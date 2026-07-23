@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Find Your Best Shades</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-deep:#f2d9d6;
+    --bg-deep-2:#f0d0cc;
+    --card:#fdf5f3;
+    --rose:#ed928f;
+    --rose-deep:#96333c;
+    --gold:#96333c;
+    --text-light:#3a1f22;
+    --text-dark:#211f15;
+    --muted:rgba(58,31,34,0.58);
+    --line: rgba(58,31,34,0.14);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background: linear-gradient(165deg, var(--bg-deep) 0%, var(--bg-deep-2) 100%);
+    color:var(--text-light);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    padding:48px 20px 80px;
+  }
+  .wrap{max-width:640px;margin:0 auto;position:relative;}
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:0.18em;
+    font-size:11px;
+    color:var(--gold);
+    text-align:center;
+    margin-bottom:10px;
+    font-weight:600;
+  }
+  h1{
+    font-family:'Playfair Display', serif;
+    font-weight:600;
+    font-size:clamp(28px,6vw,40px);
+    text-align:center;
+    margin:0 0 12px;
+    color:var(--text-light);
+  }
+  .sub{
+    text-align:center;
+    color:var(--muted);
+    font-size:15px;
+    line-height:1.5;
+    max-width:440px;
+    margin:0 auto 40px;
+  }
+  .mirror-stage{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:22px;
+    margin-bottom:40px;
+  }
+  .magic-mirror-wrap{
+    position:relative;
+    width:240px;height:340px;
+  }
+  .mirror-frame-svg{
+    position:absolute;inset:0;
+    width:100%;height:100%;
+    pointer-events:none;
+    filter: drop-shadow(0 14px 24px rgba(58,31,34,0.22));
+  }
+  .mirror{
+    position:absolute;
+    left:46px;top:73px;
+    width:148px;height:204px;
+    border-radius:50%;
+    background:var(--card);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;
+    box-shadow: inset 0 0 20px rgba(58,31,34,0.16);
+  }
+  .mirror::after{
+    content:'';
+    position:absolute;inset:0;
+    background: linear-gradient(115deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 26%, rgba(255,255,255,0) 74%, rgba(255,255,255,0.18) 100%);
+    pointer-events:none;
+  }
+  .mirror img{width:100%;height:100%;object-fit:cover;position:relative;z-index:0;}
+  .mirror .placeholder{
+    color:var(--muted);
+    font-size:12.5px;
+    text-align:center;
+    padding:0 18px;
+    line-height:1.5;
+    position:relative;
+    z-index:1;
+  }
+  .mirror .mirror-line{
+    display:block;
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-size:14px;
+    color:var(--rose-deep);
+    margin-bottom:8px;
+  }
+  .mirror .mirror-hint{
+    display:block;
+    font-size:11px;
+    letter-spacing:0.03em;
+    color:var(--muted);
+  }
+  input[type=file]{display:none;}
+  .btn{
+    font-family:'Work Sans', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:0.02em;
+    padding:14px 30px;
+    border-radius:100px;
+    border:none;
+    cursor:pointer;
+    background:var(--rose);
+    color:var(--text-dark);
+    transition: transform 0.15s ease, background 0.15s ease;
+  }
+  .btn:hover{background:var(--rose-deep); color:var(--card); transform:translateY(-1px);}
+  .btn:disabled{background:rgba(58,31,34,0.08);color:rgba(58,31,34,0.35);cursor:not-allowed;transform:none;}
+  .btn.ghost{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--text-light);
+  }
+  .btn.ghost:hover{background:rgba(246,233,227,0.06);}
+  .hint{font-size:12px;color:var(--muted);text-align:center;}
+  .upload-choice-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .choice-btn{
+    display:flex;align-items:center;gap:7px;
+    padding:11px 20px;border-radius:100px;
+    border:1.5px solid var(--rose-deep);
+    background:transparent;color:var(--rose-deep);
+    font-family:'Work Sans', sans-serif;font-weight:600;font-size:13.5px;
+    cursor:pointer;transition:all 0.15s ease;
+  }
+  .choice-btn:hover{background:var(--rose-deep);color:var(--card);}
+  .choice-icon{font-size:15px;}
+
+  .card{
+    background:var(--card);
+    color:var(--text-dark);
+    border-radius:20px;
+    padding:32px;
+    margin-bottom:24px;
+    display:none;
+  }
+  .card.show{display:block; animation: reveal 0.5s ease;}
+  @keyframes reveal{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+
+  .season-tag{
+    font-family:'Playfair Display', serif;
+    font-style:italic;
+    font-size:13px;
+    color:var(--rose-deep);
+    margin-bottom:4px;
+  }
+  .season-name{
+    font-family:'Playfair Display', serif;
+    font-weight:600;
+    font-size:26px;
+    margin:0 0 14px;
+  }
+  .season-desc{font-size:14.5px;line-height:1.6;color:rgba(33,31,21,0.75);margin-bottom:18px;}
+  .chart-subtitle{
+    font-family:'Playfair Display', serif;font-style:italic;
+    font-size:14px;text-align:center;color:var(--rose-deep);margin-bottom:6px;
+  }
+  .season-correct-row{text-align:center;margin-top:6px;}
+  .season-correct-toggle{
+    background:none;border:none;cursor:pointer;
+    font-size:12px;color:var(--muted);text-decoration:underline;
+    font-family:'Work Sans', sans-serif;
+  }
+  .season-correct-toggle:hover{color:var(--rose-deep);}
+  .season-select{
+    margin-top:10px;padding:9px 12px;border-radius:10px;
+    border:1px solid var(--line);background:rgba(58,31,34,0.03);
+    color:var(--text-light);font-size:13.5px;font-family:'Work Sans', sans-serif;
+    cursor:pointer;
+  }
+
+  .section-title{
+    font-family:'Playfair Display', serif;
+    font-size:20px;font-weight:600;
+    text-align:center;margin:8px 0 6px;
+    color:var(--text-light);
+  }
+  .section-sub{
+    text-align:center;font-size:13.5px;color:var(--muted);margin-bottom:22px;
+  }
+  .brand-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:12px;margin-bottom:8px;
+  }
+  .brand-pill{
+    padding:16px 10px;border-radius:14px;
+    border:1.5px solid var(--line);
+    background:rgba(58,31,34,0.03);
+    color:var(--text-light);
+    font-family:'Work Sans', sans-serif;
+    font-weight:600;font-size:14px;
+    cursor:pointer;text-align:center;
+    transition: all 0.15s ease;
+  }
+  .brand-pill:hover{border-color:var(--rose-deep); background:rgba(150,51,60,0.05);}
+  .brand-pill.selected{
+    background:var(--rose-deep); color:var(--card); border-color:var(--rose-deep);
+  }
+
+  #pickCard{margin-top:24px;}
+  .shade-podium{
+    display:flex;flex-direction:column;align-items:center;gap:22px;
+    margin-top:8px;
+  }
+  .shade-podium svg{filter: drop-shadow(0 8px 14px rgba(58,31,34,0.22));}
+  .shade-best-label{text-align:center;}
+  .shade-best-label .tag{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--rose-deep);font-weight:600;}
+  .shade-best-label .name{font-family:'Playfair Display', serif;font-weight:600;font-size:17px;color:#3a1f22;margin:2px 0 4px;}
+  .shade-best-label .why{font-size:12.5px;color:#6b5157;max-width:260px;margin:0 auto;line-height:1.5;}
+  .shade-best-label .shop-link{font-size:12px;font-weight:600;color:var(--rose-deep);margin-top:6px;}
+  .shade-alts{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;}
+  .shade-alt{display:flex;flex-direction:column;align-items:center;gap:8px;max-width:130px;}
+  .shade-alt .tag{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-weight:600;}
+  .shade-alt .name{font-weight:600;font-size:12.5px;color:#3a1f22;margin:1px 0 2px;text-align:center;}
+  .shade-alt .why{font-size:11px;color:#6b5157;text-align:center;line-height:1.4;}
+  .shade-alt .shop-link{font-size:11px;font-weight:600;color:var(--rose-deep);margin-top:2px;}
+
+  .loading{
+    text-align:center;color:var(--muted);font-size:13.5px;
+    display:none;padding:20px 0;
+  }
+  .loading.show{display:block;}
+  .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gold);margin:0 3px;animation:pulse 1.2s infinite ease-in-out;}
+  .dot:nth-child(2){animation-delay:0.15s;}
+  .dot:nth-child(3){animation-delay:0.3s;}
+  @keyframes pulse{0%,80%,100%{opacity:0.25;}40%{opacity:1;}}
+
+  .error-box{
+    background:rgba(217,136,145,0.12);
+    border:1px solid rgba(217,136,145,0.3);
+    color:var(--text-light);
+    padding:14px 18px;border-radius:12px;font-size:13.5px;
+    display:none; margin-bottom:20px; line-height:1.5;
+  }
+  .error-box.show{display:block;}
+  #adminTrigger{
+    position:absolute;top:0;right:0;
+    font-size:16px;line-height:1;
+    color:rgba(58,31,34,0.18);
+    cursor:pointer;user-select:none;
+    padding:14px;
+    z-index:10;
+  }
+  #adminTrigger:hover{color:rgba(58,31,34,0.4);}
+  .admin-modal{
+    display:none;position:fixed;inset:0;background:rgba(20,10,12,0.55);
+    z-index:100;align-items:center;justify-content:center;padding:20px;
+  }
+  .admin-modal.show{display:flex;}
+  .admin-modal-inner{
+    background:#fdf5f3;border-radius:18px;max-width:800px;width:100%;
+    max-height:85vh;display:flex;flex-direction:column;overflow:hidden;
+    box-shadow:0 20px 50px rgba(0,0,0,0.3);
+  }
+  .admin-modal-header{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:18px 22px;border-bottom:1px solid rgba(58,31,34,0.1);
+  }
+  .admin-modal-title{font-family:'Playfair Display', serif;font-weight:600;font-size:18px;color:#3a1f22;}
+  .admin-close{
+    background:none;border:1px solid rgba(58,31,34,0.2);border-radius:100px;
+    padding:6px 14px;font-size:12.5px;cursor:pointer;color:#3a1f22;
+  }
+  .admin-modal-actions{
+    display:flex;align-items:center;gap:14px;padding:14px 22px;
+    border-bottom:1px solid rgba(58,31,34,0.06);
+  }
+  .admin-count{font-size:12.5px;color:rgba(58,31,34,0.55);}
+  .admin-table-wrap{overflow:auto;padding:0 22px 22px;}
+  .admin-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .admin-table th{
+    text-align:left;padding:8px 10px;color:rgba(58,31,34,0.55);
+    border-bottom:1px solid rgba(58,31,34,0.15);font-weight:600;
+    white-space:nowrap;position:sticky;top:0;background:#fdf5f3;
+  }
+  .admin-table td{padding:8px 10px;border-bottom:1px solid rgba(58,31,34,0.06);white-space:nowrap;color:#3a1f22;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="adminTrigger" title="">·</div>
+  <div class="eyebrow">Effortlessly You</div>
+  <h1>Find Your Best Shades</h1>
+  <p class="sub">Upload a clear, well-lit selfie with no lipstick on. We'll figure out your color season and the lip shades that suit you best.</p>
+
+  <div class="mirror-stage">
+    <div class="magic-mirror-wrap">
+      <div class="mirror" id="mirrorLabel">
+        <span class="placeholder" id="placeholderText"><span class="mirror-line">Mirror, mirror<br>on the wall...</span><span class="mirror-hint">choose an option below</span></span>
+        <img id="preview" style="display:none;">
+      </div>
+      <svg class="mirror-frame-svg" viewBox="0 0 240 340" xmlns="http://www.w3.org/2000/svg">
+        <path d="M120,50 C105,35 90,38 88,50 C100,55 112,55 120,50 Z" fill="#96333c"/>
+        <path d="M120,50 C135,35 150,38 152,50 C140,55 128,55 120,50 Z" fill="#96333c"/>
+        <path d="M108,25 L112,10 L116,25 Z" fill="#96333c"/>
+        <path d="M116,25 L120,5 L124,25 Z" fill="#96333c"/>
+        <path d="M124,25 L128,10 L132,25 Z" fill="#96333c"/>
+        <circle cx="120" cy="6" r="3" fill="#ed928f"/>
+        <path d="M52,75 C30,85 30,110 50,120 C65,128 65,150 50,160 C32,168 32,192 50,202 C65,210 65,232 50,242 C35,250 35,270 55,278" fill="none" stroke="#96333c" stroke-width="4"/>
+        <path d="M188,75 C210,85 210,110 190,120 C175,128 175,150 190,160 C208,168 208,192 190,202 C175,210 175,232 190,242 C205,250 205,270 185,278" fill="none" stroke="#96333c" stroke-width="4"/>
+        <circle cx="30" cy="88" r="4" fill="#ed928f"/>
+        <circle cx="32" cy="190" r="4" fill="#ed928f"/>
+        <circle cx="210" cy="88" r="4" fill="#ed928f"/>
+        <circle cx="208" cy="190" r="4" fill="#ed928f"/>
+        <path d="M120,295 C114,300 114,308 120,315 C126,308 126,300 120,295 Z" fill="#96333c"/>
+        <ellipse cx="120" cy="175" rx="95" ry="125" fill="none" stroke="#96333c" stroke-width="6"/>
+        <ellipse cx="120" cy="175" rx="84" ry="112" fill="none" stroke="#96333c" stroke-width="1.5" stroke-dasharray="2,6"/>
+        <ellipse cx="120" cy="175" rx="74" ry="102" fill="none" stroke="#96333c" stroke-width="2"/>
+      </svg>
+    </div>
+
+    <div class="upload-choice-row">
+      <label class="choice-btn" for="fileInputCamera">
+        <span class="choice-icon">📷</span> Take a Selfie
+      </label>
+      <label class="choice-btn" for="fileInputUpload">
+        <span class="choice-icon">🖼️</span> Upload Photo
+      </label>
+    </div>
+    <input type="file" id="fileInputCamera" accept="image/*" capture="user" style="display:none;">
+    <input type="file" id="fileInputUpload" accept="image/*" style="display:none;">
+
+    <button class="btn" id="analyzeBtn" disabled>Find My Season</button>
+    <div class="hint">Natural light, no filter, skin and eyes clearly visible works best — hair color doesn't matter, even if dyed.</div>
+  </div>
+
+  <div class="loading" id="loading1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><br>Reading your undertone and contrast...</div>
+
+  <div class="error-box" id="errorBox1"></div>
+
+  <div class="card" id="resultCard">
+    <div class="season-tag" id="seasonFamily"></div>
+    <div class="season-name" id="seasonName"></div>
+    <div class="season-desc" id="seasonDesc"></div>
+
+    <div id="chartSection" style="display:none;">
+      <div class="chart-subtitle">Where you sit on the color chart</div>
+      <div id="chartHolder" style="display:flex;justify-content:center;margin-bottom:4px;"></div>
+    </div>
+
+    <div class="season-correct-row">
+      <button class="season-correct-toggle" id="seasonCorrectToggle">Doesn't look right? Choose your season manually</button>
+      <select class="season-select" id="seasonSelect" style="display:none;"></select>
+    </div>
+  </div>
+
+  <div id="brandSection" style="display:none;">
+    <div class="section-title">Which lipstick brand do you usually reach for?</div>
+    <div class="section-sub">Pick one, then choose your favorite line from it.</div>
+    <div class="brand-grid" id="brandGrid"></div>
+
+    <div id="lineSection" style="display:none;">
+      <div class="section-title" style="font-size:17px;margin-top:26px;">Which product line?</div>
+      <div class="brand-grid" id="lineGrid"></div>
+    </div>
+
+    <div class="loading" id="loading2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><br>Matching real shades for you...</div>
+    <div class="error-box" id="errorBox2"></div>
+
+    <div class="card" id="pickCard">
+      <div class="season-tag" id="pickBrandTag"></div>
+      <div class="season-name" id="pickBrandName" style="font-size:19px;"></div>
+      <div class="shade-podium" id="shadePodium"></div>
+    </div>
+  </div>
+</div>
+
+<div id="adminModal" class="admin-modal">
+  <div class="admin-modal-inner">
+    <div class="admin-modal-header">
+      <div class="admin-modal-title">Customer Insights</div>
+      <button class="admin-close" id="adminClose">Close</button>
+    </div>
+
+    <div id="adminLockScreen" style="padding:30px 22px;text-align:center;">
+      <div style="font-size:13px;color:rgba(58,31,34,0.6);margin-bottom:14px;">Enter passcode</div>
+      <input type="password" id="adminPassInput" class="season-select" style="display:inline-block;width:160px;text-align:center;margin-bottom:12px;">
+      <div>
+        <button class="btn" id="adminUnlockBtn" style="padding:9px 24px;font-size:12.5px;">Unlock</button>
+      </div>
+      <div id="adminLockError" style="font-size:12px;color:var(--rose-deep);margin-top:10px;display:none;">Incorrect passcode</div>
+    </div>
+
+    <div id="adminUnlockedView" style="display:none;">
+      <div class="admin-modal-actions">
+        <button class="btn" id="adminDownloadBtn" style="padding:9px 18px;font-size:12.5px;">Download CSV</button>
+        <span class="admin-count" id="adminCount"></span>
+      </div>
+      <div class="admin-table-wrap" id="adminTableWrap">
+        <div class="loading show">Loading records...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------------------------------------------------------------------
+// Seasonal color analysis knowledge base (12-season system), condensed
+// for use as the AI's reference. Written in plain descriptive terms.
+// ---------------------------------------------------------------------
+// ---------------------------------------------------------------------
+// Approximate position of each of the 12 seasons on a warm↔cool /
+// light↔dark chart (x: -1 warm to 1 cool, y: -1 dark to 1 light), plus
+// a representative color for that season's overall coloring. This is
+// a design approximation for visualization, not a single fixed
+// industry standard — different color-analysis sources place seasons
+// slightly differently.
+// ---------------------------------------------------------------------
+const SEASON_MAP = {
+  "Bright Spring":        { x: -0.55, y:  0.35, color: "#FF7A59" },
+  "True/Warm Spring":     { x: -0.75, y:  0.5,  color: "#FFA552" },
+  "Light Spring":         { x: -0.45, y:  0.75, color: "#FFC9A6" },
+  "Light Summer":         { x:  0.45, y:  0.75, color: "#C9B8E0" },
+  "True/Cool Summer":     { x:  0.7,  y:  0.25, color: "#B98CA6" },
+  "Soft Summer":          { x:  0.3,  y:  0.05, color: "#A99CA8" },
+  "Soft Autumn":          { x: -0.35, y:  0.3,  color: "#C7A548" },
+  "True/Warm Autumn":     { x: -0.6,  y: -0.3,  color: "#B5651D" },
+  "Dark Autumn":          { x: -0.35, y: -0.7,  color: "#6E4A2E" },
+  "Dark Winter":          { x:  0.45, y: -0.7,  color: "#1C2B4A" },
+  "True/Cool Winter":     { x:  0.75, y: -0.15, color: "#7A1F3D" },
+  "Bright Winter":        { x:  0.55, y:  0.05, color: "#D6006D" }
+};
+
+const SEASON_SYSTEM_PROMPT = `You are a color analyst trained in the 12-season seasonal color analysis system. You determine a person's color season from a selfie by reading three things, using ONLY the skin and eyes — never the hair, since hair is very commonly dyed and is not a reliable natural signal: undertone (warm/golden vs cool/pink-blue vs neutral) read from the skin, depth (how light or deep the skin and eyes are), and chroma/contrast (how bright and clear vs soft and muted the coloring is, and how much contrast exists specifically between the skin and the eyes).
+
+Use this reference for the 12 seasons and their best lipstick color families:
+
+SPRING (warm undertone, clear/bright chroma):
+- Bright Spring: warm undertone, light-to-medium depth, very clear and high-contrast coloring. Best lipsticks: clear warm coral, poppy orange-red, bright watermelon pink. Avoid dusty, muted, or blue-based shades.
+- True/Warm Spring: warm golden undertone, light-to-medium depth, warm clarity. Best lipsticks: peach, warm coral, golden-orange red, apricot.
+- Light Spring: warm undertone, light depth, soft clarity, delicate low contrast. Best lipsticks: light peachy-pink, soft coral, warm nude-pink, sheer apricot.
+
+SUMMER (cool undertone, soft/muted chroma):
+- Light Summer: cool undertone, light depth, soft and muted, low-to-medium contrast. Best lipsticks: soft rose-pink, cool mauve-pink, light berry, dusty rose.
+- True/Cool Summer: cool undertone, medium depth, soft and muted. Best lipsticks: rose-mauve, cool pink, soft raspberry, muted plum-pink.
+- Soft Summer: neutral-cool undertone, medium depth, the most muted/lowest-contrast of all seasons. Best lipsticks: dusty rose, muted mauve, soft brownish-pink, faded berry.
+
+AUTUMN (warm undertone, muted/rich chroma):
+- Soft Autumn: neutral-warm undertone, medium depth, muted and soft. Best lipsticks: muted terracotta, soft brick, dusty peach-brown, warm muted rose.
+- True/Warm Autumn: warm golden undertone, medium-to-deep depth, rich and earthy. Best lipsticks: brick red, warm terracotta, pumpkin, burnt orange-red.
+- Dark Autumn: warm-neutral undertone, deep depth, rich and muted with more density than Soft Autumn. Best lipsticks: deep brick red, mahogany, rust, warm chocolate-red.
+
+WINTER (cool undertone, clear/deep chroma, high contrast):
+- Dark Winter: cool-neutral undertone, deep depth, high contrast, rich and clear. Best lipsticks: deep wine, blackened red, cool burgundy, deep berry.
+- True/Cool Winter: cool blue undertone, medium-to-deep depth, high clarity. Best lipsticks: true blue-red, cool fuchsia, icy pink, cool berry.
+- Bright Winter: cool undertone, medium depth, the clearest/highest-contrast of all seasons. Best lipsticks: vivid fuchsia, clear icy red, bright cool pink, electric berry.
+
+When given a photo, work through this in order before answering. Deliberately ignore hair COLOR entirely — do not let it influence any step below, since it is very likely dyed. Hair TEXTURE is a different signal and should be used as noted in step 3.
+1. Note the undertone in the skin (yellow/golden vs pink/blue vs neutral) — look at the inner arm/wrist area or neck if visible, since face lighting can be misleading.
+2. Note whether the skin and the eyes are light or deep in overall depth.
+3. Note the contrast specifically between skin tone and eye color: very pale skin with very dark eyes = high contrast; skin and eye tone close together = low contrast. Then adjust slightly using hair texture as a secondary signal, independent of its color: fine/thin hair strands nudge toward lower/softer contrast, coarse/thick hair strands nudge toward higher/clearer contrast. Skin-eye contrast is the primary signal; hair texture only fine-tunes it, never overrides it.
+4. Note any visible warmth or coolness in the cheeks and natural lip color.
+5. Based on 1-4, identify your top choice AND the second-closest season. Compare them directly: what is the one deciding factor that separates your top choice from that runner-up? If you can't articulate a clear deciding factor, favor the more moderate/neutral-leaning season of the two rather than an extreme one.
+6. If the photo's lighting looks warm-toned (yellow/orange indoor lighting), cool-toned (blue/fluorescent lighting), or heavily filtered, factor that in — don't let obvious lighting cast override what the skin/eye undertone actually shows.
+
+Commit to ONE of the 12 seasons above only after this comparison.
+
+Respond with ONLY a valid JSON object (no markdown fences, no extra text) in this exact shape:
+{
+  "family": "Spring" | "Summer" | "Autumn" | "Winter",
+  "season": "one of the 12 season names exactly as written above",
+  "undertone": "short phrase",
+  "explanation": "2-3 sentences, warm and friendly, explaining why this season fits based on what you observed in the photo",
+  "runner_up": "the second-closest season name from the list above"
+}`;
+
+// ---------------------------------------------------------------------
+// Top 6 lipstick brands per the customer's Shopee Vietnam search
+// (Black Rouge, 3CE, Bbia, rom&nd, MERZY were the top named brand
+// filters; Peripera stands in for a smaller/less-documented brand tag
+// since it appeared repeatedly in the actual results and has a well-
+// known real shade lineup to recommend from).
+// ---------------------------------------------------------------------
+const BRANDS = [
+  { id: "black-rouge", name: "Black Rouge", tagline: "Korean velvet tints" },
+  { id: "3ce", name: "3CE", tagline: "Korean trend shades" },
+  { id: "bbia", name: "Bbia", tagline: "Korean Last Velvet tints" },
+  { id: "romand", name: "rom&nd", tagline: "Korean juicy tints" },
+  { id: "merzy", name: "MERZY", tagline: "Korean pigment tints" },
+  { id: "peripera", name: "Peripera", tagline: "Korean ink tints" }
+];
+
+const BRAND_LINES = {
+  "black-rouge": ["Air Fit Velvet Lite", "Air Hip Glow Tint", "Balming Jam Gloss"],
+  "3ce": ["Velvet Lip Tint", "Blur Water Tint", "Velvet Plush", "Cashmere Hug", "Misty Lip Bare", "Gummy Oil Tint"],
+  "bbia": ["Last Velvet Lip Tint", "L'eau Tint", "Glow Tint", "Over Glaze", "Lucky Shine Tint"],
+  "romand": ["Juicy Flash Lip Oil", "Blur Fudge Tint", "Juicy Lasting Tint"],
+  "merzy": ["The Watery Dew Tint", "Water Fit Blur Tint", "Puffer Velvet Tint"],
+  "peripera": ["Over Blur Tint", "Ink Mood Glowy Tint"]
+};
+
+// ---------------------------------------------------------------------
+// One Shopee affiliate link per brand+line (not per shade) — filled in
+// from the creator's affiliate-links spreadsheet. Whichever of a line's
+// 3 recommended shades is shown, clicking it opens this same link.
+// ---------------------------------------------------------------------
+const AFFILIATE_LINKS = {
+  "black-rouge::Air Fit Velvet Lite": "https://s.shopee.vn/5fn7H1UfsE",
+  "black-rouge::Air Hip Glow Tint": "https://s.shopee.vn/5q6Y7qiEsv",
+  "black-rouge::Balming Jam Gloss": "https://s.shopee.vn/8AUSuZBFb7",
+  "3ce::Velvet Lip Tint": "https://s.shopee.vn/7KvLG5OKUa",
+  "3ce::Blur Water Tint": "https://s.shopee.vn/7VElSONh9d",
+  "3ce::Velvet Plush": "https://s.shopee.vn/7fYBehN3og",
+  "3ce::Cashmere Hug": "https://s.shopee.vn/7prbr0MQTj",
+  "3ce::Misty Lip Bare": "https://s.shopee.vn/6ffeSrQrqW",
+  "3ce::Gummy Oil Tint": "https://s.shopee.vn/6pz4fAQEVZ",
+  "romand::Juicy Flash Lip Oil": "https://s.shopee.vn/70IUrTPbAc",
+  "romand::Blur Fudge Tint": "https://s.shopee.vn/7Abv3mOxpf",
+  "romand::Juicy Lasting Tint": "https://s.shopee.vn/8fQiqXJFmy",
+  "bbia::Last Velvet Lip Tint": "https://s.shopee.vn/8pk92qIcS1",
+  "bbia::L'eau Tint": "https://s.shopee.vn/9AMzRSHLm7",
+  "bbia::Glow Tint": "https://s.shopee.vn/80B23JLn8u",
+  "bbia::Over Glaze": "https://s.shopee.vn/8AUSFcL9nx",
+  "bbia::Lucky Shine Tint": "https://s.shopee.vn/8KnsRvKWT0",
+  "merzy::The Watery Dew Tint": "https://s.shopee.vn/8V7IeEJt83",
+  "merzy::Water Fit Blur Tint": "https://s.shopee.vn/9zw6QzEB5M",
+  "merzy::Puffer Velvet Tint": "https://s.shopee.vn/AAFWdIDXkP",
+  "peripera::Over Blur Tint": "https://s.shopee.vn/AKYwpbCuPS",
+  "peripera::Ink Mood Glowy Tint": "https://s.shopee.vn/AUsN1uCH4V"
+};
+
+// ---------------------------------------------------------------------
+// Verified real shade data — pulled from the brands' own official
+// product pages/listings rather than generated. Used as a closed list
+// the AI must pick from (no inventing names or hex values) for lines
+// that have been researched so far. Other lines still fall back to
+// general brand-knowledge guidance until researched the same way.
+// ---------------------------------------------------------------------
+// Coordinates below (x: warm↔cool, y: dark↔light) are an interim
+// approximation based on each shade's known undertone/depth, used
+// until real digitized brand color-chart images replace them.
+const VERIFIED_SHADES = {
+  // Digitized from the official Black Rouge Air Fit Velvet Lite chart
+  // photo. This chart's axis labels were reversed (Cool on the left,
+  // Warm on the right) versus the tool's convention, so coordinates
+  // were mirrored on the x-axis to stay consistent.
+  "black-rouge::Air Fit Velvet Lite": [
+    { name: "A101", hex: "#E08670", x: -0.67, y: 0.83 },
+    { name: "A102", hex: "#DC7267", x: -0.49, y: 0.66 },
+    { name: "A103", hex: "#D9636A", x: 0.02, y: 0.49 },
+    { name: "A104", hex: "#CE5D6C", x: 0.23, y: 0.30 },
+    { name: "A106", hex: "#D14F72", x: 0.58, y: 0.59 },
+    { name: "A107", hex: "#CC4A4C", x: -0.09, y: 0.10 },
+    { name: "A108", hex: "#C74B3F", x: -0.33, y: 0.04 },
+    { name: "A105", hex: "#B15C68", x: 0.05, y: -0.14 },
+    { name: "A109", hex: "#B33B3E", x: 0.22, y: -0.40 },
+    { name: "A110", hex: "#A23F32", x: -0.34, y: -0.45 }
+  ],
+  // Digitized from the official Black Rouge Air Hip Glow Tint chart
+  // photo (English labels: Cool on the left, Warm on the right — same
+  // reversed layout as before, so x was mirrored to stay consistent
+  // with the tool's convention). Re-verified against a cleaner image.
+  "black-rouge::Air Hip Glow Tint": [
+    { name: "AH01", hex: "#E8A896", x: -0.31, y: 1.0 },
+    { name: "AH02", hex: "#E8916A", x: -0.98, y: 0.77 },
+    { name: "AH03", hex: "#E8879A", x: 0.08, y: 0.74 },
+    { name: "AH04", hex: "#D9707A", x: -0.34, y: 0.50 },
+    { name: "AH05", hex: "#C8566A", x: 0.28, y: 0.42 },
+    { name: "AH06", hex: "#E85C8C", x: 1.0, y: 0.29 },
+    { name: "AH07", hex: "#D14C42", x: -0.86, y: 0.18 },
+    { name: "AH08", hex: "#B4577F", x: 0.66, y: -0.19 },
+    { name: "AH09", hex: "#A6483A", x: -0.61, y: -0.36 },
+    { name: "AH10", hex: "#8C2E30", x: -0.06, y: -0.68 }
+  ],
+  // Digitized from the official Black Rouge Balming Jam Gloss chart
+  // photo (real English shade names, standard orientation: Warm left,
+  // Cool right).
+  "black-rouge::Balming Jam Gloss": [
+    { name: "JG01 Kaya Jam", hex: "#F0D9A0", x: -1.0, y: 0.94 },
+    { name: "JG04 Apricot Jam", hex: "#E8735A", x: -0.86, y: 0.74 },
+    { name: "JG05 Peanut Jam", hex: "#D9A084", x: -0.20, y: 0.67 },
+    { name: "JG08 Apple Jam", hex: "#D1453D", x: -0.60, y: 0.45 },
+    { name: "JG03 Guava Jam", hex: "#DB7E8C", x: 0.31, y: 0.74 },
+    { name: "JG02 Strawberry Jam", hex: "#E56D74", x: 0.99, y: 0.88 },
+    { name: "JG06 Plum Latte Jam", hex: "#B4718C", x: 0.65, y: 0.41 },
+    { name: "JG07 Fig Jam", hex: "#C05C6A", x: 0.18, y: 0.23 },
+    { name: "JG09 Rose Jam", hex: "#D95F5E", x: -0.56, y: -0.30 },
+    { name: "JG11 Pom Jam", hex: "#A32A2E", x: -0.86, y: -0.76 },
+    { name: "JG12 Coconut Jam", hex: "#C87A5E", x: -0.48, y: -1.0 },
+    { name: "JG10 Wine Jam", hex: "#8C3450", x: 0.45, y: -0.52 }
+  ],
+  // Digitized directly from the official 3CE "Color Spectrum" chart
+  // photo (warm/cool, light/dark quadrant with real circle positions)
+  // — coordinates and colors read from that image, not estimated from
+  // names. Re-verified against a cleaner chart, which also revealed a
+  // shade not previously captured: Now And Always.
+  "3ce::Velvet Lip Tint": [
+    { name: "New Nude", hex: "#D99574", x: -0.69, y: 1.0 },
+    { name: "Like Gentle", hex: "#C97A6E", x: 0.0, y: 1.0 },
+    { name: "Cozy Crush", hex: "#B5657A", x: 0.58, y: 0.94 },
+    { name: "Go Now", hex: "#C98FAE", x: 0.98, y: 0.59 },
+    { name: "Childlike", hex: "#E23A2E", x: -1.0, y: 0.48 },
+    { name: "Pink Break", hex: "#E23E6B", x: 0.0, y: 0.48 },
+    { name: "Best Ever", hex: "#D81E2C", x: 0.45, y: 0.48 },
+    { name: "Private", hex: "#B31E24", x: 0.45, y: 0.02 },
+    { name: "Going Right", hex: "#DB7A6E", x: -0.83, y: -0.23 },
+    { name: "Think Again", hex: "#D9836A", x: -0.13, y: -0.25 },
+    { name: "Cashmere Nude", hex: "#B96F62", x: 0.33, y: -0.23 },
+    { name: "Walk n Talk", hex: "#A8695A", x: -0.61, y: -0.43 },
+    { name: "Know Better", hex: "#A82670", x: 0.85, y: -0.52 },
+    { name: "Now And Always", hex: "#D4453A", x: -1.0, y: -0.62 },
+    { name: "Daffodil", hex: "#C94A3E", x: -0.50, y: -0.63 },
+    { name: "Speak Up", hex: "#99392E", x: 0.14, y: -0.63 },
+    { name: "Fade In", hex: "#7A4058", x: 0.66, y: -0.63 },
+    { name: "Bitter Hour", hex: "#6B3226", x: -0.75, y: -1.0 },
+    { name: "Taupe", hex: "#6B1F1E", x: -0.13, y: -1.0 },
+    { name: "Definition", hex: "#6B1F2E", x: 0.45, y: -1.0 }
+  ],
+  // Digitized from the official 3CE Blur Water Tint chart photo
+  // (Vietnamese labels: Tông sáng=Light, Tông tối=Dark, Tông ấm=Warm,
+  // Tông lạnh=Cool — standard orientation, no mirroring needed).
+  "3ce::Blur Water Tint": [
+    { name: "#WARMTH", hex: "#C97A5E", x: -0.74, y: 1.0 },
+    { name: "#DEAR MARCH", hex: "#B5677A", x: -0.25, y: 1.0 },
+    { name: "#NIGHT TALK", hex: "#9E4A5C", x: 0.45, y: 1.0 },
+    { name: "#MORE PEACH", hex: "#D97840", x: -0.93, y: 0.53 },
+    { name: "#CHASING ROSE", hex: "#D9707A", x: -0.45, y: 0.53 },
+    { name: "#FIRST LETTER", hex: "#C85A48", x: 0.02, y: 0.53 },
+    { name: "#PINK GUAVA", hex: "#D14E5E", x: 0.66, y: 0.37 },
+    { name: "#CORAL MOON", hex: "#D97A5C", x: -0.41, y: 0.30 },
+    { name: "#BREEZE WAY", hex: "#B85C34", x: -0.85, y: 0.04 },
+    { name: "#PLAY OFF", hex: "#C4222E", x: 0.04, y: 0.04 },
+    { name: "#SPOT PLAYER", hex: "#C93A50", x: 0.80, y: 0.04 },
+    { name: "#BAKE BEIGE", hex: "#A66A48", x: -0.93, y: -0.35 },
+    { name: "#LAYDOWN", hex: "#C68272", x: -0.27, y: -0.35 },
+    { name: "#EARLY HOUR", hex: "#B25868", x: 0.89, y: -0.35 },
+    { name: "#CASUAL AFFAIR", hex: "#B2543E", x: -0.32, y: -0.63 },
+    { name: "#DOUBLE WIND", hex: "#9E4356", x: 0.95, y: -0.63 },
+    { name: "#SEPIA", hex: "#8A4030", x: -0.88, y: -0.83 }
+  ],
+  // Digitized from the official 3CE Velvet Plush chart photo
+  // (standard orientation: Warm left, Cool right, Spring/Summer/
+  // Autumn/Winter quadrant labels matching the tool's convention).
+  "3ce::Velvet Plush": [
+    { name: "Coffee Date", hex: "#D98868", x: -0.39, y: 1.0 },
+    { name: "Figtachio", hex: "#C87A6E", x: -0.31, y: 0.77 },
+    { name: "Dusky Pink", hex: "#C06D78", x: 0.25, y: 0.77 },
+    { name: "Childlike", hex: "#E8382A", x: -1.0, y: 0.60 },
+    { name: "Heated", hex: "#B85850", x: -0.26, y: 0.42 },
+    { name: "Self Made", hex: "#A8433A", x: -0.04, y: 0.17 },
+    { name: "Molten Copper", hex: "#C6785C", x: -0.96, y: -0.21 },
+    { name: "Daffodil", hex: "#9E3A34", x: -0.17, y: -0.15 },
+    { name: "Plum Smoke", hex: "#A67480", x: 0.37, y: -0.19 },
+    { name: "Spiced Latte", hex: "#A85C56", x: -0.54, y: -0.33 },
+    { name: "Taupe", hex: "#8C5850", x: -0.65, y: -0.60 },
+    { name: "Speak Up", hex: "#9E2E2E", x: 0.0, y: -0.54 },
+    { name: "Darkest Hour", hex: "#7A342E", x: -0.17, y: -0.90 }
+  ],
+  // Digitized from the official 3CE Cashmere Hug chart photo
+  // (Vietnamese ẤM=Warm left, LẠNH=Cool right — standard orientation).
+  "3ce::Cashmere Hug": [
+    { name: "1 Oat", hex: "#E0A87C", x: -0.45, y: 1.0 },
+    { name: "2 Pure Blending", hex: "#D07E96", x: 0.51, y: 1.0 },
+    { name: "3 Your Side", hex: "#D9508C", x: 1.0, y: 0.62 },
+    { name: "8 Hush Red", hex: "#B8283C", x: 0.0, y: 0.62 },
+    { name: "6 Buddy", hex: "#C86656", x: -0.92, y: 0.0 },
+    { name: "5 Cozy Whisper", hex: "#A83A5C", x: 0.31, y: 0.0 },
+    { name: "7 Knit", hex: "#A83A48", x: -0.45, y: -0.36 },
+    { name: "9 Taupe Beige", hex: "#8C6250", x: -0.92, y: -0.70 },
+    { name: "10 Dreamy", hex: "#7A4356", x: 0.71, y: -0.70 },
+    { name: "4 Text Me", hex: "#9E2E52", x: 1.0, y: -1.0 }
+  ],
+  // Digitized from the official 3CE Misty Lip Bare chart photo
+  // (standard orientation: Warm left, Cool right).
+  "3ce::Misty Lip Bare": [
+    { name: "Pink Scheme", hex: "#D97A72", x: -0.42, y: 1.0 },
+    { name: "Bare Earlier", hex: "#B06858", x: -0.70, y: 0.42 },
+    { name: "Milky Illusion", hex: "#D592A0", x: 0.89, y: 0.32 },
+    { name: "Tulip Fuzz", hex: "#C15C6E", x: 0.42, y: -0.02 },
+    { name: "Rose Sigh", hex: "#B0645C", x: -0.20, y: -0.38 },
+    { name: "Chili Flame", hex: "#A02838", x: 0.62, y: -0.53 },
+    { name: "Driftwood", hex: "#8C3830", x: 0.16, y: -0.78 },
+    { name: "Quite Taupe", hex: "#6E4438", x: -1.0, y: -0.90 }
+  ],
+  // Digitized from the official Bbia L'eau Tint chart photo
+  // (standard orientation: Warm left, Cool right).
+  "bbia::L'eau Tint": [
+    { name: "07 Peach L'eau", hex: "#E8825E", x: -0.23, y: 0.93 },
+    { name: "06 Pink L'eau", hex: "#D9498C", x: 1.0, y: 1.0 },
+    { name: "01 Gardenia L'eau", hex: "#C8695C", x: -0.57, y: 0.41 },
+    { name: "05 Peony L'eau", hex: "#C92E4A", x: 0.69, y: 0.57 },
+    { name: "04 Magnolia L'eau", hex: "#A8492E", x: -0.71, y: -0.26 },
+    { name: "08 Sweet L'eau", hex: "#9E1E38", x: -0.19, y: -0.19 },
+    { name: "02 Fleur L'eau", hex: "#C24468", x: -0.43, y: -0.77 },
+    { name: "09 Classic L'eau", hex: "#A66858", x: -0.85, y: -1.0 },
+    { name: "03 Lilac L'eau", hex: "#A83A5C", x: 0.56, y: -0.90 }
+  ],
+  // Digitized from the official Bbia Glow Tint "25 Colors Chart" photo
+  // (standard orientation: Warm left, Cool right).
+  "bbia::Glow Tint": [
+    { name: "#20 Petal", hex: "#D98B84", x: -0.73, y: 0.86 },
+    { name: "#14 Daily", hex: "#D9808A", x: 0.0, y: 0.86 },
+    { name: "#21 Bloom", hex: "#E070A0", x: 0.72, y: 0.86 },
+    { name: "#15 Spring", hex: "#C97468", x: -0.49, y: 0.55 },
+    { name: "#16 Summer", hex: "#C0707E", x: 0.44, y: 0.56 },
+    { name: "#28 Chilling", hex: "#A83A50", x: -0.28, y: 0.36 },
+    { name: "#24 Mellow Lychee", hex: "#C57E88", x: 0.18, y: 0.41 },
+    { name: "#11 Nudy", hex: "#D08E90", x: -0.19, y: 0.20 },
+    { name: "#30 Cozy", hex: "#C4795E", x: -0.89, y: 0.01 },
+    { name: "#01 Chai", hex: "#D06A4E", x: -0.52, y: 0.01 },
+    { name: "#00 Rosy", hex: "#C24A4E", x: 0.03, y: 0.01 },
+    { name: "#29 Dreamy", hex: "#C93A6C", x: 0.36, y: 0.01 },
+    { name: "#25 Mystic Plum", hex: "#A83A62", x: 0.65, y: 0.01 },
+    { name: "#02 Vintage", hex: "#A83A3E", x: -0.84, y: -0.24 },
+    { name: "#19 Choco", hex: "#B08A78", x: -0.42, y: -0.21 },
+    { name: "#03 Mauve", hex: "#8C3652", x: 0.43, y: -0.33 },
+    { name: "#17 Autumn", hex: "#8C3E30", x: -0.83, y: -0.51 },
+    { name: "#05 Vin Chaud", hex: "#9E3230", x: -0.63, y: -0.40 },
+    { name: "#23 Sweet Pomelo", hex: "#C0705C", x: -0.21, y: -0.37 },
+    { name: "#18 Winter", hex: "#9E5470", x: 0.60, y: -0.57 },
+    { name: "#26 Hazel Coconut", hex: "#8C4A38", x: -1.0, y: -0.71 },
+    { name: "#12 Coco", hex: "#7A3E30", x: -0.71, y: -0.72 },
+    { name: "#13 Maroon", hex: "#7A2E48", x: 0.27, y: -0.71 },
+    { name: "#27 Dry Fig", hex: "#7A2A3E", x: -0.03, y: -0.72 },
+    { name: "#04 Cinnamon", hex: "#6E2E28", x: -0.91, y: -1.0 }
+  ],
+  // Digitized from the official Bbia Over Glaze "15 Colors" chart photo
+  // (Vietnamese ẤM=Warm left, LẠNH=Cool right — standard orientation).
+  "bbia::Over Glaze": [
+    { name: "09 Apricot Plop", hex: "#E8877A", x: -1.0, y: 1.0 },
+    { name: "01 Peach Syrup", hex: "#E06E68", x: -0.21, y: 1.0 },
+    { name: "10 Strawberry Plop", hex: "#E06090", x: 0.25, y: 1.0 },
+    { name: "11 Cherry Plop", hex: "#DE5850", x: -0.67, y: 0.63 },
+    { name: "12 Apple Syrup", hex: "#CC3038", x: 0.25, y: 0.58 },
+    { name: "04 Cherry Syrup", hex: "#C22854", x: 0.73, y: 0.58 },
+    { name: "05 Grapefruit Syrup", hex: "#D9433C", x: -1.0, y: 0.36 },
+    { name: "02 Fig Syrup", hex: "#C43A48", x: -0.19, y: 0.02 },
+    { name: "03 Grape Syrup", hex: "#A8578C", x: 0.88, y: 0.12 },
+    { name: "06 Peanut Syrup", hex: "#A85868", x: -0.60, y: -0.22 },
+    { name: "07 Walnut Syrup", hex: "#8C6250", x: -0.97, y: -0.48 },
+    { name: "13 Latte Syrup", hex: "#9E5E52", x: -0.71, y: -0.55 },
+    { name: "14 Maple Syrup", hex: "#8C4A3A", x: -0.41, y: -0.63 },
+    { name: "08 Jujube Syrup", hex: "#8C4258", x: -0.03, y: -0.69 },
+    { name: "15 Espresso Syrup", hex: "#6E4030", x: -0.60, y: -1.0 }
+  ],
+  // Digitized from the official Bbia Lucky Shine Tint chart photo
+  // (standard orientation: Warm left, Cool right).
+  "bbia::Lucky Shine Tint": [
+    { name: "(03) Lucky Peach", hex: "#DE7368", x: -0.71, y: 1.0 },
+    { name: "(06) Lucky Rosy", hex: "#C0687A", x: 0.06, y: 0.61 },
+    { name: "(05) Lucky Plum", hex: "#8C3450", x: 0.75, y: 0.25 },
+    { name: "(04) Lucky Mauve", hex: "#C4577A", x: 0.28, y: 0.01 },
+    { name: "(02) Lucky Pink", hex: "#CA6862", x: -0.39, y: -0.18 },
+    { name: "(01) Lucky Nude", hex: "#C67868", x: -0.93, y: -0.37 },
+    { name: "(08) Lucky Fig", hex: "#C07862", x: -0.47, y: -0.85 },
+    { name: "(07) Lucky Nuts", hex: "#8C5A48", x: -1.0, y: -0.96 }
+  ],
+  // Digitized from the official MERZY The Watery Dew Tint "BẢNG MÀU"
+  // chart photo (standard orientation: Warm left, Cool right).
+  "merzy::The Watery Dew Tint": [
+    { name: "WD22", hex: "#8C2E2A", x: -0.96, y: 0.82 },
+    { name: "WD27", hex: "#B22E2E", x: -0.39, y: 0.55 },
+    { name: "WD28", hex: "#A83A4E", x: 0.73, y: 0.95 },
+    { name: "WD20", hex: "#C2384A", x: 0.93, y: 0.55 },
+    { name: "WD26", hex: "#B03844", x: 0.28, y: 0.22 },
+    { name: "WD21", hex: "#C4302E", x: -0.39, y: 0.06 },
+    { name: "WD29", hex: "#B84450", x: 0.40, y: -0.34 },
+    { name: "WD30", hex: "#9E3A34", x: -0.89, y: -0.45 },
+    { name: "WD14", hex: "#C43430", x: -0.38, y: -0.62 },
+    { name: "WD23", hex: "#7A2626", x: -0.79, y: -1.0 }
+  ],
+  // Digitized from the official MERZY Water Fit Blur Tint chart photo
+  // (standard orientation: Warm left, Cool right).
+  "merzy::Water Fit Blur Tint": [
+    { name: "FT5", hex: "#8C3550", x: 1.0, y: 1.0 },
+    { name: "FT2", hex: "#DE5A4E", x: 0.17, y: 0.83 },
+    { name: "FT3", hex: "#E09880", x: -0.21, y: 0.60 },
+    { name: "FT8", hex: "#C05868", x: 0.73, y: 0.61 },
+    { name: "FT7", hex: "#D9626C", x: 0.17, y: 0.53 },
+    { name: "FT4", hex: "#C2564E", x: -0.19, y: 0.22 },
+    { name: "FT9", hex: "#6E4048", x: 0.17, y: 0.21 },
+    { name: "FT10", hex: "#D9564A", x: -0.19, y: -0.16 },
+    { name: "FT6", hex: "#B2565C", x: 0.73, y: -0.27 },
+    { name: "FT1", hex: "#C2455C", x: -0.65, y: -0.45 }
+  ],
+  // Digitized from the official MERZY Puffer Velvet Tint chart photo
+  // (standard orientation: Warm left, Cool right).
+  "merzy::Puffer Velvet Tint": [
+    { name: "01 Femme Fatale", hex: "#C22E30", x: 0.02, y: 1.0 },
+    { name: "04 Serendipity", hex: "#D4917E", x: 0.56, y: 0.91 },
+    { name: "03 Auburn Whisper", hex: "#8C3830", x: -0.65, y: 0.48 },
+    { name: "05 Devotion", hex: "#B8657A", x: 0.99, y: 0.62 },
+    { name: "07 Love Sick", hex: "#B0455A", x: 0.02, y: 0.25 },
+    { name: "08 Unknown", hex: "#C0687E", x: 0.78, y: 0.28 },
+    { name: "02 Merlot", hex: "#C23A2E", x: 0.02, y: -0.32 },
+    { name: "10 Heat Wave", hex: "#A84E30", x: -0.69, y: -0.34 },
+    { name: "09 Savage", hex: "#B03858", x: 0.68, y: -0.70 },
+    { name: "11 Addiction", hex: "#7A2E2A", x: -0.85, y: -0.93 }
+  ],
+  // Digitized from the official Peripera Over Blur Tint chart photo.
+  // This chart was smaller/lower-resolution than others, and shade
+  // names weren't legible (numbers only) — positions are a best
+  // estimate from the visible layout, standard Warm-left/Cool-right.
+  "peripera::Over Blur Tint": [
+    { name: "Shade 01", hex: "#E58C74", x: -0.55, y: 0.85 },
+    { name: "Shade 12", hex: "#DE7E72", x: -0.25, y: 0.75 },
+    { name: "Shade 11", hex: "#DE7A82", x: 0.0, y: 0.85 },
+    { name: "Shade 02", hex: "#D2758C", x: 0.35, y: 0.8 },
+    { name: "Shade 08", hex: "#C86E88", x: 0.85, y: 0.7 },
+    { name: "Shade 04", hex: "#D66054", x: -0.7, y: 0.35 },
+    { name: "Shade 16", hex: "#C6524E", x: -0.1, y: 0.4 },
+    { name: "Shade 14", hex: "#C43A3A", x: 0.15, y: 0.35 },
+    { name: "Shade 03", hex: "#C4485E", x: 0.55, y: 0.35 },
+    { name: "Shade 13", hex: "#B24838", x: -0.85, y: 0.0 },
+    { name: "Shade 09", hex: "#B84440", x: -0.35, y: -0.05 },
+    { name: "Shade 17", hex: "#A83A3E", x: 0.05, y: -0.1 },
+    { name: "Shade 15", hex: "#A83A54", x: 0.4, y: -0.15 },
+    { name: "Shade 07", hex: "#9E3858", x: 0.85, y: -0.05 },
+    { name: "Shade 05", hex: "#8C3E2E", x: -0.6, y: -0.55 },
+    { name: "Shade 10", hex: "#7A2E2E", x: 0.0, y: -0.7 },
+    { name: "Shade 06", hex: "#7A2E48", x: 0.5, y: -0.55 }
+  ],
+  // Digitized from the official Peripera Ink Mood Glowy Tint color
+  // chart photo — real positions AND real names, both confirmed
+  // together this time (supersedes the earlier partial/mismatched
+  // data). Standard orientation: Warm left, Cool right.
+  "peripera::Ink Mood Glowy Tint": [
+    { name: "02 Coral Chemistry", hex: "#D9524A", x: -0.48, y: 0.96 },
+    { name: "01 Tiny Strawberry", hex: "#E85C7A", x: 0.40, y: 1.0 },
+    { name: "21 Young And Peach", hex: "#E8836A", x: -0.83, y: 0.68 },
+    { name: "22 Early Peach", hex: "#D9584A", x: -0.19, y: 0.67 },
+    { name: "03 Juicy Peach", hex: "#D9384A", x: 0.09, y: 0.73 },
+    { name: "05 Baby Fairy", hex: "#DE3E7E", x: 0.63, y: 0.73 },
+    { name: "06 Pink Youth", hex: "#C42E8C", x: 0.99, y: 0.61 },
+    { name: "23 Peach In Mind", hex: "#E8907E", x: -0.98, y: 0.37 },
+    { name: "18 Coral Influencer", hex: "#D9382E", x: -0.60, y: 0.34 },
+    { name: "04 Anyway, Peach", hex: "#C4383E", x: -0.04, y: 0.49 },
+    { name: "07 Plum Fizz", hex: "#A82E44", x: -0.17, y: 0.31 },
+    { name: "25 Sheer Grape", hex: "#8C2E62", x: 0.78, y: 0.45 },
+    { name: "09 Rose In Mind", hex: "#B26862", x: -0.37, y: 0.23 },
+    { name: "12 Campus Queen", hex: "#7A3E52", x: 0.41, y: 0.22 },
+    { name: "13 Mood Queen", hex: "#A8685E", x: -0.60, y: 0.10 },
+    { name: "08 Joking Pink", hex: "#C4485E", x: -0.07, y: 0.11 },
+    { name: "10 Bare Pink", hex: "#C4586E", x: 0.14, y: 0.07 },
+    { name: "11 Visual Pink", hex: "#C4467E", x: 0.71, y: 0.07 },
+    { name: "24 Ready Peach", hex: "#96323E", x: -0.07, y: -0.09 },
+    { name: "15 My Pick Rose", hex: "#8C3E3E", x: -0.66, y: -0.35 },
+    { name: "14 Rosy Wish", hex: "#822E3A", x: -0.07, y: -0.28 },
+    { name: "17 Blush Fig", hex: "#7A2E4E", x: 0.62, y: -0.34 },
+    { name: "19 Cherry So What", hex: "#96223E", x: 0.91, y: -0.43 },
+    { name: "16 Rose-Pick", hex: "#5E1E2C", x: -0.09, y: -0.71 },
+    { name: "20 Brown Yakgwa", hex: "#6E2E22", x: -0.82, y: -0.97 }
+  ],
+  // Digitized from the official 3CE Gummy Oil Tint chart photo the
+  // customer sent to confirm this line (Vietnamese ẤM=Warm left,
+  // LẠNH=Cool right — standard orientation). Verified against the
+  // real chart image.
+  "3ce::Gummy Oil Tint": [
+    { name: "13 Pearl Cloud", hex: "#DCEEF0", x: 0.0, y: 1.0 },
+    { name: "01 Bagel Peach", hex: "#B5665A", x: -0.78, y: 0.47 },
+    { name: "02 Melting Gummy", hex: "#E85A4A", x: -0.03, y: 0.60 },
+    { name: "03 Glowy", hex: "#D9556E", x: 0.40, y: 0.62 },
+    { name: "04 Rose Gummy", hex: "#C93E44", x: -0.25, y: 0.16 },
+    { name: "07 Summer Bite", hex: "#C94F82", x: 0.74, y: 0.31 },
+    { name: "06 Mauve Jelly", hex: "#A85868", x: 0.23, y: 0.01 },
+    { name: "08 Dew On", hex: "#99204E", x: 0.86, y: -0.09 },
+    { name: "11 Honey Bear", hex: "#8C5C5C", x: -0.50, y: -0.28 },
+    { name: "05 Mocha Syrup", hex: "#6E3230", x: -0.98, y: -0.49 },
+    { name: "09 Taupe Drop", hex: "#7A2440", x: 0.37, y: -0.65 },
+    { name: "10 Sweeten", hex: "#6E1638", x: 1.0, y: -0.53 }
+  ],
+  // Digitized from the official BBIA Last Velvet Tint chart photo the
+  // customer sent to confirm this line (32 shades, standard
+  // orientation: Warm left, Cool right). Verified against the real
+  // chart image.
+  "bbia::Last Velvet Lip Tint": [
+    { name: "V48", hex: "#A87868", x: -0.65, y: 0.89 },
+    { name: "V53", hex: "#E08880", x: -0.33, y: 0.93 },
+    { name: "V01", hex: "#D9605A", x: -0.02, y: 0.92 },
+    { name: "V18", hex: "#E22E68", x: 0.68, y: 0.87 },
+    { name: "V02", hex: "#D9241E", x: -0.87, y: 0.70 },
+    { name: "V40", hex: "#D68590", x: 0.38, y: 0.78 },
+    { name: "V16", hex: "#DE8578", x: -0.33, y: 0.61 },
+    { name: "V54", hex: "#C8564A", x: 0.19, y: 0.62 },
+    { name: "V49", hex: "#B5657A", x: 0.53, y: 0.54 },
+    { name: "V41", hex: "#9E5C7A", x: 0.84, y: 0.54 },
+    { name: "V17", hex: "#D9483E", x: -0.58, y: 0.41 },
+    { name: "V47", hex: "#C4746E", x: 0.03, y: 0.45 },
+    { name: "V21", hex: "#B85E62", x: 0.20, y: 0.28 },
+    { name: "V11", hex: "#C4524E", x: -0.39, y: 0.20 },
+    { name: "V43", hex: "#92485E", x: 0.48, y: 0.15 },
+    { name: "V23", hex: "#C05840", x: -0.22, y: -0.11 },
+    { name: "V13", hex: "#A85E5E", x: -0.57, y: -0.18 },
+    { name: "V52", hex: "#A24838", x: -0.24, y: -0.30 },
+    { name: "V24", hex: "#9E4A48", x: -0.93, y: -0.35 },
+    { name: "V56", hex: "#C43A2E", x: -0.57, y: -0.36 },
+    { name: "V05", hex: "#D9366E", x: 0.85, y: -0.40 },
+    { name: "V36", hex: "#7A4038", x: -0.38, y: -0.49 },
+    { name: "V42", hex: "#B0707A", x: -0.02, y: -0.55 },
+    { name: "V03", hex: "#9E1E42", x: 0.52, y: -0.46 },
+    { name: "V12", hex: "#A83A28", x: -0.98, y: -0.64 },
+    { name: "V55", hex: "#9E6252", x: -0.48, y: -0.63 },
+    { name: "V51", hex: "#C07888", x: 0.56, y: -0.69 },
+    { name: "V04", hex: "#D9503A", x: -0.56, y: -0.76 },
+    { name: "V14", hex: "#8C2E2E", x: -0.33, y: -0.79 },
+    { name: "V25", hex: "#5E362E", x: -0.77, y: -0.94 },
+    { name: "V50", hex: "#A85A5E", x: -0.04, y: -0.92 },
+    { name: "V39", hex: "#62282A", x: -0.41, y: -1.0 }
+  ],
+  // Digitized directly from the official rom&nd Juicy Flash Lip Oil
+  // color-position chart photo the customer uploaded.
+  "romand::Juicy Flash Lip Oil": [
+    { name: "00 Flash On", hex: "#F0DAD6", x: 0.0, y: 0.97 },
+    { name: "01 Pomelo Light", hex: "#C98254", x: -0.84, y: 0.82 },
+    { name: "02 Berry Up", hex: "#C05C74", x: 0.81, y: 0.72 },
+    { name: "03 Peach Strobe", hex: "#D97A4E", x: -0.41, y: 0.27 },
+    { name: "04 Flare Lychee", hex: "#C23E5E", x: 1.0, y: 0.22 },
+    { name: "05 Pear Beige", hex: "#B5654A", x: -0.66, y: -0.43 },
+    { name: "06 Grape Fig", hex: "#9B4A5E", x: 0.63, y: -0.28 },
+    { name: "07 Coco Bomb", hex: "#6B3226", x: -0.84, y: -1.0 },
+    { name: "08 Raspberry Syrup", hex: "#8C1F3A", x: 0.44, y: -0.83 }
+  ],
+  // Digitized directly from the official rom&nd Blur Fudge Tint
+  // color-position chart photo (shades 01-16) the customer uploaded.
+  "romand::Blur Fudge Tint": [
+    { name: "09 Coral Jubilee", hex: "#E8735A", x: -0.35, y: 0.75 },
+    { name: "14 Unrose", hex: "#C23A42", x: -0.05, y: 0.85 },
+    { name: "13 Cooling Up", hex: "#E39BAE", x: 0.4, y: 0.75 },
+    { name: "12 Warming Up", hex: "#C88A5E", x: -0.85, y: 0.55 },
+    { name: "15 Berry Fizz", hex: "#C2506E", x: 0.75, y: 0.55 },
+    { name: "02 Rosiental", hex: "#A85C52", x: -0.3, y: 0.35 },
+    { name: "10 Fudge Red", hex: "#B23A30", x: 0.25, y: 0.35 },
+    { name: "01 Pomeloa", hex: "#B5654A", x: -0.55, y: -0.15 },
+    { name: "06 Mauvish", hex: "#B5566E", x: 0.35, y: -0.15 },
+    { name: "05 Bibi Candy", hex: "#C2607E", x: 0.65, y: -0.35 },
+    { name: "03 Musky", hex: "#8C4A45", x: -0.35, y: -0.45 },
+    { name: "11 Fuchsia Vibe", hex: "#A82E6E", x: 0.1, y: -0.45 },
+    { name: "16 Burnt Orange", hex: "#8C4326", x: -0.85, y: -0.75 },
+    { name: "07 Cool Rose Up", hex: "#7A3350", x: 0.7, y: -0.75 },
+    { name: "04 Radwood", hex: "#6B2E24", x: -0.65, y: -0.95 },
+    { name: "08 Currant Jam", hex: "#6B1F30", x: 0.05, y: -0.85 }
+  ],
+  // Digitized directly from the official rom&nd Juicy Lasting Tint
+  // color chart photo (Spring/Summer/Autumn/Winter quadrant chart,
+  // same warm-cool/light-deep axes as the tool's coordinate system).
+  "romand::Juicy Lasting Tint": [
+    { name: "Shade 24", hex: "#D99B6E", x: -0.75, y: 0.85 },
+    { name: "Shade 10", hex: "#D98A6A", x: -0.35, y: 0.9 },
+    { name: "Shade 19", hex: "#D9425A", x: 0.05, y: 0.9 },
+    { name: "Shade 03", hex: "#D98FA0", x: 0.25, y: 0.85 },
+    { name: "Shade 14", hex: "#C2708C", x: 0.5, y: 0.75 },
+    { name: "Shade 23", hex: "#B5708C", x: 0.85, y: 0.8 },
+    { name: "Shade 08", hex: "#C98868", x: -0.9, y: 0.45 },
+    { name: "Shade 09", hex: "#C96B4E", x: -0.4, y: 0.55 },
+    { name: "Shade 04", hex: "#B5567A", x: 0.75, y: 0.45 },
+    { name: "Shade 11", hex: "#B5654A", x: -0.55, y: 0.15 },
+    { name: "Shade 01", hex: "#B5604E", x: -0.25, y: 0.02 },
+    { name: "Shade 05", hex: "#B5566E", x: 0.05, y: 0.15 },
+    { name: "Shade 20", hex: "#A83A5E", x: 0.3, y: 0.05 },
+    { name: "Shade 06", hex: "#9B3A5E", x: 0.55, y: 0.05 },
+    { name: "Shade 15", hex: "#A82E6E", x: 0.75, y: 0.02 },
+    { name: "Shade 21", hex: "#9B2E70", x: 0.95, y: 0.05 },
+    { name: "Shade 12", hex: "#8C5A3E", x: -0.9, y: -0.35 },
+    { name: "Shade 02", hex: "#8C4A3E", x: -0.4, y: -0.3 },
+    { name: "Shade 17", hex: "#6B3226", x: -0.7, y: -0.65 },
+    { name: "Shade 13", hex: "#7A2E2E", x: -0.05, y: -0.55 },
+    { name: "Shade 22", hex: "#6B1F2E", x: 0.25, y: -0.6 },
+    { name: "Shade 07", hex: "#6B1F3A", x: 0.7, y: -0.3 },
+    { name: "Shade 16", hex: "#4A1526", x: 0.75, y: -0.65 }
+  ]
+};
+
+const BRAND_SYSTEM_PROMPT = `You are a color analyst recommending real lipstick shades from a specific brand and product line, based on seasonal color analysis. You will be given a customer's color season result, which lipstick brand they prefer, and which specific product line within that brand. Use your knowledge of that brand's real, current shade lineup within that exact line to choose exactly 3 real, specific shades (their actual product names) that suit this person's season.
+
+Reference on each brand's general color character:
+- Black Rouge (Korean, Air Fit Velvet Lite / Air Hip Glow Tint / Balming Jam Gloss lines): huge range from soft coral-pink to deep brick-red and blackened berry; mostly warm-to-neutral undertone with a few cool berry options; spans light to deep depth.
+- 3CE (Korean, Stylenanda, Velvet Lip Tint / Blur Water Tint / Velvet Plush / Cashmere Hug / Misty Lip Bare / Gummy Oil Tint lines): trend-driven "my-lips-but-better" shades — muted mauve, terracotta, dusty rose, brick; mostly neutral-to-warm undertone, medium depth.
+- Bbia (Korean, Last Velvet Lip Tint / L'eau Tint / Glow Tint / Over Glaze / Lucky Shine Tint lines): one of the most iconic Korean tint lines, sophisticated muted-to-rich range — dusty terracotta, mauve, deep wine, blackened red; neutral undertone overall, medium-to-deep depth, velvety matte finish.
+- rom&nd (Korean, Juicy Flash Lip Oil / Blur Fudge Tint / Juicy Lasting Tint lines): very wide range from warm coral-orange nudes to cool rose-mauve and deep wine; famous for a natural "your lips but better" gradient look; spans light to deep.
+- MERZY (Korean, The Watery Dew Tint / Water Fit Blur Tint / Puffer Velvet Tint lines): highly pigmented, bold-leaning range from warm coral and brick to cool berry and deep red; neutral-to-warm undertone, medium-to-deep depth, popular for strong color payoff.
+- Peripera (Korean, Over Blur Tint / Ink Mood Glowy Tint lines): playful, wide range from juicy warm coral and red to soft milky pinks; mostly warm-to-neutral undertone, light-to-medium depth, glowy-to-velvet finishes.
+
+If the user message includes a "Verified real shade list," that list is the complete, authoritative set of real shades for this line. You MUST choose your 3 shades only from that list, and you MUST reuse the exact hex value given for each one — never alter, invent, or approximate a different hex. If no such list is given, fall back to your own knowledge as described above.
+
+Choose exactly 3 shades, all from the specific product line given, and rank them:
+1. "best" — the single closest match to this person's season
+2. "lighter" — an alternative from the same line that is a touch lighter/softer than the best match, still suiting the season
+3. "deeper" — an alternative from the same line that is a touch deeper/richer than the best match, still suiting the season
+
+Accuracy requirement: if a shade name includes a code or number (e.g. "21 Fig Fig", "V02"), that code must be the one that actually belongs to that exact shade name — never attach a number from one shade to the name of a different shade. Before answering, double check that each code and name pair you give actually go together. If you are not fully certain a code is correct for a given name, leave the code out entirely and give only the plain shade name — do not guess.
+
+Respond with ONLY a valid JSON object (no markdown fences, no extra text) in this exact shape:
+{
+  "brand": "brand name as given",
+  "line": "line name as given",
+  "shades": [
+    {"rank": "best", "name": "real shade name", "hex_approx": "#hexcode", "why": "one short friendly sentence"},
+    {"rank": "lighter", "name": "real shade name", "hex_approx": "#hexcode", "why": "one short friendly sentence"},
+    {"rank": "deeper", "name": "real shade name", "hex_approx": "#hexcode", "why": "one short friendly sentence"}
+  ]
+}`;
+
+// ---------------------------------------------------------------------
+// State
+// ---------------------------------------------------------------------
+let uploadedImage = null; // {base64, mediaType}
+let currentSeasonResult = null;
+let selectedBrand = null;
+
+// ---------------------------------------------------------------------
+// Lightweight customer analytics: season/shade results saved to
+// shared storage, reviewable via the hidden dashboard below.
+// Location was attempted two ways (IP lookup, then browser GPS) and
+// both are blocked at the platform level in this sandboxed
+// environment — confirmed not possible here, so it's been dropped.
+// ---------------------------------------------------------------------
+async function saveCustomerRecord(seasonResult, brandName, lineName, bestShadeName){
+  if(!window.storage) return;
+  try{
+    const key = 'customer:' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
+    const record = {
+      timestamp: new Date().toISOString(),
+      season: seasonResult ? seasonResult.season : "",
+      brand: brandName || "",
+      line: lineName || "",
+      bestShade: bestShadeName || ""
+    };
+    await window.storage.set(key, JSON.stringify(record), true);
+  }catch(e){ /* fail silently, never block the customer experience */ }
+}
+
+const fileInputCamera = document.getElementById('fileInputCamera');
+const fileInputUpload = document.getElementById('fileInputUpload');
+const preview = document.getElementById('preview');
+const placeholderText = document.getElementById('placeholderText');
+const analyzeBtn = document.getElementById('analyzeBtn');
+const loading1 = document.getElementById('loading1');
+const errorBox1 = document.getElementById('errorBox1');
+const resultCard = document.getElementById('resultCard');
+const chartSection = document.getElementById('chartSection');
+const chartHolder = document.getElementById('chartHolder');
+const brandSection = document.getElementById('brandSection');
+const brandGrid = document.getElementById('brandGrid');
+const lineSection = document.getElementById('lineSection');
+const lineGrid = document.getElementById('lineGrid');
+const loading2 = document.getElementById('loading2');
+const errorBox2 = document.getElementById('errorBox2');
+const pickCard = document.getElementById('pickCard');
+const shadePodium = document.getElementById('shadePodium');
+
+BRANDS.forEach(b => {
+  const pill = document.createElement('div');
+  pill.className = 'brand-pill';
+  pill.textContent = b.name;
+  pill.addEventListener('click', () => selectBrand(b, pill));
+  brandGrid.appendChild(pill);
+});
+
+
+function handleImageFile(file){
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const maxDim = 900;
+      let w = img.width, h = img.height;
+      if(!w || !h){
+        showError(errorBox1, "Couldn't read that photo's dimensions. Please try a different photo.");
+        return;
+      }
+      if (w > maxDim || h > maxDim) {
+        if (w >= h) { h = Math.round(h * maxDim / w); w = maxDim; }
+        else { w = Math.round(w * maxDim / h); h = maxDim; }
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      const base64Part = dataUrl.split(',')[1];
+      if(!base64Part || base64Part.length < 100){
+        showError(errorBox1, "That photo didn't process correctly. Please try again or use a different photo.");
+        return;
+      }
+      uploadedImage = { base64: base64Part, mediaType: 'image/jpeg' };
+      preview.src = dataUrl;
+      preview.style.display = 'block';
+      placeholderText.style.display = 'none';
+      analyzeBtn.disabled = false;
+    };
+    img.onerror = () => {
+      showError(errorBox1, "Couldn't read that photo. Please try a JPG or PNG image.");
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+fileInputCamera.addEventListener('change', (e) => handleImageFile(e.target.files[0]));
+fileInputUpload.addEventListener('change', (e) => handleImageFile(e.target.files[0]));
+
+function showError(box, msg){
+  box.textContent = msg;
+  box.classList.add('show');
+}
+function hideError(box){
+  box.classList.remove('show');
+}
+
+function parseJsonFromText(text){
+  const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+  return JSON.parse(cleaned);
+}
+
+async function callClaude(system, userContent){
+  const response = await fetch("/.netlify/functions/claude-proxy", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      system: system,
+      messages: [{ role: "user", content: userContent }]
+    })
+  });
+  if(!response.ok){
+    let detail = '';
+    try{
+      const errData = await response.json();
+      detail = errData && errData.error ? errData.error : JSON.stringify(errData);
+    }catch(e){}
+    throw new Error(detail || "The AI service didn't respond correctly. Please try again in a moment.");
+  }
+  const data = await response.json();
+  const textBlock = data.content.find(b => b.type === 'text');
+  if(!textBlock){
+    throw new Error("No readable response came back. Please try again.");
+  }
+  return parseJsonFromText(textBlock.text);
+}
+
+analyzeBtn.addEventListener('click', async () => {
+  if(!uploadedImage) return;
+  hideError(errorBox1);
+  resultCard.classList.remove('show');
+  loading1.classList.add('show');
+  analyzeBtn.disabled = true;
+
+  try{
+    const userContent = [
+      { type: "image", source: { type: "base64", media_type: uploadedImage.mediaType, data: uploadedImage.base64 } },
+      { type: "text", text: "Analyze this person's color season using the seasonal color analysis framework in your instructions and respond with only the JSON object." }
+    ];
+    const result = await callClaude(SEASON_SYSTEM_PROMPT, userContent);
+    currentSeasonResult = result;
+    renderSeasonResult(result);
+  } catch(err){
+    showError(errorBox1, err.message || "Something went wrong reading the photo. Please try a clearer, well-lit photo.");
+  } finally {
+    loading1.classList.remove('show');
+    analyzeBtn.disabled = false;
+  }
+});
+
+function renderSeasonResult(result){
+  document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
+  document.getElementById('seasonName').textContent = result.season;
+  document.getElementById('seasonDesc').textContent = result.explanation;
+
+  resultCard.classList.add('show');
+  updateChart(result.season);
+
+  brandSection.style.display = 'block';
+  lineSection.style.display = 'none';
+  pickCard.classList.remove('show');
+  hideError(errorBox2);
+  document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('selected'));
+  selectedBrand = null;
+
+  setupSeasonOverride(result);
+}
+
+function updateChart(seasonName){
+  const coord = SEASON_MAP[seasonName];
+  if(coord){
+    chartHolder.innerHTML = seasonChartSVG(seasonName, coord);
+    chartSection.style.display = 'block';
+  }
+}
+
+const seasonCorrectToggle = document.getElementById('seasonCorrectToggle');
+const seasonSelect = document.getElementById('seasonSelect');
+
+function setupSeasonOverride(result){
+  seasonSelect.innerHTML = '<option value="" disabled selected>Pick your actual season...</option>';
+  Object.keys(SEASON_MAP).forEach(name => {
+    const opt = document.createElement('option');
+    opt.value = name;
+    opt.textContent = name + (name === result.season ? ' (AI\'s guess)' : '') + (result.runner_up === name ? ' (close runner-up)' : '');
+    seasonSelect.appendChild(opt);
+  });
+  seasonSelect.style.display = 'none';
+  seasonCorrectToggle.style.display = 'inline';
+  seasonCorrectToggle.textContent = "Doesn't look right? Choose your season manually";
+}
+
+seasonCorrectToggle.addEventListener('click', () => {
+  seasonSelect.style.display = seasonSelect.style.display === 'none' ? 'inline-block' : 'none';
+});
+
+seasonSelect.addEventListener('change', () => {
+  const chosen = seasonSelect.value;
+  if(!chosen || !currentSeasonResult) return;
+  currentSeasonResult = {
+    ...currentSeasonResult,
+    season: chosen,
+    family: chosen.split(' ').pop(),
+    explanation: "Manually selected by you."
+  };
+  document.getElementById('seasonName').textContent = chosen;
+  document.getElementById('seasonFamily').textContent = "Manually selected";
+  document.getElementById('seasonDesc').textContent = "You picked this season yourself — shade matching below is now based on it.";
+  updateChart(chosen);
+  seasonCorrectToggle.textContent = "Change season again";
+  seasonSelect.style.display = 'none';
+
+  // Reset any in-progress brand/line selection so results re-match to the new season.
+  lineSection.style.display = 'none';
+  pickCard.classList.remove('show');
+  document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('selected'));
+  selectedBrand = null;
+});
+
+// Maps a -1..1 coordinate to pixel space and draws the warm/cool,
+// light/dark quadrant chart with the customer's season plotted on it.
+function seasonChartSVG(seasonName, coord){
+  const cx = 200, cy = 150;
+  const px = cx + coord.x * 140;
+  const py = cy - coord.y * 100;
+  return `<svg viewBox="0 0 400 300" width="340" height="255" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="4" width="392" height="292" rx="16" fill="none" stroke="rgba(58,31,34,0.15)" stroke-width="2"/>
+    <line x1="40" y1="150" x2="360" y2="150" stroke="rgba(58,31,34,0.35)" stroke-width="2"/>
+    <line x1="200" y1="30" x2="200" y2="270" stroke="rgba(58,31,34,0.35)" stroke-width="2"/>
+    <circle cx="200" cy="40" r="26" fill="#BFE3EC"/>
+    <text x="200" y="45" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#2B141C">Light</text>
+    <circle cx="200" cy="260" r="26" fill="#12283A"/>
+    <text x="200" y="265" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#fff">Dark</text>
+    <circle cx="45" cy="150" r="26" fill="#E23B3B"/>
+    <text x="45" y="155" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#fff">Warm</text>
+    <circle cx="355" cy="150" r="26" fill="#C6006F"/>
+    <text x="355" y="155" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#fff">Cool</text>
+    <circle cx="${px}" cy="${py}" r="34" fill="${coord.color}" stroke="#fff" stroke-width="3" filter="drop-shadow(0 6px 10px rgba(58,31,34,0.3))"/>
+    <text x="${px}" y="${py - 42}" text-anchor="middle" font-family="Playfair Display, serif" font-style="italic" font-size="14" font-weight="600" fill="#3a1f22">${seasonName}</text>
+  </svg>`;
+}
+
+function selectBrand(brand, pillEl){
+  document.querySelectorAll('#brandGrid .brand-pill').forEach(p => p.classList.remove('selected'));
+  pillEl.classList.add('selected');
+  selectedBrand = brand;
+  pickCard.classList.remove('show');
+  hideError(errorBox2);
+
+  lineGrid.innerHTML = '';
+  (BRAND_LINES[brand.id] || []).forEach(line => {
+    const pill = document.createElement('div');
+    pill.className = 'brand-pill';
+    pill.textContent = line;
+    pill.addEventListener('click', () => selectLine(brand, line, pill));
+    lineGrid.appendChild(pill);
+  });
+  lineSection.style.display = 'block';
+}
+
+function euclidDist(a, b){
+  return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
+}
+
+// Picks best/lighter/deeper shades purely by distance on the warm/cool,
+// light/dark chart — no AI guessing involved when coordinates exist.
+function pickByChartPosition(customerCoord, shadeList){
+  const scored = shadeList.map(s => ({ ...s, dist: euclidDist(customerCoord, s) }));
+  scored.sort((a, b) => a.dist - b.dist);
+  const best = scored[0];
+  const rest = scored.filter(s => s.name !== best.name);
+
+  const lighterCandidates = rest.filter(s => s.y > best.y).sort((a, b) => a.dist - b.dist);
+  const deeperCandidates = rest.filter(s => s.y < best.y).sort((a, b) => a.dist - b.dist);
+
+  const lighter = lighterCandidates[0] || rest.sort((a, b) => a.dist - b.dist)[0];
+  const deeper = deeperCandidates.find(s => !lighter || s.name !== lighter.name)
+    || rest.find(s => !lighter || s.name !== lighter.name);
+
+  return {
+    best: { name: best.name, hex_approx: best.hex, why: "Closest match to your color chart position." },
+    lighter: lighter ? { name: lighter.name, hex_approx: lighter.hex, why: "A lighter option in the same family." } : null,
+    deeper: deeper ? { name: deeper.name, hex_approx: deeper.hex, why: "A deeper option in the same family." } : null
+  };
+}
+
+async function selectLine(brand, line, pillEl){
+  if(!currentSeasonResult) return;
+  document.querySelectorAll('#lineGrid .brand-pill').forEach(p => p.classList.remove('selected'));
+  pillEl.classList.add('selected');
+
+  hideError(errorBox2);
+  pickCard.classList.remove('show');
+
+  const verifiedList = VERIFIED_SHADES[`${brand.id}::${line}`];
+  const customerCoord = SEASON_MAP[currentSeasonResult.season];
+
+  // Fully deterministic path: real shades + real chart position, no AI call needed.
+  if(verifiedList && customerCoord && verifiedList.every(s => typeof s.x === 'number')){
+    const matched = pickByChartPosition(customerCoord, verifiedList);
+    renderShadePodium({
+      brandId: brand.id,
+      brand: brand.name,
+      line: line,
+      shades: [
+        { rank: "best", ...matched.best },
+        ...(matched.lighter ? [{ rank: "lighter", ...matched.lighter }] : []),
+        ...(matched.deeper ? [{ rank: "deeper", ...matched.deeper }] : [])
+      ]
+    });
+    return;
+  }
+
+  loading2.classList.add('show');
+  try{
+    let promptText = `Customer's season result:\n${JSON.stringify(currentSeasonResult)}\n\nPreferred lipstick brand: ${brand.name}\nPreferred product line: ${line}\n\n`;
+    if(verifiedList){
+      promptText += `Verified real shade list for this exact line:\n${JSON.stringify(verifiedList)}\n\nPick exactly 3 shades ONLY from this list (best/lighter/deeper) and reuse their exact hex values as given.`;
+    } else {
+      promptText += `Recommend the 3 ranked shades from that exact line and respond with only the JSON object.`;
+    }
+    const userContent = [{ type: "text", text: promptText }];
+    const result = await callClaude(BRAND_SYSTEM_PROMPT, userContent);
+    result.brandId = brand.id;
+    renderShadePodium(result);
+  } catch(err){
+    showError(errorBox2, err.message || "Couldn't fetch shade picks. Please try again.");
+  } finally {
+    loading2.classList.remove('show');
+  }
+}
+
+// Small color helpers used to build a soft gradient on the swatch shape
+function hexToRgb(hex){
+  hex = hex.replace('#','');
+  if(hex.length===3){ hex = hex.split('').map(c=>c+c).join(''); }
+  const num = parseInt(hex,16);
+  return {r:(num>>16)&255, g:(num>>8)&255, b:num&255};
+}
+function rgbToHex(r,g,b){
+  const c = v => Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0');
+  return '#'+c(r)+c(g)+c(b);
+}
+function lightenHex(hex, percent){
+  const {r,g,b} = hexToRgb(hex); const p = percent/100;
+  return rgbToHex(r+(255-r)*p, g+(255-g)*p, b+(255-b)*p);
+}
+function darkenHex(hex, percent){
+  const {r,g,b} = hexToRgb(hex); const p = percent/100;
+  return rgbToHex(r*(1-p), g*(1-p), b*(1-p));
+}
+
+// Uses the customer's exact reference photo (a real kiss-mark lipstick
+// print) as an SVG mask, so the precise shape and texture from the
+// photo are preserved exactly, while the color changes per shade.
+const LIP_MASK_IMG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAADxCAAAAABUwdXsAAAZj0lEQVR4nO1daZhUxdV+T1XdGRg2WVU2WURcMbgQ0c8dRTTAE1wCLqhoNCaKS6IkbvmSJxqNGmP4XKKgkRgUl8Q1LiBuxA3UiBFEURQEAQFFhGG6qs75fnQz07N0z+3u28u08/7gYaan77313lOnTp06C9CKVrSiFa1oRSta0Yp8gIr9AM0i/oSkxSd+IUV+lFKFIbBv/EtXJL5KmCzDDABtASjea9RH/1QMAKgGAKUAX2jOSpYsxYA6qyP3OYMVgI4aXyU+mbpx1hfKAQA0F5Sv0iSLlHCbUw49olfdr6xWtf//epN+ZKG2MxygIMXTYSUBDeDoT0XExWKW4xBJ/IdtTOJY9uH5VQCU1sV+4OKBAlSd985WqXEsTYO9t7GYFZGl7zzbGYBKErvvEkgDpywREZ+CqTp4b0Vk/vYHHQLAaFWaKiWPIKDdA16sTyVVjflaITLn8N4A8B2jS6HDOQvFNy9VSXyJdyKrH7lpNw0E+rvDV4Cu74q4DKgSES/ivIjIw337AAi+I3QZdF0oNhOxqgVbxyLf3jreAN8JZW8w8V2x2VBVK2Iir187EIAp9ljyjQAXZTwFG8kXi1T/osJAlTddAS6SWFZTsL54xURWv3caQOVLlwpwsdhw9kIzYBaRqeMBlKmpSsAlEXElIuydyH9PQXnSpbDD8xLSDg0HZ0UW3j0EMOVGl9I7fpijam8Mb0W2Ttiz3CwJMuYDiTU//IzpciKxvw5GUE7SVYGT88GViLAT8YciKt1VAnsD7Qc/Pkjy9PLFVrwzn25agoRPuoXD4OK8SFUy/F2DYYKSN7yUMUiaBbqRZR3gvMy8DJkzZa1I7ErkrurzOA1JI36soMCJ5+Taj7adAmrfY34v5N0v7AymLtt8J4zL5Sp5I0vFmRl4pDtrJzzQ/UhWEPr0md7z/h4/YNAgQMh1n703F2KxEgKmTs7tQChPZJHyMMdXTgm6b9fwo49ZaPHMDbPjP/V4bm9XGF3ihMyi398HaMlW1+eFLNIO+10ydFcAsNAAU+I+TJKg5tLFipUMPW9HX7izGa+x6NqZkrV05YEsUh5t7znewEGBGt2AAYjUun8LMgdr780GZ36y8V2orE4boyeLBO2m7T5EmNLRkFDwlPaP8gBmg9ikR7aCSuFsNkCHH2fuRy8gvPPy3K5VyOJoI2LJImO7zN0bvtACkxm8xmtHbc58LkY7KCN20gt7Oy5xN5JmN3xO3+1ZimnTa/S6PcxRcgnAy9atF+oium8C/GhRlidZhYcXkXdOy//eIQUMeq6XmmKTkAG8yOUIisKVxphFuZz6FQE+JpfDFF7BqgCXtxB1lQSOyVVAoeciAVdEcepXaHi/Yv/f9IFWBQzAUeg3J9rTmQKBZcNaWXN94n03h0gIVTpY3LdAzoPo4TVumRa8E2IDFAVZinHQvAI6DyKFgFg0cP/JzRv0EawEmgfcP49bKFcggtIsbsJMrmhOcnKXLMUDnu9XUEdLXhCrmHF6c0dAOQ9Sqf5z+sVaPFcI/IRLqzhIO5CcR0luj/6xilyvUnyQDv7w8XCbdorkOg0De+Xkzi11HawPiVW+eN8nL6RZFXMkK7DHPZnbFUoJQuAnTt6S8rwst2mo7BV3urI4FwcAEFuMfbSty0vAc6DHi7RAuz0N2MoHE1JNuFw4JOUXDebyUFh18Jpnnb1FN8oJRU7TkIQf2a38wlw1Y8LsKt/UuHIgS+tLxvkSCFmKGkrFDpzT35nGQ8t+sMYNXNpiN8/NgJU/d3pjez5rySLX42Hf8g33pqG8nnbLTtxQkrKVLKL2Lxcm/KVIEKqeMrWBms92uBpn7W3LmCtQTduTGopS1mTxuHKWKwCV7nuzXH3HU5YDNjUTh0hLdWGFhG437uD6brrsljPlJt5bxDInhQHZoFP9MWZFFqm2N0i+grFLB+Rt/V9kRZZyT/QoVxMrCVzRpv4vshEP7ceNaHI7UF7gigVv1rdLs7CztD/4JS7/qgBMiw5dX98RmLlkkWp/DUnZcwWhj9YH9RV85mQZe9nBtvwnIZzv1tDBnPGojT3s4u8CV1yJZxsaR5lOJ1LyyoHfhZVQPfj6zQ3dDhmSRVrdP66lntRnAFaf9kcjb2mGOku5o8a5sueKY/zJIaaikWc5M8kio14YVrQ4zEKBFdDvsya88JlpH21HDS/zSSieK1bd8epy1cSJRUaSpXDgo9uVvzn63lFrmj6Wzmjk2r87pLwFS1hfsfrpL4LG1VGBzKah5lv3ssUJhS4UYpXn3gmQbfrTTCSLZOnAMhYs8TBYcKiTlAV2MzAdFN3ct3y58kLGxKYetcXZCKJojJswszxNd2ZFovDt32r+uCJtGG54shS/v2sZut1Z4nbj3JveXQmYtPWaQ4tKYH+0mys37S4iGlj+zs1fqv8CAXz6SgZhJUuh75wBpep2l4x9kSIARAywdBmfsxwAqeazzMNKlnK/HliaZoOwmEQ6PSsQgRkKUGly1ZkTUR/8xoN//RowvC1pmyhdaF7IN6J4wBIqGdtdCBCwaC9AAGyaeVrVts9sIinOAgk/p4gCM2khJg8o1gobVpFXC2et/zdgRBgAAUrBQkvq3IGQkqXlSl0y4UWsLBBAx59+47R3/vP+s5d3YbV6xhTp2QZfXK/Ol4o+wIo+AOLyoDVAiGeuaiz9x+2fxi+lwY6MBmAB76H6fQIoMU00OEBYySIasKRxhYZiQCA+8BrY+vWzm0645Stg9idICg7a+wA8sBFA5emk7p5yntdC65YchPcfGjDRmVd2u2dzxf/MXftPQAlACgRIXKl3MptOHcZDDrr/pqUbgabXxXAMBHb6pKLbWOJN3CZ+52eHWD3nPZcow6MUs/ESL1QCABrbxMIIAQ4GDjBCtWudApMkquWg60WVUDzBrNonfpvPx665CK88QdhWeKgWocgy7pR7i1t8QODjGmOLfnvObasBAERsAHA9laxUvLUFacAntDUJYMQDJAbwWnyC1ja9ThZqc0GHxHeZQdoZcE1b4NprNye+mhnItPuguFUtWERk/XT3zDHdumtAmSB93khaaKMB0nrPO9d+KyIiNhaLxZh93c1iMS8vtj/91CxOvwzOKG7ys5UzR0yfPhl9AeRYlpu0BtB28mefr9giIrFYLNYoNp1ZRGKyWmR+73pu4TD5m1L11qAi+pLZVbw3BAC0h+bcmhRpDxzZtftlfQHA6XTDZ+U5+PCIlRkVCyTVfU7xMsW9cyLvddMmCHTOnQSUwY7HXiwiYr1vNkuZRWLyYc+MlLVWIwparSExCu/ZWWtF5KOnukVT2YOAgxaLsA1fqKNGbjWZWAEGJ/vCaSy2IuK59rV/ePOF20WRQkoqqNA7PyNiU/ZcafJx+Oukuzf7GIpHPVhVMIOUFT52PToDWNKm68w5xE9VR9C3iZSyAPDgibFMi+F6e/qDoasqErVZUTiN5WTVRI1+C5Yt/yU67QYA0Lm28CDSALodfPe0B7Owf2JyTfgKLIbO9QXTWFZWng8igAgEKGOayAnJkCoNACP/tDrLR4rJFXVkNaO9iGVKwTocsFk+enHbaigWKCbi3DMZSXxHHHThSAAu984WzZJ1d/8CHVKIN3dcUg0bL6HIUTRM08JdLz2XOkG8zjp9rV3ou2H/QiksL/JF30i7migFbD9fJKcChK56dEh7nKjjOi4IWWxl5fAekVYgVMDoeWslxrmk2rJsSLIY0r9K+aayIEaD12b1iMWRlsMMbO9ZBwKcmyvcm9tNnaMmPVl0bN4dMyJgmJXT7/o8/TFUZtDK9n5pgFO5OpYEq5KOtNKRpXjIk8hfXLIIWIkmKLx0+mdQORXUTgKRYu+vPqdXJO7K5Poe6a6n6Wqfj+qUAhCcBAQFYKF+4I3Z0BHYCXGQCOOQK45GNKnuydKe5oLa7nZ89HIlYA1YbfDtl/76C1de9yKAuibRuYKIMeCMfY+Nqq5svQrfqcki6fWYRE6WEPR627EKf/zolfeBaYAShaiogmLB304FOKpAAwpnZinaOR8FLvzX/9quYpdLTwUAmMR2JKKBGaBTp/vEuah84Ow37BfKPaRxlo/a8c41aw9JvCoVdTMcIgDHrv8mSivay5fJt0g5DUl2+FXUZcBZrdt9I0CitERdwkZ7dD955KhoC8wLXkruS5CSLO3/EnmYn/ALGwMHQWRLXwKK4Ls8snsPQCItl8z6H97UPWvqS0vbiOVKvFOzSPLQUVyz9yOePqyH9RKpm5LNyqcpafFJJVmE9l2jLRbvtdZPvUqRLXy1UMrt+OMx+8KrqKN8WF/3lQ5BlnLT9olqFjIAsNly+to3aqLvhqA9Hzp9ICQfUYm0Joykatprc2S9GeOYuAfy0TJDY9BsyU9hde+W9axHVgrJErmqKqoQo+oVgNf/ngEjuZ48NAKRH/5QL5cfZ66r+GRVk3W0Gj6E+jQiR5aTeYlLRj9NVAD8Jm/NRbz8p2f905IUq6HixZFpFyFDRCqy7V8tDNvtuh4pNj9ub8bLI1fVX7qbll/lh26JLNCvg4jkFqHQJIy4YaNP2VFRniJdRT+2JkiRl5IMRUPXRbRr8NZem4egEjIAzv8qkkdMAccLGh5yNClZ2g/rWt02gjF5Dp6dtDo6p8I2kLh2pxw+Htbksecg/SvUbFD4M0cR3sAiv+4efbsWMqg8f7lE13e6KXj/efcwLjEdXBfJCmPlsnx0JtZAm6dEYvmNRfRyQBj1QVRpczo/ioNr5APkHFLV+OkM2v14cd77ZTCv2yHMsxucvDX3SehFPuyVUWxTGCgFTFxUgDYsVq4KExCi0Oej3B+GZdX/9op6CpIGqiblaXPT4PG3dAklWMGs3MNtrby8Q+TqSgEDB78pLv9n5OzXHhhGu5Nu/1rOrYq3yiXIpoFgWmj0+ZsUphFSTH7b1CRspFTId9srR4lgrlw4XUdsXZH4Ps8PYlWYGpa+JtRtArorx1noRaZuH+0UNACqBi4pVCAwS6xzGGtX0aCanMwGb+Wt0yJ1XCkFEP3hy00FC9d0/rkgnN1wW06C5UXe7JhbEkQDqjSgJi1ZLoVr28b8dWWTb7uBziLpsl8up9Cs3p764JYwm/VwIOWx/4Xf3xlgKlibS9YLbZi8Co0hubzAGn95ZWRTUGutgf3OqBGxOa/PmcDaw0M5SgymcvZ7rpjIAWi2iVQoKKUBoMP9VgphWCXDyYsp3nf9aUjScXjWgiESvHD56yqW5deToLRnYB85utPK8d7pAudYsf4tNVUQqiE09s/a3+DET26fs14hCoIAwC7DHo9fteDNV6xcnmoSNjRKJ2Q9TL3mp/9oXCYvQ5DAAgef0XUswBCowmfuiX051WFhQ8fpiCxv4WnBiE3GZ81VnBUravvJbWVSRwiKVJDYB/NeDRWxqfEDm6WRFZORyLa9GtUmnegd520VEbFFSzL2bunOKe3Req9P8CuTnWzY4MXndDaqnbR4cTD7HMpK8bg928MJIneDhYfopUtTmon1H0v1yO4WNnjxmIzSYxMuCRZxQKfxxxzQJSGWXNyuRyyfXpZa79Z7NG3n7pzNHRC8ODIW9lBWESC1wTQ9D+tzTkVvABYAdHELIgBifrRQp3zryWQpe8H/ZN5KR7yxEx9pfn+gCABL4r0N20FI8YHHdekJwCpVpLbqDcD6xrfT7NWSdJmSyX/K+PLiNT05ZVEzmSRElCjXEdieu7uh493wbTe2pAq26WsOXj0xNp3xkyRZjF9Lpus1KxN7eFJNmkwSIiiyAgxpI6C37WEz4uV0XOLDkpCoBITmpbXd6ySLZLv3d8ywnJjX1ee9vyBFk1wCAO0FQPceh48YQwAWrDku7kEtmfJSSWC1buCmdEEZdZKk/c97ZlZOTLxZdvorKTJJVFyHOwz0EwcdOCCRq7AffB5Cj6KBOL7uW53OHq1Lw5c2n3fNxJUlLsC9Z3lTjyoCBATS7LE9ADV56EgAEIln0uQlFygiODNsfsjtGqFyXYYZFRsuQL0tpwo0gCBOx6531cRisZiIiMv/OV8EcHJPcytN0ovOaAp6/dVtj83XdZtBBWZGJbxFJfY4tvek+OUc6ZZREt3LvWemtrDiqCXL2J90CauymKBx95WorQ6hiBxo0DG9z8Q3twQXV3asAJwRpM06KykwVp9BoUNeCd03hAsHcU5Eru+DoFZiFIC97vr067q/ieU1HCgPiMl9zc+A2jev3bgOoaws0fh4/ObFdaWtCbxf/4pbOwGWdLycc0lZT2HggocmNjcJk8gi9DIhDmW8omfm/HV9oqAnKQK5irtPqAB8fMtS7N1dVvDmwfEhJmGSLNU0e01mrXHeHYACC0DEHoB5aLQ4FNpTHiVY1UxB2nKucSSRVZH2r0VYAoV/XfeKkbhpZZx0HnBZR95hH6dbih5vEkJ27GdhjihqRyn4MqXjQEBCpPDUjHVzEbdxlWbXZaf7BwOIKHO7aBDmMc+GLvsUh6b/89VN1XbzXiQmNcvOP6tym68cBOAXH4t4F12ObbFg5biQC1K9/c3yPmhUx4F9gPVtqz47ccG2ap8ACYaf1P0USB4DqwsGZ94YHmZpqw+lhl299Nu4JImIs9Za60XeO71q4MUBoOPnCmQMVd0lBT8ozhOse+2gLBenDttd3eB4Z/6NPeNUbqMUQLBEJNtjoBIDOz449DajftaTtkCvH1ywBwA8uoaE6d+zLIxTKuHdU+C2E4Of9/Ol6I/KAiL44eOhg36o0Y+Cqh2ZgE8SvwrqOqtoeIy+rXc0z1kKEEsnPhZ+IWwsINtqX8fXPa6za0l5TPjV4IoY6ZZopTcFVk+OziCYrKnZFD/qb2h0KcawobepSOsmFBceH056f0sG2bVN6bYmiwkY1/GU2wBukXu/JiHQN76eUQpqyIWA4PacMdRDlQ1VEMijDwUZFTgLt6gZLxf8GWXV+0qcPv7RDL8Thizj0GaXd8us2b0zJzwSpGyh1jRCEKBcm7PfnO/KR1kBgDUvPJopVyEkS/uJU3bP8pFKFs7MHeUyrorTHFmk/E7vdXBlpNgBgNXcUTaEt68BmiNBfL+57VzUhcGKC7HuhKOz4KoZsrQavGDBgBZznhUSNnjuEd/I6A6BtNOQlF/ep4xM9jhsMGeM89mUO0srNOR/18eW1xQEbDB7TE12BUzSSZYOrrq8rAxRAGwrZ4/dmoW+AtKSpaTH6nKbgkLInqt0Cl7J2MjrXRUZnt48e1x1tlylkSyi7q/vVF5bHAaNnE3ZF1xKTQZxj34lExobCRgYO7syh2qW6dgorzkorDD2iaD5IIXUSFOnVK1fEXXx1SJCSFWPeTLzA8JkpCPrixuaj8JpIRBHW8YMfipteG1uMPht8drPRY3NI5BzvGY6o5SIlvXmMrBK2W154E9Lcu+RkXZvGPhzbo9FWKOhSGCFEc+nyGzICOk30qiYt1/OtygyxAVbznuAo6j8mdaQEnH737Qh1qK1vFDw8YgZzkVfALsxDE5s0fEyMVl3to7KIdd8M0g665LBsC3zxN4rWjfiXcp6M5gF2pz7YbEFJDt48fcPzTrPPSsYoP/UhQXsyxoRvJf7983duEpCyHbu6LeshbmXhTWuuRIqG197KoQiwFHl5xctVbYFLYue9GcHXKlVpLvbsBan4m4v7oGWcn7Iopfdec+aXIu9ZI0A3X6+tNhqKBy8F3mmRx4KFYcHAV0uXtpsE/Tiw4n856LoK39myJYGhvDWEmfLOpl3BFB8u5Aq8ZM8VxbPEY5F5nQqAaoAELX/3cbClXXMFF6Erzw2UtMqR/T4/SaxxavZlBossunpkdvih0sBZIDuz0rJSRc7EZnZGUnJyHkYfObfMFbf2LbfSFfk9SYZ4g2w4aTnEaqyYdbIZrwkAGacBpRIUoqwxuo7Zm5elcP5af5AJlA47vG1peDpYu9Elj+xJ0pJrzcAAdjp96uLrrs8i3z23ADAFGAnlvU8IlIOfc8dMYw9FUt5MUuANx+bvgZRdjfPD0gDmCIi+egK3CyYrYh8fg4Kt7PJ7TaK4Md26n0NxKmCKnsBCPjiDxueWq/RcgKjFIBJa0Ty1jmvSakSEb/qsnYorGshd3HQJL5i5J7DRwNeCpIJJS7wm6pPesNCU8nrqkZQAHDE49UiknsXmmbgvYh8sU+n9oAp9LoSzf1IkRf0OLuXG9Mvj+IlrEDAx0/ftRBQeeixXDDEl6T+D8dfv+MI2o0lw7l4CYVFP+3XGVBF2S1HeE+CJljs+0s1aC8AiC4/0SNunrsZN9CKb4Egq5D/3BH1C1LkgfaDdzvtcL2hmyXKNfGOJTGrX31rhvrmAwCai7YDjF6alYID8D1g2r4AmEFElHnLFQY4kQHy2pzn9VwAMNx0AneBkJepTwrkABxrprTbGwDgjFfxWknNfVckXtI0USFo2X//ojbPjV8zXuq0iMibnlSJLP5Rnf3EXQaomkoAgDhAKSYCEv4Ukm3/eECSCuB9RO6GzfTEZsT1VbGOAJOR10VFE8dPzw/t997PjhYN9Kz7UFwAADbY9k8cfo3QBw+QfDMr/rMiir4DdZbI+wqsCXErWwsUHzeI5PtHvdVtJ6HOwFck7YPqrdAd8ZXQn7tULRJ69c26I3cDlJSFXhhzpVbEAABtq1Wl4lF7vTDfuEE//PtKVJ3/6jzF1XUPpZEo611aKLBtp5VQqpx3I6KFimRChUJRDGEhAEoxA6S9AIa53LJfWtGKVrSiFa1oRStaER7/D76D1v1vAo2OAAAAAElFTkSuQmCC";
+function lipstickSwatch(hex, size){
+  const mid = 'lm' + Math.random().toString(36).slice(2, 9);
+  const w = Math.round(size * (300/241));
+  return `<svg viewBox="0 0 300 241" width="${w}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <mask id="${mid}">
+        <image href="${LIP_MASK_IMG}" width="300" height="241" preserveAspectRatio="none"/>
+      </mask>
+    </defs>
+    <rect width="300" height="241" fill="${hex}" mask="url(#${mid})"/>
+</svg>`;
+}
+
+function renderShadePodium(result){
+  document.getElementById('pickBrandTag').textContent = `${result.brand} · ${result.line || ''}`;
+  document.getElementById('pickBrandName').textContent = "Your 3 shades";
+
+  const shades = result.shades || [];
+  const best = shades.find(s => s.rank === 'best') || shades[0];
+  const lighter = shades.find(s => s.rank === 'lighter');
+  const deeper = shades.find(s => s.rank === 'deeper');
+
+  saveCustomerRecord(currentSeasonResult, result.brand, result.line, best ? best.name : "");
+
+  const affiliateUrl = AFFILIATE_LINKS[`${result.brandId}::${result.line}`];
+
+  shadePodium.innerHTML = '';
+
+  if(best){
+    const bestEl = document.createElement('div');
+    bestEl.style.display = 'flex';
+    bestEl.style.flexDirection = 'column';
+    bestEl.style.alignItems = 'center';
+    bestEl.style.gap = '10px';
+    bestEl.innerHTML = `
+      ${lipstickSwatch(best.hex_approx, 130)}
+      <div class="shade-best-label">
+        <div class="tag">Best match</div>
+        <div class="name">${best.name}</div>
+        <div class="why">${best.why}</div>
+        ${affiliateUrl ? `<div class="shop-link">Shop this shade →</div>` : ''}
+      </div>`;
+    if(affiliateUrl){
+      bestEl.style.cursor = 'pointer';
+      bestEl.addEventListener('click', () => window.open(affiliateUrl, '_blank', 'noopener'));
+    }
+    shadePodium.appendChild(bestEl);
+  }
+
+  const altsWrap = document.createElement('div');
+  altsWrap.className = 'shade-alts';
+  [{data: lighter, tag: 'Lighter pick'}, {data: deeper, tag: 'Deeper pick'}].forEach(alt => {
+    if(!alt.data) return;
+    const el = document.createElement('div');
+    el.className = 'shade-alt';
+    el.innerHTML = `
+      ${lipstickSwatch(alt.data.hex_approx, 74)}
+      <div class="tag">${alt.tag}</div>
+      <div class="name">${alt.data.name}</div>
+      <div class="why">${alt.data.why}</div>
+      ${affiliateUrl ? `<div class="shop-link">Shop →</div>` : ''}`;
+    if(affiliateUrl){
+      el.style.cursor = 'pointer';
+      el.addEventListener('click', () => window.open(affiliateUrl, '_blank', 'noopener'));
+    }
+    altsWrap.appendChild(el);
+  });
+  shadePodium.appendChild(altsWrap);
+
+  pickCard.classList.add('show');
+}
+
+// ---------------------------------------------------------------------
+// Hidden creator dashboard. The small "·" in the bottom-right corner
+// opens a passcode-gated view of every saved customer record. Not
+// linked or labeled anywhere customers would notice.
+// ---------------------------------------------------------------------
+const ADMIN_PASSCODE = "fybs-v1-180726";
+let lastLoadedRecords = [];
+
+document.getElementById('adminTrigger').addEventListener('click', () => {
+  document.getElementById('adminModal').classList.add('show');
+  document.getElementById('adminLockScreen').style.display = 'block';
+  document.getElementById('adminUnlockedView').style.display = 'none';
+  document.getElementById('adminPassInput').value = '';
+  document.getElementById('adminLockError').style.display = 'none';
+  document.getElementById('adminPassInput').focus();
+});
+
+async function tryUnlock(){
+  const pass = document.getElementById('adminPassInput').value;
+  if(pass !== ADMIN_PASSCODE){
+    document.getElementById('adminLockError').style.display = 'block';
+    return;
+  }
+  document.getElementById('adminLockScreen').style.display = 'none';
+  document.getElementById('adminUnlockedView').style.display = 'block';
+  await loadAdminRecords();
+}
+
+document.getElementById('adminUnlockBtn').addEventListener('click', tryUnlock);
+document.getElementById('adminPassInput').addEventListener('keydown', (e) => {
+  if(e.key === 'Enter') tryUnlock();
+});
+
+document.getElementById('adminClose').addEventListener('click', () => {
+  document.getElementById('adminModal').classList.remove('show');
+});
+
+async function loadAdminRecords(){
+  const wrap = document.getElementById('adminTableWrap');
+  wrap.innerHTML = '<div class="loading show">Loading records...</div>';
+  let records = [];
+  try{
+    const listResult = await window.storage.list('customer:', true);
+    const keys = (listResult && listResult.keys) || [];
+    for(const k of keys){
+      try{
+        const r = await window.storage.get(k, true);
+        if(r && r.value) records.push(JSON.parse(r.value));
+      }catch(e){}
+    }
+  }catch(e){
+    wrap.innerHTML = '<div class="loading show">Could not load records.</div>';
+    return;
+  }
+  records.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+  lastLoadedRecords = records;
+  document.getElementById('adminCount').textContent = `${records.length} record${records.length===1?'':'s'}`;
+
+  if(records.length === 0){
+    wrap.innerHTML = '<div class="loading show">No customer records yet.</div>';
+    return;
+  }
+
+  let html = '<table class="admin-table"><thead><tr><th>Date</th><th>Season</th><th>Brand</th><th>Line</th><th>Best Shade</th></tr></thead><tbody>';
+  records.forEach(r => {
+    const d = new Date(r.timestamp);
+    const dateStr = isNaN(d) ? '' : d.toLocaleString();
+    html += `<tr>
+      <td>${dateStr}</td>
+      <td>${r.season || ''}</td>
+      <td>${r.brand || ''}</td>
+      <td>${r.line || ''}</td>
+      <td>${r.bestShade || ''}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+}
+
+document.getElementById('adminDownloadBtn').addEventListener('click', () => {
+  if(lastLoadedRecords.length === 0) return;
+  const headers = ['Date', 'Season', 'Brand', 'Line', 'Best Shade'];
+  const rows = lastLoadedRecords.map(r => [
+    r.timestamp || '', r.season || '', r.brand || '', r.line || '', r.bestShade || ''
+  ]);
+  const csv = [headers, ...rows]
+    .map(row => row.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'customer-insights.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
