@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Find Your Best Shades</title>
+<title>Find My Best Shades</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -134,6 +134,28 @@
   }
   .btn.ghost:hover{background:rgba(246,233,227,0.06);}
   .hint{font-size:12px;color:var(--muted);text-align:center;}
+  .hint-columns{
+    display:flex;gap:40px;justify-content:center;
+    flex-wrap:wrap;margin:4px 0 2px;
+  }
+  .hint-col{text-align:left;}
+  .hint-col-header{
+    display:flex;align-items:center;gap:8px;margin-bottom:8px;
+  }
+  .hint-col-header span{
+    font-family:'Work Sans', sans-serif;font-weight:700;font-size:15px;
+    letter-spacing:0.02em;
+  }
+  .hint-col.no .hint-col-header span{color:#8a7176;}
+  .hint-col.yes .hint-col-header span{color:#96333c;}
+  .hint-col ul{list-style:none;margin:0;padding:0;}
+  .hint-col li{
+    display:flex;align-items:center;gap:8px;
+    font-size:12.5px;margin-bottom:5px;
+  }
+  .hint-col.no li{color:#8a7176;}
+  .hint-col.yes li{color:#96333c;}
+  .hint-checkbox{flex-shrink:0;}
   .upload-choice-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
   .choice-btn{
     display:flex;align-items:center;gap:7px;
@@ -299,8 +321,8 @@
 <body>
 <div class="wrap">
   <div id="adminTrigger" title="">·</div>
-  <div class="eyebrow">Effortlessly You</div>
-  <h1>Find Your Best Shades</h1>
+  <div class="eyebrow">Effortless Beauty</div>
+  <h1>Find My Best Shades</h1>
   <p class="sub">Upload a clear, well-lit selfie with no lipstick on. We'll figure out your color season and the lip shades that suit you best.</p>
 
   <div class="mirror-stage">
@@ -341,7 +363,30 @@
     <input type="file" id="fileInputUpload" accept="image/*" style="display:none;">
 
     <button class="btn" id="analyzeBtn" disabled>Find My Season</button>
-    <div class="hint">Natural light, no filter, skin and eyes clearly visible works best — hair color doesn't matter, even if dyed.</div>
+    <div class="hint-columns">
+      <div class="hint-col no">
+        <div class="hint-col-header">
+          <svg viewBox="0 0 40 40" width="26" height="26"><path d="M9,11 Q20,20 31,29 M31,11 Q20,20 9,29" stroke="#8a7176" stroke-width="4.5" fill="none" stroke-linecap="round"/></svg>
+          <span>NO</span>
+        </div>
+        <ul>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#8a7176"/></svg>Filter</li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#8a7176"/></svg>Makeup</li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#8a7176"/></svg>Contact lenses</li>
+        </ul>
+      </div>
+      <div class="hint-col yes">
+        <div class="hint-col-header">
+          <svg viewBox="0 0 40 40" width="26" height="26"><path d="M6,20 L16,30 L34,8" stroke="#96333c" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span>YES</span>
+        </div>
+        <ul>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg>Natural light</li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg>Eyes clearly visible</li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg>Neck and shoulder skin</li>
+        </ul>
+      </div>
+    </div>
   </div>
 
   <div class="loading" id="loading1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><br>Reading your undertone and contrast...</div>
@@ -424,49 +469,90 @@
 // digitized directly from the customer's reference chart photo.
 // ---------------------------------------------------------------------
 const SEASON_MAP = {
-  "Bright Spring":        { x: -0.24, y:  0.14, color: "#F5453C" },
-  "True/Warm Spring":     { x: -1.0,  y:  0.59, color: "#E8735C" },
-  "Light Spring":         { x: -0.24, y:  0.82, color: "#F5B8A8" },
-  "Light Summer":         { x:  0.23, y:  0.82, color: "#F0B8D0" },
-  "True/Cool Summer":     { x:  1.0,  y:  0.59, color: "#E85C8C" },
-  "Soft Summer":          { x:  0.23, y:  0.14, color: "#C08898" },
-  "Soft Autumn":          { x: -0.24, y: -0.14, color: "#B8828C" },
-  "True/Warm Autumn":     { x: -1.0,  y: -0.51, color: "#C4602E" },
-  "Dark Autumn":          { x: -0.24, y: -0.82, color: "#7A1C2E" },
-  "Dark Winter":          { x:  0.23, y: -0.82, color: "#6C1030" },
-  "True/Cool Winter":     { x:  1.0,  y: -0.51, color: "#9C1436" },
-  "Bright Winter":        { x:  0.23, y: -0.14, color: "#C4172C" }
+  "Bright Spring":        { x: -0.18, y:  0.14, color: "#F5453C" },
+  "True/Warm Spring":     { x: -1.0,  y:  0.33, color: "#E87560" },
+  "Light Spring":         { x: -0.18, y:  0.75, color: "#F5B0A0" },
+  "Light Summer":         { x:  0.18, y:  0.75, color: "#F0B0D0" },
+  "True/Cool Summer":     { x:  1.0,  y:  0.33, color: "#E85C8C" },
+  "Soft Summer":          { x:  0.18, y:  0.14, color: "#C08494" },
+  "Soft Autumn":          { x: -0.18, y: -0.13, color: "#B8828C" },
+  "True/Warm Autumn":     { x: -1.0,  y: -0.32, color: "#C25A34" },
+  "Dark Autumn":          { x: -0.18, y: -0.73, color: "#5C1A22" },
+  "Dark Winter":          { x:  0.18, y: -0.73, color: "#4A1020" },
+  "True/Cool Winter":     { x:  1.0,  y: -0.32, color: "#8C142E" },
+  "Bright Winter":        { x:  0.18, y: -0.13, color: "#C41E28" }
 };
+
+// ---------------------------------------------------------------------
+// The 12 seasons arranged in a circle (adjacency wheel), matching the
+// customer's reference chart. Used so the 2nd/3rd shade picks come
+// from neighboring seasons — same-family neighbor prioritized first,
+// only crossing into a neighboring family when no options remain.
+// ---------------------------------------------------------------------
+const SEASON_WHEEL = [
+  "Bright Spring", "True/Warm Spring", "Light Spring",
+  "Light Summer", "True/Cool Summer", "Soft Summer",
+  "Soft Autumn", "True/Warm Autumn", "Dark Autumn",
+  "Dark Winter", "True/Cool Winter", "Bright Winter"
+];
+
+function seasonFamilyIndex(name){
+  return Math.floor(SEASON_WHEEL.indexOf(name) / 3); // 0=Spring,1=Summer,2=Autumn,3=Winter
+}
+
+// Returns this season's two wheel-neighbors, with the same-family
+// neighbor listed first (True/ seasons have two same-family
+// neighbors; Bright/Light/Soft/Dark seasons have one of each).
+function getSeasonNeighbors(name){
+  const i = SEASON_WHEEL.indexOf(name);
+  if(i === -1) return [];
+  const n = SEASON_WHEEL.length;
+  const neighbors = [SEASON_WHEEL[(i - 1 + n) % n], SEASON_WHEEL[(i + 1) % n]];
+  const fam = seasonFamilyIndex(name);
+  neighbors.sort((a, b) => (seasonFamilyIndex(a) === fam ? 0 : 1) - (seasonFamilyIndex(b) === fam ? 0 : 1));
+  return neighbors;
+}
+
+// Classifies a shade's chart coordinate to whichever of the 12 seasons
+// it sits closest to.
+function classifySeasonForShade(shade){
+  let bestName = null, bestDist = Infinity;
+  for(const name in SEASON_MAP){
+    const d = euclidDist(shade, SEASON_MAP[name]);
+    if(d < bestDist){ bestDist = d; bestName = name; }
+  }
+  return bestName;
+}
 
 const SEASON_SYSTEM_PROMPT = `You are a color analyst trained in the 12-season seasonal color analysis system. You determine a person's color season from a selfie by reading three things, using ONLY the skin and eyes — never the hair, since hair is very commonly dyed and is not a reliable natural signal: undertone (warm/golden vs cool/pink-blue vs neutral) read from the skin, depth (how light or deep the skin and eyes are), and chroma/contrast (how bright and clear vs soft and muted the coloring is, and how much contrast exists specifically between the skin and the eyes).
 
-Use this reference for the 12 seasons and their best lipstick color families:
+Use this reference for the 12 seasons (undertone, depth, chroma, contrast, and overall look):
 
-SPRING (warm undertone, clear/bright chroma):
-- Bright Spring: neutral-warm undertone, medium depth, very clear and bright with high contrast. Best lipsticks: clear warm coral, poppy orange-red, bright watermelon pink. Avoid dusty, muted, or blue-based shades.
-- True/Warm Spring: very warm (golden) undertone, light-to-medium depth, warm clarity and quite bright with medium-to-high contrast. Best lipsticks: peach, warm coral, golden-orange red, apricot.
-- Light Spring: neutral-warm undertone, light depth, soft clarity and slightly bright with delicate low contrast. Best lipsticks: light peachy-pink, soft coral, warm nude-pink, sheer apricot.
+SPRING:
+- Bright Spring: neutral-warm undertone, medium depth, fresh chroma, high contrast. Overall look: vibrant, energetic.
+- True/Warm Spring: very warm (yellow) undertone, light-to-medium depth, bright chroma, medium contrast. Overall look: fresh, lively.
+- Light Spring: neutral-warm undertone, light depth, very bright chroma, low contrast. Overall look: delicate, sunny.
 
-SUMMER (cool undertone, soft/muted chroma):
-- Light Summer: neutral-cool undertone, light depth, soft to slightly bright, slightly saturated and delicate, low-to-medium contrast. Best lipsticks: soft rose-pink, cool mauve-pink, light berry, dusty rose.
-- True/Cool Summer: very cool undertone, light-to-medium depth, soft and muted, medium contrast. Best lipsticks: rose-mauve, cool pink, soft raspberry, muted plum-pink.
-- Soft Summer: neutral-cool undertone, medium depth, the most muted, softest, and lowest-contrast of all seasons. Best lipsticks: dusty rose, muted mauve, soft brownish-pink, faded berry.
+SUMMER:
+- Light Summer: neutral-cool undertone, light depth, soft chroma, low contrast. Overall look: airy, gentle.
+- True/Cool Summer: very cool (pink) undertone, light-to-medium depth, soft chroma, low-to-medium contrast. Overall look: elegant, calm.
+- Soft Summer: neutral-cool undertone, medium depth, very soft/muted chroma, low contrast. Overall look: muted, blended.
 
-AUTUMN (warm undertone, muted/rich chroma):
-- Soft Autumn: neutral-warm undertone, medium depth, muted and soft, medium-to-low contrast. Best lipsticks: muted terracotta, soft brick, dusty peach-brown, warm muted rose.
-- True/Warm Autumn: warmest (golden) undertone, medium-to-deep depth, soft, medium-dark and yellowish with rich golden warmth, medium contrast. Best lipsticks: brick red, warm terracotta, pumpkin, burnt orange-red.
-- Dark Autumn: warm-neutral undertone, deep depth, rich, muted, and dark, very high contrast. Best lipsticks: deep brick red, mahogany, rust, warm chocolate-red.
+AUTUMN:
+- Soft Autumn: neutral-warm undertone, medium depth, soft/muted chroma, low contrast. Overall look: earthy, understated.
+- True/Warm Autumn: warmest (golden) undertone, medium-to-dark depth, rich/muted chroma, medium contrast. Overall look: warm, natural.
+- Dark Autumn: warm-neutral undertone, dark depth, rich chroma, high contrast. Overall look: deep, luxurious.
 
-WINTER (cool undertone, clear/deep chroma, high contrast):
-- Dark Winter: cool-neutral undertone, deep depth, rich and clear, high contrast. Best lipsticks: deep wine, blackened red, cool burgundy, deep berry.
-- True/Cool Winter: coolest (blue) undertone, medium-to-deep depth, very bright, pure, icy and blue-based, high contrast. Best lipsticks: true blue-red, cool fuchsia, icy pink, cool berry.
-- Bright Winter: cool-neutral undertone, medium depth, the clearest, brightest, and most vivid of all seasons, highest contrast. Best lipsticks: vivid fuchsia, clear icy red, bright cool pink, electric berry.
+WINTER:
+- Dark Winter: cool-neutral undertone, dark depth, clear chroma, high contrast. Overall look: dramatic, sophisticated.
+- True/Cool Winter: coolest (blue) undertone, dark depth, very clear chroma, very high contrast. Overall look: crisp, striking.
+- Bright Winter: cool-neutral undertone, medium-to-dark depth, extremely clear/bright chroma, very high contrast. Overall look: bold, electric.
 
-When given a photo, work through this in order before answering. Deliberately ignore hair COLOR entirely — do not let it influence any step below, since it is very likely dyed. Hair TEXTURE is a different signal and should be used as noted in step 3.
-1. Note the undertone in the skin (yellow/golden vs pink/blue vs neutral) — look at the inner arm/wrist area or neck if visible, since face lighting can be misleading.
-2. Note whether the skin and the eyes are light or deep in overall depth.
-3. Note the contrast specifically between skin tone and eye color: very pale skin with very dark eyes = high contrast; skin and eye tone close together = low contrast. Then adjust slightly using hair texture as a secondary signal, independent of its color: fine/thin hair strands nudge toward lower/softer contrast, coarse/thick hair strands nudge toward higher/clearer contrast. Skin-eye contrast is the primary signal; hair texture only fine-tunes it, never overrides it.
-4. Note any visible warmth or coolness in the cheeks and natural lip color.
+When given a photo, work through this in order before answering. Deliberately ignore hair COLOR entirely — do not let it influence any step below, since it is very likely dyed. Hair TEXTURE is a different signal and should be used as noted in step 3. Also treat lip color as an unreliable signal and do not weight it heavily — many people have lip tattooing, lip blushing, or other semi-permanent lip tinting procedures, so the lips' natural color may not reflect their true undertone at all.
+1. Note the undertone in the skin (yellow/golden vs pink/blue vs neutral). Prioritize the neck and/or other visible body skin over facial skin for this reading if both are visible — many people have facial redness or discoloration from skincare treatments, so facial skin alone can be misleading. Use the neck/body skin as the primary undertone reference whenever it's visible in the photo; only fall back to facial skin if neck/body skin isn't visible at all.
+2. Note whether the skin and the eyes are light or deep in overall depth. If the eyes show an unnaturally uniform or unusually bright/vivid color that looks like colored contact lenses rather than a natural eye color, treat that reading with caution and weight the skin undertone and depth more heavily instead.
+3. Note the contrast specifically using these reference points: the deepest reference point is the black/dark part of the eye (the pupil and iris), the lightest reference point is the white part of the eye (the sclera), and compare both of these against the neck and/or body skin tone (not facial skin, for the same redness reason as step 1). Very light neck/body skin combined with a very dark iris/pupil = high contrast; skin tone sitting closer to the eye's overall tone, or a lighter/less black iris, = lower contrast. Then adjust slightly using hair texture as a secondary signal, independent of its color: fine/thin hair strands nudge toward lower/softer contrast, coarse/thick hair strands nudge toward higher/clearer contrast. This skin-eye contrast reading is the primary signal; hair texture only fine-tunes it, never overrides it.
+4. Cheek warmth/coolness can be used only as a minor, secondary tie-breaker — do not let it override the neck/body skin undertone reading from step 1, since cheeks are facial skin and can show the same treatment-related redness. Do not use lip color as a meaningful input at all, for the reason noted above.
 5. Based on 1-4, identify your top choice AND the second-closest season. Compare them directly: what is the one deciding factor that separates your top choice from that runner-up? If you can't articulate a clear deciding factor, favor the more moderate/neutral-leaning season of the two rather than an extreme one.
 6. If the photo's lighting looks warm-toned (yellow/orange indoor lighting), cool-toned (blue/fluorescent lighting), or heavily filtered, factor that in — don't let obvious lighting cast override what the skin/eye undertone actually shows.
 
@@ -991,13 +1077,14 @@ If the user message includes a "Verified real shade list," that list is the comp
 
 Hard rule: if this person's season reads warm, do not recommend any cool-toned shade, even as an alternate. If their season reads cool, do not recommend any warm-toned shade, even as an alternate. A more neutral option is fine either way, but never cross to the opposite side of warm/cool.
 
-Choose exactly 3 shades, all from the specific product line given, and rank them:
-1. "best" — the single closest match overall to this person's season (both warm/cool and light/dark)
-2. "alt1" — of the remaining shades, whichever is closest to the BEST MATCH specifically by varying mainly in LIGHT/DEEP (i.e. a lighter or deeper version of the best match, similar warmth/coolness)
-3. "alt2" — of the remaining shades, whichever is closest to the BEST MATCH specifically by varying mainly in WARM/COOL, or is simply a more neutral version (similar depth to the best match)
+The 12 seasons sit in a circle in this order (each touches its two neighbors): Bright Spring, True/Warm Spring, Light Spring, Light Summer, True/Cool Summer, Soft Summer, Soft Autumn, True/Warm Autumn, Dark Autumn, Dark Winter, True/Cool Winter, Bright Winter, then back around to Bright Spring.
 
-For alt1, the "why" field should describe only the depth difference, e.g. "Slightly lighter than your best match" or "Slightly deeper than your best match."
-For alt2, the "why" field should describe only the tone difference, e.g. "Slightly cooler than your best match," "Slightly warmer than your best match," or "A more neutral tone than your best match."
+Choose exactly 3 shades, all from the specific product line given, and rank them:
+1. "best" — the single closest match overall to this person's exact season (both warm/cool and light/dark)
+2. "alt1" — a shade that best represents the person's season-neighbor that shares the SAME family (Spring/Summer/Autumn/Winter) on the wheel above — e.g. if their season is Soft Autumn, its same-family neighbor is True/Warm Autumn, so alt1 should come from there
+3. "alt2" — another shade representing that same same-family neighbor if a second good option exists there; only if that neighboring season genuinely has no more suitable shades in this line, use the person's OTHER neighboring season instead (which may belong to a different family)
+
+For alt1 and alt2, the "why" field should briefly mention whichever of lighter/deeper or warmer/cooler/more-neutral actually differs from the best match — only mention an axis if it's meaningfully different.
 
 Accuracy requirement: if a shade name includes a code or number (e.g. "21 Fig Fig", "V02"), that code must be the one that actually belongs to that exact shade name — never attach a number from one shade to the name of a different shade. Before answering, double check that each code and name pair you give actually go together. If you are not fully certain a code is correct for a given name, leave the code out entirely and give only the plain shade name — do not guess.
 
@@ -1007,8 +1094,8 @@ Respond with ONLY a valid JSON object (no markdown fences, no extra text) in thi
   "line": "line name as given",
   "shades": [
     {"rank": "best", "name": "real shade name", "hex_approx": "#hexcode", "why": "one short friendly sentence"},
-    {"rank": "alt1", "name": "real shade name", "hex_approx": "#hexcode", "why": "one short sentence naming only the lighter/deeper difference from the best match"},
-    {"rank": "alt2", "name": "real shade name", "hex_approx": "#hexcode", "why": "one short sentence naming only the warmer/cooler/more-neutral difference from the best match"}
+    {"rank": "alt1", "name": "real shade name", "hex_approx": "#hexcode", "why": "one short sentence noting whichever of lighter/deeper or warmer/cooler/more neutral actually differs from the best match"},
+    {"rank": "alt2", "name": "real shade name", "hex_approx": "#hexcode", "why": "one short sentence noting whichever of lighter/deeper or warmer/cooler/more neutral actually differs from the best match"}
   ]
 }`;
 
@@ -1125,10 +1212,12 @@ function parseJsonFromText(text){
 }
 
 async function callClaude(system, userContent){
-  const response = await fetch("/.netlify/functions/claude-proxy", {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
       system: system,
       messages: [{ role: "user", content: userContent }]
     })
@@ -1137,7 +1226,7 @@ async function callClaude(system, userContent){
     let detail = '';
     try{
       const errData = await response.json();
-      detail = errData && errData.error ? errData.error : JSON.stringify(errData);
+      detail = errData && errData.error && errData.error.message ? errData.error.message : JSON.stringify(errData);
     }catch(e){}
     throw new Error(detail || "The AI service didn't respond correctly. Please try again in a moment.");
   }
@@ -1253,7 +1342,7 @@ function seasonChartSVG(seasonName, coord){
     <line x1="200" y1="30" x2="200" y2="270" stroke="rgba(58,31,34,0.35)" stroke-width="2"/>
     <circle cx="200" cy="40" r="26" fill="#F5D5DE"/>
     <text x="200" y="45" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#2B141C">Light</text>
-    <circle cx="200" cy="260" r="26" fill="#5C1A2C"/>
+    <circle cx="200" cy="260" r="26" fill="#3A0F16"/>
     <text x="200" y="265" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#fff">Dark</text>
     <circle cx="45" cy="150" r="26" fill="#C4602E"/>
     <text x="45" y="155" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#fff">Warm</text>
@@ -1288,34 +1377,37 @@ function euclidDist(a, b){
 
 const AXIS_THRESH = 0.04;
 
-function describeDepth(alt, best){
-  const diff = alt.y - best.y;
-  if(diff > AXIS_THRESH) return "Slightly lighter than your best match.";
-  if(diff < -AXIS_THRESH) return "Slightly deeper than your best match.";
-  return "A close match in depth to your best match.";
-}
-
-function describeTone(alt, best){
+// Describes how an alt shade differs from the best match on whichever
+// axes are actually meaningfully different (used alongside the
+// season-adjacency selection below to explain the pick in plain terms).
+function describeShadeWhy(alt, best){
+  const parts = [];
+  const yDiff = alt.y - best.y;
+  if(yDiff > AXIS_THRESH) parts.push("lighter");
+  else if(yDiff < -AXIS_THRESH) parts.push("deeper");
   const isMoreNeutral = Math.abs(alt.x) < Math.abs(best.x) - AXIS_THRESH;
-  if(isMoreNeutral) return "A more neutral tone than your best match.";
-  const diff = alt.x - best.x;
-  if(diff > AXIS_THRESH) return "Slightly cooler than your best match.";
-  if(diff < -AXIS_THRESH) return "Slightly warmer than your best match.";
-  return "A close match in tone to your best match.";
+  if(isMoreNeutral) parts.push("more neutral");
+  else {
+    const xDiff = alt.x - best.x;
+    if(xDiff > AXIS_THRESH) parts.push("cooler");
+    else if(xDiff < -AXIS_THRESH) parts.push("warmer");
+  }
+  if(parts.length === 0) return "A closely related shade from a neighboring season.";
+  return "Slightly " + parts.join(" and ") + " than your best match.";
 }
 
-// Picks the best match (closest to the customer's own position), then:
-// - alt1: the shade closest to the BEST MATCH that varies mainly in
-//   light/deep (a lighter or deeper version of the best match)
-// - alt2: the shade closest to the BEST MATCH that varies mainly in
-//   warm/cool, or is simply more neutral
 // Hard rule: if the customer reads warm, cool-side shades are never
 // recommended, and vice versa — a small neutral buffer around the
 // center line is allowed either way. No AI guessing involved when
 // real coordinates exist.
 const WARM_COOL_NEUTRAL_ZONE = 0.1;
 
-function pickByChartPosition(customerCoord, shadeList){
+// Picks the best match (closest to the customer's own position), then
+// picks the 2nd and 3rd shades by SEASON ADJACENCY on the 12-season
+// wheel: same-family neighboring season is tried first for both picks;
+// only if that neighbor has no more candidates does the search cross
+// into the other neighboring season (which may be a different family).
+function pickByChartPosition(customerCoord, shadeList, customerSeasonName){
   const isWarm = customerCoord.x < 0;
   const filtered = shadeList.filter(s => {
     if(isWarm) return s.x <= WARM_COOL_NEUTRAL_ZONE;   // exclude clearly cool shades
@@ -1328,19 +1420,44 @@ function pickByChartPosition(customerCoord, shadeList){
   const best = scored[0];
   const rest = scored.slice(1);
 
-  const byDistToBest = rest
-    .map(s => ({ ...s, distToBest: euclidDist(best, s) }))
-    .sort((a, b) => a.distToBest - b.distToBest);
+  const neighbors = customerSeasonName ? getSeasonNeighbors(customerSeasonName) : [];
+  const classified = rest.map(s => ({ ...s, season: classifySeasonForShade(s) }));
 
-  const alt1 = byDistToBest.find(s => Math.abs(s.y - best.y) >= Math.abs(s.x - best.x)) || byDistToBest[0] || null;
-  const alt2 = byDistToBest.find(s => (!alt1 || s.name !== alt1.name) && Math.abs(s.x - best.x) > Math.abs(s.y - best.y))
-    || byDistToBest.find(s => !alt1 || s.name !== alt1.name)
-    || null;
+  function closestInSeasons(seasonNames, excludeNames){
+    const candidates = classified.filter(s => seasonNames.includes(s.season) && !excludeNames.includes(s.name));
+    if(candidates.length === 0) return null;
+    candidates.sort((a, b) => euclidDist(best, a) - euclidDist(best, b));
+    return candidates[0];
+  }
+
+  let alt1 = null, alt2 = null;
+  if(neighbors.length > 0){
+    const [sameFamilyNeighbor, otherNeighbor] = neighbors;
+    alt1 = closestInSeasons([sameFamilyNeighbor], []);
+    alt2 = closestInSeasons([sameFamilyNeighbor], alt1 ? [alt1.name] : [])
+      || closestInSeasons([otherNeighbor], alt1 ? [alt1.name] : []);
+    if(!alt1){
+      alt1 = closestInSeasons([otherNeighbor], []);
+      alt2 = closestInSeasons([otherNeighbor], alt1 ? [alt1.name] : []);
+    }
+  }
+
+  // Fallback: only triggers if the pool genuinely has no shades
+  // classified into either neighboring season (e.g. a very small
+  // shade list) — falls back to closest-to-best-match overall.
+  if(!alt1 || !alt2){
+    const byDistToBest = rest
+      .filter(s => !alt1 || s.name !== alt1.name)
+      .map(s => ({ ...s, distToBest: euclidDist(best, s) }))
+      .sort((a, b) => a.distToBest - b.distToBest);
+    if(!alt1) alt1 = byDistToBest[0] || null;
+    if(!alt2) alt2 = byDistToBest.find(s => !alt1 || s.name !== alt1.name) || null;
+  }
 
   return {
     best: { name: best.name, hex_approx: best.hex, why: "Closest match to your color chart position." },
-    alt1: alt1 ? { name: alt1.name, hex_approx: alt1.hex, why: describeDepth(alt1, best) } : null,
-    alt2: alt2 ? { name: alt2.name, hex_approx: alt2.hex, why: describeTone(alt2, best) } : null
+    alt1: alt1 ? { name: alt1.name, hex_approx: alt1.hex, why: describeShadeWhy(alt1, best) } : null,
+    alt2: alt2 ? { name: alt2.name, hex_approx: alt2.hex, why: describeShadeWhy(alt2, best) } : null
   };
 }
 
@@ -1357,7 +1474,7 @@ async function selectLine(brand, line, pillEl){
 
   // Fully deterministic path: real shades + real chart position, no AI call needed.
   if(verifiedList && customerCoord && verifiedList.every(s => typeof s.x === 'number')){
-    const matched = pickByChartPosition(customerCoord, verifiedList);
+    const matched = pickByChartPosition(customerCoord, verifiedList, currentSeasonResult.season);
     renderShadePodium({
       brandId: brand.id,
       brand: brand.name,
@@ -1454,7 +1571,7 @@ function renderShadePodium(result){
         <div class="tag">Best match</div>
         <div class="name">${best.name}</div>
         <div class="why">${best.why}</div>
-        ${affiliateUrl ? `<div class="shop-link">Shop this shade →</div>` : ''}
+        ${affiliateUrl ? `<div class="shop-link">Buy now →</div>` : ''}
       </div>`;
     if(affiliateUrl){
       bestEl.style.cursor = 'pointer';
@@ -1470,7 +1587,7 @@ function renderShadePodium(result){
     const el = document.createElement('div');
     el.className = 'shade-alt';
     el.innerHTML = `
-      ${lipstickSwatch(alt.data.hex_approx, 74)}
+      ${lipstickSwatch(alt.data.hex_approx, 58)}
       <div class="tag">${alt.tag}</div>
       <div class="name">${alt.data.name}</div>
       <div class="why">${alt.data.why}</div>
