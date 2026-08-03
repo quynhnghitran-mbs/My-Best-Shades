@@ -1353,10 +1353,12 @@ function parseJsonFromText(text){
 }
 
 async function callClaude(system, userContent){
-  const response = await fetch("/.netlify/functions/claude-proxy", {
+  const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      model: "claude-sonnet-4-6",
+      max_tokens: 1000,
       system: system,
       messages: [{ role: "user", content: userContent }]
     })
@@ -1365,7 +1367,7 @@ async function callClaude(system, userContent){
     let detail = '';
     try{
       const errData = await response.json();
-      detail = errData && errData.error ? errData.error : JSON.stringify(errData);
+      detail = errData && errData.error && errData.error.message ? errData.error.message : JSON.stringify(errData);
     }catch(e){}
     throw new Error(detail || "The AI service didn't respond correctly. Please try again in a moment.");
   }
@@ -1450,23 +1452,17 @@ function makeShadeDot(shade){
   dot.className = 'shade-guide-dot';
   dot.style.background = shade.hex;
 
-  const showTip = (e) => {
-    shadeTooltip.textContent = shade.name;
-    shadeTooltip.style.left = e.clientX + 'px';
-    shadeTooltip.style.top = e.clientY + 'px';
-    shadeTooltip.classList.add('show');
-  };
-  const hideTip = () => shadeTooltip.classList.remove('show');
-
-  dot.addEventListener('mouseenter', showTip);
-  dot.addEventListener('mousemove', showTip);
-  dot.addEventListener('mouseleave', hideTip);
   dot.addEventListener('click', (e) => {
     e.stopPropagation();
-    if(shadeTooltip.classList.contains('show') && shadeTooltip.textContent === shade.name){
-      hideTip();
+    const rect = dot.getBoundingClientRect();
+    const alreadyShowingThis = shadeTooltip.classList.contains('show') && shadeTooltip.textContent === shade.name;
+    if(alreadyShowingThis){
+      shadeTooltip.classList.remove('show');
     } else {
-      showTip(e);
+      shadeTooltip.textContent = shade.name;
+      shadeTooltip.style.left = (rect.left + rect.width / 2) + 'px';
+      shadeTooltip.style.top = rect.top + 'px';
+      shadeTooltip.classList.add('show');
     }
   });
   return dot;
