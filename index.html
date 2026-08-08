@@ -716,21 +716,25 @@ Respond with ONLY a valid JSON object (no markdown fences, no extra text) in thi
 // known real shade lineup to recommend from).
 // ---------------------------------------------------------------------
 const BRANDS = [
-  { id: "black-rouge", name: "Black Rouge", tagline: "Korean velvet tints" },
-  { id: "3ce", name: "3CE", tagline: "Korean trend shades" },
-  { id: "bbia", name: "Bbia", tagline: "Korean Last Velvet tints" },
   { id: "romand", name: "rom&nd", tagline: "Korean juicy tints" },
+  { id: "3ce", name: "3CE", tagline: "Korean trend shades" },
   { id: "merzy", name: "MERZY", tagline: "Korean pigment tints" },
-  { id: "peripera", name: "Peripera", tagline: "Korean ink tints" }
+  { id: "black-rouge", name: "Black Rouge", tagline: "Korean velvet tints" },
+  { id: "bbia", name: "Bbia", tagline: "Korean Last Velvet tints" },
+  { id: "peripera", name: "Peripera", tagline: "Korean ink tints" },
+  { id: "colorkey", name: "Colorkey", tagline: "Chinese velvet tints" },
+  { id: "fwee", name: "fwee", tagline: "Korean pudding tints" }
 ];
 
 const BRAND_LINES = {
-  "black-rouge": ["Air Fit Velvet Lite", "Air Hip Glow Tint", "Balming Jam Gloss"],
-  "3ce": ["Velvet Lip Tint", "Blur Water Tint", "Velvet Plush", "Cashmere Hug", "Misty Lip Bare", "Gummy Oil Tint"],
-  "bbia": ["Last Velvet Lip Tint", "L'eau Tint", "Glow Tint", "Over Glaze", "Lucky Shine Tint"],
-  "romand": ["Juicy Flash Lip Oil", "Blur Fudge Tint", "Juicy Lasting Tint"],
-  "merzy": ["The Watery Dew Tint", "Water Fit Blur Tint", "Puffer Velvet Tint"],
-  "peripera": ["Over Blur Tint", "Ink Mood Glowy Tint"]
+  "romand": ["THE JUICY LASTING TINT", "Blur Fudge Tint", "Juicy Lasting Tint"],
+  "3ce": ["Glazy Lip Glow", "Blur Water Tint", "Velvet Plush", "Cashmere Hug", "Hazy Lip Clay"],
+  "merzy": ["Puffer Mellow Tint", "Puffer Velvet Tint", "The Watery Dew Tint"],
+  "black-rouge": ["Air Fit Velvet Lite", "Muddish Cushion Velvet", "Air Hip Glow Tint"],
+  "bbia": ["Last Velvet Lip Tint"],
+  "peripera": ["Over Blur Tint", "Water Bare", "Ink The Velvet"],
+  "colorkey": ["Watery Tint", "Velvet"],
+  "fwee": ["Rose Obsession Stay-fit Lip Tint", "Pudding Pot"]
 };
 
 // ---------------------------------------------------------------------
@@ -739,28 +743,28 @@ const BRAND_LINES = {
 // 3 recommended shades is shown, clicking it opens this same link.
 // ---------------------------------------------------------------------
 const AFFILIATE_LINKS = {
-  "black-rouge::Air Fit Velvet Lite": "https://s.shopee.vn/5fn7H1UfsE",
-  "black-rouge::Air Hip Glow Tint": "https://s.shopee.vn/5q6Y7qiEsv",
-  "black-rouge::Balming Jam Gloss": "https://s.shopee.vn/8AUSuZBFb7",
-  "3ce::Velvet Lip Tint": "https://s.shopee.vn/7KvLG5OKUa",
+  "romand::THE JUICY LASTING TINT": "https://s.shopee.vn/6pzfJ0XsSG",
+  "romand::Blur Fudge Tint": "https://s.shopee.vn/7Abv3mOxpf",
+  "romand::Juicy Lasting Tint": "https://s.shopee.vn/8fQiqXJFmy",
+  "3ce::Glazy Lip Glow": "https://s.shopee.vn/9fJprBlwto",
   "3ce::Blur Water Tint": "https://s.shopee.vn/7VElSONh9d",
   "3ce::Velvet Plush": "https://s.shopee.vn/7fYBehN3og",
   "3ce::Cashmere Hug": "https://s.shopee.vn/7prbr0MQTj",
-  "3ce::Misty Lip Bare": "https://s.shopee.vn/6ffeSrQrqW",
-  "3ce::Gummy Oil Tint": "https://s.shopee.vn/6pz4fAQEVZ",
-  "romand::Juicy Flash Lip Oil": "https://s.shopee.vn/70IUrTPbAc",
-  "romand::Blur Fudge Tint": "https://s.shopee.vn/7Abv3mOxpf",
-  "romand::Juicy Lasting Tint": "https://s.shopee.vn/8fQiqXJFmy",
-  "bbia::Last Velvet Lip Tint": "https://s.shopee.vn/8pk92qIcS1",
-  "bbia::L'eau Tint": "https://s.shopee.vn/9AMzRSHLm7",
-  "bbia::Glow Tint": "https://s.shopee.vn/80B23JLn8u",
-  "bbia::Over Glaze": "https://s.shopee.vn/8AUSFcL9nx",
-  "bbia::Lucky Shine Tint": "https://s.shopee.vn/8KnsRvKWT0",
+  "3ce::Hazy Lip Clay": "https://s.shopee.vn/9pdG3UlJYr",
+  "merzy::Puffer Mellow Tint": "https://s.shopee.vn/AUswqiimCv",
+  "merzy::Puffer Velvet Tint": "https://s.shopee.vn/AKZWePjPXs",
   "merzy::The Watery Dew Tint": "https://s.shopee.vn/8V7IeEJt83",
-  "merzy::Water Fit Blur Tint": "https://s.shopee.vn/9zw6QzEB5M",
-  "merzy::Puffer Velvet Tint": "https://s.shopee.vn/AAFWdIDXkP",
+  "black-rouge::Air Fit Velvet Lite": "https://s.shopee.vn/5fn7H1UfsE",
+  "black-rouge::Muddish Cushion Velvet": "https://s.shopee.vn/AAG6S6k2st",
+  "black-rouge::Air Hip Glow Tint": "https://s.shopee.vn/9zwgFnkgDq",
+  "bbia::Last Velvet Lip Tint": "https://s.shopee.vn/8pk92qIcS1",
   "peripera::Over Blur Tint": "https://s.shopee.vn/AKYwpbCuPS",
-  "peripera::Ink Mood Glowy Tint": "https://s.shopee.vn/AUsN1uCH4V"
+  "peripera::Water Bare": "https://s.shopee.vn/9V0PesmaEp",
+  "peripera::Ink The Velvet": "https://s.shopee.vn/9KgzSZnDZm",
+  "colorkey::Watery Tint": "https://s.shopee.vn/90493xoUFk",
+  "colorkey::Velvet": "https://s.shopee.vn/9ANZGGnqun",
+  "fwee::Rose Obsession Stay-fit Lip Tint": "https://s.shopee.vn/8fRIfLpkvi",
+  "fwee::Pudding Pot": "https://s.shopee.vn/8pkirep7al"
 };
 
 // ---------------------------------------------------------------------
@@ -774,445 +778,570 @@ const AFFILIATE_LINKS = {
 // approximation based on each shade's known undertone/depth, used
 // until real digitized brand color-chart images replace them.
 const VERIFIED_SHADES = {
-  // Digitized from the official Black Rouge Air Fit Velvet Lite chart
-  // photo. This chart's axis labels were reversed (Cool on the left,
-  // Warm on the right) versus the tool's convention, so coordinates
-  // were mirrored on the x-axis to stay consistent.
+  // Re-digitized from the customer's fresh chart + swatch photos.
+  // Chart axis labels are reversed (Cool left, Warm right) versus the
+  // tool's convention, so x was mirrored. Pixel-measured blob
+  // centroids (not eyeballed) — corrects two shades (A105, A107) that
+  // were mismeasured in an earlier pass. Names + hex added from the
+  // official swatch-photo grid (real color). English names below are
+  // the brand's official shade names (confirmed via retailer listings),
+  // swapped in for the Vietnamese-only names used initially.
   "black-rouge::Air Fit Velvet Lite": [
-    { name: "A101", hex: "#E08670", x: -0.67, y: 0.83 },
-    { name: "A102", hex: "#DC7267", x: -0.49, y: 0.66 },
-    { name: "A103", hex: "#D9636A", x: 0.02, y: 0.49 },
-    { name: "A104", hex: "#CE5D6C", x: 0.23, y: 0.30 },
-    { name: "A106", hex: "#D14F72", x: 0.58, y: 0.59 },
-    { name: "A107", hex: "#CC4A4C", x: -0.09, y: 0.10 },
-    { name: "A108", hex: "#C74B3F", x: -0.33, y: 0.04 },
-    { name: "A105", hex: "#B15C68", x: 0.05, y: -0.14 },
-    { name: "A109", hex: "#B33B3E", x: 0.22, y: -0.40 },
-    { name: "A110", hex: "#A23F32", x: -0.34, y: -0.45 }
+    { name: "A101 Sweet Dalgona", hex: "#ED9F90", x: -0.45, y: 1.0 },
+    { name: "A102 Salmon Peach", hex: "#EF918F", x: -0.95, y: 0.85 },
+    { name: "A103 Dried Balsam", hex: "#CD716C", x: -0.25, y: 0.70 },
+    { name: "A104 Rosy's Flare", hex: "#DC8187", x: 0.19, y: 0.48 },
+    { name: "A106 Strawberry Paste", hex: "#DE737F", x: 0.80, y: 0.23 },
+    { name: "A107 Apple Melo", hex: "#E98589", x: -1.0, y: 0.14 },
+    { name: "A108 Persimmon Red", hex: "#E16D6D", x: -0.23, y: 0.01 },
+    { name: "A105 Dried Mauve", hex: "#C96F6F", x: 0.48, y: 0.04 },
+    { name: "A109 Toasty Jujube", hex: "#C8686B", x: 0.19, y: -0.32 },
+    { name: "A110 Holy Oaky", hex: "#B56358", x: -0.53, y: -0.37 }
   ],
   // Digitized from the official Black Rouge Air Hip Glow Tint chart
   // photo (English labels: Cool on the left, Warm on the right — same
   // reversed layout as before, so x was mirrored to stay consistent
-  // with the tool's convention). Re-verified against a cleaner image.
+  // with the tool's convention). Positions cross-checked via pixel-
+  // measured blob centroids against a fresh chart photo (consistent
+  // with prior values). Names + hex added from the official swatch-
+  // photo grid.
   "black-rouge::Air Hip Glow Tint": [
-    { name: "AH01", hex: "#E8A896", x: -0.31, y: 1.0 },
-    { name: "AH02", hex: "#E8916A", x: -0.98, y: 0.77 },
-    { name: "AH03", hex: "#E8879A", x: 0.08, y: 0.74 },
-    { name: "AH04", hex: "#D9707A", x: -0.34, y: 0.50 },
-    { name: "AH05", hex: "#C8566A", x: 0.28, y: 0.42 },
-    { name: "AH06", hex: "#E85C8C", x: 1.0, y: 0.29 },
-    { name: "AH07", hex: "#D14C42", x: -0.86, y: 0.18 },
-    { name: "AH08", hex: "#B4577F", x: 0.66, y: -0.19 },
-    { name: "AH09", hex: "#A6483A", x: -0.61, y: -0.36 },
-    { name: "AH10", hex: "#8C2E30", x: -0.06, y: -0.68 }
+    { name: "AH01 Bare apricot", hex: "#F0AEA8", x: -0.32, y: 1.0 },
+    { name: "AH02 Shy tangerine", hex: "#F49576", x: -0.98, y: 0.76 },
+    { name: "AH03 Lotus topping", hex: "#F496A0", x: 0.05, y: 0.74 },
+    { name: "AH04 Peach latte", hex: "#F09594", x: -0.35, y: 0.51 },
+    { name: "AH05 Fig bare", hex: "#EF878E", x: 0.27, y: 0.42 },
+    { name: "AH06 Pink flirting 80%", hex: "#F37288", x: 1.0, y: 0.32 },
+    { name: "AH07 Ripe grapefruit", hex: "#F98580", x: -0.85, y: 0.18 },
+    { name: "AH08 Nostalgia mauve", hex: "#E07E81", x: 0.68, y: -0.19 },
+    { name: "AH09 Yakgwa syrup", hex: "#D07675", x: -0.62, y: -0.34 },
+    { name: "AH10 Maple dive", hex: "#DC9499", x: -0.10, y: -0.64 }
   ],
-  // Digitized from the official Black Rouge Balming Jam Gloss chart
-  // photo (real English shade names, standard orientation: Warm left,
-  // Cool right).
-  "black-rouge::Balming Jam Gloss": [
-    { name: "JG01 Kaya Jam", hex: "#F0D9A0", x: -1.0, y: 0.94 },
-    { name: "JG04 Apricot Jam", hex: "#E8735A", x: -0.86, y: 0.74 },
-    { name: "JG05 Peanut Jam", hex: "#D9A084", x: -0.20, y: 0.67 },
-    { name: "JG08 Apple Jam", hex: "#D1453D", x: -0.60, y: 0.45 },
-    { name: "JG03 Guava Jam", hex: "#DB7E8C", x: 0.31, y: 0.74 },
-    { name: "JG02 Strawberry Jam", hex: "#E56D74", x: 0.99, y: 0.88 },
-    { name: "JG06 Plum Latte Jam", hex: "#B4718C", x: 0.65, y: 0.41 },
-    { name: "JG07 Fig Jam", hex: "#C05C6A", x: 0.18, y: 0.23 },
-    { name: "JG09 Rose Jam", hex: "#D95F5E", x: -0.56, y: -0.30 },
-    { name: "JG11 Pom Jam", hex: "#A32A2E", x: -0.86, y: -0.76 },
-    { name: "JG12 Coconut Jam", hex: "#C87A5E", x: -0.48, y: -1.0 },
-    { name: "JG10 Wine Jam", hex: "#8C3450", x: 0.45, y: -0.52 }
-  ],
-  // Digitized directly from the official 3CE "Color Spectrum" chart
-  // photo (warm/cool, light/dark quadrant with real circle positions)
-  // — coordinates and colors read from that image, not estimated from
-  // names. Re-verified against a cleaner chart, which also revealed a
-  // shade not previously captured: Now And Always.
-  "3ce::Velvet Lip Tint": [
-    { name: "New Nude", hex: "#D99574", x: -0.69, y: 1.0 },
-    { name: "Like Gentle", hex: "#C97A6E", x: 0.0, y: 1.0 },
-    { name: "Cozy Crush", hex: "#B5657A", x: 0.58, y: 0.94 },
-    { name: "Go Now", hex: "#C98FAE", x: 0.98, y: 0.59 },
-    { name: "Childlike", hex: "#E23A2E", x: -1.0, y: 0.48 },
-    { name: "Pink Break", hex: "#E23E6B", x: 0.0, y: 0.48 },
-    { name: "Best Ever", hex: "#D81E2C", x: 0.45, y: 0.48 },
-    { name: "Private", hex: "#B31E24", x: 0.45, y: 0.02 },
-    { name: "Going Right", hex: "#DB7A6E", x: -0.83, y: -0.23 },
-    { name: "Think Again", hex: "#D9836A", x: -0.13, y: -0.25 },
-    { name: "Cashmere Nude", hex: "#B96F62", x: 0.33, y: -0.23 },
-    { name: "Walk n Talk", hex: "#A8695A", x: -0.61, y: -0.43 },
-    { name: "Know Better", hex: "#A82670", x: 0.85, y: -0.52 },
-    { name: "Now And Always", hex: "#D4453A", x: -1.0, y: -0.62 },
-    { name: "Daffodil", hex: "#C94A3E", x: -0.50, y: -0.63 },
-    { name: "Speak Up", hex: "#99392E", x: 0.14, y: -0.63 },
-    { name: "Fade In", hex: "#7A4058", x: 0.66, y: -0.63 },
-    { name: "Bitter Hour", hex: "#6B3226", x: -0.75, y: -1.0 },
-    { name: "Taupe", hex: "#6B1F1E", x: -0.13, y: -1.0 },
-    { name: "Definition", hex: "#6B1F2E", x: 0.45, y: -1.0 }
+  // No official position chart exists for this line (customer confirmed).
+  // x/y estimated by the assistant from the real arm-swatch photo itself:
+  // warm/cool from each shade's hue angle (more orange-red = warm, more
+  // magenta/blue-red = cool), light/dark from relative brightness (V).
+  // This is a color-analysis estimate, not a chart digitization — flagged
+  // here so it's not confused with the pixel-measured chart entries above.
+  "black-rouge::Muddish Cushion Velvet": [
+    { name: "MV01 Peach Pudding (桃子布丁)", hex: "#BC5E5C", x: -0.15, y: 0.26 },
+    { name: "MV02 Strawberry Mousse (草莓慕斯)", hex: "#D55661", x: 0.77, y: 1.0 },
+    { name: "MV03 Rich Berry (浓郁浆果)", hex: "#A23036", x: 0.49, y: -0.48 },
+    { name: "MV04 Cinnamon Red-Brown (肉桂红棕)", hex: "#92454A", x: 0.59, y: -1.0 },
+    { name: "MV05 Persimmon Frost (半秋柿霜)", hex: "#933C30", x: -1.0, y: -0.93 },
+    { name: "MV06 Tipsy Red Wine (微醺红酒)", hex: "#983742", x: 1.0, y: -0.78 }
   ],
   // Digitized from the official 3CE Blur Water Tint chart photo
   // (Vietnamese labels: Tông sáng=Light, Tông tối=Dark, Tông ấm=Warm,
   // Tông lạnh=Cool — standard orientation, no mirroring needed).
+  // Positions re-verified via pixel-measured centroids against a fresh
+  // chart photo (consistent with prior values). Names + hex refreshed
+  // from two real lip-swatch photo grids covering all 17 shades.
   "3ce::Blur Water Tint": [
-    { name: "#WARMTH", hex: "#C97A5E", x: -0.74, y: 1.0 },
-    { name: "#DEAR MARCH", hex: "#B5677A", x: -0.25, y: 1.0 },
-    { name: "#NIGHT TALK", hex: "#9E4A5C", x: 0.45, y: 1.0 },
-    { name: "#MORE PEACH", hex: "#D97840", x: -0.93, y: 0.53 },
-    { name: "#CHASING ROSE", hex: "#D9707A", x: -0.45, y: 0.53 },
-    { name: "#FIRST LETTER", hex: "#C85A48", x: 0.02, y: 0.53 },
-    { name: "#PINK GUAVA", hex: "#D14E5E", x: 0.66, y: 0.37 },
-    { name: "#CORAL MOON", hex: "#D97A5C", x: -0.41, y: 0.30 },
-    { name: "#BREEZE WAY", hex: "#B85C34", x: -0.85, y: 0.04 },
-    { name: "#PLAY OFF", hex: "#C4222E", x: 0.04, y: 0.04 },
-    { name: "#SPOT PLAYER", hex: "#C93A50", x: 0.80, y: 0.04 },
-    { name: "#BAKE BEIGE", hex: "#A66A48", x: -0.93, y: -0.35 },
-    { name: "#LAYDOWN", hex: "#C68272", x: -0.27, y: -0.35 },
-    { name: "#EARLY HOUR", hex: "#B25868", x: 0.89, y: -0.35 },
-    { name: "#CASUAL AFFAIR", hex: "#B2543E", x: -0.32, y: -0.63 },
-    { name: "#DOUBLE WIND", hex: "#9E4356", x: 0.95, y: -0.63 },
-    { name: "#SEPIA", hex: "#8A4030", x: -0.88, y: -0.83 }
+    { name: "#WARMTH (Cam sữa)", hex: "#CF7662", x: -0.80, y: 1.0 },
+    { name: "#DEAR MARCH (Cam đào nude)", hex: "#CE7F6C", x: -0.25, y: 1.0 },
+    { name: "#NIGHT TALK (Hồng nude)", hex: "#C46A63", x: 0.48, y: 1.0 },
+    { name: "#MORE PEACH (Cam đào)", hex: "#CE7258", x: -0.96, y: 0.54 },
+    { name: "#CHASING ROSE (Hồng kem sữa)", hex: "#BD6D5F", x: -0.46, y: 0.56 },
+    { name: "#FIRST LETTER (Hồng baby)", hex: "#D86C63", x: 0.04, y: 0.56 },
+    { name: "#PINK GUAVA (Hồng đào)", hex: "#D45254", x: 0.69, y: 0.34 },
+    { name: "#CORAL MOON (Cam gạch)", hex: "#D86858", x: -0.46, y: 0.29 },
+    { name: "#BREEZE WAY (Cam ngọt)", hex: "#CF5D45", x: -0.91, y: 0.02 },
+    { name: "#PLAY OFF (Đỏ cam san hô)", hex: "#D55F53", x: 0.04, y: 0.02 },
+    { name: "#SPOT PLAYER (Táo đỏ)", hex: "#DE6B6B", x: 0.85, y: 0.02 },
+    { name: "#BAKE BEIGE (Cam hồng phấn)", hex: "#CE664C", x: -1.0, y: -0.33 },
+    { name: "#LAYDOWN (Thạch trà ô long)", hex: "#B5735C", x: -0.31, y: -0.33 },
+    { name: "#EARLY HOUR (Hồng ô liu ngọt)", hex: "#C35D5D", x: 0.94, y: -0.33 },
+    { name: "#CASUAL AFFAIR (Hồng nho)", hex: "#CF5C57", x: -0.33, y: -0.65 },
+    { name: "#DOUBLE WIND (Hồng khô khói)", hex: "#BD575B", x: 0.97, y: -0.65 },
+    { name: "#SEPIA (Đỏ táo trầm)", hex: "#C26350", x: -0.91, y: -0.82 }
   ],
   // Digitized from the official 3CE Velvet Plush chart photo
   // (standard orientation: Warm left, Cool right, Spring/Summer/
   // Autumn/Winter quadrant labels matching the tool's convention).
+  // Positions re-verified via pixel-measured centroids against a fresh
+  // chart photo (consistent with prior values). Hex refreshed from a
+  // real arm-swatch photo covering all 13 shades on this chart. Note:
+  // the customer's swatch photos also showed additional shade names
+  // (Best Ever, Very Nude, Walk N Talk, Silent, Definition, Bitter
+  // Hour, Cashmere Nude, #28 Layover, #29 Apricot Crust) that aren't
+  // on this position chart — not added here pending the customer's
+  // input on how to handle them.
   "3ce::Velvet Plush": [
-    { name: "Coffee Date", hex: "#D98868", x: -0.39, y: 1.0 },
-    { name: "Figtachio", hex: "#C87A6E", x: -0.31, y: 0.77 },
-    { name: "Dusky Pink", hex: "#C06D78", x: 0.25, y: 0.77 },
-    { name: "Childlike", hex: "#E8382A", x: -1.0, y: 0.60 },
-    { name: "Heated", hex: "#B85850", x: -0.26, y: 0.42 },
-    { name: "Self Made", hex: "#A8433A", x: -0.04, y: 0.17 },
-    { name: "Molten Copper", hex: "#C6785C", x: -0.96, y: -0.21 },
-    { name: "Daffodil", hex: "#9E3A34", x: -0.17, y: -0.15 },
-    { name: "Plum Smoke", hex: "#A67480", x: 0.37, y: -0.19 },
-    { name: "Spiced Latte", hex: "#A85C56", x: -0.54, y: -0.33 },
-    { name: "Taupe", hex: "#8C5850", x: -0.65, y: -0.60 },
-    { name: "Speak Up", hex: "#9E2E2E", x: 0.0, y: -0.54 },
-    { name: "Darkest Hour", hex: "#7A342E", x: -0.17, y: -0.90 }
+    { name: "Coffee Date", hex: "#CE7262", x: -0.37, y: 1.0 },
+    { name: "Figtachio", hex: "#C35756", x: -0.26, y: 0.75 },
+    { name: "Dusky Pink", hex: "#C45359", x: 0.26, y: 0.75 },
+    { name: "Childlike", hex: "#D83922", x: -1.0, y: 0.615 },
+    { name: "Heated", hex: "#B54B4F", x: -0.24, y: 0.44 },
+    { name: "Self Made", hex: "#B75953", x: -0.09, y: 0.135 },
+    { name: "Molten Copper", hex: "#B64A36", x: -0.96, y: -0.23 },
+    { name: "Daffodil", hex: "#B92834", x: -0.15, y: -0.135 },
+    { name: "Plum Smoke", hex: "#B85B5A", x: 0.37, y: -0.23 },
+    { name: "Spiced Latte", hex: "#A24043", x: -0.54, y: -0.31 },
+    { name: "Taupe", hex: "#873127", x: -0.65, y: -0.615 },
+    { name: "Speak Up", hex: "#AC1F39", x: -0.02, y: -0.577 },
+    { name: "Darkest Hour", hex: "#872A28", x: -0.15, y: -0.94 }
   ],
   // Digitized from the official 3CE Cashmere Hug chart photo
   // (Vietnamese ẤM=Warm left, LẠNH=Cool right — standard orientation).
+  // Positions re-measured via pixel-measured centroids against a fresh
+  // chart photo — corrected the light/dark (y) scaling for #1 Oat and
+  // #8 Hush Red, which were previously both pinned to the extreme
+  // (y=1.0/0.62) when they're not quite that bright. Hex refreshed
+  // from a real arm-swatch photo (Chinese-labeled #01-#10, same
+  // product/count — matched 1:1 by number to the chart's shades).
   "3ce::Cashmere Hug": [
-    { name: "1 Oat", hex: "#E0A87C", x: -0.45, y: 1.0 },
-    { name: "2 Pure Blending", hex: "#D07E96", x: 0.51, y: 1.0 },
-    { name: "3 Your Side", hex: "#D9508C", x: 1.0, y: 0.62 },
-    { name: "8 Hush Red", hex: "#B8283C", x: 0.0, y: 0.62 },
-    { name: "6 Buddy", hex: "#C86656", x: -0.92, y: 0.0 },
-    { name: "5 Cozy Whisper", hex: "#A83A5C", x: 0.31, y: 0.0 },
-    { name: "7 Knit", hex: "#A83A48", x: -0.45, y: -0.36 },
-    { name: "9 Taupe Beige", hex: "#8C6250", x: -0.92, y: -0.70 },
-    { name: "10 Dreamy", hex: "#7A4356", x: 0.71, y: -0.70 },
-    { name: "4 Text Me", hex: "#9E2E52", x: 1.0, y: -1.0 }
+    { name: "1 Oat", hex: "#F0AEA7", x: -0.40, y: 0.83 },
+    { name: "2 Pure Blending", hex: "#E98E91", x: 0.45, y: 1.0 },
+    { name: "3 Your Side", hex: "#F18196", x: 0.88, y: 0.52 },
+    { name: "8 Hush Red", hex: "#F1777B", x: 0.0, y: 0.50 },
+    { name: "6 Buddy", hex: "#F2888D", x: -0.81, y: -0.04 },
+    { name: "5 Cozy Whisper", hex: "#E86F82", x: 0.27, y: -0.04 },
+    { name: "7 Knit", hex: "#F58A85", x: -0.40, y: -0.34 },
+    { name: "9 Taupe Beige", hex: "#F37079", x: -0.81, y: -0.66 },
+    { name: "10 Dreamy", hex: "#D88C82", x: 0.62, y: -0.66 },
+    { name: "4 Text Me", hex: "#D95C71", x: 1.0, y: -0.92 }
   ],
-  // Digitized from the official 3CE Misty Lip Bare chart photo
-  // (standard orientation: Warm left, Cool right).
-  "3ce::Misty Lip Bare": [
-    { name: "Pink Scheme", hex: "#D97A72", x: -0.42, y: 1.0 },
-    { name: "Bare Earlier", hex: "#B06858", x: -0.70, y: 0.42 },
-    { name: "Milky Illusion", hex: "#D592A0", x: 0.89, y: 0.32 },
-    { name: "Tulip Fuzz", hex: "#C15C6E", x: 0.42, y: -0.02 },
-    { name: "Rose Sigh", hex: "#B0645C", x: -0.20, y: -0.38 },
-    { name: "Chili Flame", hex: "#A02838", x: 0.62, y: -0.53 },
-    { name: "Driftwood", hex: "#8C3830", x: 0.16, y: -0.78 },
-    { name: "Quite Taupe", hex: "#6E4438", x: -1.0, y: -0.90 }
+  // Digitized from the official 3CE Hazy Lip Clay "Color Spectrum"
+  // chart photo (Spring/Summer/Autumn/Winter quadrants, Warm left/Cool
+  // right — matches tool convention, no mirror needed). Pixel-measured
+  // blob centroids. Hex colors sampled from a real arm-swatch photo for
+  // 10 of the 12 shades; #FIGGY and #BORN TO FIG weren't in that photo,
+  // so their color falls back to the chart's own swatch circle instead
+  // — flagged here as a lower-confidence source than the rest.
+  "3ce::Hazy Lip Clay": [
+    { name: "#BUTTER BEIGE", hex: "#BB6A60", x: -0.91, y: 1.0 },
+    { name: "#MAUVROWN", hex: "#E17A7D", x: -0.12, y: 0.85 },
+    { name: "#BORN TO FIG", hex: "#853A4F", x: 0.67, y: 0.79 },
+    { name: "#WHIP RED", hex: "#CF8680", x: -0.42, y: 0.46 },
+    { name: "#FIGGY", hex: "#924856", x: 0.33, y: 0.46 },
+    { name: "#TYPEGIRL", hex: "#C36C6F", x: 1.0, y: 0.46 },
+    { name: "#COMMON STRANGER", hex: "#BC4A45", x: -0.70, y: 0.09 },
+    { name: "#CHERRY FLUFF", hex: "#DB556F", x: 0.0, y: -0.04 },
+    { name: "#PAINTINGCOT", hex: "#C3645E", x: -0.54, y: -0.47 },
+    { name: "#HIPAMINE", hex: "#DB9D91", x: -0.07, y: -0.88 },
+    { name: "#WARM BROWNIE", hex: "#B0635C", x: -0.93, y: -1.0 },
+    { name: "#PLUM PUDDING", hex: "#9D2D3E", x: 0.79, y: -0.99 }
   ],
-  // Digitized from the official Bbia L'eau Tint chart photo
-  // (standard orientation: Warm left, Cool right).
-  "bbia::L'eau Tint": [
-    { name: "07 Peach L'eau", hex: "#E8825E", x: -0.23, y: 0.93 },
-    { name: "06 Pink L'eau", hex: "#D9498C", x: 1.0, y: 1.0 },
-    { name: "01 Gardenia L'eau", hex: "#C8695C", x: -0.57, y: 0.41 },
-    { name: "05 Peony L'eau", hex: "#C92E4A", x: 0.69, y: 0.57 },
-    { name: "04 Magnolia L'eau", hex: "#A8492E", x: -0.71, y: -0.26 },
-    { name: "08 Sweet L'eau", hex: "#9E1E38", x: -0.19, y: -0.19 },
-    { name: "02 Fleur L'eau", hex: "#C24468", x: -0.43, y: -0.77 },
-    { name: "09 Classic L'eau", hex: "#A66858", x: -0.85, y: -1.0 },
-    { name: "03 Lilac L'eau", hex: "#A83A5C", x: 0.56, y: -0.90 }
-  ],
-  // Digitized from the official Bbia Glow Tint "25 Colors Chart" photo
-  // (standard orientation: Warm left, Cool right).
-  "bbia::Glow Tint": [
-    { name: "#20 Petal", hex: "#D98B84", x: -0.73, y: 0.86 },
-    { name: "#14 Daily", hex: "#D9808A", x: 0.0, y: 0.86 },
-    { name: "#21 Bloom", hex: "#E070A0", x: 0.72, y: 0.86 },
-    { name: "#15 Spring", hex: "#C97468", x: -0.49, y: 0.55 },
-    { name: "#16 Summer", hex: "#C0707E", x: 0.44, y: 0.56 },
-    { name: "#28 Chilling", hex: "#A83A50", x: -0.28, y: 0.36 },
-    { name: "#24 Mellow Lychee", hex: "#C57E88", x: 0.18, y: 0.41 },
-    { name: "#11 Nudy", hex: "#D08E90", x: -0.19, y: 0.20 },
-    { name: "#30 Cozy", hex: "#C4795E", x: -0.89, y: 0.01 },
-    { name: "#01 Chai", hex: "#D06A4E", x: -0.52, y: 0.01 },
-    { name: "#00 Rosy", hex: "#C24A4E", x: 0.03, y: 0.01 },
-    { name: "#29 Dreamy", hex: "#C93A6C", x: 0.36, y: 0.01 },
-    { name: "#25 Mystic Plum", hex: "#A83A62", x: 0.65, y: 0.01 },
-    { name: "#02 Vintage", hex: "#A83A3E", x: -0.84, y: -0.24 },
-    { name: "#19 Choco", hex: "#B08A78", x: -0.42, y: -0.21 },
-    { name: "#03 Mauve", hex: "#8C3652", x: 0.43, y: -0.33 },
-    { name: "#17 Autumn", hex: "#8C3E30", x: -0.83, y: -0.51 },
-    { name: "#05 Vin Chaud", hex: "#9E3230", x: -0.63, y: -0.40 },
-    { name: "#23 Sweet Pomelo", hex: "#C0705C", x: -0.21, y: -0.37 },
-    { name: "#18 Winter", hex: "#9E5470", x: 0.60, y: -0.57 },
-    { name: "#26 Hazel Coconut", hex: "#8C4A38", x: -1.0, y: -0.71 },
-    { name: "#12 Coco", hex: "#7A3E30", x: -0.71, y: -0.72 },
-    { name: "#13 Maroon", hex: "#7A2E48", x: 0.27, y: -0.71 },
-    { name: "#27 Dry Fig", hex: "#7A2A3E", x: -0.03, y: -0.72 },
-    { name: "#04 Cinnamon", hex: "#6E2E28", x: -0.91, y: -1.0 }
-  ],
-  // Digitized from the official Bbia Over Glaze "15 Colors" chart photo
-  // (Vietnamese ẤM=Warm left, LẠNH=Cool right — standard orientation).
-  "bbia::Over Glaze": [
-    { name: "09 Apricot Plop", hex: "#E8877A", x: -1.0, y: 1.0 },
-    { name: "01 Peach Syrup", hex: "#E06E68", x: -0.21, y: 1.0 },
-    { name: "10 Strawberry Plop", hex: "#E06090", x: 0.25, y: 1.0 },
-    { name: "11 Cherry Plop", hex: "#DE5850", x: -0.67, y: 0.63 },
-    { name: "12 Apple Syrup", hex: "#CC3038", x: 0.25, y: 0.58 },
-    { name: "04 Cherry Syrup", hex: "#C22854", x: 0.73, y: 0.58 },
-    { name: "05 Grapefruit Syrup", hex: "#D9433C", x: -1.0, y: 0.36 },
-    { name: "02 Fig Syrup", hex: "#C43A48", x: -0.19, y: 0.02 },
-    { name: "03 Grape Syrup", hex: "#A8578C", x: 0.88, y: 0.12 },
-    { name: "06 Peanut Syrup", hex: "#A85868", x: -0.60, y: -0.22 },
-    { name: "07 Walnut Syrup", hex: "#8C6250", x: -0.97, y: -0.48 },
-    { name: "13 Latte Syrup", hex: "#9E5E52", x: -0.71, y: -0.55 },
-    { name: "14 Maple Syrup", hex: "#8C4A3A", x: -0.41, y: -0.63 },
-    { name: "08 Jujube Syrup", hex: "#8C4258", x: -0.03, y: -0.69 },
-    { name: "15 Espresso Syrup", hex: "#6E4030", x: -0.60, y: -1.0 }
-  ],
-  // Digitized from the official Bbia Lucky Shine Tint chart photo
-  // (standard orientation: Warm left, Cool right).
-  "bbia::Lucky Shine Tint": [
-    { name: "(03) Lucky Peach", hex: "#DE7368", x: -0.71, y: 1.0 },
-    { name: "(06) Lucky Rosy", hex: "#C0687A", x: 0.06, y: 0.61 },
-    { name: "(05) Lucky Plum", hex: "#8C3450", x: 0.75, y: 0.25 },
-    { name: "(04) Lucky Mauve", hex: "#C4577A", x: 0.28, y: 0.01 },
-    { name: "(02) Lucky Pink", hex: "#CA6862", x: -0.39, y: -0.18 },
-    { name: "(01) Lucky Nude", hex: "#C67868", x: -0.93, y: -0.37 },
-    { name: "(08) Lucky Fig", hex: "#C07862", x: -0.47, y: -0.85 },
-    { name: "(07) Lucky Nuts", hex: "#8C5A48", x: -1.0, y: -0.96 }
+  // Digitized from the official 3CE Glazy Lip Glow "seasonal wheel"
+  // chart photo (Spring/Summer/Autumn/Winter quadrants, Warm left/Cool
+  // right — matches tool convention, no mirror needed). Pixel-measured
+  // blob centroids. Hex colors from a real arm-swatch photo for #30-36,
+  // #38-39; #37 (raspberry coated) had no arm swatch in the customer's
+  // photos, so its color falls back to the chart's own swatch circle —
+  // flagged here since it's a lower-confidence source than the others.
+  // #40 (baked peach) color sampled from a separate official lip photo.
+  "3ce::Glazy Lip Glow": [
+    { name: "33 Cool Sweetie", hex: "#EE7D7B", x: -0.76, y: 0.93 },
+    { name: "40 Baked Peach", hex: "#B15050", x: -0.61, y: 0.52 },
+    { name: "30 Melting Smore", hex: "#E58581", x: -0.29, y: 0.38 },
+    { name: "32 Peachy Filling", hex: "#F27E75", x: -0.94, y: 0.0 },
+    { name: "34 Rose Glaze", hex: "#EA666F", x: 0.0, y: 0.0 },
+    { name: "35 Pink Tube", hex: "#ED8293", x: 0.66, y: 1.0 },
+    { name: "31 Lavender Cream", hex: "#E17887", x: 0.89, y: 0.42 },
+    { name: "37 Raspberry Coated", hex: "#D4545E", x: -0.23, y: -0.43 },
+    { name: "36 Double Grape", hex: "#CF7075", x: 0.28, y: -0.42 },
+    { name: "38 Salty Sweet", hex: "#AC5F55", x: -1.0, y: -0.75 },
+    { name: "39 Bouncy Cherry", hex: "#DE516F", x: 0.77, y: -0.62 }
   ],
   // Digitized from the official MERZY The Watery Dew Tint "BẢNG MÀU"
-  // chart photo (standard orientation: Warm left, Cool right).
+  // chart photo (standard orientation: Warm left, Cool right). Hex
+  // colors updated from a real arm-swatch photo the customer provided
+  // (same 10 shades, numbers match 1:1) — actual worn tint color,
+  // lighter/more sheer than a pure-pigment tube color since this is a
+  // watery gel tint, not a solid/opaque product.
   "merzy::The Watery Dew Tint": [
-    { name: "WD22", hex: "#8C2E2A", x: -0.96, y: 0.82 },
-    { name: "WD27", hex: "#B22E2E", x: -0.39, y: 0.55 },
-    { name: "WD28", hex: "#A83A4E", x: 0.73, y: 0.95 },
-    { name: "WD20", hex: "#C2384A", x: 0.93, y: 0.55 },
-    { name: "WD26", hex: "#B03844", x: 0.28, y: 0.22 },
-    { name: "WD21", hex: "#C4302E", x: -0.39, y: 0.06 },
-    { name: "WD29", hex: "#B84450", x: 0.40, y: -0.34 },
-    { name: "WD30", hex: "#9E3A34", x: -0.89, y: -0.45 },
-    { name: "WD14", hex: "#C43430", x: -0.38, y: -0.62 },
-    { name: "WD23", hex: "#7A2626", x: -0.79, y: -1.0 }
+    { name: "WD22", hex: "#D1382E", x: -0.96, y: 0.82 },
+    { name: "WD27", hex: "#E2948D", x: -0.39, y: 0.55 },
+    { name: "WD28", hex: "#E7A4A3", x: 0.73, y: 0.95 },
+    { name: "WD20", hex: "#EA7A86", x: 0.93, y: 0.55 },
+    { name: "WD26", hex: "#D16B74", x: 0.28, y: 0.22 },
+    { name: "WD21", hex: "#CF393A", x: -0.39, y: 0.06 },
+    { name: "WD29", hex: "#DC9B98", x: 0.40, y: -0.34 },
+    { name: "WD30", hex: "#D46765", x: -0.89, y: -0.45 },
+    { name: "WD14", hex: "#E98689", x: -0.38, y: -0.62 },
+    { name: "WD23", hex: "#CC4239", x: -0.79, y: -1.0 }
   ],
-  // Digitized from the official MERZY Water Fit Blur Tint chart photo
-  // (standard orientation: Warm left, Cool right).
-  "merzy::Water Fit Blur Tint": [
-    { name: "FT5", hex: "#8C3550", x: 1.0, y: 1.0 },
-    { name: "FT2", hex: "#DE5A4E", x: 0.17, y: 0.83 },
-    { name: "FT3", hex: "#E09880", x: -0.21, y: 0.60 },
-    { name: "FT8", hex: "#C05868", x: 0.73, y: 0.61 },
-    { name: "FT7", hex: "#D9626C", x: 0.17, y: 0.53 },
-    { name: "FT4", hex: "#C2564E", x: -0.19, y: 0.22 },
-    { name: "FT9", hex: "#6E4048", x: 0.17, y: 0.21 },
-    { name: "FT10", hex: "#D9564A", x: -0.19, y: -0.16 },
-    { name: "FT6", hex: "#B2565C", x: 0.73, y: -0.27 },
-    { name: "FT1", hex: "#C2455C", x: -0.65, y: -0.45 }
+  // Digitized from the official MERZY Puffer Mellow Tint "COLOR CHART"
+  // position chart (Warm/Cool, Light/Deep quadrant) — pixel-measured
+  // blob centroids. Hex colors sampled from a real arm-swatch photo
+  // (same 10 codes: AM4, CM3, GM5, M2, M13, M18, M19, M20, M21, M22 —
+  // confirmed 1:1 match against the chart via the shared codes).
+  "merzy::Puffer Mellow Tint": [
+    { name: "GM5 Fearless Red", hex: "#B87A88", x: -0.09, y: 0.89 },
+    { name: "M22 Bare Blossom", hex: "#BE5162", x: 0.71, y: 1.0 },
+    { name: "M21 Lilac Smoke", hex: "#AE3A4D", x: 0.46, y: 0.73 },
+    { name: "M13 Vapor Red", hex: "#C5666E", x: -0.17, y: 0.52 },
+    { name: "M18 Dusty Berry", hex: "#B0696A", x: 0.16, y: 0.56 },
+    { name: "M19 Mocha Latte", hex: "#B5687A", x: -0.50, y: 0.12 },
+    { name: "CM3 Metallic Mauve", hex: "#A34049", x: 0.32, y: 0.11 },
+    { name: "M20 Fig Glaze", hex: "#A8555D", x: -0.18, y: -0.14 },
+    { name: "AM4 Leather Bookmark", hex: "#B15A62", x: -0.77, y: -0.38 },
+    { name: "M2 Jane Chili", hex: "#BF6063", x: -1.0, y: -0.82 }
   ],
-  // Digitized from the official MERZY Puffer Velvet Tint chart photo
-  // (standard orientation: Warm left, Cool right).
+  // Digitized from the official MERZY Puffer Velvet Tint "COLOR CHART"
+  // position chart (Warm/Cool, Light/Deep quadrant) the customer
+  // provided — pixel-measured blob centroids, not eyeballed. Shade 06
+  // does not exist in this line (absent from both the position chart
+  // and the swatch grid). Hex colors sampled from the official lip-
+  // swatch photo grid (same 11 names/numbers, confirmed 1:1 match).
   "merzy::Puffer Velvet Tint": [
-    { name: "01 Femme Fatale", hex: "#C22E30", x: 0.02, y: 1.0 },
-    { name: "04 Serendipity", hex: "#D4917E", x: 0.56, y: 0.91 },
-    { name: "03 Auburn Whisper", hex: "#8C3830", x: -0.65, y: 0.48 },
-    { name: "05 Devotion", hex: "#B8657A", x: 0.99, y: 0.62 },
-    { name: "07 Love Sick", hex: "#B0455A", x: 0.02, y: 0.25 },
-    { name: "08 Unknown", hex: "#C0687E", x: 0.78, y: 0.28 },
-    { name: "02 Merlot", hex: "#C23A2E", x: 0.02, y: -0.32 },
-    { name: "10 Heat Wave", hex: "#A84E30", x: -0.69, y: -0.34 },
-    { name: "09 Savage", hex: "#B03858", x: 0.68, y: -0.70 },
-    { name: "11 Addiction", hex: "#7A2E2A", x: -0.85, y: -0.93 }
+    { name: "01 Femme Fatale", hex: "#A83F3C", x: -0.15, y: 1.0 },
+    { name: "04 Serendipity", hex: "#C59690", x: 0.41, y: 0.81 },
+    { name: "03 Auburn Whisper", hex: "#B4554F", x: -0.77, y: 0.53 },
+    { name: "05 Devotion", hex: "#813A3C", x: 0.88, y: 0.63 },
+    { name: "07 Love Sick", hex: "#B85259", x: -0.08, y: 0.26 },
+    { name: "08 Unknown", hex: "#CC6773", x: 0.73, y: 0.27 },
+    { name: "02 Merlot", hex: "#9F3834", x: -0.09, y: -0.33 },
+    { name: "10 Heat Wave", hex: "#953931", x: -0.82, y: -0.33 },
+    { name: "09 Savage", hex: "#C48380", x: 0.71, y: -0.67 },
+    { name: "11 Addiction", hex: "#74151B", x: -1.0, y: -0.85 }
   ],
-  // Digitized from the official Peripera Over Blur Tint chart photo.
-  // This chart was smaller/lower-resolution than others, and shade
-  // names weren't legible (numbers only) — positions are a best
-  // estimate from the visible layout, standard Warm-left/Cool-right.
+  // Replaces an earlier 17-shade entry that was digitized from a
+  // small/low-resolution image with illegible names — that image
+  // turned out not to match the real product at all. This is the
+  // official 7-shade "Over Blur Tint" chart (pixel-measured centroids,
+  // standard Warm-left/Cool-right) cross-checked by number against a
+  // Korean arm-swatch photo giving the real shade names and hex.
   "peripera::Over Blur Tint": [
-    { name: "Shade 01", hex: "#E58C74", x: -0.55, y: 0.85 },
-    { name: "Shade 12", hex: "#DE7E72", x: -0.25, y: 0.75 },
-    { name: "Shade 11", hex: "#DE7A82", x: 0.0, y: 0.85 },
-    { name: "Shade 02", hex: "#D2758C", x: 0.35, y: 0.8 },
-    { name: "Shade 08", hex: "#C86E88", x: 0.85, y: 0.7 },
-    { name: "Shade 04", hex: "#D66054", x: -0.7, y: 0.35 },
-    { name: "Shade 16", hex: "#C6524E", x: -0.1, y: 0.4 },
-    { name: "Shade 14", hex: "#C43A3A", x: 0.15, y: 0.35 },
-    { name: "Shade 03", hex: "#C4485E", x: 0.55, y: 0.35 },
-    { name: "Shade 13", hex: "#B24838", x: -0.85, y: 0.0 },
-    { name: "Shade 09", hex: "#B84440", x: -0.35, y: -0.05 },
-    { name: "Shade 17", hex: "#A83A3E", x: 0.05, y: -0.1 },
-    { name: "Shade 15", hex: "#A83A54", x: 0.4, y: -0.15 },
-    { name: "Shade 07", hex: "#9E3858", x: 0.85, y: -0.05 },
-    { name: "Shade 05", hex: "#8C3E2E", x: -0.6, y: -0.55 },
-    { name: "Shade 10", hex: "#7A2E2E", x: 0.0, y: -0.7 },
-    { name: "Shade 06", hex: "#7A2E48", x: 0.5, y: -0.55 }
+    { name: "1 Warm-Bassador", hex: "#B35E58", x: -0.36, y: 1.0 },
+    { name: "2 Cool Starter", hex: "#BA5664", x: 0.37, y: 1.0 },
+    { name: "4 Coral-La-La", hex: "#B45257", x: -0.88, y: 0.40 },
+    { name: "3 Pink Check", hex: "#B13954", x: 0.71, y: 0.40 },
+    { name: "5 Vintage Acorn", hex: "#B86863", x: -0.55, y: -0.46 },
+    { name: "7 Cooling Up Pink", hex: "#9A3E5B", x: 1.0, y: -0.34 },
+    { name: "6 Mauve-Treaming", hex: "#C09892", x: 0.66, y: -0.74 }
   ],
-  // Digitized from the official Peripera Ink Mood Glowy Tint color
-  // chart photo — real positions AND real names, both confirmed
-  // together this time (supersedes the earlier partial/mismatched
-  // data). Standard orientation: Warm left, Cool right.
-  "peripera::Ink Mood Glowy Tint": [
-    { name: "02 Coral Chemistry", hex: "#D9524A", x: -0.48, y: 0.96 },
-    { name: "01 Tiny Strawberry", hex: "#E85C7A", x: 0.40, y: 1.0 },
-    { name: "21 Young And Peach", hex: "#E8836A", x: -0.83, y: 0.68 },
-    { name: "22 Early Peach", hex: "#D9584A", x: -0.19, y: 0.67 },
-    { name: "03 Juicy Peach", hex: "#D9384A", x: 0.09, y: 0.73 },
-    { name: "05 Baby Fairy", hex: "#DE3E7E", x: 0.63, y: 0.73 },
-    { name: "06 Pink Youth", hex: "#C42E8C", x: 0.99, y: 0.61 },
-    { name: "23 Peach In Mind", hex: "#E8907E", x: -0.98, y: 0.37 },
-    { name: "18 Coral Influencer", hex: "#D9382E", x: -0.60, y: 0.34 },
-    { name: "04 Anyway, Peach", hex: "#C4383E", x: -0.04, y: 0.49 },
-    { name: "07 Plum Fizz", hex: "#A82E44", x: -0.17, y: 0.31 },
-    { name: "25 Sheer Grape", hex: "#8C2E62", x: 0.78, y: 0.45 },
-    { name: "09 Rose In Mind", hex: "#B26862", x: -0.37, y: 0.23 },
-    { name: "12 Campus Queen", hex: "#7A3E52", x: 0.41, y: 0.22 },
-    { name: "13 Mood Queen", hex: "#A8685E", x: -0.60, y: 0.10 },
-    { name: "08 Joking Pink", hex: "#C4485E", x: -0.07, y: 0.11 },
-    { name: "10 Bare Pink", hex: "#C4586E", x: 0.14, y: 0.07 },
-    { name: "11 Visual Pink", hex: "#C4467E", x: 0.71, y: 0.07 },
-    { name: "24 Ready Peach", hex: "#96323E", x: -0.07, y: -0.09 },
-    { name: "15 My Pick Rose", hex: "#8C3E3E", x: -0.66, y: -0.35 },
-    { name: "14 Rosy Wish", hex: "#822E3A", x: -0.07, y: -0.28 },
-    { name: "17 Blush Fig", hex: "#7A2E4E", x: 0.62, y: -0.34 },
-    { name: "19 Cherry So What", hex: "#96223E", x: 0.91, y: -0.43 },
-    { name: "16 Rose-Pick", hex: "#5E1E2C", x: -0.09, y: -0.71 },
-    { name: "20 Brown Yakgwa", hex: "#6E2E22", x: -0.82, y: -0.97 }
+  // No position chart or arm-swatch photo exists for this line (customer
+  // confirmed). Positions are the assistant's own estimate, not a chart
+  // digitization: x sign taken directly from the product's own Warm/Cool
+  // category columns (per customer's instruction), x magnitude from each
+  // Replaces an earlier 30-shade entry with fabricated-looking names
+  // ("Nudy 22-44", "Red 01-34") that don't match this product's real
+  // naming at all and were clustered almost entirely in one quadrant —
+  // not trustworthy, not extended.
+  //
+  // NO real chart or swatch photo exists for this line (customer
+  // confirmed). Shade names below are REAL (confirmed via web search
+  // against official retailer listings), but hex and x/y position are
+  // the assistant's ESTIMATE from what each name typically looks like
+  // in K-beauty tints (coral=warm/orange-leaning, nude=light/neutral,
+  // rose-mauve-plum=cool-leaning) — not sampled from any actual photo.
+  // This entry is meaningfully lower-confidence than every other line
+  // in this file and should be replaced with real chart/swatch data
+  // the moment the customer has it. Selection biased toward lighter
+  // shades per the customer's request.
+  "peripera::Ink The Velvet": [
+    { name: "24 Milky Nude", hex: "#E8B7A8", x: -0.30, y: 0.90 },
+    { name: "22 Bouquet Nude", hex: "#DDA090", x: -0.40, y: 0.70 },
+    { name: "17 Rosy Nude", hex: "#D89694", x: 0.10, y: 0.60 },
+    { name: "23 Nutty Nude", hex: "#C98D72", x: -0.60, y: 0.50 },
+    { name: "27 Strawberry Nude", hex: "#D97E76", x: -0.30, y: 0.40 },
+    { name: "9 Sparkling Pink", hex: "#E06C8A", x: 0.50, y: 0.30 },
+    { name: "4 Vitality Coral", hex: "#E8654A", x: -0.70, y: 0.10 },
+    { name: "28 Mauveful Nude", hex: "#B97684", x: 0.40, y: 0.0 },
+    { name: "15 Beauty Peak Rose", hex: "#C15A6C", x: 0.30, y: -0.20 },
+    { name: "2 Celeb Deep Rose", hex: "#A83A54", x: 0.50, y: -0.60 }
   ],
-  // Digitized from the official 3CE Gummy Oil Tint chart photo the
-  // customer sent to confirm this line (Vietnamese ẤM=Warm left,
-  // LẠNH=Cool right — standard orientation). Verified against the
-  // real chart image.
-  "3ce::Gummy Oil Tint": [
-    { name: "13 Pearl Cloud", hex: "#DCEEF0", x: 0.0, y: 1.0 },
-    { name: "01 Bagel Peach", hex: "#B5665A", x: -0.78, y: 0.47 },
-    { name: "02 Melting Gummy", hex: "#E85A4A", x: -0.03, y: 0.60 },
-    { name: "03 Glowy", hex: "#D9556E", x: 0.40, y: 0.62 },
-    { name: "04 Rose Gummy", hex: "#C93E44", x: -0.25, y: 0.16 },
-    { name: "07 Summer Bite", hex: "#C94F82", x: 0.74, y: 0.31 },
-    { name: "06 Mauve Jelly", hex: "#A85868", x: 0.23, y: 0.01 },
-    { name: "08 Dew On", hex: "#99204E", x: 0.86, y: -0.09 },
-    { name: "11 Honey Bear", hex: "#8C5C5C", x: -0.50, y: -0.28 },
-    { name: "05 Mocha Syrup", hex: "#6E3230", x: -0.98, y: -0.49 },
-    { name: "09 Taupe Drop", hex: "#7A2440", x: 0.37, y: -0.65 },
-    { name: "10 Sweeten", hex: "#6E1638", x: 1.0, y: -0.53 }
+  // Digitized from the official Peripera Water Bare Tint quadrant
+  // chart photo — pixel-measured centroids (standard Warm-left/
+  // Cool-right). Hex for all 17 shades sampled from two real lip-
+  // swatch photo grids. Only 13 of the 17 shades appear on the chart;
+  // #01 Announce Beige, #06 Softly Brown, #12 Sealing Power, and
+  // #13 Cherry Blossom are NOT on it (customer confirmed no chart
+  // position exists for them). Their x/y below is the assistant's
+  // estimate from each shade's actual sampled color (hue for warm/
+  // cool, brightness/saturation + name connotation for light/deep) —
+  // lower confidence than the 13 pixel-measured positions, and worth
+  // correcting if a fuller chart turns up later.
+  "peripera::Water Bare": [
+    { name: "14 Guardian", hex: "#EB788D", x: 0.10, y: 0.91 },
+    { name: "9 Cool-Lepathy", hex: "#DB7188", x: 0.60, y: 1.0 },
+    { name: "16 Cute Pink", hex: "#D3485D", x: -0.23, y: 0.65 },
+    { name: "7 Mute Paradise", hex: "#E57B84", x: 0.33, y: 0.58 },
+    { name: "13 Cherry Blossom (est.)", hex: "#E87982", x: -0.41, y: 0.40 },
+    { name: "2 Universal Coral", hex: "#E88687", x: -0.88, y: 0.45 },
+    { name: "10 Chat Cool PT", hex: "#C75B7B", x: 1.0, y: 0.31 },
+    { name: "1 Announce Beige (est.)", hex: "#EB9698", x: -0.79, y: 0.50 },
+    { name: "15 Buying Pink", hex: "#E08390", x: 0.16, y: 0.14 },
+    { name: "12 Sealing Power (est.)", hex: "#DB6D78", x: -0.29, y: 0.10 },
+    { name: "4 All Right Peach", hex: "#EF7B84", x: -0.71, y: 0.03 },
+    { name: "3 Emotional Pink", hex: "#E9798D", x: 0.48, y: 0.03 },
+    { name: "17 Rosy Boom Up", hex: "#CC3C4E", x: -0.33, y: 0.01 },
+    { name: "11 Hip Rose", hex: "#C25159", x: 0.01, y: -0.17 },
+    { name: "6 Softly Brown (est.)", hex: "#D3696F", x: -0.57, y: -0.40 },
+    { name: "8 Pure Pink", hex: "#E75F82", x: 0.78, y: -0.39 },
+    { name: "5 Red Update", hex: "#DE7077", x: -0.48, y: -0.51 }
+  ],
+  // Digitized from the official Colorkey "Chọn Son Theo Tone Da" chart
+  // photo. This chart's axes are fully rotated 180° from the tool's
+  // convention: Cool is labeled top... no — specifically Da Ngâm
+  // (Dark) is at TOP and Da Sáng (Light) at BOTTOM (y reversed), and
+  // Da Lạnh (Cool) is LEFT / Da Ấm (Warm) is RIGHT (x reversed too —
+  // customer confirmed this mapping directly). Both axes were mirrored
+  // to match the tool's Warm-left/Cool-right, Light-top/Dark-bottom
+  // convention. Pixel-measured centroids. Hex for all 6 shades sampled
+  // from a real lip-swatch photo (matched by code) — customer confirmed
+  // no English shade names exist for this line, so names are code-only.
+  "colorkey::Watery Tint": [
+    { name: "O308", hex: "#AE2D32", x: -1.0, y: -1.0 },
+    { name: "P363", hex: "#BF4A57", x: -0.85, y: 0.71 },
+    { name: "O368", hex: "#C75858", x: 0.85, y: 1.0 },
+    { name: "R300", hex: "#B13641", x: 0.0, y: -0.68 },
+    { name: "P307", hex: "#BF515A", x: 0.0, y: 0.35 },
+    { name: "O344", hex: "#B73E46", x: 0.97, y: -0.35 }
+  ],
+  // Digitized from the official fwee "24 Rose Spectrum" charts —
+  // this line has two finishes (Matte, Glow), 12 shades each, each
+  // with its own position chart (standard Warm-left/Cool-right/Light-
+  // top/Deep-bottom, no mirroring needed). Pixel-measured centroids.
+  // Matte hex sampled from a real lip-swatch photo grid (all 12
+  // shades). No separate swatch photo exists for Glow (customer's 4th
+  // image was an exact duplicate of the Matte swatch grid) — Glow hex
+  // falls back to the Glow chart's own swatch blobs, flagged as a
+  // lower-confidence source than the Matte entries.
+  "fwee::Rose Obsession Stay-fit Lip Tint": [
+    { name: "MW01 Baked Rose (Matte)", hex: "#CB7778", x: -0.6, y: -0.393 },
+    { name: "MW02 Burnt Rose (Matte)", hex: "#CE6462", x: -0.733, y: -0.049 },
+    { name: "MW03 Cinnamon Rose (Matte)", hex: "#9F4A44", x: -0.95, y: -0.934 },
+    { name: "MW04 Not Your Baby (Matte)", hex: "#E48580", x: -1.0, y: 0.869 },
+    { name: "MN01 Blushed Rose (Matte)", hex: "#D77A80", x: 0.367, y: 0.066 },
+    { name: "MN02 Peach Rose (Matte)", hex: "#E47E85", x: -0.317, y: 0.361 },
+    { name: "MN03 Dried Rose (Matte)", hex: "#CB7174", x: 0.0, y: -0.590 },
+    { name: "MN04 Baby Rose (Matte)", hex: "#E17D87", x: 0.150, y: 0.787 },
+    { name: "MC01 Petal Rose (Matte)", hex: "#DA818F", x: 0.967, y: 1.0 },
+    { name: "MC02 STH Rose (Matte)", hex: "#D47482", x: 0.483, y: -0.262 },
+    { name: "MC03 Dusty Rose (Matte)", hex: "#C96F7B", x: 0.85, y: -0.607 },
+    { name: "MC04 Baby Angel (Matte)", hex: "#EF8892", x: 0.667, y: 0.836 },
+    { name: "GW01 Honey Rose (Glow)", hex: "#BF796A", x: -1.0, y: -0.436 },
+    { name: "GW02 Spring Rose (Glow)", hex: "#BF5F52", x: -0.814, y: 0.364 },
+    { name: "GW03 Coco Rose (Glow)", hex: "#3E1C19", x: -0.542, y: -0.982 },
+    { name: "GW04 Call Me Baby (Glow)", hex: "#DE9189", x: -0.898, y: 1.0 },
+    { name: "GN01 My Rose (Glow)", hex: "#D5918C", x: -0.102, y: 0.455 },
+    { name: "GN02 Sweet Rose (Glow)", hex: "#8C4948", x: -0.203, y: -0.145 },
+    { name: "GN03 Apple Rose (Glow)", hex: "#B65964", x: 0.322, y: -0.545 },
+    { name: "GN04 Baby Vanilla (Glow)", hex: "#E1868F", x: 0.017, y: 0.927 },
+    { name: "GC01 Bunny Rose (Glow)", hex: "#BA8083", x: 0.407, y: 0.4 },
+    { name: "GC02 Fresh Rose (Glow)", hex: "#C7868B", x: 0.831, y: -0.127 },
+    { name: "GC03 Plum Rose (Glow)", hex: "#7E2B3D", x: 0.966, y: -0.8 },
+    { name: "GC04 Baby Bunny (Glow)", hex: "#CC96A1", x: 0.644, y: 0.873 }
+  ],
+  // Digitized from the official fwee Blurry Pudding Pot "30 Color
+  // Chart" (standard Spring/Summer/Autumn/Winter quadrant layout,
+  // Warm left/Cool right, Light top/Deep bottom — no mirroring
+  // needed). Pixel-measured centroids. The chart's own small shade
+  // codes (under each name) were too blurry at this image resolution
+  // to read reliably, so names are the shade names only, no codes —
+  // didn't want to guess illegible text. Hex sampled from a real
+  // swatch-photo grid covering all 30 shades (organized by the
+  // brand's own "Moment" categories, matched 1:1 by name to the chart).
+  "fwee::Pudding Pot": [
+    { name: "Baby", hex: "#DD7A80", x: 0.103, y: 1.0 },
+    { name: "D-Day", hex: "#FD3C47", x: -0.312, y: 0.847 },
+    { name: "Sth", hex: "#C8696F", x: 0.247, y: 0.82 },
+    { name: "Like", hex: "#F49CA9", x: 0.772, y: 0.81 },
+    { name: "Crush", hex: "#CA3D5F", x: 1.0, y: 0.801 },
+    { name: "Girls", hex: "#E64439", x: -0.772, y: 0.511 },
+    { name: "BFF", hex: "#F7566E", x: 0.049, y: 0.612 },
+    { name: "Hurt", hex: "#B75D61", x: 0.217, y: 0.422 },
+    { name: "Film", hex: "#B74B58", x: 0.437, y: 0.422 },
+    { name: "Seventeen", hex: "#E36A64", x: -0.551, y: 0.474 },
+    { name: "Boy", hex: "#F16865", x: -0.35, y: 0.483 },
+    { name: "Skirt", hex: "#DA706F", x: -0.148, y: 0.474 },
+    { name: "Cherry", hex: "#D84360", x: 0.049, y: 0.275 },
+    { name: "Dear", hex: "#D67364", x: -0.863, y: -0.061 },
+    { name: "Feel'n", hex: "#CD7965", x: -0.684, y: -0.046 },
+    { name: "My", hex: "#D27C6E", x: -0.483, y: -0.098 },
+    { name: "Memories", hex: "#C24C48", x: -0.285, y: -0.083 },
+    { name: "Without", hex: "#D1898B", x: 0.221, y: 0.015 },
+    { name: "Baddie", hex: "#B84A63", x: 0.513, y: 0.015 },
+    { name: "Mule", hex: "#C73449", x: 0.696, y: 0.0 },
+    { name: "Oh!", hex: "#EB9CAD", x: 0.943, y: 0.006 },
+    { name: "Faded", hex: "#BC706F", x: -0.076, y: -0.336 },
+    { name: "Be", hex: "#D2846E", x: -0.985, y: -0.602 },
+    { name: "Fav", hex: "#B04236", x: -0.791, y: -0.725 },
+    { name: "Lyrics", hex: "#C36452", x: -0.589, y: -0.667 },
+    { name: "Ambitious", hex: "#C9433A", x: -0.369, y: -0.719 },
+    { name: "Chill'n", hex: "#984843", x: -0.072, y: -0.682 },
+    { name: "Slavyy", hex: "#974C57", x: 0.217, y: -0.734 },
+    { name: "Greedy", hex: "#A63E55", x: 0.43, y: -0.719 },
+    { name: "Boss", hex: "#86374D", x: 0.875, y: -0.78 }
+  ],
+  // Digitized from the official Colorkey "Chọn Son Theo Tone Da" chart
+  // for the Velvet line — same rotated-axis layout as Watery Tint
+  // (Da Ngâm/Dark top, Da Sáng/Light bottom, Da Lạnh/Cool left, Da Ấm/
+  // Warm right), both axes mirrored to match the tool's convention.
+  // This chart's own lip photos doubled as the swatch source, so hex
+  // was sampled directly from them — no separate swatch photo needed.
+  // No English shade names exist for this line, so names are code-only
+  // (per customer's Watery Tint instruction, applied here too).
+  "colorkey::Velvet": [
+    { name: "R666", hex: "#7F2024", x: -1.0, y: -1.0 },
+    { name: "R608", hex: "#6A2323", x: -0.02, y: -0.84 },
+    { name: "B605", hex: "#8F2423", x: 0.49, y: -0.36 },
+    { name: "O611", hex: "#852122", x: -0.76, y: -0.10 },
+    { name: "R247", hex: "#843033", x: -0.03, y: 0.40 },
+    { name: "P251", hex: "#8F4245", x: -0.76, y: 0.16 },
+    { name: "P226", hex: "#81383B", x: 0.92, y: 0.52 }
   ],
   // Digitized from the official BBIA Last Velvet Tint chart photo the
   // customer sent to confirm this line (32 shades, standard
-  // orientation: Warm left, Cool right). Verified against the real
-  // chart image.
+  // orientation: Warm left, Cool right). Positions verified against
+  // the real chart image. Hex colors refreshed from a real lip-swatch
+  // photo grid (Moist Velvet + Soft Velvet sub-lines, same 32 codes).
   "bbia::Last Velvet Lip Tint": [
-    { name: "V48", hex: "#A87868", x: -0.65, y: 0.89 },
-    { name: "V53", hex: "#E08880", x: -0.33, y: 0.93 },
-    { name: "V01", hex: "#D9605A", x: -0.02, y: 0.92 },
-    { name: "V18", hex: "#E22E68", x: 0.68, y: 0.87 },
-    { name: "V02", hex: "#D9241E", x: -0.87, y: 0.70 },
-    { name: "V40", hex: "#D68590", x: 0.38, y: 0.78 },
-    { name: "V16", hex: "#DE8578", x: -0.33, y: 0.61 },
-    { name: "V54", hex: "#C8564A", x: 0.19, y: 0.62 },
-    { name: "V49", hex: "#B5657A", x: 0.53, y: 0.54 },
-    { name: "V41", hex: "#9E5C7A", x: 0.84, y: 0.54 },
-    { name: "V17", hex: "#D9483E", x: -0.58, y: 0.41 },
-    { name: "V47", hex: "#C4746E", x: 0.03, y: 0.45 },
-    { name: "V21", hex: "#B85E62", x: 0.20, y: 0.28 },
-    { name: "V11", hex: "#C4524E", x: -0.39, y: 0.20 },
-    { name: "V43", hex: "#92485E", x: 0.48, y: 0.15 },
-    { name: "V23", hex: "#C05840", x: -0.22, y: -0.11 },
-    { name: "V13", hex: "#A85E5E", x: -0.57, y: -0.18 },
-    { name: "V52", hex: "#A24838", x: -0.24, y: -0.30 },
-    { name: "V24", hex: "#9E4A48", x: -0.93, y: -0.35 },
-    { name: "V56", hex: "#C43A2E", x: -0.57, y: -0.36 },
-    { name: "V05", hex: "#D9366E", x: 0.85, y: -0.40 },
-    { name: "V36", hex: "#7A4038", x: -0.38, y: -0.49 },
-    { name: "V42", hex: "#B0707A", x: -0.02, y: -0.55 },
-    { name: "V03", hex: "#9E1E42", x: 0.52, y: -0.46 },
-    { name: "V12", hex: "#A83A28", x: -0.98, y: -0.64 },
-    { name: "V55", hex: "#9E6252", x: -0.48, y: -0.63 },
-    { name: "V51", hex: "#C07888", x: 0.56, y: -0.69 },
-    { name: "V04", hex: "#D9503A", x: -0.56, y: -0.76 },
-    { name: "V14", hex: "#8C2E2E", x: -0.33, y: -0.79 },
-    { name: "V25", hex: "#5E362E", x: -0.77, y: -0.94 },
-    { name: "V50", hex: "#A85A5E", x: -0.04, y: -0.92 },
-    { name: "V39", hex: "#62282A", x: -0.41, y: -1.0 }
+    { name: "V48", hex: "#C3645F", x: -0.65, y: 0.89 },
+    { name: "V53", hex: "#CB686D", x: -0.33, y: 0.93 },
+    { name: "V01", hex: "#D5434E", x: -0.02, y: 0.92 },
+    { name: "V18", hex: "#ED4E6C", x: 0.68, y: 0.87 },
+    { name: "V02", hex: "#C32832", x: -0.87, y: 0.70 },
+    { name: "V40", hex: "#D2818F", x: 0.38, y: 0.78 },
+    { name: "V16", hex: "#D2727A", x: -0.33, y: 0.61 },
+    { name: "V54", hex: "#C25361", x: 0.19, y: 0.62 },
+    { name: "V49", hex: "#CF697B", x: 0.53, y: 0.54 },
+    { name: "V41", hex: "#CA728A", x: 0.84, y: 0.54 },
+    { name: "V17", hex: "#E26263", x: -0.58, y: 0.41 },
+    { name: "V47", hex: "#C36970", x: 0.03, y: 0.45 },
+    { name: "V21", hex: "#AD565E", x: 0.20, y: 0.28 },
+    { name: "V11", hex: "#B84851", x: -0.39, y: 0.20 },
+    { name: "V43", hex: "#9A565D", x: 0.48, y: 0.15 },
+    { name: "V23", hex: "#B04C44", x: -0.22, y: -0.11 },
+    { name: "V13", hex: "#B85C65", x: -0.57, y: -0.18 },
+    { name: "V52", hex: "#9D524F", x: -0.24, y: -0.30 },
+    { name: "V24", hex: "#942C2B", x: -0.93, y: -0.35 },
+    { name: "V56", hex: "#B1736F", x: -0.57, y: -0.36 },
+    { name: "V05", hex: "#AD2636", x: 0.85, y: -0.40 },
+    { name: "V36", hex: "#AA514B", x: -0.38, y: -0.49 },
+    { name: "V42", hex: "#AE696F", x: -0.02, y: -0.55 },
+    { name: "V03", hex: "#A1212C", x: 0.52, y: -0.46 },
+    { name: "V12", hex: "#972E23", x: -0.98, y: -0.64 },
+    { name: "V55", hex: "#B0756D", x: -0.48, y: -0.63 },
+    { name: "V51", hex: "#B14B5B", x: 0.56, y: -0.69 },
+    { name: "V04", hex: "#AD342B", x: -0.56, y: -0.76 },
+    { name: "V14", hex: "#9C3029", x: -0.33, y: -0.79 },
+    { name: "V25", hex: "#85301F", x: -0.77, y: -0.94 },
+    { name: "V50", hex: "#C55E5D", x: -0.04, y: -0.92 },
+    { name: "V39", hex: "#922921", x: -0.41, y: -1.0 }
   ],
-  // Digitized directly from the official rom&nd Juicy Flash Lip Oil
-  // color-position chart photo the customer uploaded.
-  "romand::Juicy Flash Lip Oil": [
-    { name: "00 Flash On", hex: "#F0DAD6", x: 0.0, y: 0.97 },
-    { name: "01 Pomelo Light", hex: "#C98254", x: -0.84, y: 0.82 },
-    { name: "02 Berry Up", hex: "#C05C74", x: 0.81, y: 0.72 },
-    { name: "03 Peach Strobe", hex: "#D97A4E", x: -0.41, y: 0.27 },
-    { name: "04 Flare Lychee", hex: "#C23E5E", x: 1.0, y: 0.22 },
-    { name: "05 Pear Beige", hex: "#B5654A", x: -0.66, y: -0.43 },
-    { name: "06 Grape Fig", hex: "#9B4A5E", x: 0.63, y: -0.28 },
-    { name: "07 Coco Bomb", hex: "#6B3226", x: -0.84, y: -1.0 },
-    { name: "08 Raspberry Syrup", hex: "#8C1F3A", x: 0.44, y: -0.83 }
-  ],
-  // Digitized directly from the official rom&nd Blur Fudge Tint
-  // color-position chart photo (shades 01-16) the customer uploaded.
+  // Digitized from the official rom&nd Blur Fudge Tint color-position
+  // chart photo (shades 01-16, names + x/y). Hex colors updated from a
+  // second swatch-photo grid the customer provided (same 16 shades,
+  // labels machine-translated into Chinese there, but numbers 01-16
+  // line up 1:1 with the English names below) — real sampled lip color
+  // per shade, more accurate than the chart's small tube-icon color.
   "romand::Blur Fudge Tint": [
-    { name: "09 Coral Jubilee", hex: "#E8735A", x: -0.35, y: 0.75 },
-    { name: "14 Unrose", hex: "#C23A42", x: -0.05, y: 0.85 },
-    { name: "13 Cooling Up", hex: "#E39BAE", x: 0.4, y: 0.75 },
-    { name: "12 Warming Up", hex: "#C88A5E", x: -0.85, y: 0.55 },
-    { name: "15 Berry Fizz", hex: "#C2506E", x: 0.75, y: 0.55 },
-    { name: "02 Rosiental", hex: "#A85C52", x: -0.3, y: 0.35 },
-    { name: "10 Fudge Red", hex: "#B23A30", x: 0.25, y: 0.35 },
-    { name: "01 Pomeloa", hex: "#B5654A", x: -0.55, y: -0.15 },
-    { name: "06 Mauvish", hex: "#B5566E", x: 0.35, y: -0.15 },
-    { name: "05 Bibi Candy", hex: "#C2607E", x: 0.65, y: -0.35 },
-    { name: "03 Musky", hex: "#8C4A45", x: -0.35, y: -0.45 },
-    { name: "11 Fuchsia Vibe", hex: "#A82E6E", x: 0.1, y: -0.45 },
-    { name: "16 Burnt Orange", hex: "#8C4326", x: -0.85, y: -0.75 },
-    { name: "07 Cool Rose Up", hex: "#7A3350", x: 0.7, y: -0.75 },
-    { name: "04 Radwood", hex: "#6B2E24", x: -0.65, y: -0.95 },
-    { name: "08 Currant Jam", hex: "#6B1F30", x: 0.05, y: -0.85 }
+    { name: "09 Coral Jubilee", hex: "#E04553", x: -0.35, y: 0.75 },
+    { name: "14 Unrose", hex: "#D25269", x: -0.05, y: 0.85 },
+    { name: "13 Cooling Up", hex: "#D1677E", x: 0.4, y: 0.75 },
+    { name: "12 Warming Up", hex: "#DE8285", x: -0.85, y: 0.55 },
+    { name: "15 Berry Fizz", hex: "#DA5980", x: 0.75, y: 0.55 },
+    { name: "02 Rosiental", hex: "#C84656", x: -0.3, y: 0.35 },
+    { name: "10 Fudge Red", hex: "#D52A4B", x: 0.25, y: 0.35 },
+    { name: "01 Pomeloa", hex: "#DC6460", x: -0.55, y: -0.15 },
+    { name: "06 Mauvish", hex: "#CB5F74", x: 0.35, y: -0.15 },
+    { name: "05 Bibi Candy", hex: "#C7355F", x: 0.65, y: -0.35 },
+    { name: "03 Musky", hex: "#B13333", x: -0.35, y: -0.45 },
+    { name: "11 Fuchsia Vibe", hex: "#D2204C", x: 0.1, y: -0.45 },
+    { name: "16 Burnt Orange", hex: "#C35354", x: -0.85, y: -0.75 },
+    { name: "07 Cool Rose Up", hex: "#C64C68", x: 0.7, y: -0.75 },
+    { name: "04 Radwood", hex: "#994038", x: -0.65, y: -0.95 },
+    { name: "08 Currant Jam", hex: "#B32740", x: 0.05, y: -0.85 }
   ],
-  // Digitized directly from the official rom&nd Juicy Lasting Tint
-  // color chart photo (Spring/Summer/Autumn/Winter quadrant chart,
-  // same warm-cool/light-deep axes as the tool's coordinate system).
+  // Digitized from the official rom&nd Juicy Lasting Tint chart photo
+  // (Spring/Summer/Autumn/Winter quadrant, positions for shades
+  // 01-20) combined with the separate official swatch-photo grid for
+  // more accurate real colors on shades 06-20. Shades 01-05 have no
+  // swatch photo, so their color comes from the chart's own tube
+  // image instead, per the customer's instruction. Shades 21-39 (real
+  // colors from swatch photos, minus 15/30/34/35 which don't exist)
+  // aren't on the position chart at all, so their x/y were estimated
+  // algorithmically from their own hue/lightness at the customer's
+  // request — these are approximate, not chart-verified positions.
   "romand::Juicy Lasting Tint": [
-    { name: "Shade 24", hex: "#D99B6E", x: -0.75, y: 0.85 },
-    { name: "Shade 10", hex: "#D98A6A", x: -0.35, y: 0.9 },
-    { name: "Shade 19", hex: "#D9425A", x: 0.05, y: 0.9 },
-    { name: "Shade 03", hex: "#D98FA0", x: 0.25, y: 0.85 },
-    { name: "Shade 14", hex: "#C2708C", x: 0.5, y: 0.75 },
-    { name: "Shade 23", hex: "#B5708C", x: 0.85, y: 0.8 },
-    { name: "Shade 08", hex: "#C98868", x: -0.9, y: 0.45 },
-    { name: "Shade 09", hex: "#C96B4E", x: -0.4, y: 0.55 },
-    { name: "Shade 04", hex: "#B5567A", x: 0.75, y: 0.45 },
-    { name: "Shade 11", hex: "#B5654A", x: -0.55, y: 0.15 },
-    { name: "Shade 01", hex: "#B5604E", x: -0.25, y: 0.02 },
-    { name: "Shade 05", hex: "#B5566E", x: 0.05, y: 0.15 },
-    { name: "Shade 20", hex: "#A83A5E", x: 0.3, y: 0.05 },
-    { name: "Shade 06", hex: "#9B3A5E", x: 0.55, y: 0.05 },
-    { name: "Shade 15", hex: "#A82E6E", x: 0.75, y: 0.02 },
-    { name: "Shade 21", hex: "#9B2E70", x: 0.95, y: 0.05 },
-    { name: "Shade 12", hex: "#8C5A3E", x: -0.9, y: -0.35 },
-    { name: "Shade 02", hex: "#8C4A3E", x: -0.4, y: -0.3 },
-    { name: "Shade 17", hex: "#6B3226", x: -0.7, y: -0.65 },
-    { name: "Shade 13", hex: "#7A2E2E", x: -0.05, y: -0.55 },
-    { name: "Shade 22", hex: "#6B1F2E", x: 0.25, y: -0.6 },
-    { name: "Shade 07", hex: "#6B1F3A", x: 0.7, y: -0.3 },
-    { name: "Shade 16", hex: "#4A1526", x: 0.75, y: -0.65 }
+    { name: "01", hex: "#E8823E", x: -0.75, y: 0.9 },
+    { name: "05", hex: "#E8827A", x: -0.05, y: 0.95 },
+    { name: "15", hex: "#8C3A48", x: 0.2, y: 0.75 },
+    { name: "04", hex: "#D1207A", x: 0.65, y: 0.7 },
+    { name: "10", hex: "#E8877A", x: -0.55, y: 0.4 },
+    { name: "11", hex: "#D9645A", x: -0.35, y: 0.4 },
+    { name: "09", hex: "#D9564A", x: -0.1, y: 0.4 },
+    { name: "18", hex: "#8C3A48", x: 0.15, y: 0.5 },
+    { name: "06", hex: "#E8776C", x: 0.45, y: 0.45 },
+    { name: "08", hex: "#C97A4E", x: -0.85, y: 0.0 },
+    { name: "02", hex: "#D9503E", x: -0.2, y: 0.0 },
+    { name: "03", hex: "#D9463A", x: 0.15, y: 0.0 },
+    { name: "19", hex: "#C4382E", x: 0.35, y: 0.0 },
+    { name: "14", hex: "#A83A3E", x: 0.6, y: 0.0 },
+    { name: "13", hex: "#B5583A", x: -0.75, y: -0.35 },
+    { name: "07", hex: "#D9704A", x: -0.4, y: -0.35 },
+    { name: "12", hex: "#8C2E30", x: 0.3, y: -0.35 },
+    { name: "20", hex: "#6E3226", x: -0.6, y: -0.7 },
+    { name: "16", hex: "#962E28", x: -0.3, y: -0.7 },
+    { name: "17", hex: "#5C1E2E", x: 0.45, y: -0.7 },
+    { name: "21", hex: "#D9464E", x: 0.09, y: -0.11 },
+    { name: "22", hex: "#E8776E", x: -0.11, y: 0.21 },
+    { name: "23", hex: "#E8968A", x: -0.14, y: 0.38 },
+    { name: "24", hex: "#E8887A", x: -0.16, y: 0.28 },
+    { name: "25", hex: "#E8A0A8", x: 0.09, y: 0.51 },
+    { name: "26", hex: "#F0B8B0", x: -0.09, y: 0.65 },
+    { name: "27", hex: "#E8A8B8", x: 0.19, y: 0.55 },
+    { name: "28", hex: "#F0C4B8", x: -0.14, y: 0.69 },
+    { name: "29", hex: "#F0B8A0", x: -0.28, y: 0.55 },
+    { name: "31", hex: "#F5D0D0", x: 0.0, y: 0.86 },
+    { name: "32", hex: "#E8998A", x: -0.18, y: 0.38 },
+    { name: "33", hex: "#F0C8C0", x: -0.09, y: 0.74 },
+    { name: "36", hex: "#E8ADA0", x: -0.15, y: 0.51 },
+    { name: "37", hex: "#E8A8AE", x: 0.07, y: 0.55 },
+    { name: "38", hex: "#E8B0AC", x: -0.05, y: 0.58 },
+    { name: "39", hex: "#F0C0BC", x: -0.05, y: 0.72 }
+  ],
+  // Digitized from Nghi's official rom&nd THE JUICY LASTING TINT color-chart
+  // photo (Spring/Summer/Autumn/Winter quadrant wheel; axes Light↔Deep and
+  // Warm↔Cool) for x/y position, cross-checked against the official 24-cell
+  // swatch-photo grid for correct shade names and real sampled lip color.
+  // Shade 18 does not exist in this line — it's absent from both the chart
+  // and the swatch grid, not an omission. This replaces an earlier version
+  // of this line that had mismatched/duplicated shade numbers (e.g. two
+  // different shades both labeled "12", "18 Mulled Peach" which isn't a
+  // real shade in this line) — that data was not chart-verified.
+  "romand::THE JUICY LASTING TINT": [
+    { name: "01 Pomelo Skin", hex: "#DF928F", x: -0.97, y: -0.17 },
+    { name: "02 Nucadamia", hex: "#D0716D", x: -0.61, y: -0.68 },
+    { name: "03 Bare Grape", hex: "#CF7B87", x: 0.22, y: 0.65 },
+    { name: "04 Fig Fig", hex: "#D95870", x: 0.77, y: 0.11 },
+    { name: "05 Jujube", hex: "#E0677A", x: -0.40, y: -0.21 },
+    { name: "06 Peeling Angdoo", hex: "#C95A6A", x: 0.19, y: -0.17 },
+    { name: "07 Cherry Bomb", hex: "#C93C4C", x: 0.64, y: -0.75 },
+    { name: "08 Pink Pumpkin", hex: "#D9606A", x: -1.0, y: 0.27 },
+    { name: "09 Mulled Peach", hex: "#D0656D", x: -0.48, y: 0.27 },
+    { name: "10 Bare Apricot", hex: "#D76473", x: -0.56, y: 0.90 },
+    { name: "11 Papaya Jam", hex: "#DC686E", x: -0.58, y: -0.08 },
+    { name: "12 Apple Brown", hex: "#C55148", x: -0.97, y: -0.59 },
+    { name: "13 Eat Dotori", hex: "#C4403E", x: -0.43, y: -0.94 },
+    { name: "14 Almond Rose", hex: "#A03F46", x: 0.48, y: 0.52 },
+    { name: "15 Bare Fig", hex: "#974552", x: 0.48, y: -0.21 },
+    { name: "16 Plum Coke", hex: "#A3383F", x: 0.92, y: -1.0 },
+    { name: "17 Dark Coconut", hex: "#AD464B", x: -0.84, y: -0.94 },
+    { name: "19 Summer Scent", hex: "#AC3234", x: -0.14, y: 0.59 },
+    { name: "20 Juju Fig", hex: "#BA4D5F", x: -0.17, y: -0.21 },
+    { name: "21 Grape Bomb", hex: "#A63D51", x: 0.95, y: -0.17 },
+    { name: "22 Dotori Bomb", hex: "#B93C4B", x: -0.22, y: -1.0 },
+    { name: "23 Peach Peach Me", hex: "#D46C81", x: 0.90, y: 0.78 },
+    { name: "24 Bare Juicy Oh", hex: "#DB6E72", x: -0.84, y: 0.78 }
   ]
 };
 
 const BRAND_SYSTEM_PROMPT = `You are a color analyst recommending real lipstick shades from a specific brand and product line, based on seasonal color analysis. You will be given a customer's color season result, which lipstick brand they prefer, and which specific product line within that brand. Use your knowledge of that brand's real, current shade lineup within that exact line to choose exactly 3 real, specific shades (their actual product names) that suit this person's season.
 
 Reference on each brand's general color character:
-- Black Rouge (Korean, Air Fit Velvet Lite / Air Hip Glow Tint / Balming Jam Gloss lines): huge range from soft coral-pink to deep brick-red and blackened berry; mostly warm-to-neutral undertone with a few cool berry options; spans light to deep depth.
-- 3CE (Korean, Stylenanda, Velvet Lip Tint / Blur Water Tint / Velvet Plush / Cashmere Hug / Misty Lip Bare / Gummy Oil Tint lines): trend-driven "my-lips-but-better" shades — muted mauve, terracotta, dusty rose, brick; mostly neutral-to-warm undertone, medium depth.
-- Bbia (Korean, Last Velvet Lip Tint / L'eau Tint / Glow Tint / Over Glaze / Lucky Shine Tint lines): one of the most iconic Korean tint lines, sophisticated muted-to-rich range — dusty terracotta, mauve, deep wine, blackened red; neutral undertone overall, medium-to-deep depth, velvety matte finish.
-- rom&nd (Korean, Juicy Flash Lip Oil / Blur Fudge Tint / Juicy Lasting Tint lines): very wide range from warm coral-orange nudes to cool rose-mauve and deep wine; famous for a natural "your lips but better" gradient look; spans light to deep.
-- MERZY (Korean, The Watery Dew Tint / Water Fit Blur Tint / Puffer Velvet Tint lines): highly pigmented, bold-leaning range from warm coral and brick to cool berry and deep red; neutral-to-warm undertone, medium-to-deep depth, popular for strong color payoff.
-- Peripera (Korean, Over Blur Tint / Ink Mood Glowy Tint lines): playful, wide range from juicy warm coral and red to soft milky pinks; mostly warm-to-neutral undertone, light-to-medium depth, glowy-to-velvet finishes.
+- Black Rouge (Korean, Air Fit Velvet Lite / Air Hip Glow Tint / Muddish Cushion Velvet lines): huge range from soft coral-pink to deep brick-red and blackened berry; mostly warm-to-neutral undertone with a few cool berry options; spans light to deep depth.
+- 3CE (Korean, Stylenanda, Blur Water Tint / Velvet Plush / Cashmere Hug / Glazy Lip Glow / Hazy Lip Clay lines): trend-driven "my-lips-but-better" shades — muted mauve, terracotta, dusty rose, brick; mostly neutral-to-warm undertone, medium depth.
+- Bbia (Korean, Last Velvet Lip Tint line): one of the most iconic Korean tint lines, sophisticated muted-to-rich range — dusty terracotta, mauve, deep wine, blackened red; neutral undertone overall, medium-to-deep depth, velvety matte finish.
+- rom&nd (Korean, Blur Fudge Tint / Juicy Lasting Tint / THE JUICY LASTING TINT lines): very wide range from warm coral-orange nudes to cool rose-mauve and deep wine; famous for a natural "your lips but better" gradient look; spans light to deep.
+- MERZY (Korean, The Watery Dew Tint / Puffer Velvet Tint / Puffer Mellow Tint lines): highly pigmented, bold-leaning range from warm coral and brick to cool berry and deep red; neutral-to-warm undertone, medium-to-deep depth, popular for strong color payoff.
+- Peripera (Korean, Over Blur Tint / Ink The Velvet / Water Bare lines): playful, wide range from juicy warm coral and red to soft milky pinks; mostly warm-to-neutral undertone, light-to-medium depth, glowy-to-velvet finishes.
+- Colorkey (Chinese, Watery Tint / Velvet lines): affordable, trend-driven velvet and watery lip tints popular across Asia; wide range from soft nudes to bold reds, both warm and cool options, light-to-medium depth.
+- fwee (Korean, Rose Obsession Stay-fit Lip Tint / Pudding Pot lines): playful indie brand known for a very wide, TikTok-popular shade range in its "Pudding Pot" tints; spans warm peachy nudes to cool berry-plums, light to deep.
 
 If the user message includes a "Verified real shade list," that list is the complete, authoritative set of real shades for this line. You MUST choose your 3 shades only from that list, and you MUST reuse the exact hex value given for each one — never alter, invent, or approximate a different hex. If no such list is given, fall back to your own knowledge as described above.
 
