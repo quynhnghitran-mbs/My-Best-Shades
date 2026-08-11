@@ -299,52 +299,10 @@
     display:none; margin-bottom:20px; line-height:1.5;
   }
   .error-box.show{display:block;}
-  #adminTrigger{
-    position:absolute;top:0;right:0;
-    font-size:16px;line-height:1;
-    color:rgba(58,31,34,0.18);
-    cursor:pointer;user-select:none;
-    padding:14px;
-    z-index:10;
-  }
-  #adminTrigger:hover{color:rgba(58,31,34,0.4);}
-  .admin-modal{
-    display:none;position:fixed;inset:0;background:rgba(20,10,12,0.55);
-    z-index:100;align-items:center;justify-content:center;padding:20px;
-  }
-  .admin-modal.show{display:flex;}
-  .admin-modal-inner{
-    background:#fdf5f3;border-radius:18px;max-width:800px;width:100%;
-    max-height:85vh;display:flex;flex-direction:column;overflow:hidden;
-    box-shadow:0 20px 50px rgba(0,0,0,0.3);
-  }
-  .admin-modal-header{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:18px 22px;border-bottom:1px solid rgba(58,31,34,0.1);
-  }
-  .admin-modal-title{font-family:'Playfair Display', serif;font-weight:600;font-size:18px;color:#3a1f22;}
-  .admin-close{
-    background:none;border:1px solid rgba(58,31,34,0.2);border-radius:100px;
-    padding:6px 14px;font-size:12.5px;cursor:pointer;color:#3a1f22;
-  }
-  .admin-modal-actions{
-    display:flex;align-items:center;gap:14px;padding:14px 22px;
-    border-bottom:1px solid rgba(58,31,34,0.06);
-  }
-  .admin-count{font-size:12.5px;color:rgba(58,31,34,0.55);}
-  .admin-table-wrap{overflow:auto;padding:0 22px 22px;}
-  .admin-table{width:100%;border-collapse:collapse;font-size:12.5px;}
-  .admin-table th{
-    text-align:left;padding:8px 10px;color:rgba(58,31,34,0.55);
-    border-bottom:1px solid rgba(58,31,34,0.15);font-weight:600;
-    white-space:nowrap;position:sticky;top:0;background:#fdf5f3;
-  }
-  .admin-table td{padding:8px 10px;border-bottom:1px solid rgba(58,31,34,0.06);white-space:nowrap;color:#3a1f22;}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div id="adminTrigger" title="">·</div>
   <div class="eyebrow">Effortless Beauty</div>
   <h1>Find My Best Shades</h1>
   <p class="sub">Upload a clear, well-lit selfie with no lipstick on. We'll figure out your color season and the lip shades that suit you best.</p>
@@ -466,34 +424,6 @@
   </div>
 </div>
 
-<div id="adminModal" class="admin-modal">
-  <div class="admin-modal-inner">
-    <div class="admin-modal-header">
-      <div class="admin-modal-title">Customer Insights</div>
-      <button class="admin-close" id="adminClose">Close</button>
-    </div>
-
-    <div id="adminLockScreen" style="padding:30px 22px;text-align:center;">
-      <div style="font-size:13px;color:rgba(58,31,34,0.6);margin-bottom:14px;">Enter passcode</div>
-      <input type="password" id="adminPassInput" class="season-select" style="display:inline-block;width:160px;text-align:center;margin-bottom:12px;">
-      <div>
-        <button class="btn" id="adminUnlockBtn" style="padding:9px 24px;font-size:12.5px;">Unlock</button>
-      </div>
-      <div id="adminLockError" style="font-size:12px;color:var(--rose-deep);margin-top:10px;display:none;">Incorrect passcode</div>
-    </div>
-
-    <div id="adminUnlockedView" style="display:none;">
-      <div class="admin-modal-actions">
-        <button class="btn" id="adminDownloadBtn" style="padding:9px 18px;font-size:12.5px;">Download CSV</button>
-        <span class="admin-count" id="adminCount"></span>
-      </div>
-      <div class="admin-table-wrap" id="adminTableWrap">
-        <div class="loading show">Loading records...</div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <script>
 // ---------------------------------------------------------------------
 // Seasonal color analysis knowledge base (12-season system), condensed
@@ -507,14 +437,14 @@
 const SEASON_MAP = {
   "Bright Spring":        { x: -0.18, y:  0.14, color: "#F5453C" },
   "True/Warm Spring":     { x: -1.0,  y:  0.33, color: "#E87560" },
-  "Light Spring":         { x: -0.18, y:  0.75, color: "#F5B0A0" },
-  "Light Summer":         { x:  0.18, y:  0.75, color: "#F0B0D0" },
+  "Light Spring":         { x: -0.18, y:  1.0,  color: "#F5B0A0" },
+  "Light Summer":         { x:  0.18, y:  1.0,  color: "#F0B0D0" },
   "True/Cool Summer":     { x:  1.0,  y:  0.33, color: "#E85C8C" },
   "Soft Summer":          { x:  0.18, y:  0.14, color: "#C08494" },
   "Soft Autumn":          { x: -0.18, y: -0.13, color: "#B8828C" },
   "True/Warm Autumn":     { x: -1.0,  y: -0.32, color: "#C25A34" },
-  "Dark Autumn":          { x: -0.18, y: -0.73, color: "#5C1A22" },
-  "Dark Winter":          { x:  0.18, y: -0.73, color: "#4A1020" },
+  "Dark Autumn":          { x: -0.18, y: -1.0,  color: "#5C1A22" },
+  "Dark Winter":          { x:  0.18, y: -1.0,  color: "#4A1020" },
   "True/Cool Winter":     { x:  1.0,  y: -0.32, color: "#8C142E" },
   "Bright Winter":        { x:  0.18, y: -0.13, color: "#C41E28" }
 };
@@ -623,47 +553,6 @@ const SEASON_SHADE_GUIDE = {
     avoid: [ {name:"Dusty Rose", hex:"#C08081"}, {name:"Muted Nude", hex:"#B89A8A"} ]
   }
 };
-
-// ---------------------------------------------------------------------
-// The 12 seasons arranged in a circle (adjacency wheel), matching the
-// customer's reference chart. Used so the 2nd/3rd shade picks come
-// from neighboring seasons — same-family neighbor prioritized first,
-// only crossing into a neighboring family when no options remain.
-// ---------------------------------------------------------------------
-const SEASON_WHEEL = [
-  "Bright Spring", "True/Warm Spring", "Light Spring",
-  "Light Summer", "True/Cool Summer", "Soft Summer",
-  "Soft Autumn", "True/Warm Autumn", "Dark Autumn",
-  "Dark Winter", "True/Cool Winter", "Bright Winter"
-];
-
-function seasonFamilyIndex(name){
-  return Math.floor(SEASON_WHEEL.indexOf(name) / 3); // 0=Spring,1=Summer,2=Autumn,3=Winter
-}
-
-// Returns this season's two wheel-neighbors, with the same-family
-// neighbor listed first (True/ seasons have two same-family
-// neighbors; Bright/Light/Soft/Dark seasons have one of each).
-function getSeasonNeighbors(name){
-  const i = SEASON_WHEEL.indexOf(name);
-  if(i === -1) return [];
-  const n = SEASON_WHEEL.length;
-  const neighbors = [SEASON_WHEEL[(i - 1 + n) % n], SEASON_WHEEL[(i + 1) % n]];
-  const fam = seasonFamilyIndex(name);
-  neighbors.sort((a, b) => (seasonFamilyIndex(a) === fam ? 0 : 1) - (seasonFamilyIndex(b) === fam ? 0 : 1));
-  return neighbors;
-}
-
-// Classifies a shade's chart coordinate to whichever of the 12 seasons
-// it sits closest to.
-function classifySeasonForShade(shade){
-  let bestName = null, bestDist = Infinity;
-  for(const name in SEASON_MAP){
-    const d = euclidDist(shade, SEASON_MAP[name]);
-    if(d < bestDist){ bestDist = d; bestName = name; }
-  }
-  return bestName;
-}
 
 const SEASON_SYSTEM_PROMPT = `You are a color analyst trained in the 12-season seasonal color analysis system. You determine a person's color season from a selfie by reading three things, using ONLY the skin and eyes — never the hair, since hair is very commonly dyed and is not a reliable natural signal: undertone (warm/golden vs cool/pink-blue vs neutral) read from the skin, depth (how light or deep the skin and eyes are), and chroma/contrast (how bright and clear vs soft and muted the coloring is, and how much contrast exists specifically between the skin and the eyes).
 
@@ -817,19 +706,22 @@ const VERIFIED_SHADES = {
     { name: "AH09 Yakgwa syrup", hex: "#D07675", x: -0.62, y: -0.34 },
     { name: "AH10 Maple dive", hex: "#DC9499", x: -0.10, y: -0.64 }
   ],
-  // No official position chart exists for this line (customer confirmed).
-  // x/y estimated by the assistant from the real arm-swatch photo itself:
-  // warm/cool from each shade's hue angle (more orange-red = warm, more
-  // magenta/blue-red = cool), light/dark from relative brightness (V).
-  // This is a color-analysis estimate, not a chart digitization — flagged
-  // here so it's not confused with the pixel-measured chart entries above.
+  // Digitized from the official Black Rouge Muddish Cushion Velvet
+  // position chart (standard orientation: Warm left, Cool right, Light
+  // top, Dark bottom — matches tool convention exactly). Hex values are
+  // the exact codes printed directly on the chart itself (highest-
+  // confidence color source available), cross-checked against a real
+  // arm-swatch photo for consistency (both agree on shade order/tone).
+  // Real English shade names confirmed from the chart. Supersedes the
+  // earlier version of this line, which had no chart at all and used
+  // estimated positions/colors/names.
   "black-rouge::Muddish Cushion Velvet": [
-    { name: "MV01 Peach Pudding (桃子布丁)", hex: "#BC5E5C", x: -0.15, y: 0.26 },
-    { name: "MV02 Strawberry Mousse (草莓慕斯)", hex: "#D55661", x: 0.77, y: 1.0 },
-    { name: "MV03 Rich Berry (浓郁浆果)", hex: "#A23036", x: 0.49, y: -0.48 },
-    { name: "MV04 Cinnamon Red-Brown (肉桂红棕)", hex: "#92454A", x: 0.59, y: -1.0 },
-    { name: "MV05 Persimmon Frost (半秋柿霜)", hex: "#933C30", x: -1.0, y: -0.93 },
-    { name: "MV06 Tipsy Red Wine (微醺红酒)", hex: "#983742", x: 1.0, y: -0.78 }
+    { name: "MV01 Peach Pudding", hex: "#C06051", x: -0.95, y: 1.0 },
+    { name: "MV02 Strawberry Mochi", hex: "#D05B5C", x: 0.32, y: 1.0 },
+    { name: "MV03 Apple Ade", hex: "#D45C64", x: -0.01, y: 0.38 },
+    { name: "MV04 Best Cinnamon", hex: "#CC6E53", x: -0.20, y: -0.17 },
+    { name: "MV05 Dried Persimmon", hex: "#D98A6C", x: -0.95, y: -0.61 },
+    { name: "MV06 Bean Jam", hex: "#C75B5D", x: 0.75, y: -0.70 }
   ],
   // Digitized from the official 3CE Blur Water Tint chart photo
   // (Vietnamese labels: Tông sáng=Light, Tông tối=Dark, Tông ấm=Warm,
@@ -838,23 +730,23 @@ const VERIFIED_SHADES = {
   // chart photo (consistent with prior values). Names + hex refreshed
   // from two real lip-swatch photo grids covering all 17 shades.
   "3ce::Blur Water Tint": [
-    { name: "#WARMTH (Cam sữa)", hex: "#CF7662", x: -0.80, y: 1.0 },
-    { name: "#DEAR MARCH (Cam đào nude)", hex: "#CE7F6C", x: -0.25, y: 1.0 },
-    { name: "#NIGHT TALK (Hồng nude)", hex: "#C46A63", x: 0.48, y: 1.0 },
-    { name: "#MORE PEACH (Cam đào)", hex: "#CE7258", x: -0.96, y: 0.54 },
-    { name: "#CHASING ROSE (Hồng kem sữa)", hex: "#BD6D5F", x: -0.46, y: 0.56 },
-    { name: "#FIRST LETTER (Hồng baby)", hex: "#D86C63", x: 0.04, y: 0.56 },
-    { name: "#PINK GUAVA (Hồng đào)", hex: "#D45254", x: 0.69, y: 0.34 },
-    { name: "#CORAL MOON (Cam gạch)", hex: "#D86858", x: -0.46, y: 0.29 },
-    { name: "#BREEZE WAY (Cam ngọt)", hex: "#CF5D45", x: -0.91, y: 0.02 },
-    { name: "#PLAY OFF (Đỏ cam san hô)", hex: "#D55F53", x: 0.04, y: 0.02 },
-    { name: "#SPOT PLAYER (Táo đỏ)", hex: "#DE6B6B", x: 0.85, y: 0.02 },
-    { name: "#BAKE BEIGE (Cam hồng phấn)", hex: "#CE664C", x: -1.0, y: -0.33 },
-    { name: "#LAYDOWN (Thạch trà ô long)", hex: "#B5735C", x: -0.31, y: -0.33 },
-    { name: "#EARLY HOUR (Hồng ô liu ngọt)", hex: "#C35D5D", x: 0.94, y: -0.33 },
-    { name: "#CASUAL AFFAIR (Hồng nho)", hex: "#CF5C57", x: -0.33, y: -0.65 },
-    { name: "#DOUBLE WIND (Hồng khô khói)", hex: "#BD575B", x: 0.97, y: -0.65 },
-    { name: "#SEPIA (Đỏ táo trầm)", hex: "#C26350", x: -0.91, y: -0.82 }
+    { name: "#WARMTH", hex: "#CF7662", x: -0.80, y: 1.0 },
+    { name: "#DEAR MARCH", hex: "#CE7F6C", x: -0.25, y: 1.0 },
+    { name: "#NIGHT TALK", hex: "#C46A63", x: 0.48, y: 1.0 },
+    { name: "#MORE PEACH", hex: "#CE7258", x: -0.96, y: 0.54 },
+    { name: "#CHASING ROSE", hex: "#BD6D5F", x: -0.46, y: 0.56 },
+    { name: "#FIRST LETTER", hex: "#D86C63", x: 0.04, y: 0.56 },
+    { name: "#PINK GUAVA", hex: "#D45254", x: 0.69, y: 0.34 },
+    { name: "#CORAL MOON", hex: "#D86858", x: -0.46, y: 0.29 },
+    { name: "#BREEZE WAY", hex: "#CF5D45", x: -0.91, y: 0.02 },
+    { name: "#PLAY OFF", hex: "#D55F53", x: 0.04, y: 0.02 },
+    { name: "#SPOT PLAYER", hex: "#DE6B6B", x: 0.85, y: 0.02 },
+    { name: "#BAKE BEIGE", hex: "#CE664C", x: -1.0, y: -0.33 },
+    { name: "#LAYDOWN", hex: "#B5735C", x: -0.31, y: -0.33 },
+    { name: "#EARLY HOUR", hex: "#C35D5D", x: 0.94, y: -0.33 },
+    { name: "#CASUAL AFFAIR", hex: "#CF5C57", x: -0.33, y: -0.65 },
+    { name: "#DOUBLE WIND", hex: "#BD575B", x: 0.97, y: -0.65 },
+    { name: "#SEPIA", hex: "#C26350", x: -0.91, y: -0.82 }
   ],
   // Digitized from the official 3CE Velvet Plush chart photo
   // (standard orientation: Warm left, Cool right, Spring/Summer/
@@ -962,22 +854,26 @@ const VERIFIED_SHADES = {
     { name: "WD14", hex: "#E98689", x: -0.38, y: -0.62 },
     { name: "WD23", hex: "#CC4239", x: -0.79, y: -1.0 }
   ],
-  // Digitized from the official MERZY Puffer Mellow Tint "COLOR CHART"
-  // position chart (Warm/Cool, Light/Deep quadrant) — pixel-measured
-  // blob centroids. Hex colors sampled from a real arm-swatch photo
-  // (same 10 codes: AM4, CM3, GM5, M2, M13, M18, M19, M20, M21, M22 —
-  // confirmed 1:1 match against the chart via the shared codes).
+  // Re-digitized from a clean, high-resolution version of the official
+  // MERZY Puffer Mellow Tint "COLOR CHART" — pixel-measured centroids
+  // relative to the true axis-crossing point (verified via Python
+  // distance calculation, not eyeballed). This corrects an earlier
+  // digitization from a lower-quality version of this chart, which had
+  // meaningfully different (less accurate) positions for several
+  // shades, especially M13 and M19 which sit much closer to center
+  // than previously recorded. Hex colors unchanged — still sourced
+  // from the real arm-swatch photo confirmed earlier.
   "merzy::Puffer Mellow Tint": [
-    { name: "GM5 Fearless Red", hex: "#B87A88", x: -0.09, y: 0.89 },
-    { name: "M22 Bare Blossom", hex: "#BE5162", x: 0.71, y: 1.0 },
-    { name: "M21 Lilac Smoke", hex: "#AE3A4D", x: 0.46, y: 0.73 },
-    { name: "M13 Vapor Red", hex: "#C5666E", x: -0.17, y: 0.52 },
-    { name: "M18 Dusty Berry", hex: "#B0696A", x: 0.16, y: 0.56 },
-    { name: "M19 Mocha Latte", hex: "#B5687A", x: -0.50, y: 0.12 },
-    { name: "CM3 Metallic Mauve", hex: "#A34049", x: 0.32, y: 0.11 },
-    { name: "M20 Fig Glaze", hex: "#A8555D", x: -0.18, y: -0.14 },
-    { name: "AM4 Leather Bookmark", hex: "#B15A62", x: -0.77, y: -0.38 },
-    { name: "M2 Jane Chili", hex: "#BF6063", x: -1.0, y: -0.82 }
+    { name: "GM5 Fearless Red", hex: "#B87A88", x: 0.198, y: 0.856 },
+    { name: "M22 Bare Blossom", hex: "#BE5162", x: 0.885, y: 1.0 },
+    { name: "M21 Lilac Smoke", hex: "#AE3A4D", x: 0.656, y: 0.636 },
+    { name: "M13 Vapor Red", hex: "#C5666E", x: 0.0, y: 0.347 },
+    { name: "M18 Dusty Berry", hex: "#B0696A", x: 0.380, y: 0.347 },
+    { name: "M19 Mocha Latte", hex: "#B5687A", x: -0.315, y: 0.0 },
+    { name: "CM3 Metallic Mauve", hex: "#A34049", x: 0.513, y: 0.0 },
+    { name: "M20 Fig Glaze", hex: "#A8555D", x: 0.0, y: -0.380 },
+    { name: "AM4 Leather Bookmark", hex: "#B15A62", x: -0.578, y: -0.380 },
+    { name: "M2 Jane Chili", hex: "#BF6063", x: -0.827, y: -0.742 }
   ],
   // Digitized from the official MERZY Puffer Velvet Tint "COLOR CHART"
   // position chart (Warm/Cool, Light/Deep quadrant) the customer
@@ -1012,36 +908,32 @@ const VERIFIED_SHADES = {
     { name: "7 Cooling Up Pink", hex: "#9A3E5B", x: 1.0, y: -0.34 },
     { name: "6 Mauve-Treaming", hex: "#C09892", x: 0.66, y: -0.74 }
   ],
-  // No position chart or arm-swatch photo exists for this line (customer
-  // confirmed). Positions are the assistant's own estimate, not a chart
-  // digitization: x sign taken directly from the product's own Warm/Cool
-  // category columns (per customer's instruction), x magnitude from each
-  // Replaces an earlier 30-shade entry with fabricated-looking names
-  // ("Nudy 22-44", "Red 01-34") that don't match this product's real
-  // naming at all and were clustered almost entirely in one quadrant —
-  // not trustworthy, not extended.
-  //
-  // NO real chart or swatch photo exists for this line (customer
-  // confirmed). Shade names below are REAL (confirmed via web search
-  // against official retailer listings), but hex and x/y position are
-  // the assistant's ESTIMATE from what each name typically looks like
-  // in K-beauty tints (coral=warm/orange-leaning, nude=light/neutral,
-  // rose-mauve-plum=cool-leaning) — not sampled from any actual photo.
-  // This entry is meaningfully lower-confidence than every other line
-  // in this file and should be replaced with real chart/swatch data
-  // the moment the customer has it. Selection biased toward lighter
-  // shades per the customer's request.
+  // Digitized from the official Peripera Ink The Velvet position chart
+  // photo (standard orientation: Warm left, Cool right, Light top, Dark
+  // bottom — matches tool convention exactly, pixel-measured centroids).
+  // Note: the "#XX" labels on that chart are shade NUMBERS, not hex
+  // codes (unlike Muddish Cushion Velvet's chart). Hex colors sampled
+  // from two real arm-swatch photos covering all 16 shades on the
+  // chart, matched 1:1 by shade number. Real English names confirmed
+  // from those same swatch photos. Supersedes the earlier fully-
+  // estimated version of this line (no chart or swatch existed then).
   "peripera::Ink The Velvet": [
-    { name: "24 Milky Nude", hex: "#E8B7A8", x: -0.30, y: 0.90 },
-    { name: "22 Bouquet Nude", hex: "#DDA090", x: -0.40, y: 0.70 },
-    { name: "17 Rosy Nude", hex: "#D89694", x: 0.10, y: 0.60 },
-    { name: "23 Nutty Nude", hex: "#C98D72", x: -0.60, y: 0.50 },
-    { name: "27 Strawberry Nude", hex: "#D97E76", x: -0.30, y: 0.40 },
-    { name: "9 Sparkling Pink", hex: "#E06C8A", x: 0.50, y: 0.30 },
-    { name: "4 Vitality Coral", hex: "#E8654A", x: -0.70, y: 0.10 },
-    { name: "28 Mauveful Nude", hex: "#B97684", x: 0.40, y: 0.0 },
-    { name: "15 Beauty Peak Rose", hex: "#C15A6C", x: 0.30, y: -0.20 },
-    { name: "2 Celeb Deep Rose", hex: "#A83A54", x: 0.50, y: -0.60 }
+    { name: "39 Sunny Orange", hex: "#E85030", x: -1.0, y: 0.71 },
+    { name: "49 Last Red", hex: "#D9636E", x: -0.24, y: 0.30 },
+    { name: "27 Strawberry Nude", hex: "#B8637A", x: 0.29, y: 0.12 },
+    { name: "24 Milky Nude", hex: "#D9836A", x: -0.98, y: -0.02 },
+    { name: "45 Pink Beige Nude", hex: "#D9827A", x: -0.30, y: 0.01 },
+    { name: "47 Dazzling Spring", hex: "#D97A6C", x: 0.0, y: 0.0 },
+    { name: "08 Sellout Red", hex: "#E0324A", x: 0.29, y: -0.14 },
+    { name: "16 Heart Fuchsia Pink", hex: "#A81E3E", x: 0.90, y: -0.11 },
+    { name: "30 Classic Nude", hex: "#B8724A", x: -0.50, y: -0.12 },
+    { name: "26 Well-Made Nude", hex: "#A8524A", x: -0.67, y: -0.34 },
+    { name: "48 100 Hearts", hex: "#A82E5C", x: 1.0, y: -0.40 },
+    { name: "25 Cinnamon Nude", hex: "#B85C42", x: -1.0, y: -0.60 },
+    { name: "46 Pink Mauve Nude", hex: "#B87070", x: 0.77, y: -0.62 },
+    { name: "42 Pinkish Nude", hex: "#A8707A", x: 0.97, y: -0.74 },
+    { name: "18 Star Plum Pink", hex: "#8C3060", x: 1.0, y: -0.89 },
+    { name: "17 Rosy Nude", hex: "#8C4050", x: 1.0, y: -1.0 }
   ],
   // Digitized from the official Peripera Water Bare Tint quadrant
   // chart photo — pixel-measured centroids (standard Warm-left/
@@ -1230,9 +1122,9 @@ const VERIFIED_SHADES = {
   // line up 1:1 with the English names below) — real sampled lip color
   // per shade, more accurate than the chart's small tube-icon color.
   "romand::Blur Fudge Tint": [
-    { name: "09 Coral Jubilee", hex: "#E04553", x: -0.35, y: 0.75 },
-    { name: "14 Unrose", hex: "#D25269", x: -0.05, y: 0.85 },
-    { name: "13 Cooling Up", hex: "#D1677E", x: 0.4, y: 0.75 },
+    { name: "09 Coral Jubilee", hex: "#E04553", x: -0.63, y: 0.83 },
+    { name: "14 Unrose", hex: "#D25269", x: 0.0, y: 0.77 },
+    { name: "13 Cooling Up", hex: "#D1677E", x: 0.50, y: 1.0 },
     { name: "12 Warming Up", hex: "#DE8285", x: -0.85, y: 0.55 },
     { name: "15 Berry Fizz", hex: "#DA5980", x: 0.75, y: 0.55 },
     { name: "02 Rosiental", hex: "#C84656", x: -0.3, y: 0.35 },
@@ -1241,7 +1133,7 @@ const VERIFIED_SHADES = {
     { name: "06 Mauvish", hex: "#CB5F74", x: 0.35, y: -0.15 },
     { name: "05 Bibi Candy", hex: "#C7355F", x: 0.65, y: -0.35 },
     { name: "03 Musky", hex: "#B13333", x: -0.35, y: -0.45 },
-    { name: "11 Fuchsia Vibe", hex: "#D2204C", x: 0.1, y: -0.45 },
+    { name: "11 Fuchsia Vibe", hex: "#D2204C", x: 0.3, y: -0.45 },
     { name: "16 Burnt Orange", hex: "#C35354", x: -0.85, y: -0.75 },
     { name: "07 Cool Rose Up", hex: "#C64C68", x: 0.7, y: -0.75 },
     { name: "04 Radwood", hex: "#994038", x: -0.65, y: -0.95 },
@@ -1315,7 +1207,7 @@ const VERIFIED_SHADES = {
     { name: "08 Pink Pumpkin", hex: "#D9606A", x: -1.0, y: 0.27 },
     { name: "09 Mulled Peach", hex: "#D0656D", x: -0.48, y: 0.27 },
     { name: "10 Bare Apricot", hex: "#D76473", x: -0.56, y: 0.90 },
-    { name: "11 Papaya Jam", hex: "#DC686E", x: -0.58, y: -0.08 },
+    { name: "11 Papaya Jam", hex: "#DC686E", x: -0.73, y: 0.25 },
     { name: "12 Apple Brown", hex: "#C55148", x: -0.97, y: -0.59 },
     { name: "13 Eat Dotori", hex: "#C4403E", x: -0.43, y: -0.94 },
     { name: "14 Almond Rose", hex: "#A03F46", x: 0.48, y: 0.52 },
@@ -1345,14 +1237,12 @@ Reference on each brand's general color character:
 
 If the user message includes a "Verified real shade list," that list is the complete, authoritative set of real shades for this line. You MUST choose your 3 shades only from that list, and you MUST reuse the exact hex value given for each one — never alter, invent, or approximate a different hex. If no such list is given, fall back to your own knowledge as described above.
 
-Hard rule: if this person's season reads warm, do not recommend any cool-toned shade, even as an alternate. If their season reads cool, do not recommend any warm-toned shade, even as an alternate. A more neutral option is fine either way, but never cross to the opposite side of warm/cool.
+Hard rule: if this person's season reads warm, do not recommend any cool-toned shade, even as an alternate. If their season reads cool, do not recommend any warm-toned shade, even as an alternate. A more neutral option is fine either way, but never cross to the opposite side of warm/cool — except in the specific fallback case in step 3 below, where this can be set aside only to fill a slot that would otherwise be empty.
 
-The 12 seasons sit in a circle in this order (each touches its two neighbors): Bright Spring, True/Warm Spring, Light Spring, Light Summer, True/Cool Summer, Soft Summer, Soft Autumn, True/Warm Autumn, Dark Autumn, Dark Winter, True/Cool Winter, Bright Winter, then back around to Bright Spring.
-
-Choose exactly 3 shades, all from the specific product line given, and rank them:
-1. "best" — the single closest match overall to this person's exact season (both warm/cool and light/dark)
-2. "alt1" — a shade that best represents the person's season-neighbor that shares the SAME family (Spring/Summer/Autumn/Winter) on the wheel above — e.g. if their season is Soft Autumn, its same-family neighbor is True/Warm Autumn, so alt1 should come from there
-3. "alt2" — another shade representing that same same-family neighbor if a second good option exists there; only if that neighboring season genuinely has no more suitable shades in this line, use the person's OTHER neighboring season instead (which may belong to a different family)
+Choose exactly 3 shades, all from the specific product line given, using this process:
+1. Determine the customer's quadrant on the warm/cool, light/dark chart. This is INCLUSIVE of the axis edges, so a shade sitting exactly on the warm/cool line or the light/dark line still counts as being in the customer's quadrant as long as its other coordinate matches. It's also inclusive of near-neutral shades on the warm/cool axis specifically: a shade within about 0.1 of the center on the warm/cool axis counts as neutral enough to belong to EITHER side's quadrant, not strictly whichever side its sign falls on.
+2. Within that quadrant, rank every shade by DEPTH similarity to the customer first (how close their light/deep level is), then by TEMPERATURE similarity (how warm/cool) as the tiebreak. "best" = the top of that ranked list, "alt1" (2nd closest) and "alt2" (3rd closest) are the next two shades down that same ranked list.
+3. If the quadrant has fewer than 3 shades in this line, fill the remaining slot(s) from the complete shade list (not just the quadrant, and not limited by the warm/cool hard rule above) — still ranked by the same depth-then-temperature process, just picking whichever real shades are next closest overall.
 
 For alt1 and alt2, the "why" field should briefly mention whichever of lighter/deeper or warmer/cooler/more-neutral actually differs from the best match — only mention an axis if it's meaningfully different.
 
@@ -1375,28 +1265,6 @@ Respond with ONLY a valid JSON object (no markdown fences, no extra text) in thi
 let uploadedImage = null; // {base64, mediaType}
 let currentSeasonResult = null;
 let selectedBrand = null;
-
-// ---------------------------------------------------------------------
-// Lightweight customer analytics: season/shade results saved to
-// shared storage, reviewable via the hidden dashboard below.
-// Location was attempted two ways (IP lookup, then browser GPS) and
-// both are blocked at the platform level in this sandboxed
-// environment — confirmed not possible here, so it's been dropped.
-// ---------------------------------------------------------------------
-async function saveCustomerRecord(seasonResult, brandName, lineName, bestShadeName){
-  if(!window.storage) return;
-  try{
-    const key = 'customer:' + Date.now() + '-' + Math.random().toString(36).slice(2, 7);
-    const record = {
-      timestamp: new Date().toISOString(),
-      season: seasonResult ? seasonResult.season : "",
-      brand: brandName || "",
-      line: lineName || "",
-      bestShade: bestShadeName || ""
-    };
-    await window.storage.set(key, JSON.stringify(record), true);
-  }catch(e){ /* fail silently, never block the customer experience */ }
-}
 
 const fileInputCamera = document.getElementById('fileInputCamera');
 const fileInputUpload = document.getElementById('fileInputUpload');
@@ -1547,8 +1415,8 @@ function renderSeasonResult(result){
   setupSeasonOverride(result);
 }
 
-function updateChart(seasonName){
-  const coord = SEASON_MAP[seasonName];
+function updateChart(seasonName, customerCoord){
+  const coord = customerCoord || SEASON_MAP[seasonName];
   if(coord){
     chartHolder.innerHTML = seasonChartSVG(seasonName, coord);
     chartSection.style.display = 'block';
@@ -1644,8 +1512,8 @@ seasonSelect.addEventListener('change', () => {
 // light/dark quadrant chart with the customer's season plotted on it.
 function seasonChartSVG(seasonName, coord){
   const cx = 200, cy = 150;
-  const px = cx + coord.x * 140;
-  const py = cy - coord.y * 100;
+  const px = cx + coord.x * 105;
+  const py = cy - coord.y * 65;
   return `<svg viewBox="0 0 400 300" width="340" height="255" xmlns="http://www.w3.org/2000/svg">
     <rect x="4" y="4" width="392" height="292" rx="16" fill="none" stroke="rgba(58,31,34,0.15)" stroke-width="2"/>
     <line x1="40" y1="150" x2="360" y2="150" stroke="rgba(58,31,34,0.35)" stroke-width="2"/>
@@ -1658,8 +1526,8 @@ function seasonChartSVG(seasonName, coord){
     <text x="45" y="155" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#fff">Warm</text>
     <circle cx="355" cy="150" r="26" fill="#C4172C"/>
     <text x="355" y="155" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#fff">Cool</text>
-    <circle cx="${px}" cy="${py}" r="34" fill="${coord.color}" stroke="#fff" stroke-width="3" filter="drop-shadow(0 6px 10px rgba(58,31,34,0.3))"/>
-    <text x="${px}" y="${py - 42}" text-anchor="middle" font-family="Playfair Display, serif" font-style="italic" font-size="14" font-weight="600" fill="#3a1f22">${seasonName}</text>
+    <circle cx="${px}" cy="${py}" r="15" fill="${coord.color}" stroke="#fff" stroke-width="2.5" filter="drop-shadow(0 6px 10px rgba(58,31,34,0.3))"/>
+    <text x="${px}" y="${py - 24}" text-anchor="middle" font-family="Playfair Display, serif" font-style="italic" font-size="14" font-weight="600" fill="#3a1f22">${seasonName}</text>
   </svg>`;
 }
 
@@ -1688,8 +1556,7 @@ function euclidDist(a, b){
 const AXIS_THRESH = 0.04;
 
 // Describes how an alt shade differs from the best match on whichever
-// axes are actually meaningfully different (used alongside the
-// season-adjacency selection below to explain the pick in plain terms).
+// axes are actually meaningfully different.
 function describeShadeWhy(alt, best){
   const parts = [];
   const yDiff = alt.y - best.y;
@@ -1702,7 +1569,7 @@ function describeShadeWhy(alt, best){
     if(xDiff > AXIS_THRESH) parts.push("cooler");
     else if(xDiff < -AXIS_THRESH) parts.push("warmer");
   }
-  if(parts.length === 0) return "A closely related shade from a neighboring season.";
+  if(parts.length === 0) return "A closely related shade from the same family.";
   return "Slightly " + parts.join(" and ") + " than your best match.";
 }
 
@@ -1712,11 +1579,20 @@ function describeShadeWhy(alt, best){
 // real coordinates exist.
 const WARM_COOL_NEUTRAL_ZONE = 0.1;
 
-// Picks the best match (closest to the customer's own position), then
-// picks the 2nd and 3rd shades by SEASON ADJACENCY on the 12-season
-// wheel: same-family neighboring season is tried first for both picks;
-// only if that neighbor has no more candidates does the search cross
-// into the other neighboring season (which may be a different family).
+// Shade-matching formula (simplified, replaces the near-axis version):
+// 1. Determine the customer's quadrant on the warm/cool, light/dark
+//    chart — INCLUSIVE of the axis edges, so a shade sitting exactly
+//    on x=0 or y=0 still counts as being in the customer's quadrant
+//    as long as its other coordinate matches.
+// 2. Rank every shade within that quadrant by DEPTH similarity to the
+//    customer first (how light/deep), then TEMPERATURE similarity
+//    (how warm/cool) as the tiebreak.
+// 3. Best match = the top of that ranked list. 2nd and 3rd closest are
+//    the next two shades down the same ranked list.
+// 4. If the quadrant has fewer than 3 shades, widen to the full shade
+//    list (still ranked the same way) only to fill the remaining
+//    slots — this is the only case where the quadrant boundary is
+//    crossed.
 function pickByChartPosition(customerCoord, shadeList, customerSeasonName){
   const isWarm = customerCoord.x < 0;
   const filtered = shadeList.filter(s => {
@@ -1725,44 +1601,49 @@ function pickByChartPosition(customerCoord, shadeList, customerSeasonName){
   });
   const pool = filtered.length > 0 ? filtered : shadeList; // safety net, should rarely trigger
 
-  const scored = pool.map(s => ({ ...s, distToCustomer: euclidDist(customerCoord, s) }));
-  scored.sort((a, b) => a.distToCustomer - b.distToCustomer);
-  const best = scored[0];
-  const rest = scored.slice(1);
+  // Quadrant boundary, inclusive of the edges (x=0 or y=0 still counts
+  // as belonging, as long as the other axis matches the customer).
+  // The warm/cool side uses the same neutral buffer as the hard rule
+  // above — a shade within WARM_COOL_NEUTRAL_ZONE of center counts as
+  // neutral enough to qualify for EITHER side's quadrant, not just
+  // whichever side its sign technically falls on.
+  const isCustomerLight = customerCoord.y >= 0;
+  const quadrantPool = pool.filter(s => {
+    const xOk = isWarm ? s.x <= WARM_COOL_NEUTRAL_ZONE : s.x >= -WARM_COOL_NEUTRAL_ZONE;
+    const yOk = isCustomerLight ? s.y >= 0 : s.y <= 0;
+    return xOk && yOk;
+  });
 
-  const neighbors = customerSeasonName ? getSeasonNeighbors(customerSeasonName) : [];
-  const classified = rest.map(s => ({ ...s, season: classifySeasonForShade(s) }));
-
-  function closestInSeasons(seasonNames, excludeNames){
-    const candidates = classified.filter(s => seasonNames.includes(s.season) && !excludeNames.includes(s.name));
-    if(candidates.length === 0) return null;
-    candidates.sort((a, b) => euclidDist(best, a) - euclidDist(best, b));
-    return candidates[0];
+  // Rank by depth similarity to the customer first, temperature
+  // (warm/cool) similarity second — used both within the quadrant and
+  // as the fallback ranking across everything if needed.
+  function rankByDepthThenTemp(list){
+    return [...list].sort((a, b) => {
+      const aDepth = Math.abs(a.y - customerCoord.y);
+      const bDepth = Math.abs(b.y - customerCoord.y);
+      if(Math.abs(aDepth - bDepth) > AXIS_THRESH) return aDepth - bDepth;
+      const aWarmth = Math.abs(a.x - customerCoord.x);
+      const bWarmth = Math.abs(b.x - customerCoord.x);
+      return aWarmth - bWarmth;
+    });
   }
 
-  let alt1 = null, alt2 = null;
-  if(neighbors.length > 0){
-    const [sameFamilyNeighbor, otherNeighbor] = neighbors;
-    alt1 = closestInSeasons([sameFamilyNeighbor], []);
-    alt2 = closestInSeasons([sameFamilyNeighbor], alt1 ? [alt1.name] : [])
-      || closestInSeasons([otherNeighbor], alt1 ? [alt1.name] : []);
-    if(!alt1){
-      alt1 = closestInSeasons([otherNeighbor], []);
-      alt2 = closestInSeasons([otherNeighbor], alt1 ? [alt1.name] : []);
-    }
+  const rankedQuadrant = rankByDepthThenTemp(quadrantPool);
+  let picks = rankedQuadrant.slice(0, 3);
+
+  // Only if the quadrant didn't yield 3 shades, fill the remaining
+  // slots from the COMPLETE shade list (bypassing even the warm/cool
+  // hard filter, which only applies within the quadrant search) —
+  // still ranked the same way, skipping whatever's already picked.
+  if(picks.length < 3){
+    const pickedNames = new Set(picks.map(s => s.name));
+    const rankedAll = rankByDepthThenTemp(shadeList).filter(s => !pickedNames.has(s.name));
+    picks = picks.concat(rankedAll.slice(0, 3 - picks.length));
   }
 
-  // Fallback: only triggers if the pool genuinely has no shades
-  // classified into either neighboring season (e.g. a very small
-  // shade list) — falls back to closest-to-best-match overall.
-  if(!alt1 || !alt2){
-    const byDistToBest = rest
-      .filter(s => !alt1 || s.name !== alt1.name)
-      .map(s => ({ ...s, distToBest: euclidDist(best, s) }))
-      .sort((a, b) => a.distToBest - b.distToBest);
-    if(!alt1) alt1 = byDistToBest[0] || null;
-    if(!alt2) alt2 = byDistToBest.find(s => !alt1 || s.name !== alt1.name) || null;
-  }
+  const best = picks[0];
+  const alt1 = picks[1] || null;
+  const alt2 = picks[2] || null;
 
   return {
     best: { name: best.name, hex_approx: best.hex, why: "Closest match to your color chart position." },
@@ -1863,8 +1744,6 @@ function renderShadePodium(result){
   const alt1 = shades.find(s => s.rank === 'alt1');
   const alt2 = shades.find(s => s.rank === 'alt2');
 
-  saveCustomerRecord(currentSeasonResult, result.brand, result.line, best ? best.name : "");
-
   const affiliateUrl = AFFILIATE_LINKS[`${result.brandId}::${result.line}`];
 
   shadePodium.innerHTML = '';
@@ -1912,103 +1791,6 @@ function renderShadePodium(result){
 
   pickCard.classList.add('show');
 }
-
-// ---------------------------------------------------------------------
-// Hidden creator dashboard. The small "·" in the bottom-right corner
-// opens a passcode-gated view of every saved customer record. Not
-// linked or labeled anywhere customers would notice.
-// ---------------------------------------------------------------------
-const ADMIN_PASSCODE = "fybs-v1-180726";
-let lastLoadedRecords = [];
-
-document.getElementById('adminTrigger').addEventListener('click', () => {
-  document.getElementById('adminModal').classList.add('show');
-  document.getElementById('adminLockScreen').style.display = 'block';
-  document.getElementById('adminUnlockedView').style.display = 'none';
-  document.getElementById('adminPassInput').value = '';
-  document.getElementById('adminLockError').style.display = 'none';
-  document.getElementById('adminPassInput').focus();
-});
-
-async function tryUnlock(){
-  const pass = document.getElementById('adminPassInput').value;
-  if(pass !== ADMIN_PASSCODE){
-    document.getElementById('adminLockError').style.display = 'block';
-    return;
-  }
-  document.getElementById('adminLockScreen').style.display = 'none';
-  document.getElementById('adminUnlockedView').style.display = 'block';
-  await loadAdminRecords();
-}
-
-document.getElementById('adminUnlockBtn').addEventListener('click', tryUnlock);
-document.getElementById('adminPassInput').addEventListener('keydown', (e) => {
-  if(e.key === 'Enter') tryUnlock();
-});
-
-document.getElementById('adminClose').addEventListener('click', () => {
-  document.getElementById('adminModal').classList.remove('show');
-});
-
-async function loadAdminRecords(){
-  const wrap = document.getElementById('adminTableWrap');
-  wrap.innerHTML = '<div class="loading show">Loading records...</div>';
-  let records = [];
-  try{
-    const listResult = await window.storage.list('customer:', true);
-    const keys = (listResult && listResult.keys) || [];
-    for(const k of keys){
-      try{
-        const r = await window.storage.get(k, true);
-        if(r && r.value) records.push(JSON.parse(r.value));
-      }catch(e){}
-    }
-  }catch(e){
-    wrap.innerHTML = '<div class="loading show">Could not load records.</div>';
-    return;
-  }
-  records.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-  lastLoadedRecords = records;
-  document.getElementById('adminCount').textContent = `${records.length} record${records.length===1?'':'s'}`;
-
-  if(records.length === 0){
-    wrap.innerHTML = '<div class="loading show">No customer records yet.</div>';
-    return;
-  }
-
-  let html = '<table class="admin-table"><thead><tr><th>Date</th><th>Season</th><th>Brand</th><th>Line</th><th>Best Shade</th></tr></thead><tbody>';
-  records.forEach(r => {
-    const d = new Date(r.timestamp);
-    const dateStr = isNaN(d) ? '' : d.toLocaleString();
-    html += `<tr>
-      <td>${dateStr}</td>
-      <td>${r.season || ''}</td>
-      <td>${r.brand || ''}</td>
-      <td>${r.line || ''}</td>
-      <td>${r.bestShade || ''}</td>
-    </tr>`;
-  });
-  html += '</tbody></table>';
-  wrap.innerHTML = html;
-}
-
-document.getElementById('adminDownloadBtn').addEventListener('click', () => {
-  if(lastLoadedRecords.length === 0) return;
-  const headers = ['Date', 'Season', 'Brand', 'Line', 'Best Shade'];
-  const rows = lastLoadedRecords.map(r => [
-    r.timestamp || '', r.season || '', r.brand || '', r.line || '', r.bestShade || ''
-  ]);
-  const csv = [headers, ...rows]
-    .map(row => row.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(','))
-    .join('\n');
-  const blob = new Blob([csv], { type: 'text/csv' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'customer-insights.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-});
 </script>
 </body>
 </html>
