@@ -593,10 +593,10 @@ Respond with ONLY a valid JSON object (no markdown fences, no extra text) in thi
 {
   "family": "Spring" | "Summer" | "Autumn" | "Winter",
   "season": "one of the 12 season names exactly as written above",
-  "undertone": "short phrase",
+  "undertone": "short phrase, plain language only (e.g. \"warm golden\"), never RGB or numeric detail",
   "estimated_skin_rgb": [R, G, B] as three numbers 0-255, your estimate from step 2,
   "g_minus_b": the number G-B calculated from estimated_skin_rgb,
-  "explanation": "2-3 sentences, warm and friendly, explaining why this season fits based on what you observed in the photo",
+  "explanation": "2-3 sentences, warm and friendly, explaining why this season fits based on what you observed in the photo — never mention RGB values, the G-B calculation, or any numeric/technical undertone-detection detail here; keep it in plain, natural language a customer would enjoy reading",
   "runner_up": "the second-closest season name from the list above"
 }`;
 
