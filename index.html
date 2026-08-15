@@ -380,6 +380,8 @@
     <div class="season-name" id="seasonName"></div>
     <div class="season-desc" id="seasonDesc"></div>
 
+    <div id="debugPanel" style="display:none;font-family:monospace;font-size:11px;background:rgba(58,31,34,0.05);border-radius:8px;padding:10px 12px;margin:10px 0;white-space:pre-wrap;color:#3a1f22;line-height:1.6;"></div>
+
     <div id="chartSection" style="display:none;">
       <div class="chart-subtitle">Where you sit on the color chart</div>
       <div id="chartHolder" style="display:flex;justify-content:center;margin-bottom:4px;"></div>
@@ -579,7 +581,7 @@ WINTER:
 - Bright Winter: cool-neutral undertone, medium-to-dark depth, extremely clear/bright chroma, very high contrast. Overall look: bold, electric.
 
 When given a photo, work through this in order before answering. Deliberately ignore hair COLOR entirely — do not let it influence any step below, since it is very likely dyed. Also treat lip color as an unreliable signal and do not weight it heavily — many people have lip tattooing, lip blushing, or other semi-permanent lip tinting procedures, so the lips' natural color may not reflect their true undertone at all. Customers are instructed to photograph themselves in natural light, so no lighting/white-balance correction is needed.
-1. Note whether the skin and the eyes are light or deep in overall depth.
+1. Determine depth using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Depth result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate two RGB values (R, G, B, each 0-255) — skin (neck/body skin) and eyebrows (their actual color) — convert each to a luminance value using L = 0.299×R + 0.587×G + 0.114×B, then calculate Depth Score as 0.4×L(skin) + 0.6×L(eyebrows), weighting eyebrow color more heavily since darker, fuller eyebrows correlate with deeper overall coloring even when skin alone might read lighter. Apply this rule: if Depth Score is below 77, depth is Deep; if it is 77 to 107, depth is Medium; if it is above 107, depth is Light.
 2. Determine contrast using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Contrast result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate four separate RGB values (R, G, B, each 0-255), each read carefully and specifically from THIS photo — do not default to an assumed "typical" value for any of them:
    a. Skin — the color of the neck and/or other visible body skin (not facial skin, since many people have facial redness or discoloration from skincare treatments that facial skin alone can be misleading about).
    b. Sclera — the white of the eye. This varies genuinely from a yellowish/off-white tone to a nearly pure bright white — look at the actual tone in this specific photo rather than assuming pure white by default.
@@ -588,21 +590,30 @@ When given a photo, work through this in order before answering. Deliberately ig
    Convert each of the four RGB estimates to a luminance value using L = 0.299×R + 0.587×G + 0.114×B. Calculate Lightness as the average of L(skin) and L(sclera). Calculate Darkness as the average of L(iris) and L(eyebrows). Calculate the Contrast Score as Lightness minus Darkness. Apply this rule exactly: if the Contrast Score is below 100, contrast is Low; if it is 100 to 150, contrast is Medium; if it is above 150, contrast is High. This numeric rule is the authoritative contrast determination — precision in each of the four individual RGB estimates matters, since both iris and sclera have wide natural variation that a rushed or generic estimate would miss.
 3. Determine undertone using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Undertone result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate the average skin color of the neck and/or other visible body skin as an RGB value (R, G, B, each 0-255) — prioritize neck/body skin over facial skin for this reading if both are visible, since many people have facial redness or discoloration from skincare treatments that facial skin alone can be misleading about; only fall back to facial skin if neck/body skin isn't visible at all. Then calculate G minus B (Green value minus Blue value) from that estimate. Apply this rule exactly, with no neutral option: if G-B is less than 30, she is cool-leaning; if G-B is 30 or higher, she is warm-leaning. This numeric rule is the authoritative undertone determination — it always resolves to warm or cool, never neutral, regardless of how the skin subjectively looks. This includes olive skin: don't classify it as "neutral" by eye — estimate its RGB and apply the same G-B rule like any other skin tone; olive skin with a more golden cast will naturally compute a higher G-B (warm-leaning), while olive skin with a more ashy/gray cast will naturally compute a lower G-B (cool-leaning). Do not assume undertone from depth — deep skin can be warm or cool just as easily as light skin can, and the two are fully independent; the RGB estimate and G-B calculation should reflect hue only, not lightness.
 4. Cheek warmth/coolness can be used only as a minor, secondary tie-breaker — do not let it override the neck/body skin undertone reading from step 3, since cheeks are facial skin and can show the same treatment-related redness. Do not use lip color as a meaningful input at all, for the reason noted above.
-5. Based on 1-4, identify your top choice AND the second-closest season. Compare them directly: what is the one deciding factor that separates your top choice from that runner-up? If the undertone signal genuinely feels weak or mixed, favor a neutral-leaning season (Bright Spring, Light Spring, Light Summer, Soft Summer, Soft Autumn, or Dark Autumn/Winter's neutral variants) over forcing a confident warm or cool call — a hedged, honest neutral read is more useful than an overconfident wrong one.
+5. HARD FAMILY CONSTRAINT — apply this before picking any season: if step 3's undertone result is cool-leaning, the season MUST come from the SUMMER or WINTER family — Spring and Autumn are completely off the table, with no exceptions, regardless of anything else about the photo. If step 3's undertone result is warm-leaning, the season MUST come from the SPRING or AUTUMN family — Summer and Winter are completely off the table, with no exceptions. The "neutral-warm" / "cool-neutral" / "warm-neutral" language in the season reference list above describes each season's typical chroma character, not an invitation to cross this boundary — step 3's undertone result is strictly binary (never neutral) and is authoritative over that descriptive language. For cool-leaning specifically, step 1's Depth result decides which of these two families, per the official criteria: Depth of Light or Medium means the season MUST come from SUMMER (Winter has no light or medium-depth member at all — Winter is medium-to-dark or dark only); Depth of Deep means the season MUST come from WINTER. This routing is authoritative — never place a Medium depth result into any Winter season, and never place a Deep depth result into a Summer season.
+6. Based on 1-5, identify your top choice AND the second-closest season (the runner-up must also respect the hard family constraint from step 5). Compare them directly: what is the one deciding factor that separates your top choice from that runner-up? This hedging note applies ONLY when no precise measurements were given and you are self-estimating: if your own visual undertone estimate genuinely feels weak or mixed, lean toward whichever of the two eligible families in step 5 feels slightly more supported, rather than crossing into the other family — never use "feels mixed" as a reason to cross the family boundary itself.
 
-Commit to ONE of the 12 seasons above only after this comparison.
+Commit to ONE of the 12 seasons above only after this comparison. Work through steps 1-6 internally — never write out your reasoning, calculations, or any narration of this process in your visible response. Your response must begin with the opening curly brace of the JSON object and contain nothing else, not even a single sentence of preamble like "Let me work through this."
 
 Respond with ONLY a valid JSON object (no markdown fences, no extra text) in this exact shape:
 {
   "family": "Spring" | "Summer" | "Autumn" | "Winter",
   "season": "one of the 12 season names exactly as written above",
   "undertone": "short phrase, plain language only (e.g. \"warm golden\"), never RGB or numeric detail",
-  "estimated_skin_rgb": [R, G, B] as three numbers 0-255, your estimate from step 3,
+  "estimated_skin_rgb": [R, G, B] as three numbers 0-255, your estimate from step 1/3,
+  "skin_luminance": the number L(skin) calculated from estimated_skin_rgb,
+  "eyebrow_luminance": the number L(eyebrow) calculated from estimated_eyebrow_rgb,
+  "iris_luminance": the number L(iris) calculated from estimated_iris_rgb,
+  "sclera_luminance": the number L(sclera) calculated from estimated_sclera_rgb,
+  "depth_score": the number 0.4*skin_luminance+0.6*eyebrow_luminance calculated in step 1,
+  "depth_level": "Deep" | "Medium" | "Light",
   "g_minus_b": the number G-B calculated from estimated_skin_rgb,
   "estimated_iris_rgb": [R, G, B] as three numbers 0-255, your estimate from step 2,
   "estimated_sclera_rgb": [R, G, B] as three numbers 0-255, your estimate from step 2,
   "estimated_eyebrow_rgb": [R, G, B] as three numbers 0-255, your estimate from step 2,
-  "contrast_score": the number Lightness-Darkness calculated in step 2,
+  "lightness": the number (skin_luminance+sclera_luminance)/2 calculated in step 2,
+  "darkness": the number (iris_luminance+eyebrow_luminance)/2 calculated in step 2,
+  "contrast_score": the number lightness-darkness calculated in step 2,
   "contrast_level": "Low" | "Medium" | "High",
   "explanation": "2-3 sentences, warm and friendly, explaining why this season fits based on what you observed in the photo — never mention RGB values, luminance, contrast score, the G-B calculation, or any numeric/technical detail here; keep it in plain, natural language a customer would enjoy reading",
   "runner_up": "the second-closest season name from the list above"
@@ -1310,14 +1321,19 @@ async function loadFaceLandmarker(){
 }
 
 // Verified MediaPipe Face Landmarker (478-point) indices used for
-// sampling. Iris ring points sit ON the iris (avoiding the pupil's
-// center reflection highlight). Sclera has no dedicated landmark, so
-// it's derived as the midpoint between each iris center and its
-// nearest eye corner — geometrically falls on the white of the eye.
-// Skin is sampled from the LOWER cheek (derived as the midpoint
-// between the cheekbone and jawline, on both sides) plus the center
-// of the forehead — deliberately avoiding the upper cheek/cheekbone
-// area, since that's where blush and natural flush most commonly show.
+// sampling. Iris is sampled at the midpoint between the iris center
+// and each ring point — avoids both the ring edge (can catch the dark
+// limbal boundary where iris meets sclera) and the exact center (can
+// catch a bright reflection/catchlight), landing on genuine iris
+// tissue instead. Sclera has no dedicated landmark, so it's derived
+// as the midpoint between each iris center and its nearest eye corner
+// — geometrically falls on the white of the eye.
+// Skin is sampled from 10 points: the LOWER cheek (derived as the
+// midpoint between the cheekbone and 3 different jaw landmarks, on
+// both sides — 6 points total) plus the center of the forehead (2
+// points), the nose bridge, and the nose tip — deliberately avoiding
+// the upper cheek/cheekbone area, since that's where blush and
+// natural flush most commonly show.
 const MP_LANDMARKS = {
   leftIrisRing: [469, 470, 471, 472],
   rightIrisRing: [474, 475, 476, 477],
@@ -1332,10 +1348,14 @@ const MP_LANDMARKS = {
   leftCheekbone: 234,
   leftJawA: 172,
   leftJawB: 136,
+  leftJawC: 150,
   rightCheekbone: 454,
   rightJawA: 397,
   rightJawB: 365,
-  foreheadCenter: [9, 151]
+  rightJawC: 379,
+  foreheadCenter: [9, 151],
+  noseTip: 1,
+  noseBridge: 6
 };
 
 // Reads the average RGB of a small block around one pixel coordinate,
@@ -1399,16 +1419,43 @@ async function measureFaceFromPhoto(imgEl){
       if(!a || !b) return null;
       return samplePixelBlock(imageData, ((a.x + b.x) / 2) * w, ((a.y + b.y) / 2) * h, radius);
     }
+    // Finds whichever iris ring point sits closest to a given eye
+    // corner — avoids assuming a fixed directional order for the ring
+    // indices, which isn't guaranteed to be reliably known.
+    function nearestRingPoint(cornerIdx, ringIndices){
+      const corner = landmarks[cornerIdx];
+      if(!corner) return null;
+      let closestIdx = null, closestDist = Infinity;
+      for(const idx of ringIndices){
+        const p = landmarks[idx];
+        if(!p) continue;
+        const d = Math.hypot(p.x - corner.x, p.y - corner.y);
+        if(d < closestDist){ closestDist = d; closestIdx = idx; }
+      }
+      return closestIdx;
+    }
 
+    // Sample midway between iris center and iris ring, rather than
+    // either extreme — the ring edge often catches the dark limbal
+    // boundary (where iris meets sclera), while the exact center can
+    // catch a bright reflection/catchlight. The midpoint lands on
+    // genuine iris tissue, avoiding both.
     const irisSamples = [
-      ...sampleIndices(MP_LANDMARKS.leftIrisRing, 2),
-      ...sampleIndices(MP_LANDMARKS.rightIrisRing, 2)
+      ...MP_LANDMARKS.leftIrisRing.map(ringIdx => sampleMidpoint(MP_LANDMARKS.leftIrisCenter, ringIdx, 2)),
+      ...MP_LANDMARKS.rightIrisRing.map(ringIdx => sampleMidpoint(MP_LANDMARKS.rightIrisCenter, ringIdx, 2))
     ];
+    // Sclera sampled as the midpoint between each eye corner and the
+    // nearest iris ring point on that side — closer to the true white
+    // of the eye than using the iris center as the inner reference.
+    const leftOuterRing = nearestRingPoint(MP_LANDMARKS.leftEyeOuter, MP_LANDMARKS.leftIrisRing);
+    const leftInnerRing = nearestRingPoint(MP_LANDMARKS.leftEyeInner, MP_LANDMARKS.leftIrisRing);
+    const rightOuterRing = nearestRingPoint(MP_LANDMARKS.rightEyeOuter, MP_LANDMARKS.rightIrisRing);
+    const rightInnerRing = nearestRingPoint(MP_LANDMARKS.rightEyeInner, MP_LANDMARKS.rightIrisRing);
     const scleraSamples = [
-      sampleMidpoint(MP_LANDMARKS.leftEyeOuter, MP_LANDMARKS.leftIrisCenter, 2),
-      sampleMidpoint(MP_LANDMARKS.leftIrisCenter, MP_LANDMARKS.leftEyeInner, 2),
-      sampleMidpoint(MP_LANDMARKS.rightEyeOuter, MP_LANDMARKS.rightIrisCenter, 2),
-      sampleMidpoint(MP_LANDMARKS.rightIrisCenter, MP_LANDMARKS.rightEyeInner, 2)
+      sampleMidpoint(MP_LANDMARKS.leftEyeOuter, leftOuterRing, 2),
+      sampleMidpoint(leftInnerRing, MP_LANDMARKS.leftEyeInner, 2),
+      sampleMidpoint(MP_LANDMARKS.rightEyeOuter, rightOuterRing, 2),
+      sampleMidpoint(rightInnerRing, MP_LANDMARKS.rightEyeInner, 2)
     ];
     const eyebrowSamples = [
       ...sampleIndices(MP_LANDMARKS.leftEyebrow, 2),
@@ -1417,9 +1464,13 @@ async function measureFaceFromPhoto(imgEl){
     const skinSamples = [
       sampleMidpoint(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawA, 3),
       sampleMidpoint(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawB, 3),
+      sampleMidpoint(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawC, 3),
       sampleMidpoint(MP_LANDMARKS.rightCheekbone, MP_LANDMARKS.rightJawA, 3),
       sampleMidpoint(MP_LANDMARKS.rightCheekbone, MP_LANDMARKS.rightJawB, 3),
-      ...sampleIndices(MP_LANDMARKS.foreheadCenter, 3)
+      sampleMidpoint(MP_LANDMARKS.rightCheekbone, MP_LANDMARKS.rightJawC, 3),
+      ...sampleIndices(MP_LANDMARKS.foreheadCenter, 3),
+      ...sampleIndices([MP_LANDMARKS.noseBridge], 2),
+      ...sampleIndices([MP_LANDMARKS.noseTip], 2)
     ];
 
     const irisRgb = averageRgb(irisSamples);
@@ -1432,14 +1483,26 @@ async function measureFaceFromPhoto(imgEl){
     const gMinusB = skinRgb.g - skinRgb.b;
     const undertone = gMinusB < 30 ? "cool-leaning" : "warm-leaning";
 
-    const lightness = (luminance(skinRgb) + luminance(scleraRgb)) / 2;
-    const darkness = (luminance(irisRgb) + luminance(eyebrowRgb)) / 2;
+    const skinLuminance = luminance(skinRgb);
+    const eyebrowLuminance = luminance(eyebrowRgb);
+    const irisLuminance = luminance(irisRgb);
+    const scleraLuminance = luminance(scleraRgb);
+
+    const depthScore = 0.4 * skinLuminance + 0.6 * eyebrowLuminance;
+    const depthLevel = depthScore < 77 ? "Deep" : depthScore <= 107 ? "Medium" : "Light";
+
+    const lightness = (skinLuminance + scleraLuminance) / 2;
+    const darkness = (irisLuminance + eyebrowLuminance) / 2;
     const contrastScore = lightness - darkness;
     const contrastLevel = contrastScore < 100 ? "Low" : contrastScore <= 150 ? "Medium" : "High";
 
     return {
       skin_rgb: skinRgb, iris_rgb: irisRgb, sclera_rgb: scleraRgb, eyebrow_rgb: eyebrowRgb,
       g_minus_b: Math.round(gMinusB), undertone,
+      skin_luminance: Math.round(skinLuminance), eyebrow_luminance: Math.round(eyebrowLuminance),
+      iris_luminance: Math.round(irisLuminance), sclera_luminance: Math.round(scleraLuminance),
+      depth_score: Math.round(depthScore), depth_level: depthLevel,
+      lightness: Math.round(lightness), darkness: Math.round(darkness),
       contrast_score: Math.round(contrastScore), contrast_level: contrastLevel
     };
   } catch(e){
@@ -1526,7 +1589,15 @@ function hideError(box){
 }
 
 function parseJsonFromText(text){
-  const cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+  let cleaned = text.replace(/```json/g, '').replace(/```/g, '').trim();
+  // Defensive: if Claude added any preamble/postamble prose around the
+  // JSON object despite instructions not to, extract just the {...}
+  // portion rather than failing outright.
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace = cleaned.lastIndexOf('}');
+  if(firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace){
+    cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+  }
   return JSON.parse(cleaned);
 }
 
@@ -1577,9 +1648,10 @@ analyzeBtn.addEventListener('click', async () => {
         `Iris RGB: (${measurements.iris_rgb.r}, ${measurements.iris_rgb.g}, ${measurements.iris_rgb.b})\n` +
         `Sclera RGB: (${measurements.sclera_rgb.r}, ${measurements.sclera_rgb.g}, ${measurements.sclera_rgb.b})\n` +
         `Eyebrow RGB: (${measurements.eyebrow_rgb.r}, ${measurements.eyebrow_rgb.g}, ${measurements.eyebrow_rgb.b})\n` +
+        `Depth Score: ${measurements.depth_score} -> Depth: ${measurements.depth_level}\n` +
         `G-B (skin): ${measurements.g_minus_b} -> Undertone: ${measurements.undertone}\n` +
         `Contrast Score: ${measurements.contrast_score} -> Contrast: ${measurements.contrast_level}\n` +
-        `Use this Undertone and Contrast result directly rather than recalculating from your own visual estimate — only depth still needs your own visual judgment.`;
+        `Use this Depth, Undertone, and Contrast result directly rather than recalculating from your own visual estimate.`;
     }
 
     const userContent = [
@@ -1591,8 +1663,18 @@ analyzeBtn.addEventListener('click', async () => {
       // Overwrite with the real measured values regardless of what
       // Claude echoed back, so downstream display is always accurate.
       result.estimated_skin_rgb = [measurements.skin_rgb.r, measurements.skin_rgb.g, measurements.skin_rgb.b];
-      result.g_minus_b = measurements.g_minus_b;
       result.estimated_iris_rgb = [measurements.iris_rgb.r, measurements.iris_rgb.g, measurements.iris_rgb.b];
+      result.estimated_sclera_rgb = [measurements.sclera_rgb.r, measurements.sclera_rgb.g, measurements.sclera_rgb.b];
+      result.estimated_eyebrow_rgb = [measurements.eyebrow_rgb.r, measurements.eyebrow_rgb.g, measurements.eyebrow_rgb.b];
+      result.skin_luminance = measurements.skin_luminance;
+      result.eyebrow_luminance = measurements.eyebrow_luminance;
+      result.iris_luminance = measurements.iris_luminance;
+      result.sclera_luminance = measurements.sclera_luminance;
+      result.depth_score = measurements.depth_score;
+      result.depth_level = measurements.depth_level;
+      result.g_minus_b = measurements.g_minus_b;
+      result.lightness = measurements.lightness;
+      result.darkness = measurements.darkness;
       result.contrast_score = measurements.contrast_score;
       result.contrast_level = measurements.contrast_level;
     }
@@ -1610,6 +1692,25 @@ function renderSeasonResult(result){
   document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
   document.getElementById('seasonName').textContent = result.season;
   document.getElementById('seasonDesc').textContent = result.explanation;
+
+  const debugPanel = document.getElementById('debugPanel');
+  const v = (x) => (x === undefined || x === null) ? 'N/A' : x;
+  if(result.estimated_skin_rgb){
+    debugPanel.style.display = 'block';
+    debugPanel.textContent =
+      `[DEBUG — remove before real customer use]\n` +
+      `skin_rgb: ${JSON.stringify(result.estimated_skin_rgb)}  L=${v(result.skin_luminance)}\n` +
+      `iris_rgb: ${JSON.stringify(result.estimated_iris_rgb)}  L=${v(result.iris_luminance)}\n` +
+      `sclera_rgb: ${JSON.stringify(result.estimated_sclera_rgb)}  L=${v(result.sclera_luminance)}\n` +
+      `eyebrow_rgb: ${JSON.stringify(result.estimated_eyebrow_rgb)}  L=${v(result.eyebrow_luminance)}\n` +
+      `g_minus_b: ${v(result.g_minus_b)} -> ${result.undertone || ''}\n` +
+      `Depth Score = 0.4*${v(result.skin_luminance)} + 0.6*${v(result.eyebrow_luminance)} = ${v(result.depth_score)} -> ${result.depth_level}\n` +
+      `Lightness = (${v(result.skin_luminance)}+${v(result.sclera_luminance)})/2 = ${v(result.lightness)}\n` +
+      `Darkness = (${v(result.iris_luminance)}+${v(result.eyebrow_luminance)})/2 = ${v(result.darkness)}\n` +
+      `Contrast Score = ${v(result.lightness)}-${v(result.darkness)} = ${v(result.contrast_score)} -> ${result.contrast_level}`;
+  } else {
+    debugPanel.style.display = 'none';
+  }
 
   resultCard.classList.add('show');
   updateChart(result.season);
