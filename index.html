@@ -1451,6 +1451,44 @@ async function measureFaceFromPhoto(imgEl){
       }
       return closestIdx;
     }
+    // Samples several candidate points along the line between two
+    // landmarks (at the given fractions from A to B) and returns
+    // whichever candidate is BRIGHTEST — used for sclera, since a
+    // single fixed point can land on eyelid skin instead of visible
+    // white, but genuine sclera should stand out as distinctly bright
+    // relative to nearby skin.
+    function sampleBrightestAlongLine(indexA, indexB, fractions, radius){
+      const a = landmarks[indexA], b = landmarks[indexB];
+      if(!a || !b) return null;
+      let best = null, bestLum = -Infinity;
+      for(const f of fractions){
+        const px = (a.x + (b.x - a.x) * f) * w;
+        const py = (a.y + (b.y - a.y) * f) * h;
+        const sample = samplePixelBlock(imageData, px, py, radius);
+        if(!sample) continue;
+        const l = luminance(sample);
+        if(l > bestLum){ bestLum = l; best = sample; }
+      }
+      return best;
+    }
+    // Samples several candidate points around a landmark, offset
+    // vertically, and returns whichever is DARKEST — used for
+    // eyebrows, since the contour landmark itself can sit on
+    // brow-bone skin between sparse hairs rather than on hair, but
+    // genuine eyebrow hair should stand out as distinctly dark
+    // relative to nearby skin.
+    function sampleDarkestNearby(index, verticalOffsets, radius){
+      const p = landmarks[index];
+      if(!p) return null;
+      let best = null, bestLum = Infinity;
+      for(const dy of verticalOffsets){
+        const sample = samplePixelBlock(imageData, p.x * w, (p.y + dy) * h, radius);
+        if(!sample) continue;
+        const l = luminance(sample);
+        if(l < bestLum){ bestLum = l; best = sample; }
+      }
+      return best;
+    }
 
     // Sample midway between iris center and iris ring, rather than
     // either extreme — the ring edge often catches the dark limbal
@@ -1461,22 +1499,28 @@ async function measureFaceFromPhoto(imgEl){
       ...MP_LANDMARKS.leftIrisRing.map(ringIdx => sampleMidpoint(MP_LANDMARKS.leftIrisCenter, ringIdx, 2)),
       ...MP_LANDMARKS.rightIrisRing.map(ringIdx => sampleMidpoint(MP_LANDMARKS.rightIrisCenter, ringIdx, 2))
     ];
-    // Sclera sampled as the midpoint between each eye corner and the
-    // nearest iris ring point on that side — closer to the true white
-    // of the eye than using the iris center as the inner reference.
+    // Sclera: search along the line from each eye corner toward the
+    // nearest iris ring point, biased toward the ring side (0.15-0.45
+    // of the way there) where visible white is most reliably found,
+    // and keep whichever candidate is brightest.
+    const scleraFractions = [0.15, 0.3, 0.45];
     const leftOuterRing = nearestRingPoint(MP_LANDMARKS.leftEyeOuter, MP_LANDMARKS.leftIrisRing);
     const leftInnerRing = nearestRingPoint(MP_LANDMARKS.leftEyeInner, MP_LANDMARKS.leftIrisRing);
     const rightOuterRing = nearestRingPoint(MP_LANDMARKS.rightEyeOuter, MP_LANDMARKS.rightIrisRing);
     const rightInnerRing = nearestRingPoint(MP_LANDMARKS.rightEyeInner, MP_LANDMARKS.rightIrisRing);
     const scleraSamples = [
-      sampleMidpoint(MP_LANDMARKS.leftEyeOuter, leftOuterRing, 2),
-      sampleMidpoint(leftInnerRing, MP_LANDMARKS.leftEyeInner, 2),
-      sampleMidpoint(MP_LANDMARKS.rightEyeOuter, rightOuterRing, 2),
-      sampleMidpoint(rightInnerRing, MP_LANDMARKS.rightEyeInner, 2)
+      sampleBrightestAlongLine(leftOuterRing, MP_LANDMARKS.leftEyeOuter, scleraFractions, 2),
+      sampleBrightestAlongLine(leftInnerRing, MP_LANDMARKS.leftEyeInner, scleraFractions, 2),
+      sampleBrightestAlongLine(rightOuterRing, MP_LANDMARKS.rightEyeOuter, scleraFractions, 2),
+      sampleBrightestAlongLine(rightInnerRing, MP_LANDMARKS.rightEyeInner, scleraFractions, 2)
     ];
+    // Eyebrow: search a small vertical band around each contour
+    // landmark and keep whichever candidate is darkest, since hair
+    // should stand out clearly from surrounding brow-bone skin.
+    const eyebrowOffsets = [-0.012, -0.006, 0, 0.006, 0.012];
     const eyebrowSamples = [
-      ...sampleIndices(MP_LANDMARKS.leftEyebrow, 2),
-      ...sampleIndices(MP_LANDMARKS.rightEyebrow, 2)
+      ...MP_LANDMARKS.leftEyebrow.map(idx => sampleDarkestNearby(idx, eyebrowOffsets, 2)),
+      ...MP_LANDMARKS.rightEyebrow.map(idx => sampleDarkestNearby(idx, eyebrowOffsets, 2))
     ];
     const skinSamples = [
       sampleMidpoint(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawA, 3),
@@ -1579,13 +1623,17 @@ function handleImageFile(file){
       const canvas = document.createElement('canvas');
       canvas.width = w; canvas.height = h;
       canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+      // PNG (lossless) instead of JPEG — JPEG's chroma subsampling
+      // blurs/averages color information more aggressively than
+      // brightness, which was quietly shrinking subtle color gaps
+      // like G-B before real pixel sampling ever got to see them.
+      const dataUrl = canvas.toDataURL('image/png');
       const base64Part = dataUrl.split(',')[1];
       if(!base64Part || base64Part.length < 100){
         showError(errorBox1, "That photo didn't process correctly. Please try again or use a different photo.");
         return;
       }
-      uploadedImage = { base64: base64Part, mediaType: 'image/jpeg' };
+      uploadedImage = { base64: base64Part, mediaType: 'image/png' };
       preview.src = dataUrl;
       preview.style.display = 'block';
       placeholderText.style.display = 'none';
