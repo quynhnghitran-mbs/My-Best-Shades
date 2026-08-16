@@ -1307,17 +1307,31 @@ async function loadFaceLandmarker(){
   if(faceLandmarker) return faceLandmarker;
   if(faceLandmarkerLoadPromise) return faceLandmarkerLoadPromise;
   faceLandmarkerLoadPromise = (async () => {
-    const vision = await import(MP_CDN);
-    const { FaceLandmarker, FilesetResolver } = vision;
-    const filesetResolver = await FilesetResolver.forVisionTasks(`${MP_CDN}/wasm`);
-    faceLandmarker = await FaceLandmarker.createFromOptions(filesetResolver, {
-      baseOptions: { modelAssetPath: MP_MODEL_URL, delegate: "GPU" },
-      runningMode: "IMAGE",
-      numFaces: 1
-    });
+    const timeout = (ms) => new Promise((_, reject) => setTimeout(() => reject(new Error(`Timed out after ${ms}ms`)), ms));
+    const loadAttempt = (async () => {
+      const vision = await import(MP_CDN);
+      const { FaceLandmarker, FilesetResolver } = vision;
+      const filesetResolver = await FilesetResolver.forVisionTasks(`${MP_CDN}/wasm`);
+      return FaceLandmarker.createFromOptions(filesetResolver, {
+        baseOptions: { modelAssetPath: MP_MODEL_URL, delegate: "CPU" },
+        runningMode: "IMAGE",
+        numFaces: 1
+      });
+    })();
+    faceLandmarker = await Promise.race([loadAttempt, timeout(8000)]);
     return faceLandmarker;
   })();
-  return faceLandmarkerLoadPromise;
+  try{
+    return await faceLandmarkerLoadPromise;
+  } catch(e){
+    // Don't leave a broken/hung promise cached forever — clear it so
+    // the NEXT attempt (e.g. the customer's next photo, or a retry)
+    // gets a genuinely fresh load instead of waiting on the same
+    // already-failed promise indefinitely.
+    faceLandmarkerLoadPromise = null;
+    faceLandmarker = null;
+    throw e;
+  }
 }
 
 // Verified MediaPipe Face Landmarker (478-point) indices used for
@@ -1397,7 +1411,10 @@ async function measureFaceFromPhoto(imgEl){
   try{
     const landmarker = await loadFaceLandmarker();
     const result = landmarker.detect(imgEl);
-    if(!result || !result.faceLandmarks || result.faceLandmarks.length === 0) return null;
+    if(!result || !result.faceLandmarks || result.faceLandmarks.length === 0){
+      console.warn('[Face measurement] MediaPipe ran but detected NO face in this photo.', result);
+      return null;
+    }
     const landmarks = result.faceLandmarks[0];
 
     const w = imgEl.naturalWidth, h = imgEl.naturalHeight;
@@ -1478,7 +1495,10 @@ async function measureFaceFromPhoto(imgEl){
     const eyebrowRgb = averageRgb(eyebrowSamples);
     const skinRgb = averageRgb(skinSamples);
 
-    if(!irisRgb || !scleraRgb || !eyebrowRgb || !skinRgb) return null;
+    if(!irisRgb || !scleraRgb || !eyebrowRgb || !skinRgb){
+      console.warn('[Face measurement] Face was detected but pixel sampling failed for one or more regions.', {irisRgb, scleraRgb, eyebrowRgb, skinRgb});
+      return null;
+    }
 
     const gMinusB = skinRgb.g - skinRgb.b;
     const undertone = gMinusB < 30 ? "cool-leaning" : "warm-leaning";
@@ -1503,9 +1523,11 @@ async function measureFaceFromPhoto(imgEl){
       iris_luminance: Math.round(irisLuminance), sclera_luminance: Math.round(scleraLuminance),
       depth_score: Math.round(depthScore), depth_level: depthLevel,
       lightness: Math.round(lightness), darkness: Math.round(darkness),
-      contrast_score: Math.round(contrastScore), contrast_level: contrastLevel
+      contrast_score: Math.round(contrastScore), contrast_level: contrastLevel,
+      image_width: w, image_height: h
     };
   } catch(e){
+    console.error('[Face measurement failed, falling back to AI estimation]', e);
     return null; // any failure -> caller falls back to AI estimation
   }
 }
@@ -1677,7 +1699,10 @@ analyzeBtn.addEventListener('click', async () => {
       result.darkness = measurements.darkness;
       result.contrast_score = measurements.contrast_score;
       result.contrast_level = measurements.contrast_level;
+      result.image_width = measurements.image_width;
+      result.image_height = measurements.image_height;
     }
+    result.image_mime_type = uploadedImage.mediaType;
     currentSeasonResult = result;
     renderSeasonResult(result);
   } catch(err){
@@ -1697,8 +1722,13 @@ function renderSeasonResult(result){
   const v = (x) => (x === undefined || x === null) ? 'N/A' : x;
   if(result.estimated_skin_rgb){
     debugPanel.style.display = 'block';
+    const sourceLabel = (result.image_width !== undefined)
+      ? '✓ REAL PIXEL MEASUREMENT (MediaPipe succeeded)'
+      : '⚠ AI SELF-ESTIMATE (MediaPipe did not run or failed — Claude guessed these numbers visually)';
     debugPanel.textContent =
       `[DEBUG — remove before real customer use]\n` +
+      `SOURCE: ${sourceLabel}\n` +
+      `image: ${v(result.image_width)}x${v(result.image_height)}  type=${v(result.image_mime_type)}\n` +
       `skin_rgb: ${JSON.stringify(result.estimated_skin_rgb)}  L=${v(result.skin_luminance)}\n` +
       `iris_rgb: ${JSON.stringify(result.estimated_iris_rgb)}  L=${v(result.iris_luminance)}\n` +
       `sclera_rgb: ${JSON.stringify(result.estimated_sclera_rgb)}  L=${v(result.sclera_luminance)}\n` +
