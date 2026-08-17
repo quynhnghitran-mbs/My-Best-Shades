@@ -1619,10 +1619,10 @@ async function measureFaceFromPhoto(imgEl){
     const rightOuterRing = nearestRingPoint(MP_LANDMARKS.rightEyeOuter, MP_LANDMARKS.rightIrisRing);
     const rightInnerRing = nearestRingPoint(MP_LANDMARKS.rightEyeInner, MP_LANDMARKS.rightIrisRing);
     const scleraSamples = [
-      ...sampleNeutralInRegion(leftOuterRing, MP_LANDMARKS.leftEyeOuter, 1, 10, 5, 0.04, 0.10),
-      ...sampleNeutralInRegion(leftInnerRing, MP_LANDMARKS.leftEyeInner, 1, 10, 5, 0.04, 0.10),
-      ...sampleNeutralInRegion(rightOuterRing, MP_LANDMARKS.rightEyeOuter, 1, 10, 5, 0.04, 0.10),
-      ...sampleNeutralInRegion(rightInnerRing, MP_LANDMARKS.rightEyeInner, 1, 10, 5, 0.04, 0.10)
+      ...sampleNeutralInRegion(leftOuterRing, MP_LANDMARKS.leftEyeOuter, 1, 10, 7, 0.08, 0.10),
+      ...sampleNeutralInRegion(leftInnerRing, MP_LANDMARKS.leftEyeInner, 1, 10, 7, 0.08, 0.10),
+      ...sampleNeutralInRegion(rightOuterRing, MP_LANDMARKS.rightEyeOuter, 1, 10, 7, 0.08, 0.10),
+      ...sampleNeutralInRegion(rightInnerRing, MP_LANDMARKS.rightEyeInner, 1, 10, 7, 0.08, 0.10)
     ];
 
     // EYEBROW: scans a 10x10 grid (100 candidates) across each brow's
