@@ -1517,6 +1517,12 @@ async function measureFaceFromPhoto(imgEl){
         scored.sort((x, y) => x.ratio - y.ratio);
         kept = scored.slice(0, Math.max(1, Math.round(scored.length * 0.1)));
       }
+      // Among neutral-passing candidates, keep only the brighter half
+      // before averaging — sclera should be both neutral AND bright;
+      // averaging in darker neutral pixels too (shadow, lash edge)
+      // was pulling the result notably darker than true sclera.
+      kept.sort((x, y) => luminance(y.sample) - luminance(x.sample));
+      kept = kept.slice(0, Math.max(1, Math.ceil(kept.length / 2)));
       return kept.map(k => k.sample);
     }
     // Finds whichever iris ring point sits closest to a given eye
