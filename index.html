@@ -1436,6 +1436,21 @@ async function measureFaceFromPhoto(imgEl){
       if(!a || !b) return null;
       return samplePixelBlock(imageData, ((a.x + b.x) / 2) * w, ((a.y + b.y) / 2) * h, radius);
     }
+    // Samples at a given fraction along the line from landmark A to
+    // landmark B (0 = at A, 1 = at B).
+    function sampleAlongLine(indexA, indexB, fraction, radius){
+      const a = landmarks[indexA], b = landmarks[indexB];
+      if(!a || !b) return null;
+      const px = (a.x + (b.x - a.x) * fraction) * w;
+      const py = (a.y + (b.y - a.y) * fraction) * h;
+      return samplePixelBlock(imageData, px, py, radius);
+    }
+    // Samples multiple fractions along a line, returning all results
+    // (not just the best) — used where more sample density is wanted
+    // while still keeping the search biased toward a reliable zone.
+    function sampleFractionsAlongLine(indexA, indexB, fractions, radius){
+      return fractions.map(f => sampleAlongLine(indexA, indexB, f, radius));
+    }
     // Finds whichever iris ring point sits closest to a given eye
     // corner — avoids assuming a fixed directional order for the ring
     // indices, which isn't guaranteed to be reliably known.
@@ -1451,32 +1466,11 @@ async function measureFaceFromPhoto(imgEl){
       }
       return closestIdx;
     }
-    // Samples several candidate points along the line between two
-    // landmarks (at the given fractions from A to B) and returns
-    // whichever candidate is BRIGHTEST — used for sclera, since a
-    // single fixed point can land on eyelid skin instead of visible
-    // white, but genuine sclera should stand out as distinctly bright
-    // relative to nearby skin.
-    function sampleBrightestAlongLine(indexA, indexB, fractions, radius){
-      const a = landmarks[indexA], b = landmarks[indexB];
-      if(!a || !b) return null;
-      let best = null, bestLum = -Infinity;
-      for(const f of fractions){
-        const px = (a.x + (b.x - a.x) * f) * w;
-        const py = (a.y + (b.y - a.y) * f) * h;
-        const sample = samplePixelBlock(imageData, px, py, radius);
-        if(!sample) continue;
-        const l = luminance(sample);
-        if(l > bestLum){ bestLum = l; best = sample; }
-      }
-      return best;
-    }
-    // Samples several candidate points around a landmark, offset
-    // vertically, and returns whichever is DARKEST — used for
-    // eyebrows, since the contour landmark itself can sit on
-    // brow-bone skin between sparse hairs rather than on hair, but
-    // genuine eyebrow hair should stand out as distinctly dark
-    // relative to nearby skin.
+    // Samples around a landmark at several vertical offsets, keeping
+    // the darkest — used for eyebrows, since the contour landmark
+    // itself can sit on brow-bone skin between sparse hairs rather
+    // than on hair, but genuine hair should stand out as distinctly
+    // dark relative to nearby skin.
     function sampleDarkestNearby(index, verticalOffsets, radius){
       const p = landmarks[index];
       if(!p) return null;
@@ -1489,53 +1483,100 @@ async function measureFaceFromPhoto(imgEl){
       }
       return best;
     }
+    // Samples a point that's a given fraction of the way from the
+    // iris center toward a target (x,y) position (not a landmark
+    // index — used for the interpolated 5th angular iris direction).
+    function samplePointFraction(centerIdx, targetXY, fraction, radius){
+      const c = landmarks[centerIdx];
+      if(!c || !targetXY) return null;
+      const px = (c.x + (targetXY.x - c.x) * fraction) * w;
+      const py = (c.y + (targetXY.y - c.y) * fraction) * h;
+      return samplePixelBlock(imageData, px, py, radius);
+    }
 
-    // Sample midway between iris center and iris ring, rather than
-    // either extreme — the ring edge often catches the dark limbal
-    // boundary (where iris meets sclera), while the exact center can
-    // catch a bright reflection/catchlight. The midpoint lands on
-    // genuine iris tissue, avoiding both.
+    // IRIS: 10 points per eye (20 total). 5 angular directions (the 4
+    // MediaPipe ring landmarks, plus 1 interpolated direction between
+    // two of them for denser angular coverage) x 2 radial fractions
+    // between the iris center and each direction — avoids both the
+    // pupil-center reflection and the dark limbal ring edge.
+    function irisTenPoints(centerIdx, ring, radius){
+      const c = landmarks[centerIdx];
+      const r0 = landmarks[ring[0]], r2 = landmarks[ring[2]];
+      const interpolatedXY = (c && r0 && r2) ? { x: (r0.x + r2.x) / 2, y: (r0.y + r2.y) / 2 } : null;
+      const radialFractions = [0.4, 0.6];
+      const samples = [];
+      for(const ringIdx of ring){
+        for(const f of radialFractions){
+          samples.push(sampleAlongLine(centerIdx, ringIdx, f, radius));
+        }
+      }
+      for(const f of radialFractions){
+        samples.push(samplePointFraction(centerIdx, interpolatedXY, f, radius));
+      }
+      return samples;
+    }
     const irisSamples = [
-      ...MP_LANDMARKS.leftIrisRing.map(ringIdx => sampleMidpoint(MP_LANDMARKS.leftIrisCenter, ringIdx, 2)),
-      ...MP_LANDMARKS.rightIrisRing.map(ringIdx => sampleMidpoint(MP_LANDMARKS.rightIrisCenter, ringIdx, 2))
+      ...irisTenPoints(MP_LANDMARKS.leftIrisCenter, MP_LANDMARKS.leftIrisRing, 2),
+      ...irisTenPoints(MP_LANDMARKS.rightIrisCenter, MP_LANDMARKS.rightIrisRing, 2)
     ];
-    // Sclera: search along the line from each eye corner toward the
-    // nearest iris ring point, biased toward the ring side (0.15-0.45
-    // of the way there) where visible white is most reliably found,
-    // and keep whichever candidate is brightest.
-    const scleraFractions = [0.15, 0.3, 0.45];
+
+    // SCLERA: 5 points on the outer side + 5 on the inner side per
+    // eye (20 total). Fractions stay biased toward the iris/ring side
+    // (0.08-0.40 of the way from ring to corner) rather than spread
+    // all the way to the corner, since visible white is most reliable
+    // near the ring and eyelid folds become more likely deeper into
+    // the corner.
+    const scleraFractions = [0.08, 0.16, 0.24, 0.32, 0.40];
     const leftOuterRing = nearestRingPoint(MP_LANDMARKS.leftEyeOuter, MP_LANDMARKS.leftIrisRing);
     const leftInnerRing = nearestRingPoint(MP_LANDMARKS.leftEyeInner, MP_LANDMARKS.leftIrisRing);
     const rightOuterRing = nearestRingPoint(MP_LANDMARKS.rightEyeOuter, MP_LANDMARKS.rightIrisRing);
     const rightInnerRing = nearestRingPoint(MP_LANDMARKS.rightEyeInner, MP_LANDMARKS.rightIrisRing);
     const scleraSamples = [
-      sampleBrightestAlongLine(leftOuterRing, MP_LANDMARKS.leftEyeOuter, scleraFractions, 2),
-      sampleBrightestAlongLine(leftInnerRing, MP_LANDMARKS.leftEyeInner, scleraFractions, 2),
-      sampleBrightestAlongLine(rightOuterRing, MP_LANDMARKS.rightEyeOuter, scleraFractions, 2),
-      sampleBrightestAlongLine(rightInnerRing, MP_LANDMARKS.rightEyeInner, scleraFractions, 2)
+      ...sampleFractionsAlongLine(leftOuterRing, MP_LANDMARKS.leftEyeOuter, scleraFractions, 2),
+      ...sampleFractionsAlongLine(leftInnerRing, MP_LANDMARKS.leftEyeInner, scleraFractions, 2),
+      ...sampleFractionsAlongLine(rightOuterRing, MP_LANDMARKS.rightEyeOuter, scleraFractions, 2),
+      ...sampleFractionsAlongLine(rightInnerRing, MP_LANDMARKS.rightEyeInner, scleraFractions, 2)
     ];
-    // Eyebrow: search a small vertical band around each contour
-    // landmark and keep whichever candidate is darkest, since hair
-    // should stand out clearly from surrounding brow-bone skin.
+
+    // EYEBROW: already 10 landmark points per side (20 total) —
+    // unchanged, still searching a small vertical band per point.
     const eyebrowOffsets = [-0.012, -0.006, 0, 0.006, 0.012];
     const eyebrowSamples = [
       ...MP_LANDMARKS.leftEyebrow.map(idx => sampleDarkestNearby(idx, eyebrowOffsets, 2)),
       ...MP_LANDMARKS.rightEyebrow.map(idx => sampleDarkestNearby(idx, eyebrowOffsets, 2))
     ];
+
+    // SKIN: 40 points total — 10 per lower cheek (20) + 20 on the
+    // forehead. Cheek uses the 3 existing cheekbone-to-jaw lines per
+    // side, sampled at multiple fractions (4+3+3=10). Forehead uses a
+    // 5x4 grid of small offsets around the glabella landmark, staying
+    // well clear of the hairline.
+    function cheekTenPoints(cheekboneIdx, jawA, jawB, jawC, radius){
+      return [
+        ...sampleFractionsAlongLine(cheekboneIdx, jawA, [0.25, 0.4, 0.55, 0.7], radius),
+        ...sampleFractionsAlongLine(cheekboneIdx, jawB, [0.3, 0.5, 0.7], radius),
+        ...sampleFractionsAlongLine(cheekboneIdx, jawC, [0.3, 0.5, 0.7], radius)
+      ];
+    }
     const skinSamplesCheek = [
-      sampleMidpoint(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawA, 3),
-      sampleMidpoint(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawB, 3),
-      sampleMidpoint(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawC, 3),
-      sampleMidpoint(MP_LANDMARKS.rightCheekbone, MP_LANDMARKS.rightJawA, 3),
-      sampleMidpoint(MP_LANDMARKS.rightCheekbone, MP_LANDMARKS.rightJawB, 3),
-      sampleMidpoint(MP_LANDMARKS.rightCheekbone, MP_LANDMARKS.rightJawC, 3)
+      ...cheekTenPoints(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawA, MP_LANDMARKS.leftJawB, MP_LANDMARKS.leftJawC, 3),
+      ...cheekTenPoints(MP_LANDMARKS.rightCheekbone, MP_LANDMARKS.rightJawA, MP_LANDMARKS.rightJawB, MP_LANDMARKS.rightJawC, 3)
     ];
-    const skinSamplesForehead = sampleIndices(MP_LANDMARKS.foreheadCenter, 3);
-    const skinSamplesNose = [
-      ...sampleIndices([MP_LANDMARKS.noseBridge], 2),
-      ...sampleIndices([MP_LANDMARKS.noseTip], 2)
-    ];
-    const skinSamples = [...skinSamplesCheek, ...skinSamplesForehead, ...skinSamplesNose];
+    function foreheadTwentyPoints(anchorIdx, radius){
+      const p = landmarks[anchorIdx];
+      if(!p) return [];
+      const dxs = [-0.05, -0.025, 0, 0.025, 0.05];
+      const dys = [-0.02, -0.01, 0, 0.015];
+      const samples = [];
+      for(const dy of dys){
+        for(const dx of dxs){
+          samples.push(samplePixelBlock(imageData, (p.x + dx) * w, (p.y + dy) * h, radius));
+        }
+      }
+      return samples;
+    }
+    const skinSamplesForehead = foreheadTwentyPoints(MP_LANDMARKS.foreheadCenter[0], 3);
+    const skinSamples = [...skinSamplesCheek, ...skinSamplesForehead];
 
     const irisRgb = averageRgb(irisSamples);
     const scleraRgb = averageRgb(scleraSamples);
@@ -1546,7 +1587,6 @@ async function measureFaceFromPhoto(imgEl){
     // regions (e.g. forehead) independently show.
     const skinRgbCheek = averageRgb(skinSamplesCheek);
     const skinRgbForehead = averageRgb(skinSamplesForehead);
-    const skinRgbNose = averageRgb(skinSamplesNose);
 
     if(!irisRgb || !scleraRgb || !eyebrowRgb || !skinRgb){
       console.warn('[Face measurement] Face was detected but pixel sampling failed for one or more regions.', {irisRgb, scleraRgb, eyebrowRgb, skinRgb});
@@ -1578,7 +1618,7 @@ async function measureFaceFromPhoto(imgEl){
       lightness: Math.round(lightness), darkness: Math.round(darkness),
       contrast_score: Math.round(contrastScore), contrast_level: contrastLevel,
       image_width: w, image_height: h,
-      skin_rgb_cheek: skinRgbCheek, skin_rgb_forehead: skinRgbForehead, skin_rgb_nose: skinRgbNose
+      skin_rgb_cheek: skinRgbCheek, skin_rgb_forehead: skinRgbForehead
     };
   } catch(e){
     console.error('[Face measurement failed, falling back to AI estimation]', e);
@@ -1761,7 +1801,6 @@ analyzeBtn.addEventListener('click', async () => {
       result.image_height = measurements.image_height;
       result.skin_rgb_cheek = measurements.skin_rgb_cheek;
       result.skin_rgb_forehead = measurements.skin_rgb_forehead;
-      result.skin_rgb_nose = measurements.skin_rgb_nose;
     }
     result.image_mime_type = uploadedImage.mediaType;
     currentSeasonResult = result;
@@ -1791,7 +1830,7 @@ function renderSeasonResult(result){
       `SOURCE: ${sourceLabel}\n` +
       `image: ${v(result.image_width)}x${v(result.image_height)}  type=${v(result.image_mime_type)}\n` +
       `skin_rgb: ${JSON.stringify(result.estimated_skin_rgb)}  L=${v(result.skin_luminance)}\n` +
-      `  ↳ cheek: ${JSON.stringify(v(result.skin_rgb_cheek))}  forehead: ${JSON.stringify(v(result.skin_rgb_forehead))}  nose: ${JSON.stringify(v(result.skin_rgb_nose))}\n` +
+      `  ↳ cheek: ${JSON.stringify(v(result.skin_rgb_cheek))}  forehead: ${JSON.stringify(v(result.skin_rgb_forehead))}\n` +
       `iris_rgb: ${JSON.stringify(result.estimated_iris_rgb)}  L=${v(result.iris_luminance)}\n` +
       `sclera_rgb: ${JSON.stringify(result.estimated_sclera_rgb)}  L=${v(result.sclera_luminance)}\n` +
       `eyebrow_rgb: ${JSON.stringify(result.estimated_eyebrow_rgb)}  L=${v(result.eyebrow_luminance)}\n` +
