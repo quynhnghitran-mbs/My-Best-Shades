@@ -1349,16 +1349,22 @@ async function loadFaceLandmarker(){
 // the upper cheek/cheekbone area, since that's where blush and
 // natural flush most commonly show.
 const MP_LANDMARKS = {
+  // All indices below verified directly against Google's own
+  // tfjs-models/face-landmarks-detection keypoints.ts source (the
+  // canonical reference — see MESH_ANNOTATIONS in that file). An
+  // earlier version of this had left/right swapped for eye corners
+  // AND eyebrows, which meant sclera was being computed between one
+  // eye's iris and the OTHER eye's corner points entirely.
   leftIrisRing: [469, 470, 471, 472],
   rightIrisRing: [474, 475, 476, 477],
   leftIrisCenter: 468,
   rightIrisCenter: 473,
-  leftEyeOuter: 33,
-  leftEyeInner: 133,
-  rightEyeOuter: 263,
-  rightEyeInner: 362,
-  leftEyebrow: [70, 63, 105, 66, 107, 55, 65, 52, 53, 46],
-  rightEyebrow: [300, 293, 334, 296, 336, 285, 295, 282, 283, 276],
+  leftEyeOuter: 263,
+  leftEyeInner: 362,
+  rightEyeOuter: 33,
+  rightEyeInner: 133,
+  leftEyebrow: [300, 293, 334, 296, 336, 285, 295, 282, 283, 276],
+  rightEyebrow: [70, 63, 105, 66, 107, 55, 65, 52, 53, 46],
   leftCheekbone: 234,
   leftJawA: 172,
   leftJawB: 136,
@@ -1368,6 +1374,7 @@ const MP_LANDMARKS = {
   rightJawB: 365,
   rightJawC: 379,
   foreheadCenter: [9, 151],
+  foreheadHairline: 10,
   noseTip: 1,
   noseBridge: 6
 };
@@ -1508,23 +1515,32 @@ async function measureFaceFromPhoto(imgEl){
     }
     // Samples around a landmark at several vertical offsets, keeping
     // the darkest — used for eyebrows, since the contour landmark
-    // itself can sit on brow-bone skin between sparse hairs rather
-    // than on hair, but genuine hair should stand out as distinctly
-    // dark relative to nearby skin.
-    function sampleDarkestNearby(index, verticalOffsets, radius, horizontalOffsets){
-      const p = landmarks[index];
-      if(!p) return null;
-      const hOffsets = horizontalOffsets || [0];
-      let best = null, bestLum = Infinity;
-      for(const dy of verticalOffsets){
-        for(const dx of hOffsets){
-          const sample = samplePixelBlock(imageData, (p.x + dx) * w, (p.y + dy) * h, radius);
-          if(!sample) continue;
-          const l = luminance(sample);
-          if(l < bestLum){ bestLum = l; best = sample; }
+    // Scans a dense grid across the bounding box of a set of contour
+    // landmarks (expanded slightly), and returns only the darkest
+    // fraction of all candidates found — used for eyebrows, since
+    // searching small windows near specific landmarks assumes we
+    // already know roughly where the hair is; scanning the whole
+    // plausible region and keeping only the genuinely darkest points
+    // is more robust to exact landmark positioning or thin/sparse brows.
+    function sampleDarkestInRegion(indices, radius, gridSize, keepFraction){
+      const points = indices.map(i => landmarks[i]).filter(Boolean);
+      if(points.length === 0) return [];
+      const minX = Math.min(...points.map(p => p.x));
+      const maxX = Math.max(...points.map(p => p.x));
+      const minY = Math.min(...points.map(p => p.y)) - 0.015; // a little above the contour (toward hairline side)
+      const maxY = Math.max(...points.map(p => p.y)) + 0.008; // a little below (toward eyelid side)
+      const candidates = [];
+      for(let gx = 0; gx < gridSize; gx++){
+        for(let gy = 0; gy < gridSize; gy++){
+          const x = minX + (maxX - minX) * (gx / (gridSize - 1));
+          const y = minY + (maxY - minY) * (gy / (gridSize - 1));
+          const sample = samplePixelBlock(imageData, x * w, y * h, radius);
+          if(sample) candidates.push(sample);
         }
       }
-      return best;
+      candidates.sort((a, b) => luminance(a) - luminance(b));
+      const keepCount = Math.max(1, Math.round(candidates.length * keepFraction));
+      return candidates.slice(0, keepCount);
     }
     // Samples a point that's a given fraction of the way from the
     // iris center toward a target (x,y) position (not a landmark
@@ -1581,16 +1597,14 @@ async function measureFaceFromPhoto(imgEl){
       ...sampleBrightestNearFractions(rightInnerRing, MP_LANDMARKS.rightEyeInner, scleraFractions, 2)
     ];
 
-    // EYEBROW: 10 landmark points per side (20 total). Each point now
-    // searches a small 2D grid (vertical AND horizontal offsets, not
-    // just a vertical line) and keeps whichever candidate is darkest
-    // — a wider search area gives genuine hair a better chance of
-    // being found, especially for thinner/sparser brows.
-    const eyebrowVerticalOffsets = [-0.018, -0.012, -0.006, 0, 0.006, 0.012, 0.018];
-    const eyebrowHorizontalOffsets = [-0.008, 0, 0.008];
+    // EYEBROW: scans an 8x8 grid (64 candidates) across each brow's
+    // full bounding box, keeping only the darkest 25% (~16 points per
+    // side, 32 total) — far more robust than searching small windows
+    // near individual landmarks, since it doesn't depend on already
+    // knowing roughly where the hair sits.
     const eyebrowSamples = [
-      ...MP_LANDMARKS.leftEyebrow.map(idx => sampleDarkestNearby(idx, eyebrowVerticalOffsets, 2, eyebrowHorizontalOffsets)),
-      ...MP_LANDMARKS.rightEyebrow.map(idx => sampleDarkestNearby(idx, eyebrowVerticalOffsets, 2, eyebrowHorizontalOffsets))
+      ...sampleDarkestInRegion(MP_LANDMARKS.leftEyebrow, 2, 8, 0.25),
+      ...sampleDarkestInRegion(MP_LANDMARKS.rightEyebrow, 2, 8, 0.25)
     ];
 
     // SKIN: 40 points total — 10 per lower cheek (20) + 20 on the
@@ -1609,20 +1623,28 @@ async function measureFaceFromPhoto(imgEl){
       ...cheekTenPoints(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawA, MP_LANDMARKS.leftJawB, MP_LANDMARKS.leftJawC, 3),
       ...cheekTenPoints(MP_LANDMARKS.rightCheekbone, MP_LANDMARKS.rightJawA, MP_LANDMARKS.rightJawB, MP_LANDMARKS.rightJawC, 3)
     ];
-    function foreheadTwentyPoints(anchorIdx, radius){
-      const p = landmarks[anchorIdx];
-      if(!p) return [];
+    // MediaPipe's own documentation notes forehead landmark coverage
+    // is sparse — points sit either near the hairline or at the
+    // glabella (between the eyebrows) — and recommends interpolating
+    // between them for genuine mid-forehead positions. Landmark 9 on
+    // its own is the glabella specifically, too close to the brow
+    // area; anchoring there was pulling the "forehead" sample toward
+    // eyebrow-adjacent skin instead of true mid-forehead.
+    function foreheadTwentyPoints(glabellaIdx, hairlineIdx, radius){
+      const g = landmarks[glabellaIdx], hl = landmarks[hairlineIdx];
+      if(!g || !hl) return [];
+      const anchor = { x: g.x + (hl.x - g.x) * 0.45, y: g.y + (hl.y - g.y) * 0.45 };
       const dxs = [-0.05, -0.025, 0, 0.025, 0.05];
       const dys = [-0.02, -0.01, 0, 0.015];
       const samples = [];
       for(const dy of dys){
         for(const dx of dxs){
-          samples.push(samplePixelBlock(imageData, (p.x + dx) * w, (p.y + dy) * h, radius));
+          samples.push(samplePixelBlock(imageData, (anchor.x + dx) * w, (anchor.y + dy) * h, radius));
         }
       }
       return samples;
     }
-    const skinSamplesForehead = foreheadTwentyPoints(MP_LANDMARKS.foreheadCenter[0], 3);
+    const skinSamplesForehead = foreheadTwentyPoints(MP_LANDMARKS.foreheadCenter[0], MP_LANDMARKS.foreheadHairline, 3);
     const skinSamples = [...skinSamplesCheek, ...skinSamplesForehead];
 
     const irisRgb = averageRgb(irisSamples);
