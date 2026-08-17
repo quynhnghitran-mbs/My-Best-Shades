@@ -1599,12 +1599,16 @@ async function measureFaceFromPhoto(imgEl){
     ];
 
     // SCLERA: 5 points on the outer side + 5 on the inner side per
-    // eye (20 total). Fractions stay biased toward the iris/ring side
-    // (0.08-0.40 of the way from ring to corner) rather than spread
-    // all the way to the corner, since visible white is most reliable
-    // near the ring and eyelid folds become more likely deeper into
-    // the corner.
-    const scleraFractions = [0.08, 0.16, 0.24, 0.32, 0.40];
+    // eye (20 total). Widened significantly further toward the
+    // corner (up to 0.70) than earlier attempts (which stayed within
+    // 0.08-0.40) — staying close to the ring consistently found a
+    // warm-toned limbal highlight rather than genuine neutral sclera
+    // across five different search-mechanic changes, suggesting true
+    // visible white simply starts further toward the corner for at
+    // least some eye shapes/lighting. The neutrality-penalty scoring
+    // still guards against landing on eyelid fold skin even at these
+    // wider fractions.
+    const scleraFractions = [0.10, 0.25, 0.40, 0.55, 0.70];
     const leftOuterRing = nearestRingPoint(MP_LANDMARKS.leftEyeOuter, MP_LANDMARKS.leftIrisRing);
     const leftInnerRing = nearestRingPoint(MP_LANDMARKS.leftEyeInner, MP_LANDMARKS.leftIrisRing);
     const rightOuterRing = nearestRingPoint(MP_LANDMARKS.rightEyeOuter, MP_LANDMARKS.rightIrisRing);
@@ -1622,8 +1626,8 @@ async function measureFaceFromPhoto(imgEl){
     // the truest, darkest core of the hair rather than any lighter
     // transitional pixels at its edges.
     const eyebrowSamples = [
-      ...sampleDarkestInRegion(MP_LANDMARKS.leftEyebrow, 2, 10, 0.05),
-      ...sampleDarkestInRegion(MP_LANDMARKS.rightEyebrow, 2, 10, 0.05)
+      ...sampleDarkestInRegion(MP_LANDMARKS.leftEyebrow, 2, 10, 0.12),
+      ...sampleDarkestInRegion(MP_LANDMARKS.rightEyebrow, 2, 10, 0.12)
     ];
 
     // SKIN: 40 points total — 10 per lower cheek (20) + 20 on the
