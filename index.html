@@ -1480,29 +1480,39 @@ async function measureFaceFromPhoto(imgEl){
     function sampleFractionsAlongLine(indexA, indexB, fractions, radius){
       return fractions.map(f => sampleAlongLine(indexA, indexB, f, radius));
     }
-    // For EACH target fraction, checks a couple of nearby positions
-    // (small local jitter) and keeps whichever scores best on
-    // brightness MINUS a penalty for color spread — used for sclera.
-    // Pure brightness-seeking was finding bright, warm-toned skin
-    // near the eye (e.g. a highlight on the lower eyelid) rather than
-    // genuine sclera, since skin can be brighter than sclera in some
-    // lighting. Real sclera is close to neutral gray (R≈G≈B); skin is
-    // not (R notably higher than G and B) — penalizing that spread
-    // makes the search prefer true neutral white over a brighter but
-    // clearly-skin-toned false positive.
     function colorSpread(rgb){
       return Math.max(rgb.r, rgb.g, rgb.b) - Math.min(rgb.r, rgb.g, rgb.b);
     }
+    // For EACH target fraction, searches a genuine 2D patch — jitter
+    // ALONG the ring-to-corner line (as before) PLUS perpendicular to
+    // it — and keeps whichever scores best on brightness minus a
+    // color-spread penalty. A pure along-the-line search assumes true
+    // sclera sits exactly on that line, but the eye is a curved
+    // surface — visible white can sit slightly above or below the
+    // direct line between two landmarks, which a 1D search would
+    // never reach no matter how it scores what it does find.
     function sampleBrightestNearFractions(indexA, indexB, fractions, radius){
-      const jitters = [-0.03, 0, 0.03];
+      const a = landmarks[indexA], b = landmarks[indexB];
+      if(!a || !b) return fractions.map(() => null);
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const perpX = -dy / len, perpY = dx / len; // unit vector perpendicular to the line
+      const alongJitters = [-0.03, 0, 0.03];
+      const perpJitters = [-0.02, -0.01, 0, 0.01, 0.02];
       const spreadPenalty = 1.5;
       return fractions.map(f => {
         let best = null, bestScore = -Infinity;
-        for(const j of jitters){
-          const sample = sampleAlongLine(indexA, indexB, f + j, radius);
-          if(!sample) continue;
-          const score = luminance(sample) - spreadPenalty * colorSpread(sample);
-          if(score > bestScore){ bestScore = score; best = sample; }
+        for(const aj of alongJitters){
+          const baseX = a.x + dx * (f + aj);
+          const baseY = a.y + dy * (f + aj);
+          for(const pj of perpJitters){
+            const px = (baseX + perpX * pj) * w;
+            const py = (baseY + perpY * pj) * h;
+            const sample = samplePixelBlock(imageData, px, py, radius);
+            if(!sample) continue;
+            const score = luminance(sample) - spreadPenalty * colorSpread(sample);
+            if(score > bestScore){ bestScore = score; best = sample; }
+          }
         }
         return best;
       });
@@ -1600,20 +1610,20 @@ async function measureFaceFromPhoto(imgEl){
     const rightOuterRing = nearestRingPoint(MP_LANDMARKS.rightEyeOuter, MP_LANDMARKS.rightIrisRing);
     const rightInnerRing = nearestRingPoint(MP_LANDMARKS.rightEyeInner, MP_LANDMARKS.rightIrisRing);
     const scleraSamples = [
-      ...sampleBrightestNearFractions(leftOuterRing, MP_LANDMARKS.leftEyeOuter, scleraFractions, 2),
-      ...sampleBrightestNearFractions(leftInnerRing, MP_LANDMARKS.leftEyeInner, scleraFractions, 2),
-      ...sampleBrightestNearFractions(rightOuterRing, MP_LANDMARKS.rightEyeOuter, scleraFractions, 2),
-      ...sampleBrightestNearFractions(rightInnerRing, MP_LANDMARKS.rightEyeInner, scleraFractions, 2)
+      ...sampleBrightestNearFractions(leftOuterRing, MP_LANDMARKS.leftEyeOuter, scleraFractions, 1),
+      ...sampleBrightestNearFractions(leftInnerRing, MP_LANDMARKS.leftEyeInner, scleraFractions, 1),
+      ...sampleBrightestNearFractions(rightOuterRing, MP_LANDMARKS.rightEyeOuter, scleraFractions, 1),
+      ...sampleBrightestNearFractions(rightInnerRing, MP_LANDMARKS.rightEyeInner, scleraFractions, 1)
     ];
 
     // EYEBROW: scans a 10x10 grid (100 candidates) across each brow's
     // bounding box (with a wider margin than before), keeping only
-    // the darkest 12% (~12 points per side, 24 total) to more
-    // aggressively isolate the true darkest core of the hair rather
-    // than including lighter transitional pixels at its edges.
+    // the darkest 5% (~5 points per side, 10 total) to isolate just
+    // the truest, darkest core of the hair rather than any lighter
+    // transitional pixels at its edges.
     const eyebrowSamples = [
-      ...sampleDarkestInRegion(MP_LANDMARKS.leftEyebrow, 2, 10, 0.12),
-      ...sampleDarkestInRegion(MP_LANDMARKS.rightEyebrow, 2, 10, 0.12)
+      ...sampleDarkestInRegion(MP_LANDMARKS.leftEyebrow, 2, 10, 0.05),
+      ...sampleDarkestInRegion(MP_LANDMARKS.rightEyebrow, 2, 10, 0.05)
     ];
 
     // SKIN: 40 points total — 10 per lower cheek (20) + 20 on the
