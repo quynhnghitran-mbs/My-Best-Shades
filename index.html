@@ -1483,39 +1483,41 @@ async function measureFaceFromPhoto(imgEl){
     function colorSpread(rgb){
       return Math.max(rgb.r, rgb.g, rgb.b) - Math.min(rgb.r, rgb.g, rgb.b);
     }
-    // For EACH target fraction, searches a genuine 2D patch — jitter
-    // ALONG the ring-to-corner line (as before) PLUS perpendicular to
-    // it — and keeps whichever scores best on brightness minus a
-    // color-spread penalty. A pure along-the-line search assumes true
-    // sclera sits exactly on that line, but the eye is a curved
-    // surface — visible white can sit slightly above or below the
-    // direct line between two landmarks, which a 1D search would
-    // never reach no matter how it scores what it does find.
-    function sampleBrightestNearFractions(indexA, indexB, fractions, radius){
-      const a = landmarks[indexA], b = landmarks[indexB];
-      if(!a || !b) return fractions.map(() => null);
+    // Scans a dense 2D region between the iris ring and an eye corner
+    // (the full line, not a narrow sub-range, plus perpendicular
+    // width) and keeps every candidate whose color spread is within
+    // neutralThreshold of its own luminance (spread/L ratio) — same
+    // strategy that worked for eyebrow: scan broadly, filter by the
+    // right criterion, average everything that passes, rather than
+    // picking a single "best" point. If nothing meets the threshold
+    // (should be rare), falls back to the most-neutral candidates
+    // found so a result always exists.
+    function sampleNeutralInRegion(ringIdx, cornerIdx, radius, alongSteps, perpSteps, perpWidth, neutralThreshold){
+      const a = landmarks[ringIdx], b = landmarks[cornerIdx];
+      if(!a || !b) return [];
       const dx = b.x - a.x, dy = b.y - a.y;
       const len = Math.hypot(dx, dy) || 1;
-      const perpX = -dy / len, perpY = dx / len; // unit vector perpendicular to the line
-      const alongJitters = [-0.03, 0, 0.03];
-      const perpJitters = [-0.02, -0.01, 0, 0.01, 0.02];
-      const spreadPenalty = 1.5;
-      return fractions.map(f => {
-        let best = null, bestScore = -Infinity;
-        for(const aj of alongJitters){
-          const baseX = a.x + dx * (f + aj);
-          const baseY = a.y + dy * (f + aj);
-          for(const pj of perpJitters){
-            const px = (baseX + perpX * pj) * w;
-            const py = (baseY + perpY * pj) * h;
-            const sample = samplePixelBlock(imageData, px, py, radius);
-            if(!sample) continue;
-            const score = luminance(sample) - spreadPenalty * colorSpread(sample);
-            if(score > bestScore){ bestScore = score; best = sample; }
-          }
+      const perpX = -dy / len, perpY = dx / len;
+      const candidates = [];
+      for(let i = 0; i < alongSteps; i++){
+        const f = i / (alongSteps - 1);
+        const baseX = a.x + dx * f;
+        const baseY = a.y + dy * f;
+        for(let j = 0; j < perpSteps; j++){
+          const pj = -perpWidth / 2 + perpWidth * (j / (perpSteps - 1));
+          const px = (baseX + perpX * pj) * w;
+          const py = (baseY + perpY * pj) * h;
+          const sample = samplePixelBlock(imageData, px, py, radius);
+          if(sample) candidates.push(sample);
         }
-        return best;
-      });
+      }
+      const scored = candidates.map(c => ({ sample: c, ratio: colorSpread(c) / Math.max(1, luminance(c)) }));
+      let kept = scored.filter(s => s.ratio <= neutralThreshold);
+      if(kept.length === 0){
+        scored.sort((x, y) => x.ratio - y.ratio);
+        kept = scored.slice(0, Math.max(1, Math.round(scored.length * 0.1)));
+      }
+      return kept.map(k => k.sample);
     }
     // Finds whichever iris ring point sits closest to a given eye
     // corner — avoids assuming a fixed directional order for the ring
@@ -1598,26 +1600,23 @@ async function measureFaceFromPhoto(imgEl){
       ...irisTenPoints(MP_LANDMARKS.rightIrisCenter, MP_LANDMARKS.rightIrisRing, 2)
     ];
 
-    // SCLERA: 5 points on the outer side + 5 on the inner side per
-    // eye (20 total). Widened significantly further toward the
-    // corner (up to 0.70) than earlier attempts (which stayed within
-    // 0.08-0.40) — staying close to the ring consistently found a
-    // warm-toned limbal highlight rather than genuine neutral sclera
-    // across five different search-mechanic changes, suggesting true
-    // visible white simply starts further toward the corner for at
-    // least some eye shapes/lighting. The neutrality-penalty scoring
-    // still guards against landing on eyelid fold skin even at these
-    // wider fractions.
-    const scleraFractions = [0.10, 0.25, 0.40, 0.55, 0.70];
+    // SCLERA: same strategy that worked for eyebrow — scan a dense
+    // region (spanning the full ring-to-corner line plus perpendicular
+    // width, not a narrow sub-range) and keep every candidate whose
+    // color spread is within 10% of its own luminance (verified
+    // against real manual color-picker data: true sclera measured at
+    // 9.5%), averaging all of them — rather than picking one "best"
+    // point, which repeatedly found a warm-toned highlight regardless
+    // of scoring method or search range.
     const leftOuterRing = nearestRingPoint(MP_LANDMARKS.leftEyeOuter, MP_LANDMARKS.leftIrisRing);
     const leftInnerRing = nearestRingPoint(MP_LANDMARKS.leftEyeInner, MP_LANDMARKS.leftIrisRing);
     const rightOuterRing = nearestRingPoint(MP_LANDMARKS.rightEyeOuter, MP_LANDMARKS.rightIrisRing);
     const rightInnerRing = nearestRingPoint(MP_LANDMARKS.rightEyeInner, MP_LANDMARKS.rightIrisRing);
     const scleraSamples = [
-      ...sampleBrightestNearFractions(leftOuterRing, MP_LANDMARKS.leftEyeOuter, scleraFractions, 1),
-      ...sampleBrightestNearFractions(leftInnerRing, MP_LANDMARKS.leftEyeInner, scleraFractions, 1),
-      ...sampleBrightestNearFractions(rightOuterRing, MP_LANDMARKS.rightEyeOuter, scleraFractions, 1),
-      ...sampleBrightestNearFractions(rightInnerRing, MP_LANDMARKS.rightEyeInner, scleraFractions, 1)
+      ...sampleNeutralInRegion(leftOuterRing, MP_LANDMARKS.leftEyeOuter, 1, 10, 5, 0.04, 0.10),
+      ...sampleNeutralInRegion(leftInnerRing, MP_LANDMARKS.leftEyeInner, 1, 10, 5, 0.04, 0.10),
+      ...sampleNeutralInRegion(rightOuterRing, MP_LANDMARKS.rightEyeOuter, 1, 10, 5, 0.04, 0.10),
+      ...sampleNeutralInRegion(rightInnerRing, MP_LANDMARKS.rightEyeInner, 1, 10, 5, 0.04, 0.10)
     ];
 
     // EYEBROW: scans a 10x10 grid (100 candidates) across each brow's
