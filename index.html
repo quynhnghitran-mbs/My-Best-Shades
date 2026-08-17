@@ -1522,22 +1522,31 @@ async function measureFaceFromPhoto(imgEl){
       ...MP_LANDMARKS.leftEyebrow.map(idx => sampleDarkestNearby(idx, eyebrowOffsets, 2)),
       ...MP_LANDMARKS.rightEyebrow.map(idx => sampleDarkestNearby(idx, eyebrowOffsets, 2))
     ];
-    const skinSamples = [
+    const skinSamplesCheek = [
       sampleMidpoint(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawA, 3),
       sampleMidpoint(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawB, 3),
       sampleMidpoint(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawC, 3),
       sampleMidpoint(MP_LANDMARKS.rightCheekbone, MP_LANDMARKS.rightJawA, 3),
       sampleMidpoint(MP_LANDMARKS.rightCheekbone, MP_LANDMARKS.rightJawB, 3),
-      sampleMidpoint(MP_LANDMARKS.rightCheekbone, MP_LANDMARKS.rightJawC, 3),
-      ...sampleIndices(MP_LANDMARKS.foreheadCenter, 3),
+      sampleMidpoint(MP_LANDMARKS.rightCheekbone, MP_LANDMARKS.rightJawC, 3)
+    ];
+    const skinSamplesForehead = sampleIndices(MP_LANDMARKS.foreheadCenter, 3);
+    const skinSamplesNose = [
       ...sampleIndices([MP_LANDMARKS.noseBridge], 2),
       ...sampleIndices([MP_LANDMARKS.noseTip], 2)
     ];
+    const skinSamples = [...skinSamplesCheek, ...skinSamplesForehead, ...skinSamplesNose];
 
     const irisRgb = averageRgb(irisSamples);
     const scleraRgb = averageRgb(scleraSamples);
     const eyebrowRgb = averageRgb(eyebrowSamples);
     const skinRgb = averageRgb(skinSamples);
+    // Per-region breakdown, for diagnosing whether one region (e.g.
+    // cheek) is pulling the overall skin average away from what other
+    // regions (e.g. forehead) independently show.
+    const skinRgbCheek = averageRgb(skinSamplesCheek);
+    const skinRgbForehead = averageRgb(skinSamplesForehead);
+    const skinRgbNose = averageRgb(skinSamplesNose);
 
     if(!irisRgb || !scleraRgb || !eyebrowRgb || !skinRgb){
       console.warn('[Face measurement] Face was detected but pixel sampling failed for one or more regions.', {irisRgb, scleraRgb, eyebrowRgb, skinRgb});
@@ -1568,7 +1577,8 @@ async function measureFaceFromPhoto(imgEl){
       depth_score: Math.round(depthScore), depth_level: depthLevel,
       lightness: Math.round(lightness), darkness: Math.round(darkness),
       contrast_score: Math.round(contrastScore), contrast_level: contrastLevel,
-      image_width: w, image_height: h
+      image_width: w, image_height: h,
+      skin_rgb_cheek: skinRgbCheek, skin_rgb_forehead: skinRgbForehead, skin_rgb_nose: skinRgbNose
     };
   } catch(e){
     console.error('[Face measurement failed, falling back to AI estimation]', e);
@@ -1749,6 +1759,9 @@ analyzeBtn.addEventListener('click', async () => {
       result.contrast_level = measurements.contrast_level;
       result.image_width = measurements.image_width;
       result.image_height = measurements.image_height;
+      result.skin_rgb_cheek = measurements.skin_rgb_cheek;
+      result.skin_rgb_forehead = measurements.skin_rgb_forehead;
+      result.skin_rgb_nose = measurements.skin_rgb_nose;
     }
     result.image_mime_type = uploadedImage.mediaType;
     currentSeasonResult = result;
@@ -1778,6 +1791,7 @@ function renderSeasonResult(result){
       `SOURCE: ${sourceLabel}\n` +
       `image: ${v(result.image_width)}x${v(result.image_height)}  type=${v(result.image_mime_type)}\n` +
       `skin_rgb: ${JSON.stringify(result.estimated_skin_rgb)}  L=${v(result.skin_luminance)}\n` +
+      `  ↳ cheek: ${JSON.stringify(v(result.skin_rgb_cheek))}  forehead: ${JSON.stringify(v(result.skin_rgb_forehead))}  nose: ${JSON.stringify(v(result.skin_rgb_nose))}\n` +
       `iris_rgb: ${JSON.stringify(result.estimated_iris_rgb)}  L=${v(result.iris_luminance)}\n` +
       `sclera_rgb: ${JSON.stringify(result.estimated_sclera_rgb)}  L=${v(result.sclera_luminance)}\n` +
       `eyebrow_rgb: ${JSON.stringify(result.estimated_eyebrow_rgb)}  L=${v(result.eyebrow_luminance)}\n` +
