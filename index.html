@@ -1527,7 +1527,7 @@ async function measureFaceFromPhoto(imgEl){
         const allLums = candidates.map(luminance);
         const maxRawLum = Math.max(...allLums);
         const minRawLum = Math.min(...allLums);
-        console.log(`[Sclera scan: ${label}] scanned ${candidates.length} raw candidates, luminance range ${minRawLum.toFixed(0)}-${maxRawLum.toFixed(0)}, ${scored.filter(s=>s.ratio<=neutralThreshold).length} passed 10% neutrality, kept ${kept.length} after brightness filter`);
+        console.log(`[Sclera scan: ${label}] scanned ${candidates.length} raw candidates, luminance range ${minRawLum.toFixed(0)}-${maxRawLum.toFixed(0)}, ${scored.filter(s=>s.ratio<=neutralThreshold).length} passed ${(neutralThreshold*100).toFixed(0)}% neutrality, kept ${kept.length} after brightness filter`);
       }
       return kept.map(k => k.sample);
     }
