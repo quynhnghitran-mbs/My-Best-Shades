@@ -581,16 +581,17 @@ WINTER:
 - Bright Winter: cool-neutral undertone, medium-to-dark depth, extremely clear/bright chroma, very high contrast. Overall look: bold, electric.
 
 When given a photo, work through this in order before answering. Deliberately ignore hair COLOR entirely — do not let it influence any step below, since it is very likely dyed. Also treat lip color as an unreliable signal and do not weight it heavily — many people have lip tattooing, lip blushing, or other semi-permanent lip tinting procedures, so the lips' natural color may not reflect their true undertone at all. Customers are instructed to photograph themselves in natural light, so no lighting/white-balance correction is needed.
-1. Determine depth using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Depth result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate two RGB values (R, G, B, each 0-255) — skin (neck/body skin) and eyebrows (their actual color) — convert each to a luminance value using L = 0.299×R + 0.587×G + 0.114×B, then calculate Depth Score as 0.4×L(skin) + 0.6×L(eyebrows), weighting eyebrow color more heavily since darker, fuller eyebrows correlate with deeper overall coloring even when skin alone might read lighter. Apply this rule: if Depth Score is below 77, depth is Deep; if it is 77 to 135, depth is Medium; if it is above 135, depth is Light.
+1. Determine depth using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Depth result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate two RGB values (R, G, B, each 0-255) — skin (neck/body skin) and eyebrows (their actual color) — convert each to a luminance value using L = 0.299×R + 0.587×G + 0.114×B, then calculate Depth Score as 0.4×L(skin) + 0.6×L(eyebrows), weighting eyebrow color more heavily since darker, fuller eyebrows correlate with deeper overall coloring even when skin alone might read lighter. Apply this rule: if Depth Score is below 77, depth is Deep; if it is 77 to 135, depth is Medium; if it is above 135, depth is Light. Near each boundary, use a soft zone instead of a hard cutoff: within 5% of a boundary value, depth fully flips to the adjacent category (e.g. Depth Score 78 is close enough to 77 that depth is Deep, not Medium); within 10% of a boundary (but outside 5%), give a blended label like "Medium-to-Deep" instead of forcing one answer (e.g. Depth Score 84 is "Medium-to-Deep").
 2. Determine contrast using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Contrast result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate four separate RGB values (R, G, B, each 0-255), each read carefully and specifically from THIS photo — do not default to an assumed "typical" value for any of them:
    a. Skin — the color of the neck and/or other visible body skin (not facial skin, since many people have facial redness or discoloration from skincare treatments that facial skin alone can be misleading about).
    b. Sclera — the white of the eye. This varies genuinely from a yellowish/off-white tone to a nearly pure bright white — look at the actual tone in this specific photo rather than assuming pure white by default.
    c. Iris — the colored ring of the eye. This varies genuinely across a wide range: light brown/amber irises are meaningfully lighter than dark brown, which are themselves meaningfully lighter than nearly black irises — look carefully at the actual shade in this specific photo and estimate accordingly, rather than defaulting to assuming a dark iris.
    d. Eyebrows — their actual color as shown in the photo.
-   Convert each of the four RGB estimates to a luminance value using L = 0.299×R + 0.587×G + 0.114×B. Calculate Lightness as the average of L(skin) and L(sclera). Calculate Darkness as the average of L(iris) and L(eyebrows). Calculate the Contrast Score as Lightness minus Darkness. Apply this rule exactly: if the Contrast Score is below 100, contrast is Low; if it is 100 to 150, contrast is Medium; if it is above 150, contrast is High. This numeric rule is the authoritative contrast determination — precision in each of the four individual RGB estimates matters, since both iris and sclera have wide natural variation that a rushed or generic estimate would miss.
+   Convert each of the four RGB estimates to a luminance value using L = 0.299×R + 0.587×G + 0.114×B. Calculate Lightness as the average of L(skin) and L(sclera). Calculate Darkness as the average of L(iris) and L(eyebrows). Calculate the Contrast Score as Lightness minus Darkness. Apply this rule exactly: if the Contrast Score is below 100, contrast is Low; if it is 100 to 150, contrast is Medium; if it is above 150, contrast is High. Near each boundary, use a soft zone instead of a hard cutoff: within 5% of a boundary value, contrast fully flips to the adjacent category; within 10% of a boundary (but outside 5%), give a blended label like "Low-to-Medium" instead of forcing one answer. This numeric rule is the authoritative contrast determination — precision in each of the four individual RGB estimates matters, since both iris and sclera have wide natural variation that a rushed or generic estimate would miss.
 3. Determine undertone using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Undertone result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate the average skin color of the neck and/or other visible body skin as an RGB value (R, G, B, each 0-255) — prioritize neck/body skin over facial skin for this reading if both are visible, since many people have facial redness or discoloration from skincare treatments that facial skin alone can be misleading about; only fall back to facial skin if neck/body skin isn't visible at all. Then calculate G minus B (Green value minus Blue value) from that estimate. Apply this rule exactly, with no neutral option: if G-B is less than 20, she is cool-leaning; if G-B is 20 or higher, she is warm-leaning. This numeric rule is the authoritative undertone determination — it always resolves to warm or cool, never neutral, regardless of how the skin subjectively looks. This includes olive skin: don't classify it as "neutral" by eye — estimate its RGB and apply the same G-B rule like any other skin tone; olive skin with a more golden cast will naturally compute a higher G-B (warm-leaning), while olive skin with a more ashy/gray cast will naturally compute a lower G-B (cool-leaning). Do not assume undertone from depth — deep skin can be warm or cool just as easily as light skin can, and the two are fully independent; the RGB estimate and G-B calculation should reflect hue only, not lightness.
 4. Cheek warmth/coolness can be used only as a minor, secondary tie-breaker — do not let it override the neck/body skin undertone reading from step 3, since cheeks are facial skin and can show the same treatment-related redness. Do not use lip color as a meaningful input at all, for the reason noted above.
 5. HARD FAMILY CONSTRAINT — apply this before picking any season: if step 3's undertone result is cool-leaning, the season MUST come from the SUMMER or WINTER family — Spring and Autumn are completely off the table, with no exceptions, regardless of anything else about the photo. If step 3's undertone result is warm-leaning, the season MUST come from the SPRING or AUTUMN family — Summer and Winter are completely off the table, with no exceptions. The "neutral-warm" / "cool-neutral" / "warm-neutral" language in the season reference list above describes each season's typical chroma character, not an invitation to cross this boundary — step 3's undertone result is strictly binary (never neutral) and is authoritative over that descriptive language. For cool-leaning specifically, step 1's Depth result decides which of these two families, per the official criteria: Depth of Light or Medium means the season MUST come from SUMMER (Winter has no light or medium-depth member at all — Winter is medium-to-dark or dark only); Depth of Deep means the season MUST come from WINTER. This routing is authoritative — never place a Medium depth result into any Winter season, and never place a Deep depth result into a Summer season.
+   Depth and Contrast results may come back as a blended label (e.g. "Medium-to-Light" or "Deep-to-Medium") instead of a single pure category — this happens when the measured score sits close enough to a boundary that forcing a single answer would be arbitrary. Use this as genuine latitude, not an error to resolve: consider both halves of the blend and use your own visual judgment from the photo to decide which fits best, rather than defaulting to just one side. The one exception: if a blended Depth result straddles the Deep/Medium line specifically (e.g. "Deep-to-Medium") for a cool-leaning customer, this also means either Summer or Winter family may be considered for this pick, not just whichever family the nearer half would technically suggest — use judgment here too.
 6. Based on 1-5, identify your top choice AND the second-closest season (the runner-up must also respect the hard family constraint from step 5). Compare them directly: what is the one deciding factor that separates your top choice from that runner-up? This hedging note applies ONLY when no precise measurements were given and you are self-estimating: if your own visual undertone estimate genuinely feels weak or mixed, lean toward whichever of the two eligible families in step 5 feels slightly more supported, rather than crossing into the other family — never use "feels mixed" as a reason to cross the family boundary itself.
 
 Commit to ONE of the 12 seasons above only after this comparison. Work through steps 1-6 internally — never write out your reasoning, calculations, or any narration of this process in your visible response. Your response must begin with the opening curly brace of the JSON object and contain nothing else, not even a single sentence of preamble like "Let me work through this."
@@ -606,7 +607,7 @@ Respond with ONLY a valid JSON object (no markdown fences, no extra text) in thi
   "iris_luminance": the number L(iris) calculated from estimated_iris_rgb,
   "sclera_luminance": the number L(sclera) calculated from estimated_sclera_rgb,
   "depth_score": the number 0.4*skin_luminance+0.6*eyebrow_luminance calculated in step 1,
-  "depth_level": "Deep" | "Medium" | "Light",
+  "depth_level": "Deep" | "Medium" | "Light" | a blended label like "Medium-to-Light" if the score sits close to a boundary,
   "g_minus_b": the number G-B calculated from estimated_skin_rgb,
   "estimated_iris_rgb": [R, G, B] as three numbers 0-255, your estimate from step 2,
   "estimated_sclera_rgb": [R, G, B] as three numbers 0-255, your estimate from step 2,
@@ -614,7 +615,7 @@ Respond with ONLY a valid JSON object (no markdown fences, no extra text) in thi
   "lightness": the number (skin_luminance+sclera_luminance)/2 calculated in step 2,
   "darkness": the number (iris_luminance+eyebrow_luminance)/2 calculated in step 2,
   "contrast_score": the number lightness-darkness calculated in step 2,
-  "contrast_level": "Low" | "Medium" | "High",
+  "contrast_level": "Low" | "Medium" | "High" | a blended label like "Low-to-Medium" if the score sits close to a boundary,
   "explanation": "2-3 sentences, warm and friendly, explaining why this season fits based on what you observed in the photo — never mention RGB values, luminance, contrast score, the G-B calculation, or any numeric/technical detail here; keep it in plain, natural language a customer would enjoy reading",
   "runner_up": "the second-closest season name from the list above"
 }`;
@@ -1699,18 +1700,48 @@ async function measureFaceFromPhoto(imgEl){
     const gMinusB = skinRgb.g - skinRgb.b;
     const undertone = gMinusB < 20 ? "cool-leaning" : "warm-leaning";
 
+    // Classifies a score against two boundaries into 3 categories, but
+    // with soft zones near each boundary instead of a hard cutoff:
+    // within 5% of a boundary, the score fully flips to the adjacent
+    // category (it's close enough that the "wrong side" reading isn't
+    // meaningfully different from the other side); within 10% (but
+    // outside 5%), it returns a blended "X-to-Y" label instead of
+    // forcing a single answer, giving the season-picking step real
+    // latitude to use judgment in genuinely borderline cases rather
+    // than being locked into whichever side of an arbitrary line the
+    // raw number happened to land on. (5%/10% figures: provisional,
+    // to be revisited.)
+    function classifyWithZones(score, lowerBoundary, upperBoundary, labels){
+      const lowerZone5 = lowerBoundary * 0.05, lowerZone10 = lowerBoundary * 0.10;
+      const upperZone5 = upperBoundary * 0.05, upperZone10 = upperBoundary * 0.10;
+      const distFromLower = score - lowerBoundary;
+      const distFromUpper = score - upperBoundary;
+
+      if(Math.abs(distFromLower) <= lowerZone5) return labels[0];
+      if(Math.abs(distFromUpper) <= upperZone5) return labels[2];
+      if(Math.abs(distFromLower) <= lowerZone10){
+        return distFromLower > 0 ? `${labels[1]}-to-${labels[0]}` : `${labels[0]}-to-${labels[1]}`;
+      }
+      if(Math.abs(distFromUpper) <= upperZone10){
+        return distFromUpper > 0 ? `${labels[2]}-to-${labels[1]}` : `${labels[1]}-to-${labels[2]}`;
+      }
+      if(score < lowerBoundary) return labels[0];
+      if(score > upperBoundary) return labels[2];
+      return labels[1];
+    }
+
     const skinLuminance = luminance(skinRgb);
     const eyebrowLuminance = luminance(eyebrowRgb);
     const irisLuminance = luminance(irisRgb);
     const scleraLuminance = luminance(scleraRgb);
 
     const depthScore = 0.4 * skinLuminance + 0.6 * eyebrowLuminance;
-    const depthLevel = depthScore < 77 ? "Deep" : depthScore <= 135 ? "Medium" : "Light";
+    const depthLevel = classifyWithZones(depthScore, 77, 135, ["Deep", "Medium", "Light"]);
 
     const lightness = (skinLuminance + scleraLuminance) / 2;
     const darkness = (irisLuminance + eyebrowLuminance) / 2;
     const contrastScore = lightness - darkness;
-    const contrastLevel = contrastScore < 100 ? "Low" : contrastScore <= 150 ? "Medium" : "High";
+    const contrastLevel = classifyWithZones(contrastScore, 100, 150, ["Low", "Medium", "High"]);
 
     return {
       skin_rgb: skinRgb, iris_rgb: irisRgb, sclera_rgb: scleraRgb, eyebrow_rgb: eyebrowRgb,
