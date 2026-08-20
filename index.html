@@ -1699,6 +1699,21 @@ async function measureFaceFromPhoto(imgEl){
 
     const gMinusB = skinRgb.g - skinRgb.b;
     const undertone = gMinusB < 20 ? "cool-leaning" : "warm-leaning";
+    // Purely descriptive 6-tier scale for customer-facing language and
+    // internal reference — does NOT affect the strict binary routing
+    // decision above (cool-leaning/warm-leaning at G-B=20 is untouched
+    // and remains the sole basis for Spring/Autumn vs Summer/Winter
+    // family routing). Boundaries provided directly, not yet
+    // statistically validated against a large sample.
+    function classifyUndertoneDescriptive(gb){
+      if(gb <= 5) return "Blue-cool";
+      if(gb < 15) return "Cool";
+      if(gb < 20) return "Cool-neutral";
+      if(gb < 25) return "Warm-neutral";
+      if(gb <= 35) return "Warm";
+      return "Golden";
+    }
+    const undertoneDescriptive = classifyUndertoneDescriptive(gMinusB);
 
     // Classifies a score against two boundaries into 3 categories, but
     // with soft zones near each boundary instead of a hard cutoff:
@@ -1760,7 +1775,7 @@ async function measureFaceFromPhoto(imgEl){
 
     return {
       skin_rgb: skinRgb, iris_rgb: irisRgb, sclera_rgb: scleraRgb, eyebrow_rgb: eyebrowRgb,
-      g_minus_b: Math.round(gMinusB), undertone,
+      g_minus_b: Math.round(gMinusB), undertone, undertone_descriptive: undertoneDescriptive,
       skin_luminance: Math.round(skinLuminance), eyebrow_luminance: Math.round(eyebrowLuminance),
       iris_luminance: Math.round(irisLuminance), sclera_luminance: Math.round(scleraLuminance),
       depth_score: Math.round(depthScore), depth_level: depthLevel,
@@ -1955,6 +1970,7 @@ analyzeBtn.addEventListener('click', async () => {
       result.skin_rgb_forehead = measurements.skin_rgb_forehead;
       result.skin_chroma = measurements.skin_chroma;
       result.iris_chroma = measurements.iris_chroma;
+      result.undertone_descriptive = measurements.undertone_descriptive;
     }
     result.image_mime_type = uploadedImage.mediaType;
     currentSeasonResult = result;
@@ -1988,7 +2004,7 @@ function renderSeasonResult(result){
       `iris_rgb: ${JSON.stringify(result.estimated_iris_rgb)}  L=${v(result.iris_luminance)}\n` +
       `sclera_rgb: ${JSON.stringify(result.estimated_sclera_rgb)}  L=${v(result.sclera_luminance)}\n` +
       `eyebrow_rgb: ${JSON.stringify(result.estimated_eyebrow_rgb)}  L=${v(result.eyebrow_luminance)}\n` +
-      `g_minus_b: ${v(result.g_minus_b)} -> ${result.undertone || ''}\n` +
+      `g_minus_b: ${v(result.g_minus_b)} -> ${result.undertone || ''}  [descriptive: ${v(result.undertone_descriptive)}]\n` +
       `Depth Score = 0.4*${v(result.skin_luminance)} + 0.6*${v(result.eyebrow_luminance)} = ${v(result.depth_score)} -> ${result.depth_level}\n` +
       `Lightness = (${v(result.skin_luminance)}+${v(result.sclera_luminance)})/2 = ${v(result.lightness)}\n` +
       `Darkness = (${v(result.iris_luminance)}+${v(result.eyebrow_luminance)})/2 = ${v(result.darkness)}\n` +
