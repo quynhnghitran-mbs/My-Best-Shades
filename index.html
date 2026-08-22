@@ -581,7 +581,7 @@ WINTER:
 - Bright Winter: cool-neutral undertone, medium-to-dark depth, extremely clear/bright chroma, very high contrast. Overall look: bold, electric.
 
 When given a photo, work through this in order before answering. Deliberately ignore hair COLOR entirely — do not let it influence any step below, since it is very likely dyed. Also treat lip color as an unreliable signal and do not weight it heavily — many people have lip tattooing, lip blushing, or other semi-permanent lip tinting procedures, so the lips' natural color may not reflect their true undertone at all. Customers are instructed to photograph themselves in natural light, so no lighting/white-balance correction is needed.
-1. Determine depth using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Depth result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate two RGB values (R, G, B, each 0-255) — skin (neck/body skin) and eyebrows (their actual color) — convert each to a luminance value using L = 0.299×R + 0.587×G + 0.114×B, then calculate Depth Score as 0.4×L(skin) + 0.6×L(eyebrows), weighting eyebrow color more heavily since darker, fuller eyebrows correlate with deeper overall coloring even when skin alone might read lighter. Apply this rule: if Depth Score is below 77, depth is Deep; if it is 77 to 135, depth is Medium; if it is above 135, depth is Light. Near each boundary, use a soft zone instead of a hard cutoff: within 5% of a boundary value, depth fully flips to the adjacent category (e.g. Depth Score 78 is close enough to 77 that depth is Deep, not Medium); within 10% of a boundary (but outside 5%), give a blended label like "Medium-to-Deep" instead of forcing one answer (e.g. Depth Score 84 is "Medium-to-Deep").
+1. Determine depth using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Depth result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate two RGB values (R, G, B, each 0-255) — skin (neck/body skin) and eyebrows (their actual color) — convert each to a luminance value using L = 0.299×R + 0.587×G + 0.114×B, then calculate Depth Score as 0.3×L(skin) + 0.7×L(eyebrows), weighting eyebrow color more heavily since darker, fuller eyebrows correlate with deeper overall coloring even when skin alone might read lighter. Apply this rule: if Depth Score is below 95, depth is Deep; if it is 95 to 135, depth is Medium; if it is above 135, depth is Light. Near each boundary, use a soft zone instead of a hard cutoff: within 5% of a boundary value, depth fully flips to the adjacent category; within 10% of a boundary (but outside 5%), give a blended label like "Medium-to-Deep" instead of forcing one answer.
 2. Determine contrast using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Contrast result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate four separate RGB values (R, G, B, each 0-255), each read carefully and specifically from THIS photo — do not default to an assumed "typical" value for any of them:
    a. Skin — the color of the neck and/or other visible body skin (not facial skin, since many people have facial redness or discoloration from skincare treatments that facial skin alone can be misleading about).
    b. Sclera — the white of the eye. This varies genuinely from a yellowish/off-white tone to a nearly pure bright white — look at the actual tone in this specific photo rather than assuming pure white by default.
@@ -606,7 +606,7 @@ Respond with ONLY a valid JSON object (no markdown fences, no extra text) in thi
   "eyebrow_luminance": the number L(eyebrow) calculated from estimated_eyebrow_rgb,
   "iris_luminance": the number L(iris) calculated from estimated_iris_rgb,
   "sclera_luminance": the number L(sclera) calculated from estimated_sclera_rgb,
-  "depth_score": the number 0.4*skin_luminance+0.6*eyebrow_luminance calculated in step 1,
+  "depth_score": the number 0.3*skin_luminance+0.7*eyebrow_luminance calculated in step 1,
   "depth_level": "Deep" | "Medium" | "Light" | a blended label like "Medium-to-Light" if the score sits close to a boundary,
   "g_minus_b": the number G-B calculated from estimated_skin_rgb,
   "estimated_iris_rgb": [R, G, B] as three numbers 0-255, your estimate from step 2,
@@ -1750,7 +1750,7 @@ async function measureFaceFromPhoto(imgEl){
     const irisLuminance = luminance(irisRgb);
     const scleraLuminance = luminance(scleraRgb);
 
-    const depthScore = 0.4 * skinLuminance + 0.6 * eyebrowLuminance;
+    const depthScore = 0.3 * skinLuminance + 0.7 * eyebrowLuminance;
     const depthLevel = classifyWithZones(depthScore, 95, 135, ["Deep", "Medium", "Light"]);
 
     const lightness = 0.7 * Math.max(skinLuminance, scleraLuminance) + 0.3 * Math.min(skinLuminance, scleraLuminance);
@@ -1788,7 +1788,7 @@ async function measureFaceFromPhoto(imgEl){
     // landed in "Deep" seasons (an earlier, unanchored attempt had
     // 12/23), and 18/23 matched prior results.
     function warmthTo10(gb){ return Math.max(0, Math.min(10, 5 + (1/2.7)*(gb-20))); }
-    function valueTo10(ds){ return Math.max(0, Math.min(10, 2.5 + (2.5/29.8)*(ds-95))); }
+    function valueTo10(ds){ return Math.max(0, Math.min(10, 2.5 + (2.5/22.8)*(ds-95))); }
     function chromaTo10(c){ return Math.max(0, Math.min(10, (2/7.4)*(c-16.0))); }
     function contrastTo10(cs){ return Math.max(0, Math.min(10, 3 + (4/77.4)*(cs-104.6))); }
 
@@ -2051,7 +2051,7 @@ function renderSeasonResult(result){
       `sclera_rgb: ${JSON.stringify(result.estimated_sclera_rgb)}  L=${v(result.sclera_luminance)}\n` +
       `eyebrow_rgb: ${JSON.stringify(result.estimated_eyebrow_rgb)}  L=${v(result.eyebrow_luminance)}\n` +
       `g_minus_b: ${v(result.g_minus_b)} -> ${result.undertone || ''}  [descriptive: ${v(result.undertone_descriptive)}]\n` +
-      `Depth Score = 0.4*${v(result.skin_luminance)} + 0.6*${v(result.eyebrow_luminance)} = ${v(result.depth_score)} -> ${result.depth_level}\n` +
+      `Depth Score = 0.3*${v(result.skin_luminance)} + 0.7*${v(result.eyebrow_luminance)} = ${v(result.depth_score)} -> ${result.depth_level}\n` +
       `Lightness = 0.7*max(${v(result.skin_luminance)},${v(result.sclera_luminance)})+0.3*min(...) = ${v(result.lightness)}\n` +
       `Darkness = (${v(result.iris_luminance)}+${v(result.eyebrow_luminance)})/2 = ${v(result.darkness)}\n` +
       `Contrast Score = ${v(result.lightness)}-${v(result.darkness)} = ${v(result.contrast_score)} -> ${result.contrast_level}\n` +
