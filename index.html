@@ -594,6 +594,8 @@ When given a photo, work through this in order before answering. Deliberately ig
    Depth and Contrast results may come back as a blended label (e.g. "Medium-to-Light" or "Deep-to-Medium") instead of a single pure category — this happens when the measured score sits close enough to a boundary that forcing a single answer would be arbitrary. Use this as genuine latitude, not an error to resolve: consider both halves of the blend and use your own visual judgment from the photo to decide which fits best, rather than defaulting to just one side. The one exception: if a blended Depth result straddles the Deep/Medium line specifically (e.g. "Deep-to-Medium") for a cool-leaning customer, this also means either Summer or Winter family may be considered for this pick, not just whichever family the nearer half would technically suggest — use judgment here too.
 6. Based on 1-5, identify your top choice AND the second-closest season (the runner-up must also respect the hard family constraint from step 5). Compare them directly: what is the one deciding factor that separates your top choice from that runner-up? This hedging note applies ONLY when no precise measurements were given and you are self-estimating: if your own visual undertone estimate genuinely feels weak or mixed, lean toward whichever of the two eligible families in step 5 feels slightly more supported, rather than crossing into the other family — never use "feels mixed" as a reason to cross the family boundary itself.
 
+OVERRIDE: if the user's message includes a line starting with "QUANTITATIVE SEASON MATCH:", that season is the final, authoritative answer — skip steps 1-6's comparison process entirely for season selection (Depth/Undertone/Contrast from steps 1-3 are still used as given facts elsewhere in your response, e.g. for depth_level and contrast_level fields, just not for picking the season itself). Do not compare it against other candidates or substitute your own judgment. Set "season" to the given match exactly, and set "runner_up" to whichever season would be second based on your own reading, without changing the primary pick.
+
 Commit to ONE of the 12 seasons above only after this comparison. Work through steps 1-6 internally — never write out your reasoning, calculations, or any narration of this process in your visible response. Your response must begin with the opening curly brace of the JSON object and contain nothing else, not even a single sentence of preamble like "Let me work through this."
 
 Respond with ONLY a valid JSON object (no markdown fences, no extra text) in this exact shape:
@@ -1973,8 +1975,8 @@ analyzeBtn.addEventListener('click', async () => {
         `Depth Score: ${measurements.depth_score} -> Depth: ${measurements.depth_level}\n` +
         `G-B (skin): ${measurements.g_minus_b} -> Undertone: ${measurements.undertone}\n` +
         `Contrast Score: ${measurements.contrast_score} -> Contrast: ${measurements.contrast_level}\n` +
-        `Skin chroma (saturation): ${measurements.skin_chroma}%  Iris chroma (saturation): ${measurements.iris_chroma}%\n` +
-        `The chroma numbers above are experimental and informational only — there is no strict rule for them yet. Higher values suggest more vivid/clear coloring (associated with Bright seasons), lower values suggest more muted/soft coloring (associated with Soft seasons), but use this only as a minor supporting signal alongside your own visual read of clarity vs mutedness, never as a hard override of the Depth/Undertone/Contrast results above.\n` +
+        `Skin chroma (saturation): ${measurements.skin_chroma}%  Iris chroma (saturation): ${measurements.iris_chroma}%  Sclera chroma (saturation): ${measurements.sclera_chroma}%\n` +
+        `QUANTITATIVE SEASON MATCH: ${measurements.quant_best} (distance=${measurements.quant_best_dist}). This was computed by converting the measurements above onto the same 0-10 Warmth/Value/Chroma/Contrast scale used by the official 12-season reference table, then finding the nearest of the 12 season archetypes by direct distance. This IS the final season — use it exactly as given, do not perform your own comparison between candidate seasons or second-guess it based on your own visual impression. Your only job now is to write a warm, natural 2-3 sentence explanation for why this season fits, based on what you observe in the photo (skip any mention of the distance calculation or numeric methodology in that explanation).\n` +
         `Use the Depth, Undertone, and Contrast results directly rather than recalculating from your own visual estimate.`;
     }
 
@@ -2017,6 +2019,20 @@ analyzeBtn.addEventListener('click', async () => {
       result.quant_best_dist = measurements.quant_best_dist;
       result.quant_runner_up = measurements.quant_runner_up;
       result.quant_runner_up_dist = measurements.quant_runner_up_dist;
+      // Safety net: force the actual displayed season/family to match
+      // the quantitative result exactly, regardless of what Claude
+      // returned — same pattern already used for every other measured
+      // field, so a prompt-following slip can never surface a season
+      // that doesn't match the given quantitative match.
+      const seasonFamilyMap = {
+        "Light Spring":"Spring", "True Spring":"Spring", "Bright Spring":"Spring",
+        "Light Summer":"Summer", "True Summer":"Summer", "Soft Summer":"Summer",
+        "Soft Autumn":"Autumn", "True Autumn":"Autumn", "Deep Autumn":"Autumn",
+        "Deep Winter":"Winter", "True Winter":"Winter", "Bright Winter":"Winter"
+      };
+      result.season = measurements.quant_best;
+      result.family = seasonFamilyMap[measurements.quant_best] || result.family;
+      result.runner_up = measurements.quant_runner_up;
     }
     result.image_mime_type = uploadedImage.mediaType;
     currentSeasonResult = result;
