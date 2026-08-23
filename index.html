@@ -1760,6 +1760,22 @@ async function measureFaceFromPhoto(imgEl){
     const contrastScore = lightness - darkness;
     const contrastLevel = classifyWithZones(contrastScore, 100, 150, ["Low", "Medium", "High"]);
 
+    // LUMINANCE SPREAD (new, experimental, informational only — NOT a
+    // replacement for Contrast Score above, and not yet part of
+    // season matching). The true widest gap across all 4 features
+    // (brightest minus darkest, regardless of which pair), rather
+    // than a blend of averaged pairs — captures cases like nearly-
+    // black iris + nearly-white sclera + deep skin, where the blended
+    // Contrast Score can understate the real visual drama. Tested
+    // directly against the existing formula on real data: replacing
+    // Contrast Score with this outright changed labels for 11-14 of
+    // 23 real photos, including cases where a Summer-family person
+    // would land in "High" contrast — a category no Summer season
+    // supports at all. Kept separate until there's a way to use it
+    // that doesn't break that validated fit.
+    const luminanceSpread = Math.max(skinLuminance, scleraLuminance, irisLuminance, eyebrowLuminance)
+      - Math.min(skinLuminance, scleraLuminance, irisLuminance, eyebrowLuminance);
+
     // CHROMA (experimental, informational only — no threshold rule
     // yet). Standard HSV saturation formula: how colorful/vivid a
     // color is vs how gray/muted, independent of brightness. This is
@@ -1775,6 +1791,20 @@ async function measureFaceFromPhoto(imgEl){
     const skinChroma = saturation(skinRgb);
     const irisChroma = saturation(irisRgb);
     const scleraChroma = saturation(scleraRgb);
+    // CHROMA CONTRAST (new, experimental, informational only — NOT
+    // part of the 4D quantitative match below). The spread between
+    // skin/iris/sclera chroma: a vividly saturated feature standing
+    // out against otherwise muted coloring is itself a form of visual
+    // contrast, separate from pure lightness/darkness contrast.
+    // Confirmed as a genuinely distinct (not redundant) signal against
+    // real data: moderately, significantly correlated with luminance
+    // Contrast Score (r=-0.486, p=0.019, n=23) but NOT strongly enough
+    // to just merge into it — the relationship is inverse, so blending
+    // them naively could cancel out real signal from each. Not yet
+    // integrated into season matching since the 12-season reference
+    // table has no equivalent column to calibrate against — exposed
+    // here for data collection until that calibration is possible.
+    const chromaContrast = Math.max(skinChroma, irisChroma, scleraChroma) - Math.min(skinChroma, irisChroma, scleraChroma);
 
     // QUANTITATIVE 12-SEASON MATCH (experimental, for testing only —
     // does NOT replace the actual season Claude returns). Converts
@@ -1819,6 +1849,8 @@ async function measureFaceFromPhoto(imgEl){
       skin_rgb_cheek: skinRgbCheek, skin_rgb_forehead: skinRgbForehead,
       skin_chroma: Math.round(skinChroma * 10) / 10, iris_chroma: Math.round(irisChroma * 10) / 10,
       sclera_chroma: Math.round(scleraChroma * 10) / 10,
+      chroma_contrast: Math.round(chromaContrast * 10) / 10,
+      luminance_spread: Math.round(luminanceSpread),
       quant_warmth: Math.round(qW*10)/10, quant_value: Math.round(qV*10)/10,
       quant_chroma: Math.round(qC*10)/10, quant_contrast: Math.round(qK*10)/10,
       quant_best: quantScored[0].name, quant_best_dist: Math.round(quantScored[0].dist*100)/100,
@@ -2010,6 +2042,8 @@ analyzeBtn.addEventListener('click', async () => {
       result.skin_chroma = measurements.skin_chroma;
       result.iris_chroma = measurements.iris_chroma;
       result.sclera_chroma = measurements.sclera_chroma;
+      result.chroma_contrast = measurements.chroma_contrast;
+      result.luminance_spread = measurements.luminance_spread;
       result.undertone_descriptive = measurements.undertone_descriptive;
       result.quant_warmth = measurements.quant_warmth;
       result.quant_value = measurements.quant_value;
@@ -2072,6 +2106,8 @@ function renderSeasonResult(result){
       `Darkness = (${v(result.iris_luminance)}+${v(result.eyebrow_luminance)})/2 = ${v(result.darkness)}\n` +
       `Contrast Score = ${v(result.lightness)}-${v(result.darkness)} = ${v(result.contrast_score)} -> ${result.contrast_level}\n` +
       `[experimental] Chroma: skin=${v(result.skin_chroma)}%  iris=${v(result.iris_chroma)}%  sclera=${v(result.sclera_chroma)}%  (C = 3-way average)\n` +
+      `[NEW, informational only] Chroma Contrast (spread) = ${v(result.chroma_contrast)}%  — not yet part of season matching\n` +
+      `[NEW, informational only] Luminance Spread = ${v(result.luminance_spread)}  (vs official Contrast Score = ${v(result.contrast_score)})  — not yet part of season matching\n` +
       `[QUANT MATCH - testing only, not the official result] W=${v(result.quant_warmth)} V=${v(result.quant_value)} C=${v(result.quant_chroma)} K=${v(result.quant_contrast)}\n` +
       `  -> ${v(result.quant_best)} (dist=${v(result.quant_best_dist)})  runner-up: ${v(result.quant_runner_up)} (dist=${v(result.quant_runner_up_dist)})`;
   } else {
