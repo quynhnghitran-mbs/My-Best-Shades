@@ -1649,20 +1649,20 @@ async function measureFaceFromPhoto(imgEl){
     // total) instead of averaging every point directly. Lower cheek
     // can fall into shadow from face shape (jaw, nose, cheekbone ridge
     // casting shadow downward) especially under typical selfie
-    // lighting from above — excluding the darkest 30% before
+    // lighting from above — excluding the darkest 50% before
     // averaging removes shadow-affected outliers, the same technique
     // and exclusion percentage already applied to forehead (for the
     // opposite problem, glare) and validated for eyebrow.
     function cheekTenPoints(cheekboneIdx, jawA, jawB, jawC, radius){
-      const fractionsA = [0.25, 0.314, 0.379, 0.443, 0.507, 0.571, 0.636, 0.7];
-      const fractionsBC = [0.3, 0.357, 0.414, 0.471, 0.529, 0.586, 0.643, 0.7];
+      const fractionsA = [0.15, 0.243, 0.336, 0.429, 0.521, 0.614, 0.707, 0.8];
+      const fractionsBC = [0.2, 0.286, 0.371, 0.457, 0.543, 0.629, 0.714, 0.8];
       const samples = [
         ...sampleFractionsAlongLine(cheekboneIdx, jawA, fractionsA, radius),
         ...sampleFractionsAlongLine(cheekboneIdx, jawB, fractionsBC, radius),
         ...sampleFractionsAlongLine(cheekboneIdx, jawC, fractionsBC, radius)
       ].filter(Boolean);
       samples.sort((a, b) => luminance(b) - luminance(a)); // brightest first
-      const keepCount = Math.max(1, Math.round(samples.length * 0.70));
+      const keepCount = Math.max(1, Math.round(samples.length * 0.50));
       return samples.slice(0, keepCount);
     }
     const skinSamplesCheek = [
@@ -1683,7 +1683,7 @@ async function measureFaceFromPhoto(imgEl){
     // cheek for the same person, sometimes by 100+ luminance points,
     // too large to be genuine skin variation. Rather than averaging
     // the whole scanned region (which lets glare hotspots skew the
-    // result), excludes the brightest 30% before averaging — the same
+    // result), excludes the brightest 50% before averaging — the same
     // percentile-filtering strategy already validated for eyebrow,
     // just removing a minority glare-affected portion instead of
     // isolating a different substance.
@@ -1691,8 +1691,8 @@ async function measureFaceFromPhoto(imgEl){
       const g = landmarks[glabellaIdx], hl = landmarks[hairlineIdx];
       if(!g || !hl) return [];
       const anchor = { x: g.x + (hl.x - g.x) * 0.45, y: g.y + (hl.y - g.y) * 0.45 };
-      const dxs = [-0.06, -0.043, -0.026, -0.009, 0.009, 0.026, 0.043, 0.06];
-      const dys = [-0.025, -0.014, -0.003, 0.008, 0.019, 0.03];
+      const dxs = [-0.08, -0.057, -0.034, -0.011, 0.011, 0.034, 0.057, 0.08];
+      const dys = [-0.035, -0.02, -0.005, 0.01, 0.025, 0.04];
       const samples = [];
       for(const dy of dys){
         for(const dx of dxs){
@@ -1701,7 +1701,7 @@ async function measureFaceFromPhoto(imgEl){
         }
       }
       samples.sort((a, b) => luminance(a) - luminance(b));
-      const keepCount = Math.max(1, Math.round(samples.length * 0.70));
+      const keepCount = Math.max(1, Math.round(samples.length * 0.50));
       return samples.slice(0, keepCount);
     }
     const skinSamplesForehead = foreheadFilteredPoints(MP_LANDMARKS.foreheadCenter[0], MP_LANDMARKS.foreheadHairline, 3);
