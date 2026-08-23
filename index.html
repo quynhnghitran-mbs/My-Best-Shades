@@ -1644,17 +1644,26 @@ async function measureFaceFromPhoto(imgEl){
       ...sampleDarkestInRegion(MP_LANDMARKS.rightEyebrow, 2, 10, 0.12)
     ];
 
-    // SKIN: 40 points total — 10 per lower cheek (20) + 20 on the
-    // forehead. Cheek uses the 3 existing cheekbone-to-jaw lines per
-    // side, sampled at multiple fractions (4+3+3=10). Forehead uses a
-    // 5x4 grid of small offsets around the glabella landmark, staying
-    // well clear of the hairline.
+    // SKIN: cheek uses the 3 existing cheekbone-to-jaw lines per side,
+    // now sampled at 8 fractions each (24 candidates per side, 48
+    // total) instead of averaging every point directly. Lower cheek
+    // can fall into shadow from face shape (jaw, nose, cheekbone ridge
+    // casting shadow downward) especially under typical selfie
+    // lighting from above — excluding the darkest 30% before
+    // averaging removes shadow-affected outliers, the same technique
+    // and exclusion percentage already applied to forehead (for the
+    // opposite problem, glare) and validated for eyebrow.
     function cheekTenPoints(cheekboneIdx, jawA, jawB, jawC, radius){
-      return [
-        ...sampleFractionsAlongLine(cheekboneIdx, jawA, [0.25, 0.4, 0.55, 0.7], radius),
-        ...sampleFractionsAlongLine(cheekboneIdx, jawB, [0.3, 0.5, 0.7], radius),
-        ...sampleFractionsAlongLine(cheekboneIdx, jawC, [0.3, 0.5, 0.7], radius)
-      ];
+      const fractionsA = [0.25, 0.314, 0.379, 0.443, 0.507, 0.571, 0.636, 0.7];
+      const fractionsBC = [0.3, 0.357, 0.414, 0.471, 0.529, 0.586, 0.643, 0.7];
+      const samples = [
+        ...sampleFractionsAlongLine(cheekboneIdx, jawA, fractionsA, radius),
+        ...sampleFractionsAlongLine(cheekboneIdx, jawB, fractionsBC, radius),
+        ...sampleFractionsAlongLine(cheekboneIdx, jawC, fractionsBC, radius)
+      ].filter(Boolean);
+      samples.sort((a, b) => luminance(b) - luminance(a)); // brightest first
+      const keepCount = Math.max(1, Math.round(samples.length * 0.70));
+      return samples.slice(0, keepCount);
     }
     const skinSamplesCheek = [
       ...cheekTenPoints(MP_LANDMARKS.leftCheekbone, MP_LANDMARKS.leftJawA, MP_LANDMARKS.leftJawB, MP_LANDMARKS.leftJawC, 3),
@@ -1667,21 +1676,35 @@ async function measureFaceFromPhoto(imgEl){
     // its own is the glabella specifically, too close to the brow
     // area; anchoring there was pulling the "forehead" sample toward
     // eyebrow-adjacent skin instead of true mid-forehead.
-    function foreheadTwentyPoints(glabellaIdx, hairlineIdx, radius){
+    //
+    // Forehead is also a raised, forward-facing surface that commonly
+    // catches more direct light/glare than cheeks do in typical
+    // photos — repeatedly observed reading notably brighter than
+    // cheek for the same person, sometimes by 100+ luminance points,
+    // too large to be genuine skin variation. Rather than averaging
+    // the whole scanned region (which lets glare hotspots skew the
+    // result), excludes the brightest 30% before averaging — the same
+    // percentile-filtering strategy already validated for eyebrow,
+    // just removing a minority glare-affected portion instead of
+    // isolating a different substance.
+    function foreheadFilteredPoints(glabellaIdx, hairlineIdx, radius){
       const g = landmarks[glabellaIdx], hl = landmarks[hairlineIdx];
       if(!g || !hl) return [];
       const anchor = { x: g.x + (hl.x - g.x) * 0.45, y: g.y + (hl.y - g.y) * 0.45 };
-      const dxs = [-0.05, -0.025, 0, 0.025, 0.05];
-      const dys = [-0.02, -0.01, 0, 0.015];
+      const dxs = [-0.06, -0.043, -0.026, -0.009, 0.009, 0.026, 0.043, 0.06];
+      const dys = [-0.025, -0.014, -0.003, 0.008, 0.019, 0.03];
       const samples = [];
       for(const dy of dys){
         for(const dx of dxs){
-          samples.push(samplePixelBlock(imageData, (anchor.x + dx) * w, (anchor.y + dy) * h, radius));
+          const sample = samplePixelBlock(imageData, (anchor.x + dx) * w, (anchor.y + dy) * h, radius);
+          if(sample) samples.push(sample);
         }
       }
-      return samples;
+      samples.sort((a, b) => luminance(a) - luminance(b));
+      const keepCount = Math.max(1, Math.round(samples.length * 0.70));
+      return samples.slice(0, keepCount);
     }
-    const skinSamplesForehead = foreheadTwentyPoints(MP_LANDMARKS.foreheadCenter[0], MP_LANDMARKS.foreheadHairline, 3);
+    const skinSamplesForehead = foreheadFilteredPoints(MP_LANDMARKS.foreheadCenter[0], MP_LANDMARKS.foreheadHairline, 3);
     const skinSamples = [...skinSamplesCheek, ...skinSamplesForehead];
 
     const irisRgb = averageRgb(irisSamples);
