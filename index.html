@@ -381,6 +381,11 @@
     <div class="season-desc" id="seasonDesc"></div>
 
     <div id="debugPanel" style="display:none;font-family:monospace;font-size:11px;background:rgba(58,31,34,0.05);border-radius:8px;padding:10px 12px;margin:10px 0;white-space:pre-wrap;color:#3a1f22;line-height:1.6;"></div>
+    <div id="debugHistoryControls" style="display:none;margin:6px 0 14px 0;font-size:12px;">
+      <span id="debugHistoryCount" style="color:#3a1f22;opacity:0.7;"></span>
+      <button type="button" onclick="downloadDebugHistoryCSV()" style="margin-left:8px;padding:4px 10px;border-radius:6px;border:1px solid #3a1f22;background:transparent;color:#3a1f22;cursor:pointer;font-size:12px;">Download Test History (CSV)</button>
+      <button type="button" onclick="clearDebugHistory()" style="margin-left:6px;padding:4px 10px;border-radius:6px;border:1px solid #3a1f22;background:transparent;color:#3a1f22;cursor:pointer;font-size:12px;opacity:0.7;">Clear</button>
+    </div>
 
     <div id="chartSection" style="display:none;">
       <div class="chart-subtitle">Where you sit on the color chart</div>
@@ -2117,7 +2122,123 @@ analyzeBtn.addEventListener('click', async () => {
   }
 });
 
+// Debug test history — saves each real-measurement result to
+// localStorage so test cases can be reviewed/exported in bulk later,
+// instead of manually copying debug panel text each time. Only meant
+// for internal testing; safe here since this file runs as a normal
+// website (not inside Claude.ai's artifact sandbox, where browser
+// storage APIs are unsupported and excluded from that version).
+function saveDebugHistory(result){
+  try{
+    if(result.image_width === undefined) return; // only save real pixel measurements, not AI self-estimates
+    const record = {
+      timestamp: new Date().toISOString(),
+      image_width: result.image_width, image_height: result.image_height, image_mime_type: result.image_mime_type,
+      skin_rgb: result.estimated_skin_rgb, skin_rgb_cheek: result.skin_rgb_cheek, skin_rgb_forehead: result.skin_rgb_forehead,
+      iris_rgb: result.estimated_iris_rgb, sclera_rgb: result.estimated_sclera_rgb, eyebrow_rgb: result.estimated_eyebrow_rgb,
+      skin_luminance: result.skin_luminance, iris_luminance: result.iris_luminance,
+      sclera_luminance: result.sclera_luminance, eyebrow_luminance: result.eyebrow_luminance,
+      g_minus_b: result.g_minus_b, undertone: result.undertone, undertone_descriptive: result.undertone_descriptive,
+      depth_score: result.depth_score, depth_level: result.depth_level,
+      lightness: result.lightness, darkness: result.darkness,
+      contrast_score: result.contrast_score, contrast_level: result.contrast_level,
+      skin_chroma: result.skin_chroma, iris_chroma: result.iris_chroma, sclera_chroma: result.sclera_chroma,
+      chroma_contrast: result.chroma_contrast, luminance_spread: result.luminance_spread,
+      quant_warmth: result.quant_warmth, quant_value: result.quant_value,
+      quant_chroma: result.quant_chroma, quant_contrast: result.quant_contrast,
+      quant_best: result.quant_best, quant_best_dist: result.quant_best_dist,
+      quant_runner_up: result.quant_runner_up, quant_runner_up_dist: result.quant_runner_up_dist,
+      season: result.season, family: result.family
+    };
+    const history = JSON.parse(localStorage.getItem('ffbs_debug_history') || '[]');
+    history.push(record);
+    localStorage.setItem('ffbs_debug_history', JSON.stringify(history));
+    updateDebugHistoryCount();
+  } catch(e){
+    console.warn('[Debug history] Failed to save', e);
+  }
+}
+function updateDebugHistoryCount(){
+  try{
+    const history = JSON.parse(localStorage.getItem('ffbs_debug_history') || '[]');
+    const controls = document.getElementById('debugHistoryControls');
+    const countEl = document.getElementById('debugHistoryCount');
+    if(history.length > 0){
+      controls.style.display = 'block';
+      countEl.textContent = `${history.length} test case${history.length===1?'':'s'} saved`;
+    } else {
+      controls.style.display = 'none';
+    }
+  } catch(e){}
+}
+function csvEscape(val){
+  if(val === undefined || val === null) return '';
+  const s = String(val);
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+}
+function downloadDebugHistoryCSV(){
+  try{
+    const history = JSON.parse(localStorage.getItem('ffbs_debug_history') || '[]');
+    if(history.length === 0){ alert('No saved test cases yet.'); return; }
+    // RGB array fields get split into separate _r/_g/_b columns rather
+    // than one JSON-array column, so values like G-B can be computed
+    // directly in the spreadsheet without any manual parsing.
+    const rgbFields = ['skin_rgb', 'skin_rgb_cheek', 'skin_rgb_forehead', 'iris_rgb', 'sclera_rgb', 'eyebrow_rgb'];
+    const scalarFields = [
+      'timestamp', 'image_width', 'image_height', 'image_mime_type',
+      'skin_luminance', 'iris_luminance', 'sclera_luminance', 'eyebrow_luminance',
+      'g_minus_b', 'undertone', 'undertone_descriptive',
+      'depth_score', 'depth_level', 'lightness', 'darkness', 'contrast_score', 'contrast_level',
+      'skin_chroma', 'iris_chroma', 'sclera_chroma', 'chroma_contrast', 'luminance_spread',
+      'quant_warmth', 'quant_value', 'quant_chroma', 'quant_contrast',
+      'quant_best', 'quant_best_dist', 'quant_runner_up', 'quant_runner_up_dist',
+      'season', 'family'
+    ];
+    const headers = [];
+    rgbFields.forEach(f => headers.push(`${f}_r`, `${f}_g`, `${f}_b`));
+    headers.push(...scalarFields);
+
+    const rows = [headers.join(',')];
+    for(const record of history){
+      const cells = [];
+      for(const f of rgbFields){
+        const rgb = record[f];
+        if(Array.isArray(rgb) && rgb.length === 3){
+          cells.push(rgb[0], rgb[1], rgb[2]);
+        } else {
+          cells.push('', '', '');
+        }
+      }
+      for(const f of scalarFields){
+        cells.push(csvEscape(record[f]));
+      }
+      rows.push(cells.join(','));
+    }
+
+    const csv = rows.join('\n');
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `debug_history_${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch(e){
+    alert('Could not export CSV: ' + e.message);
+  }
+}
+function clearDebugHistory(){
+  if(confirm('Clear all saved debug history? This cannot be undone.')){
+    localStorage.removeItem('ffbs_debug_history');
+    updateDebugHistoryCount();
+  }
+}
+updateDebugHistoryCount(); // module scripts run after DOM parsing, so call directly rather than waiting for DOMContentLoaded (which has already fired by this point)
+
 function renderSeasonResult(result){
+  saveDebugHistory(result);
   document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
   document.getElementById('seasonName').textContent = result.season;
   document.getElementById('seasonDesc').textContent = result.explanation;
