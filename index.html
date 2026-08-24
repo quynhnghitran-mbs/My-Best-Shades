@@ -2154,8 +2154,22 @@ function saveDebugHistory(result){
     history.push(record);
     localStorage.setItem('ffbs_debug_history', JSON.stringify(history));
     updateDebugHistoryCount();
+    sendToLiveSheet(record);
   } catch(e){
     console.warn('[Debug history] Failed to save', e);
+  }
+}
+const LIVE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwoJWcfXrZb9vByyjdy6H2LspYayq_9q6vhuJhkOgGMBTN_kpthAdWzvVKiDHjqUbIKiw/exec';
+function sendToLiveSheet(record){
+  try{
+    fetch(LIVE_SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Apps Script Web Apps don't implement CORS preflight (OPTIONS) handling; no-cors avoids triggering one, at the cost of not being able to read the response
+      headers: { 'Content-Type': 'text/plain' }, // avoids a preflight; Apps Script reads e.postData.contents as the raw string regardless of this header
+      body: JSON.stringify(record)
+    }).catch(e => console.warn('[Live sheet] Send failed', e));
+  } catch(e){
+    console.warn('[Live sheet] Failed to send', e);
   }
 }
 function updateDebugHistoryCount(){
@@ -2216,15 +2230,33 @@ function downloadDebugHistoryCSV(){
     }
 
     const csv = rows.join('\n');
-    const blob = new Blob([csv], {type: 'text/csv'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `debug_history_${new Date().toISOString().slice(0,10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+
+    // Some mobile browsers (Safari on iOS especially) don't reliably
+    // trigger programmatic downloads. Try the normal download first;
+    // as a fallback that works far more universally, also open the
+    // raw CSV text in a new tab so it can always be selected and
+    // copied manually, or saved via the browser's own "Save Page As."
+    try{
+      const blob = new Blob([csv], {type: 'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `debug_history_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch(e){
+      console.warn('[CSV export] Direct download failed, falling back to new-tab view', e);
+    }
+
+    const newTab = window.open('', '_blank');
+    if(newTab){
+      newTab.document.write(`<pre style="white-space:pre-wrap;word-break:break-all;font-family:monospace;font-size:12px;padding:16px;">${csv.replace(/</g,'&lt;')}</pre>`);
+      newTab.document.title = 'Debug history CSV — select all (Ctrl+A / Cmd+A) and copy';
+    } else {
+      alert('Download may not have worked on this browser, and a popup was blocked. Please allow popups for this site and try again.');
+    }
   } catch(e){
     alert('Could not export CSV: ' + e.message);
   }
