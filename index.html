@@ -586,7 +586,7 @@ WINTER:
 - Bright Winter: cool-neutral undertone, medium-to-dark depth, extremely clear/bright chroma, very high contrast. Overall look: bold, electric.
 
 When given a photo, work through this in order before answering. Deliberately ignore hair COLOR entirely — do not let it influence any step below, since it is very likely dyed. Also treat lip color as an unreliable signal and do not weight it heavily — many people have lip tattooing, lip blushing, or other semi-permanent lip tinting procedures, so the lips' natural color may not reflect their true undertone at all. Customers are instructed to photograph themselves in natural light, so no lighting/white-balance correction is needed.
-1. Determine depth using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Depth result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate one RGB value (R, G, B, each 0-255) for skin (neck/body skin), convert it to a luminance value using L = 0.299×R + 0.587×G + 0.114×B — this luminance value IS the Depth Score. Do not incorporate eyebrow color into this calculation: eyebrow tattooing/microblading is extremely common, and tattoo ink color reflects an artist's choice, not natural pigment, so it has no reliable relationship to genuine depth. Apply this rule: if Depth Score is below 140, depth is Deep; if it is 140 to 176, depth is Medium; if it is above 176, depth is Light. Near each boundary, use a soft zone instead of a hard cutoff: within 5% of a boundary value, depth fully flips to the adjacent category; within 10% of a boundary (but outside 5%), give a blended label like "Medium-to-Deep" instead of forcing one answer.
+1. Determine depth using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Depth result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate four RGB values (R, G, B, each 0-255) — skin (neck/body skin), iris, sclera, and eyebrows — convert each to a luminance value using L = 0.299×R + 0.587×G + 0.114×B, then average all four luminance values together — this average IS the Depth Score. Apply this rule: if Depth Score is below 98, depth is Deep; if it is 98 to 130, depth is Medium; if it is above 130, depth is Light. Near each boundary, use a soft zone instead of a hard cutoff: within 5% of a boundary value, depth fully flips to the adjacent category; within 10% of a boundary (but outside 5%), give a blended label like "Medium-to-Deep" instead of forcing one answer.
 2. Determine contrast using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Contrast result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate four separate RGB values (R, G, B, each 0-255), each read carefully and specifically from THIS photo — do not default to an assumed "typical" value for any of them:
    a. Skin — the color of the neck and/or other visible body skin (not facial skin, since many people have facial redness or discoloration from skincare treatments that facial skin alone can be misleading about).
    b. Sclera — the white of the eye. This varies genuinely from a yellowish/off-white tone to a nearly pure bright white — look at the actual tone in this specific photo rather than assuming pure white by default.
@@ -613,7 +613,7 @@ Respond with ONLY a valid JSON object (no markdown fences, no extra text) in thi
   "eyebrow_luminance": the number L(eyebrow) calculated from estimated_eyebrow_rgb,
   "iris_luminance": the number L(iris) calculated from estimated_iris_rgb,
   "sclera_luminance": the number L(sclera) calculated from estimated_sclera_rgb,
-  "depth_score": the number = skin_luminance (skin only, no eyebrow) calculated in step 1,
+  "depth_score": the number = average of skin, iris, sclera, and eyebrow luminance calculated in step 1,
   "depth_level": "Deep" | "Medium" | "Light" | a blended label like "Medium-to-Light" if the score sits close to a boundary,
   "g_minus_b": the number G-B calculated from estimated_skin_rgb,
   "estimated_iris_rgb": [R, G, B] as three numbers 0-255, your estimate from step 2,
@@ -1780,17 +1780,16 @@ async function measureFaceFromPhoto(imgEl){
     const irisLuminance = luminance(irisRgb);
     const scleraLuminance = luminance(scleraRgb);
 
-    // DEPTH: skin luminance only — no eyebrow component. Eyebrow
-    // tattooing/microblading is a very common cosmetic procedure in
-    // this customer base; tattoo ink color reflects an artist's
-    // choice, not natural pigment, and has no relationship to genuine
-    // depth. Skin can never be cosmetically altered this way, so
-    // using it alone eliminates this vulnerability entirely rather
-    // than just reducing it. Thresholds re-derived via the same
-    // 15th/85th percentile method used throughout this calibration,
-    // applied to the real skin-luminance-only distribution.
-    const depthScore = skinLuminance;
-    const depthLevel = classifyWithZones(depthScore, 140, 176, ["Deep", "Medium", "Light"]);
+    // DEPTH: overall depth — average of skin, iris, sclera, and
+    // eyebrow luminance. NOTE: this reintroduces the eyebrow tattoo/
+    // microblading vulnerability that skin-only Depth was specifically
+    // built to eliminate (tattoo ink color has no relationship to
+    // genuine natural depth). Implemented at explicit request pending
+    // further review of real results. Thresholds re-derived via the
+    // same 15th/85th percentile method used throughout this
+    // calibration, applied to the real overall-depth distribution.
+    const depthScore = (skinLuminance + irisLuminance + scleraLuminance + eyebrowLuminance) / 4;
+    const depthLevel = classifyWithZones(depthScore, 98, 130, ["Deep", "Medium", "Light"]);
 
     // DARKNESS: iris weighted more heavily than eyebrow (0.7/0.3, was
     // an even 50/50) — same tattoo concern applies here, just less
@@ -1863,7 +1862,7 @@ async function measureFaceFromPhoto(imgEl){
     // landed in "Deep" seasons (an earlier, unanchored attempt had
     // 12/23), and 18/23 matched prior results.
     function warmthTo10(gb){ return Math.max(0, Math.min(10, 5 + (1/2.7)*(gb-20))); }
-    function valueTo10(ds){ return Math.max(0, Math.min(10, 2.5 + 0.1323*(ds-140))); }
+    function valueTo10(ds){ return Math.max(0, Math.min(10, 2.5 + 0.1389*(ds-98))); }
     function chromaTo10(c){ return Math.max(0, Math.min(10, (2/7.4)*(c-16.0))); }
     function contrastTo10(cs){ return Math.max(0, Math.min(10, 3 + 0.0683*(cs-109.4))); }
 
@@ -2292,7 +2291,7 @@ function renderSeasonResult(result){
       `sclera_rgb: ${JSON.stringify(result.estimated_sclera_rgb)}  L=${v(result.sclera_luminance)}\n` +
       `eyebrow_rgb: ${JSON.stringify(result.estimated_eyebrow_rgb)}  L=${v(result.eyebrow_luminance)}\n` +
       `g_minus_b: ${v(result.g_minus_b)} -> ${result.undertone || ''}  [descriptive: ${v(result.undertone_descriptive)}]\n` +
-      `Depth Score = skin_luminance only (no eyebrow) = ${v(result.depth_score)} -> ${result.depth_level}\n` +
+      `Depth Score = avg(skin=${v(result.skin_luminance)}, iris=${v(result.iris_luminance)}, sclera=${v(result.sclera_luminance)}, brow=${v(result.eyebrow_luminance)}) = ${v(result.depth_score)} -> ${result.depth_level}\n` +
       `Lightness = 0.7*max(${v(result.skin_luminance)},${v(result.sclera_luminance)})+0.3*min(...) = ${v(result.lightness)}\n` +
       `Darkness = 0.7*${v(result.iris_luminance)}+0.3*${v(result.eyebrow_luminance)} = ${v(result.darkness)}\n` +
       `Contrast Score = ${v(result.lightness)}-${v(result.darkness)} = ${v(result.contrast_score)} -> ${result.contrast_level}\n` +
