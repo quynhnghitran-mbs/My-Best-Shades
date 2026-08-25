@@ -2411,10 +2411,10 @@ function updateChart(seasonName, customerCoord, result){
 
 function quantBarChartSVG(warmth, value, chroma, contrast){
   const dims = [
-    { left: "Cool", right: "Warm", val: warmth, colorA: "#C4172C", colorB: "#C4602E", id: "gradWarmth" },
-    { left: "Deep", right: "Light", val: value, colorA: "#3A0F16", colorB: "#F5D5DE", id: "gradValue" },
-    { left: "Muted", right: "Vivid", val: chroma, colorA: "#B79A9C", colorB: "#D6336C", id: "gradChroma" },
-    { left: "Low", right: "High Contrast", val: contrast, colorA: "#E3CDD2", colorB: "#2B141C", id: "gradContrast" }
+    { left: "Cool", right: "Warm", val: warmth, colorA: "#C86B87", colorB: "#E0919E", id: "gradWarmth" },
+    { left: "Deep", right: "Light", val: value, colorA: "#7A2E3D", colorB: "#F5D5DE", id: "gradValue" },
+    { left: "Muted", right: "Vivid", val: chroma, colorA: "#C9A8AE", colorB: "#D6336C", id: "gradChroma" },
+    { left: "Low", right: "High Contrast", val: contrast, colorA: "#F0D8DC", colorB: "#5C2430", id: "gradContrast" }
   ];
   const barWidth = 280, barHeight = 14, rowGap = 46, leftPad = 10, topPad = 14;
   const svgHeight = topPad * 2 + dims.length * rowGap;
