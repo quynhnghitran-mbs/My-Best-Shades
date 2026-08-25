@@ -1694,10 +1694,11 @@ async function measureFaceFromPhoto(imgEl){
     // cheek for the same person, sometimes by 100+ luminance points,
     // too large to be genuine skin variation. Rather than averaging
     // the whole scanned region (which lets glare hotspots skew the
-    // result), excludes the brightest 50% before averaging — the same
-    // percentile-filtering strategy already validated for eyebrow,
-    // just removing a minority glare-affected portion instead of
-    // isolating a different substance.
+    // result), excludes the brightest 70% before averaging — raised
+    // from 30% then 50% after real testing showed the cheek/forehead
+    // gap kept shrinking substantially with each increase rather than
+    // plateauing (106->83->54 points across those two rounds), and a
+    // further real case showed 50% still wasn't strict enough.
     function foreheadFilteredPoints(glabellaIdx, hairlineIdx, radius){
       const g = landmarks[glabellaIdx], hl = landmarks[hairlineIdx];
       if(!g || !hl) return [];
@@ -1712,11 +1713,54 @@ async function measureFaceFromPhoto(imgEl){
         }
       }
       samples.sort((a, b) => luminance(a) - luminance(b));
-      const keepCount = Math.max(1, Math.round(samples.length * 0.50));
+      const keepCount = Math.max(1, Math.round(samples.length * 0.30));
       return samples.slice(0, keepCount);
     }
     const skinSamplesForehead = foreheadFilteredPoints(MP_LANDMARKS.foreheadCenter[0], MP_LANDMARKS.foreheadHairline, 3);
-    const skinSamples = [...skinSamplesCheek, ...skinSamplesForehead];
+
+    // UPPER EYELID. Interpolates between iris center and a central
+    // eyebrow point (35% of the way toward the brow), landing in the
+    // eyelid/crease area without needing new, unverified specific
+    // landmark indices — same safer approach already used for
+    // forehead, given this file's history of a landmark left/right
+    // swap bug. Two contamination risks here, not just one: crease
+    // shadow (like cheek's shadow problem) AND eyelash proximity
+    // (dark hair, like eyebrow's problem) — both risks push in the
+    // same direction (darker than true eyelid skin), so keeping the
+    // brightest samples and excluding the darkest handles both at
+    // once. Given the double risk, samples a larger 7x4 grid (28
+    // candidates per side) and keeps only the brightest 5 per side
+    // (10 total) — 82% exclusion, notably more aggressive than
+    // cheek's 50% single-risk exclusion, following the lesson from
+    // forehead where an initially lenient exclusion needed tightening
+    // twice against real evidence before it was strict enough.
+    // Wired into the overall skin sample pool (not just informational
+    // anymore) specifically to dilute any residual glare that still
+    // makes it through forehead's own filtering — a third, largely
+    // independent skin-tone source rather than relying on cheek and
+    // forehead alone.
+    function eyelidFilteredPoints(irisCenterIdx, eyebrowCentralIdx, radius){
+      const iris = landmarks[irisCenterIdx], brow = landmarks[eyebrowCentralIdx];
+      if(!iris || !brow) return [];
+      const anchor = { x: iris.x + (brow.x - iris.x) * 0.35, y: iris.y + (brow.y - iris.y) * 0.35 };
+      const dxs = [-0.03, -0.02, -0.01, 0, 0.01, 0.02, 0.03];
+      const dys = [-0.012, -0.004, 0.004, 0.012];
+      const samples = [];
+      for(const dy of dys){
+        for(const dx of dxs){
+          const sample = samplePixelBlock(imageData, (anchor.x + dx) * w, (anchor.y + dy) * h, radius);
+          if(sample) samples.push(sample);
+        }
+      }
+      samples.sort((a, b) => luminance(b) - luminance(a)); // brightest first
+      return samples.slice(0, Math.min(5, samples.length));
+    }
+    const eyelidSamplesLeft = eyelidFilteredPoints(MP_LANDMARKS.leftIrisCenter, MP_LANDMARKS.leftEyebrow[2], 2);
+    const eyelidSamplesRight = eyelidFilteredPoints(MP_LANDMARKS.rightIrisCenter, MP_LANDMARKS.rightEyebrow[2], 2);
+    const eyelidSamples = [...eyelidSamplesLeft, ...eyelidSamplesRight];
+    const eyelidRgb = averageRgb(eyelidSamples);
+
+    const skinSamples = [...skinSamplesCheek, ...skinSamplesForehead, ...eyelidSamples];
 
     const irisRgb = averageRgb(irisSamples);
     const scleraRgb = averageRgb(scleraSamples);
@@ -1785,6 +1829,7 @@ async function measureFaceFromPhoto(imgEl){
     const eyebrowLuminance = luminance(eyebrowRgb);
     const irisLuminance = luminance(irisRgb);
     const scleraLuminance = luminance(scleraRgb);
+    const eyelidLuminance = eyelidRgb ? luminance(eyelidRgb) : null;
 
     // DEPTH: overall depth — average of skin, iris, sclera, and
     // eyebrow luminance. NOTE: this reintroduces the eyebrow tattoo/
@@ -1899,6 +1944,7 @@ async function measureFaceFromPhoto(imgEl){
       sclera_chroma: Math.round(scleraChroma * 10) / 10,
       chroma_contrast: Math.round(chromaContrast * 10) / 10,
       luminance_spread: Math.round(luminanceSpread),
+      eyelid_rgb: eyelidRgb, eyelid_luminance: eyelidLuminance !== null ? Math.round(eyelidLuminance) : null,
       quant_warmth: Math.round(qW*10)/10, quant_value: Math.round(qV*10)/10,
       quant_chroma: Math.round(qC*10)/10, quant_contrast: Math.round(qK*10)/10,
       quant_best: quantScored[0].name, quant_best_dist: Math.round(quantScored[0].dist*100)/100,
@@ -2092,6 +2138,8 @@ analyzeBtn.addEventListener('click', async () => {
       result.sclera_chroma = measurements.sclera_chroma;
       result.chroma_contrast = measurements.chroma_contrast;
       result.luminance_spread = measurements.luminance_spread;
+      result.eyelid_rgb = measurements.eyelid_rgb;
+      result.eyelid_luminance = measurements.eyelid_luminance;
       result.undertone_descriptive = measurements.undertone_descriptive;
       result.quant_warmth = measurements.quant_warmth;
       result.quant_value = measurements.quant_value;
@@ -2304,6 +2352,7 @@ function renderSeasonResult(result){
       `[experimental] Chroma: skin=${v(result.skin_chroma)}%  iris=${v(result.iris_chroma)}%  sclera=${v(result.sclera_chroma)}%  (C = 3-way average)\n` +
       `[NEW, informational only] Chroma Contrast (spread) = ${v(result.chroma_contrast)}%  — not yet part of season matching\n` +
       `[NEW, informational only] Luminance Spread = ${v(result.luminance_spread)}  (vs official Contrast Score = ${v(result.contrast_score)})  — not yet part of season matching\n` +
+      `Eyelid: rgb=${result.eyelid_rgb ? JSON.stringify(result.eyelid_rgb) : 'N/A'}  L=${v(result.eyelid_luminance)}  — now part of skin_rgb (10 of 48 skin points, ~21%)\n` +
       `[QUANT MATCH - testing only, not the official result] W=${v(result.quant_warmth)} V=${v(result.quant_value)} C=${v(result.quant_chroma)} K=${v(result.quant_contrast)}\n` +
       `  -> ${v(result.quant_best)} (dist=${v(result.quant_best_dist)})  runner-up: ${v(result.quant_runner_up)} (dist=${v(result.quant_runner_up_dist)})`;
   } else {
