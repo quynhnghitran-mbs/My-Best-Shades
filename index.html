@@ -388,7 +388,7 @@
     </div>
 
     <div id="chartSection" style="display:none;">
-      <div class="chart-subtitle">Where you sit on the color chart</div>
+      <div class="chart-subtitle">Your color profile</div>
       <div id="chartHolder" style="display:flex;justify-content:center;margin-bottom:4px;"></div>
     </div>
 
@@ -1948,7 +1948,8 @@ async function measureFaceFromPhoto(imgEl){
       quant_warmth: Math.round(qW*10)/10, quant_value: Math.round(qV*10)/10,
       quant_chroma: Math.round(qC*10)/10, quant_contrast: Math.round(qK*10)/10,
       quant_best: quantScored[0].name, quant_best_dist: Math.round(quantScored[0].dist*100)/100,
-      quant_runner_up: quantScored[1].name, quant_runner_up_dist: Math.round(quantScored[1].dist*100)/100
+      quant_runner_up: quantScored[1].name, quant_runner_up_dist: Math.round(quantScored[1].dist*100)/100,
+      quant_too_close: (quantScored[1].dist - quantScored[0].dist) < 0.15
     };
   } catch(e){
     console.error('[Face measurement failed, falling back to AI estimation]', e);
@@ -2149,6 +2150,7 @@ analyzeBtn.addEventListener('click', async () => {
       result.quant_best_dist = measurements.quant_best_dist;
       result.quant_runner_up = measurements.quant_runner_up;
       result.quant_runner_up_dist = measurements.quant_runner_up_dist;
+      result.quant_too_close = measurements.quant_too_close;
       // Safety net: force the actual displayed season/family to match
       // the quantitative result exactly, regardless of what Claude
       // returned — same pattern already used for every other measured
@@ -2160,8 +2162,18 @@ analyzeBtn.addEventListener('click', async () => {
         "Soft Autumn":"Autumn", "True Autumn":"Autumn", "Deep Autumn":"Autumn", "Deep Soft Autumn":"Autumn",
         "Deep Winter":"Winter", "True Winter":"Winter", "Bright Winter":"Winter", "Soft Winter":"Winter"
       };
-      result.season = measurements.quant_best;
-      result.family = seasonFamilyMap[measurements.quant_best] || result.family;
+      if(measurements.quant_too_close){
+        // Best and runner-up are too close to confidently distinguish
+        // (within 0.15) — don't force a season at all; flag for the
+        // customer to retest with a different photo instead of risking
+        // an arbitrary, unreliable pick.
+        result.needsRetest = true;
+        result.season = null;
+        result.family = null;
+      } else {
+        result.season = measurements.quant_best;
+        result.family = seasonFamilyMap[measurements.quant_best] || result.family;
+      }
       result.runner_up = measurements.quant_runner_up;
     }
     result.image_mime_type = uploadedImage.mediaType;
@@ -2324,9 +2336,15 @@ updateDebugHistoryCount(); // module scripts run after DOM parsing, so call dire
 
 function renderSeasonResult(result){
   saveDebugHistory(result);
-  document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
-  document.getElementById('seasonName').textContent = result.season;
-  document.getElementById('seasonDesc').textContent = result.explanation;
+  if(result.needsRetest){
+    document.getElementById('seasonFamily').textContent = "";
+    document.getElementById('seasonName').textContent = "Let's try another photo";
+    document.getElementById('seasonDesc').textContent = "Your coloring sits right between two seasons, close enough that we can't confidently tell which one fits best from this photo. Please retake your photo in bright, even natural light (near a window works well), with a plain background and no filters, then try again.";
+  } else {
+    document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
+    document.getElementById('seasonName').textContent = result.season;
+    document.getElementById('seasonDesc').textContent = result.explanation;
+  }
 
   const debugPanel = document.getElementById('debugPanel');
   const v = (x) => (x === undefined || x === null) ? 'N/A' : x;
@@ -2360,7 +2378,18 @@ function renderSeasonResult(result){
   }
 
   resultCard.classList.add('show');
-  updateChart(result.season);
+
+  if(result.needsRetest){
+    brandSection.style.display = 'none';
+    lineSection.style.display = 'none';
+    pickCard.classList.remove('show');
+    hideError(errorBox2);
+    document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('selected'));
+    selectedBrand = null;
+    return;
+  }
+
+  updateChart(result.season, null, result);
 
   brandSection.style.display = 'block';
   lineSection.style.display = 'none';
@@ -2372,13 +2401,34 @@ function renderSeasonResult(result){
   setupSeasonOverride(result);
 }
 
-function updateChart(seasonName, customerCoord){
-  const coord = customerCoord || SEASON_MAP[seasonName];
-  if(coord){
-    chartHolder.innerHTML = seasonChartSVG(seasonName, coord);
+function updateChart(seasonName, customerCoord, result){
+  if(result && typeof result.quant_warmth === 'number'){
+    chartHolder.innerHTML = quantBarChartSVG(result.quant_warmth, result.quant_value, result.quant_chroma, result.quant_contrast);
     chartSection.style.display = 'block';
   }
   renderShadeGuide(seasonName);
+}
+
+function quantBarChartSVG(warmth, value, chroma, contrast){
+  const dims = [
+    { label: "Cool → Warm", val: warmth },
+    { label: "Deep → Light", val: value },
+    { label: "Muted → Vivid", val: chroma },
+    { label: "Low → High Contrast", val: contrast }
+  ];
+  const barWidth = 280, barHeight = 14, rowGap = 42, leftPad = 10, topPad = 10;
+  const svgHeight = topPad * 2 + dims.length * rowGap;
+  let bars = '';
+  dims.forEach((d, i) => {
+    const y = topPad + i * rowGap;
+    const fillWidth = Math.max(2, (Math.min(10, Math.max(0, d.val)) / 10) * barWidth);
+    bars += `
+      <text x="${leftPad}" y="${y - 4}" font-size="12" fill="#3a1f22" font-family="sans-serif">${d.label}</text>
+      <rect x="${leftPad}" y="${y}" width="${barWidth}" height="${barHeight}" rx="7" fill="#f0e4e6"/>
+      <rect x="${leftPad}" y="${y}" width="${fillWidth}" height="${barHeight}" rx="7" fill="#a8586b"/>
+    `;
+  });
+  return `<svg viewBox="0 0 ${leftPad*2 + barWidth} ${svgHeight}" width="${leftPad*2 + barWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">${bars}</svg>`;
 }
 
 const shadeGuideSection = document.getElementById('shadeGuideSection');
@@ -2454,7 +2504,7 @@ seasonSelect.addEventListener('change', () => {
   document.getElementById('seasonName').textContent = chosen;
   document.getElementById('seasonFamily').textContent = "Manually selected";
   document.getElementById('seasonDesc').textContent = "You picked this season yourself — shade matching below is now based on it.";
-  updateChart(chosen);
+  updateChart(chosen, null, currentSeasonResult);
   seasonCorrectToggle.textContent = "Change season again";
   seasonSelect.style.display = 'none';
 
@@ -2464,29 +2514,6 @@ seasonSelect.addEventListener('change', () => {
   document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('selected'));
   selectedBrand = null;
 });
-
-// Maps a -1..1 coordinate to pixel space and draws the warm/cool,
-// light/dark quadrant chart with the customer's season plotted on it.
-function seasonChartSVG(seasonName, coord){
-  const cx = 200, cy = 150;
-  const px = cx + coord.x * 105;
-  const py = cy - coord.y * 65;
-  return `<svg viewBox="0 0 400 300" width="340" height="255" xmlns="http://www.w3.org/2000/svg">
-    <rect x="4" y="4" width="392" height="292" rx="16" fill="none" stroke="rgba(58,31,34,0.15)" stroke-width="2"/>
-    <line x1="40" y1="150" x2="360" y2="150" stroke="rgba(58,31,34,0.35)" stroke-width="2"/>
-    <line x1="200" y1="30" x2="200" y2="270" stroke="rgba(58,31,34,0.35)" stroke-width="2"/>
-    <circle cx="200" cy="40" r="26" fill="#F5D5DE"/>
-    <text x="200" y="45" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#2B141C">Light</text>
-    <circle cx="200" cy="260" r="26" fill="#3A0F16"/>
-    <text x="200" y="265" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#fff">Dark</text>
-    <circle cx="45" cy="150" r="26" fill="#C4602E"/>
-    <text x="45" y="155" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#fff">Warm</text>
-    <circle cx="355" cy="150" r="26" fill="#C4172C"/>
-    <text x="355" y="155" text-anchor="middle" font-family="Work Sans, sans-serif" font-size="12" font-weight="600" fill="#fff">Cool</text>
-    <circle cx="${px}" cy="${py}" r="15" fill="${coord.color}" stroke="#fff" stroke-width="2.5" filter="drop-shadow(0 6px 10px rgba(58,31,34,0.3))"/>
-    <text x="${px}" y="${py - 24}" text-anchor="middle" font-family="Playfair Display, serif" font-style="italic" font-size="14" font-weight="600" fill="#3a1f22">${seasonName}</text>
-  </svg>`;
-}
 
 function selectBrand(brand, pillEl){
   document.querySelectorAll('#brandGrid .brand-pill').forEach(p => p.classList.remove('selected'));
