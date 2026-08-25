@@ -563,30 +563,36 @@ const SEASON_SHADE_GUIDE = {
 
 const SEASON_SYSTEM_PROMPT = `You are a color analyst trained in the 12-season seasonal color analysis system. You determine a person's color season from a selfie by reading three things, using ONLY the skin and eyes — never the hair, since hair is very commonly dyed and is not a reliable natural signal: undertone (warm/golden vs cool/pink-blue vs neutral) read from the skin, depth (how light or deep the skin and eyes are), and chroma/contrast (how bright and clear vs soft and muted the coloring is, and how much contrast exists specifically between the skin and the eyes).
 
-Use this reference for the 12 seasons (undertone, depth, chroma, contrast, and overall look):
+Use this reference for the 16 seasons (undertone, depth, chroma, contrast, and overall look):
 
 SPRING:
 - Bright Spring: neutral-warm undertone, medium depth, fresh chroma, high contrast. Overall look: vibrant, energetic.
 - True/Warm Spring: very warm (yellow) undertone, light-to-medium depth, bright chroma, medium contrast. Overall look: fresh, lively.
 - Light Spring: neutral-warm undertone, light depth, very bright chroma, low contrast. Overall look: delicate, sunny.
+- Soft Spring: neutral-warm undertone, light-to-medium depth, muted chroma, low contrast. Overall look: fresh but soft, gentle warmth without vividness.
 
 SUMMER:
 - Light Summer: neutral-cool undertone, light depth, soft chroma, low contrast. Overall look: airy, gentle.
 - True/Cool Summer: very cool (pink) undertone, light-to-medium depth, soft chroma, low-to-medium contrast. Overall look: elegant, calm.
 - Soft Summer: neutral-cool undertone, medium depth, very soft/muted chroma, low contrast. Overall look: muted, blended.
+- Deep Soft Summer: cool-leaning undertone, dark depth, muted chroma, medium contrast. Overall look: deep and cool but understated, not vivid like Deep Winter.
 
 AUTUMN:
 - Soft Autumn: neutral-warm undertone, medium depth, soft/muted chroma, low contrast. Overall look: earthy, understated.
 - True/Warm Autumn: warmest (golden) undertone, medium-to-dark depth, rich/muted chroma, medium contrast. Overall look: warm, natural.
 - Dark Autumn: warm-neutral undertone, dark depth, rich chroma, high contrast. Overall look: deep, luxurious.
+- Deep Soft Autumn: warm-leaning undertone, dark depth, muted chroma, medium contrast. Overall look: deep and warm but understated, not richly saturated like Deep Autumn.
 
 WINTER:
 - Dark Winter: cool-neutral undertone, dark depth, clear chroma, high contrast. Overall look: dramatic, sophisticated.
 - True/Cool Winter: coolest (blue) undertone, dark depth, very clear chroma, very high contrast. Overall look: crisp, striking.
 - Bright Winter: cool-neutral undertone, medium-to-dark depth, extremely clear/bright chroma, very high contrast. Overall look: bold, electric.
+- Soft Winter: cool-neutral undertone, medium depth, muted chroma, high contrast. Overall look: dramatic but muted — striking light/dark contrast without Winter's usual vivid color.
+
+Note on the four "Soft"/"Deep Soft" additions above (Soft Spring, Deep Soft Summer, Deep Soft Autumn, Soft Winter): Deep Soft Summer and Deep Soft Autumn were added after finding real customer photos with no good home in the original 12 — genuinely deep but muted coloring, which the original seasons couldn't represent (each family's muted member only went to medium depth, and each family's deep member required vivid chroma). Soft Spring and Soft Winter fill the same structural gap by analogy but have not yet been validated against real customer photos — treat them as reasoned but provisional.
 
 When given a photo, work through this in order before answering. Deliberately ignore hair COLOR entirely — do not let it influence any step below, since it is very likely dyed. Also treat lip color as an unreliable signal and do not weight it heavily — many people have lip tattooing, lip blushing, or other semi-permanent lip tinting procedures, so the lips' natural color may not reflect their true undertone at all. Customers are instructed to photograph themselves in natural light, so no lighting/white-balance correction is needed.
-1. Determine depth using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Depth result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate four RGB values (R, G, B, each 0-255) — skin (neck/body skin), iris, sclera, and eyebrows — convert each to a luminance value using L = 0.299×R + 0.587×G + 0.114×B, then average all four luminance values together — this average IS the Depth Score. Apply this rule: if Depth Score is below 98, depth is Deep; if it is 98 to 130, depth is Medium; if it is above 130, depth is Light. Near each boundary, use a soft zone instead of a hard cutoff: within 5% of a boundary value, depth fully flips to the adjacent category; within 10% of a boundary (but outside 5%), give a blended label like "Medium-to-Deep" instead of forcing one answer.
+1. Determine depth using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Depth result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate four RGB values (R, G, B, each 0-255) — skin (neck/body skin), iris, sclera, and eyebrows — convert each to a luminance value using L = 0.299×R + 0.587×G + 0.114×B, then average all four luminance values together — this average IS the Depth Score. Apply this rule: if Depth Score is below 98, depth is Deep; if it is 98 to 130, depth is Medium; if it is above 130, depth is Light. Near each boundary, use a soft zone instead of a hard cutoff: within 1% of a boundary value, depth fully flips to the adjacent category; within 2% of a boundary (but outside 1%), give a blended label like "Medium-to-Deep" instead of forcing one answer. This zone is intentionally narrow (unlike Contrast's wider zone below) — real testing showed a wider zone here swept most people into "Light" incorrectly, since Depth Score values cluster densely near the Light boundary.
 2. Determine contrast using this precise rule. If the user's message includes "Precise measurements were taken directly from this photo's pixels," use the given Contrast result directly — do not re-estimate or second-guess it, since it was measured from actual pixels, not visually judged. Only if no such measurements are given, estimate it yourself: estimate four separate RGB values (R, G, B, each 0-255), each read carefully and specifically from THIS photo — do not default to an assumed "typical" value for any of them:
    a. Skin — the color of the neck and/or other visible body skin (not facial skin, since many people have facial redness or discoloration from skincare treatments that facial skin alone can be misleading about).
    b. Sclera — the white of the eye. This varies genuinely from a yellowish/off-white tone to a nearly pure bright white — look at the actual tone in this specific photo rather than assuming pure white by default.
@@ -1756,9 +1762,9 @@ async function measureFaceFromPhoto(imgEl){
     // than being locked into whichever side of an arbitrary line the
     // raw number happened to land on. (5%/10% figures: provisional,
     // to be revisited.)
-    function classifyWithZones(score, lowerBoundary, upperBoundary, labels){
-      const lowerZone5 = lowerBoundary * 0.05, lowerZone10 = lowerBoundary * 0.10;
-      const upperZone5 = upperBoundary * 0.05, upperZone10 = upperBoundary * 0.10;
+    function classifyWithZones(score, lowerBoundary, upperBoundary, labels, zonePct5=0.05, zonePct10=0.10){
+      const lowerZone5 = lowerBoundary * zonePct5, lowerZone10 = lowerBoundary * zonePct10;
+      const upperZone5 = upperBoundary * zonePct5, upperZone10 = upperBoundary * zonePct10;
       const distFromLower = score - lowerBoundary;
       const distFromUpper = score - upperBoundary;
 
@@ -1789,7 +1795,7 @@ async function measureFaceFromPhoto(imgEl){
     // same 15th/85th percentile method used throughout this
     // calibration, applied to the real overall-depth distribution.
     const depthScore = (skinLuminance + irisLuminance + scleraLuminance + eyebrowLuminance) / 4;
-    const depthLevel = classifyWithZones(depthScore, 98, 130, ["Deep", "Medium", "Light"]);
+    const depthLevel = classifyWithZones(depthScore, 98, 130, ["Deep", "Medium", "Light"], 0.01, 0.02);
 
     // DARKNESS: iris weighted more heavily than eyebrow (0.7/0.3, was
     // an even 50/50) — same tattoo concern applies here, just less
@@ -1867,10 +1873,10 @@ async function measureFaceFromPhoto(imgEl){
     function contrastTo10(cs){ return Math.max(0, Math.min(10, 3 + 0.0683*(cs-109.4))); }
 
     const seasonReference = [
-      ["Light Spring","Spring",7,9,7,3], ["True Spring","Spring",10,6,8,5], ["Bright Spring","Spring",6,6,10,8],
-      ["Light Summer","Summer",3,9,5,3], ["True Summer","Summer",1,5,4,4], ["Soft Summer","Summer",4,5,2,3],
-      ["Soft Autumn","Autumn",6,5,2,3], ["True Autumn","Autumn",10,4,6,5], ["Deep Autumn","Autumn",7,2,6,6],
-      ["Deep Winter","Winter",2,1,7,7], ["True Winter","Winter",1,4,8,7], ["Bright Winter","Winter",3,5,10,10],
+      ["Light Spring","Spring",7,9,7,3], ["True Spring","Spring",10,6,8,5], ["Bright Spring","Spring",6,6,10,8], ["Soft Spring","Spring",7,7,3,3],
+      ["Light Summer","Summer",3,9,5,3], ["True Summer","Summer",1,5,4,4], ["Soft Summer","Summer",4,5,2,3], ["Deep Soft Summer","Summer",3,2,2,4],
+      ["Soft Autumn","Autumn",6,5,2,3], ["True Autumn","Autumn",10,4,6,5], ["Deep Autumn","Autumn",7,2,6,6], ["Deep Soft Autumn","Autumn",7,2,2,4],
+      ["Deep Winter","Winter",2,1,7,7], ["True Winter","Winter",1,4,8,7], ["Bright Winter","Winter",3,5,10,10], ["Soft Winter","Winter",2,3,3,6],
     ];
     const avgChroma = (skinChroma + irisChroma + scleraChroma) / 3;
     const qW = warmthTo10(gMinusB), qV = valueTo10(depthScore), qC = chromaTo10(avgChroma), qK = contrastTo10(contrastScore);
@@ -2101,10 +2107,10 @@ analyzeBtn.addEventListener('click', async () => {
       // field, so a prompt-following slip can never surface a season
       // that doesn't match the given quantitative match.
       const seasonFamilyMap = {
-        "Light Spring":"Spring", "True Spring":"Spring", "Bright Spring":"Spring",
-        "Light Summer":"Summer", "True Summer":"Summer", "Soft Summer":"Summer",
-        "Soft Autumn":"Autumn", "True Autumn":"Autumn", "Deep Autumn":"Autumn",
-        "Deep Winter":"Winter", "True Winter":"Winter", "Bright Winter":"Winter"
+        "Light Spring":"Spring", "True Spring":"Spring", "Bright Spring":"Spring", "Soft Spring":"Spring",
+        "Light Summer":"Summer", "True Summer":"Summer", "Soft Summer":"Summer", "Deep Soft Summer":"Summer",
+        "Soft Autumn":"Autumn", "True Autumn":"Autumn", "Deep Autumn":"Autumn", "Deep Soft Autumn":"Autumn",
+        "Deep Winter":"Winter", "True Winter":"Winter", "Bright Winter":"Winter", "Soft Winter":"Winter"
       };
       result.season = measurements.quant_best;
       result.family = seasonFamilyMap[measurements.quant_best] || result.family;
