@@ -371,7 +371,7 @@
     </div>
   </div>
 
-  <div class="loading" id="loading1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><br>Reading your undertone and contrast...</div>
+  <div class="loading" id="loading1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><br><span id="loading1Text">Reading your undertone and contrast...</span></div>
 
   <div class="error-box" id="errorBox1"></div>
 
@@ -1332,7 +1332,7 @@ async function loadFaceLandmarker(){
         numFaces: 1
       });
     })();
-    faceLandmarker = await Promise.race([loadAttempt, timeout(8000)]);
+    faceLandmarker = await Promise.race([loadAttempt, timeout(25000)]);
     return faceLandmarker;
   })();
   try{
@@ -2086,11 +2086,36 @@ analyzeBtn.addEventListener('click', async () => {
   analyzeBtn.disabled = true;
 
   try{
-    // Try real pixel-based measurement first (automatic, no manual
-    // action). If it fails for any reason, measurements is null and
-    // Claude estimates undertone/contrast visually instead, same as
-    // before this feature existed — the flow never blocks on this.
-    const measurements = await measureFaceFromPhoto(preview);
+    // Real pixel-based measurement, retried up to 3 times before
+    // giving up. AI self-estimate fallback has been removed entirely
+    // — real testing showed it was unreliable enough that customers
+    // are better served waiting for a genuine measurement (or being
+    // asked to retry with a different photo) than getting a fast but
+    // inaccurate visual guess.
+    let measurements = null;
+    const maxAttempts = 3;
+    const loading1Text = document.getElementById('loading1Text');
+    for(let attempt = 1; attempt <= maxAttempts; attempt++){
+      if(attempt > 1 && loading1Text){
+        loading1Text.textContent = `Still working — attempt ${attempt} of ${maxAttempts}...`;
+      }
+      measurements = await measureFaceFromPhoto(preview);
+      if(measurements) break;
+    }
+    if(loading1Text) loading1Text.textContent = 'Reading your undertone and contrast...';
+
+    if(!measurements){
+      loading1.classList.remove('show');
+      analyzeBtn.disabled = false;
+      document.getElementById('seasonFamily').textContent = "";
+      document.getElementById('seasonName').textContent = "Let's try that again";
+      document.getElementById('seasonDesc').textContent = "We couldn't get a clear, accurate reading from this photo after a few tries. This usually means the lighting is uneven, the face is partly turned or obscured, or the connection was too slow to load properly. Please try again with a clear, front-facing photo in bright, even natural light — or try again if your connection may have been slow.";
+      resultCard.classList.add('show');
+      chartSection.style.display = 'none';
+      brandSection.style.display = 'none';
+      lineSection.style.display = 'none';
+      return;
+    }
 
     let measurementText = "";
     if(measurements){
