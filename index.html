@@ -411,15 +411,6 @@
   </div>
 
   <div id="brandSection" style="display:none;">
-    <div class="section-title">Which lipstick brand do you usually reach for?</div>
-    <div class="section-sub">Pick one, then choose your favorite line from it.</div>
-    <div class="brand-grid" id="brandGrid"></div>
-
-    <div id="lineSection" style="display:none;">
-      <div class="section-title" style="font-size:17px;margin-top:26px;">Which product line?</div>
-      <div class="brand-grid" id="lineGrid"></div>
-    </div>
-
     <div class="loading" id="loading2"><span class="dot"></span><span class="dot"></span><span class="dot"></span><br>Matching real shades for you...</div>
     <div class="error-box" id="errorBox2"></div>
 
@@ -437,25 +428,6 @@
 // for use as the AI's reference. Written in plain descriptive terms.
 // ---------------------------------------------------------------------
 // ---------------------------------------------------------------------
-// Position and color of each of the 12 seasons on a warm↔cool /
-// light↔dark chart (x: -1 warm to 1 cool, y: -1 dark to 1 light),
-// digitized directly from the customer's reference chart photo.
-// ---------------------------------------------------------------------
-const SEASON_MAP = {
-  "Bright Spring":        { x: -0.18, y:  0.14, color: "#F5453C" },
-  "True/Warm Spring":     { x: -1.0,  y:  0.33, color: "#E87560" },
-  "Light Spring":         { x: -0.18, y:  1.0,  color: "#F5B0A0" },
-  "Light Summer":         { x:  0.18, y:  1.0,  color: "#F0B0D0" },
-  "True/Cool Summer":     { x:  1.0,  y:  0.33, color: "#E85C8C" },
-  "Soft Summer":          { x:  0.18, y:  0.14, color: "#C08494" },
-  "Soft Autumn":          { x: -0.18, y: -0.13, color: "#B8828C" },
-  "True/Warm Autumn":     { x: -1.0,  y: -0.32, color: "#C25A34" },
-  "Dark Autumn":          { x: -0.18, y: -1.0,  color: "#5C1A22" },
-  "Dark Winter":          { x:  0.18, y: -1.0,  color: "#4A1020" },
-  "True/Cool Winter":     { x:  1.0,  y: -0.32, color: "#8C142E" },
-  "Bright Winter":        { x:  0.18, y: -0.13, color: "#C41E28" }
-};
-
 // ---------------------------------------------------------------------
 // General "shades to look for / avoid" guide per season, shown to
 // customers purely as visual reference AFTER their season is detected.
@@ -650,17 +622,6 @@ const BRANDS = [
   { id: "colorkey", name: "Colorkey", tagline: "Chinese velvet tints" },
   { id: "fwee", name: "fwee", tagline: "Korean pudding tints" }
 ];
-
-const BRAND_LINES = {
-  "romand": ["THE JUICY LASTING TINT", "Blur Fudge Tint", "Juicy Lasting Tint"],
-  "3ce": ["Glazy Lip Glow", "Blur Water Tint", "Velvet Plush", "Cashmere Hug", "Hazy Lip Clay"],
-  "merzy": ["Puffer Mellow Tint", "Puffer Velvet Tint", "The Watery Dew Tint"],
-  "black-rouge": ["Air Fit Velvet Lite", "Muddish Cushion Velvet", "Air Hip Glow Tint"],
-  "bbia": ["Last Velvet Lip Tint"],
-  "peripera": ["Over Blur Tint", "Water Bare", "Ink The Velvet"],
-  "colorkey": ["Watery Tint", "Velvet"],
-  "fwee": ["Rose Obsession Stay-fit Lip Tint", "Pudding Pot"]
-};
 
 // ---------------------------------------------------------------------
 // One Shopee affiliate link per brand+line (not per shade) — filled in
@@ -1259,48 +1220,75 @@ const VERIFIED_SHADES = {
   ]
 };
 
-const BRAND_SYSTEM_PROMPT = `You are a color analyst recommending real lipstick shades from a specific brand and product line, based on seasonal color analysis. You will be given a customer's color season result, which lipstick brand they prefer, and which specific product line within that brand. Use your knowledge of that brand's real, current shade lineup within that exact line to choose exactly 3 real, specific shades (their actual product names) that suit this person's season.
+// ---------------------------------------------------------------------
+// Brand-agnostic shade matching. Customers are matched directly to the
+// closest lipstick shade across the ENTIRE database by color profile
+// (Warmth, Value, Chroma), not by first picking a brand/line. Contrast
+// is deliberately excluded here — it's a multi-feature spread concept
+// (bright sclera vs dark iris/eyebrow) that has no natural analog for
+// a single lipstick color.
+//
+// Skin and lipstick are different color populations (lipsticks are far
+// more saturated by formulation, and skew pink/red rather than skin's
+// yellow/orange) — reusing the skin-calibrated warmthTo10/valueTo10/
+// chromaTo10 functions directly on lipstick hex colors was tested and
+// failed badly (75% of 333 real shades clamped to Warmth=0, 51% to
+// Chroma=10). This is a SEPARATE calibration, derived the same way
+// (15th/85th percentile of the real shade population), anchored to
+// 1/9 instead of 0/10 to leave headroom for genuine outliers:
+//   G-B: 15th pct=-17.2, 85th pct=11.0
+//   Luminance: 15th pct=92.9, 85th pct=160.9
+//   Saturation%: 15th pct=40.8, 85th pct=69.0
+// Verified this produces a healthy, roughly symmetric distribution
+// (means ~5, clamping ~10% at each end) rather than the skin-formula's
+// wildly lopsided one.
+function lipWarmthTo10(gb){ return Math.max(0, Math.min(10, 1 + 0.2837*(gb+17.2))); }
+function lipValueTo10(L){ return Math.max(0, Math.min(10, 1 + 0.1176*(L-92.9))); }
+function lipChromaTo10(sat){ return Math.max(0, Math.min(10, 1 + 0.2837*(sat-40.8))); }
 
-Reference on each brand's general color character:
-- Black Rouge (Korean, Air Fit Velvet Lite / Air Hip Glow Tint / Muddish Cushion Velvet lines): huge range from soft coral-pink to deep brick-red and blackened berry; mostly warm-to-neutral undertone with a few cool berry options; spans light to deep depth.
-- 3CE (Korean, Stylenanda, Blur Water Tint / Velvet Plush / Cashmere Hug / Glazy Lip Glow / Hazy Lip Clay lines): trend-driven "my-lips-but-better" shades — muted mauve, terracotta, dusty rose, brick; mostly neutral-to-warm undertone, medium depth.
-- Bbia (Korean, Last Velvet Lip Tint line): one of the most iconic Korean tint lines, sophisticated muted-to-rich range — dusty terracotta, mauve, deep wine, blackened red; neutral undertone overall, medium-to-deep depth, velvety matte finish.
-- rom&nd (Korean, Blur Fudge Tint / Juicy Lasting Tint / THE JUICY LASTING TINT lines): very wide range from warm coral-orange nudes to cool rose-mauve and deep wine; famous for a natural "your lips but better" gradient look; spans light to deep.
-- MERZY (Korean, The Watery Dew Tint / Puffer Velvet Tint / Puffer Mellow Tint lines): highly pigmented, bold-leaning range from warm coral and brick to cool berry and deep red; neutral-to-warm undertone, medium-to-deep depth, popular for strong color payoff.
-- Peripera (Korean, Over Blur Tint / Ink The Velvet / Water Bare lines): playful, wide range from juicy warm coral and red to soft milky pinks; mostly warm-to-neutral undertone, light-to-medium depth, glowy-to-velvet finishes.
-- Colorkey (Chinese, Watery Tint / Velvet lines): affordable, trend-driven velvet and watery lip tints popular across Asia; wide range from soft nudes to bold reds, both warm and cool options, light-to-medium depth.
-- fwee (Korean, Rose Obsession Stay-fit Lip Tint / Pudding Pot lines): playful indie brand known for a very wide, TikTok-popular shade range in its "Pudding Pot" tints; spans warm peachy nudes to cool berry-plums, light to deep.
+function hexToRgbShade(hex){
+  const n = parseInt(hex.replace('#',''), 16);
+  return { r: (n>>16)&255, g: (n>>8)&255, b: n&255 };
+}
+function luminanceShade(rgb){ return 0.299*rgb.r + 0.587*rgb.g + 0.114*rgb.b; }
+function saturationShade(rgb){
+  const mx = Math.max(rgb.r,rgb.g,rgb.b), mn = Math.min(rgb.r,rgb.g,rgb.b);
+  return mx > 0 ? ((mx-mn)/mx)*100 : 0;
+}
 
-If the user message includes a "Verified real shade list," that list is the complete, authoritative set of real shades for this line. You MUST choose your 3 shades only from that list, and you MUST reuse the exact hex value given for each one — never alter, invent, or approximate a different hex. If no such list is given, fall back to your own knowledge as described above.
+const SHADE_DATABASE = Object.entries(VERIFIED_SHADES).flatMap(([brandLine, shades]) =>
+  shades.map(s => {
+    const rgb = hexToRgbShade(s.hex);
+    const gb = rgb.g - rgb.b;
+    const L = luminanceShade(rgb);
+    const sat = saturationShade(rgb);
+    return {
+      name: s.name, hex: s.hex, brandLine,
+      warmth: lipWarmthTo10(gb), value: lipValueTo10(L), chroma: lipChromaTo10(sat)
+    };
+  })
+);
 
-Hard rule: if this person's season reads warm, do not recommend any cool-toned shade, even as an alternate. If their season reads cool, do not recommend any warm-toned shade, even as an alternate. A more neutral option is fine either way, but never cross to the opposite side of warm/cool — except in the specific fallback case in step 3 below, where this can be set aside only to fill a slot that would otherwise be empty.
-
-Choose exactly 3 shades, all from the specific product line given, using this process:
-1. Determine the customer's quadrant on the warm/cool, light/dark chart. This is INCLUSIVE of the axis edges, so a shade sitting exactly on the warm/cool line or the light/dark line still counts as being in the customer's quadrant as long as its other coordinate matches. It's also inclusive of near-neutral shades on the warm/cool axis specifically: a shade within about 0.1 of the center on the warm/cool axis counts as neutral enough to belong to EITHER side's quadrant, not strictly whichever side its sign falls on.
-2. Within that quadrant, rank every shade by DEPTH similarity to the customer first (how close their light/deep level is), then by TEMPERATURE similarity (how warm/cool) as the tiebreak. "best" = the top of that ranked list, "alt1" (2nd closest) and "alt2" (3rd closest) are the next two shades down that same ranked list.
-3. If the quadrant has fewer than 3 shades in this line, fill the remaining slot(s) from the complete shade list (not just the quadrant, and not limited by the warm/cool hard rule above) — still ranked by the same depth-then-temperature process, just picking whichever real shades are next closest overall.
-
-For alt1 and alt2, the "why" field should briefly mention whichever of lighter/deeper or warmer/cooler/more-neutral actually differs from the best match — only mention an axis if it's meaningfully different.
-
-Accuracy requirement: if a shade name includes a code or number (e.g. "21 Fig Fig", "V02"), that code must be the one that actually belongs to that exact shade name — never attach a number from one shade to the name of a different shade. Before answering, double check that each code and name pair you give actually go together. If you are not fully certain a code is correct for a given name, leave the code out entirely and give only the plain shade name — do not guess.
-
-Respond with ONLY a valid JSON object (no markdown fences, no extra text) in this exact shape:
-{
-  "brand": "brand name as given",
-  "line": "line name as given",
-  "shades": [
-    {"rank": "best", "name": "real shade name", "hex_approx": "#hexcode", "why": "one short friendly sentence"},
-    {"rank": "alt1", "name": "real shade name", "hex_approx": "#hexcode", "why": "one short sentence noting whichever of lighter/deeper or warmer/cooler/more neutral actually differs from the best match"},
-    {"rank": "alt2", "name": "real shade name", "hex_approx": "#hexcode", "why": "one short sentence noting whichever of lighter/deeper or warmer/cooler/more neutral actually differs from the best match"}
-  ]
-}`;
+// Returns the topN closest shades across the WHOLE database by 3D
+// Euclidean distance on Warmth/Value/Chroma (Contrast excluded, see
+// note above). Brand doesn't factor into ranking at all — a customer
+// might see their top matches come from entirely different brands.
+function findBestShades(customerWarmth, customerValue, customerChroma, topN){
+  return SHADE_DATABASE
+    .map(s => ({
+      ...s,
+      dist: Math.sqrt((customerWarmth-s.warmth)**2 + (customerValue-s.value)**2 + (customerChroma-s.chroma)**2)
+    }))
+    .sort((a,b) => a.dist - b.dist)
+    .slice(0, topN);
+}
 
 // ---------------------------------------------------------------------
 // State
 // ---------------------------------------------------------------------
 let uploadedImage = null; // {base64, mediaType}
 let currentSeasonResult = null;
-let selectedBrand = null;
+let previousAttemptWasFlagged = false; // tracks whether the LAST analyze attempt hit a too-close-to-call or poor-fit condition, so a repeat on retest resolves differently than a first occurrence
 
 // ---------------------------------------------------------------------
 // Automatic face-landmark detection (MediaPipe Face Landmarker) for
@@ -1949,7 +1937,8 @@ async function measureFaceFromPhoto(imgEl){
       quant_chroma: Math.round(qC*10)/10, quant_contrast: Math.round(qK*10)/10,
       quant_best: quantScored[0].name, quant_best_dist: Math.round(quantScored[0].dist*100)/100,
       quant_runner_up: quantScored[1].name, quant_runner_up_dist: Math.round(quantScored[1].dist*100)/100,
-      quant_too_close: (quantScored[1].dist - quantScored[0].dist) < 0.15
+      quant_too_close: (quantScored[1].dist - quantScored[0].dist) < 0.15,
+      quant_poor_fit: quantScored[0].dist >= 4
     };
   } catch(e){
     console.error('[Face measurement failed, falling back to AI estimation]', e);
@@ -1968,22 +1957,10 @@ const resultCard = document.getElementById('resultCard');
 const chartSection = document.getElementById('chartSection');
 const chartHolder = document.getElementById('chartHolder');
 const brandSection = document.getElementById('brandSection');
-const brandGrid = document.getElementById('brandGrid');
-const lineSection = document.getElementById('lineSection');
-const lineGrid = document.getElementById('lineGrid');
 const loading2 = document.getElementById('loading2');
 const errorBox2 = document.getElementById('errorBox2');
 const pickCard = document.getElementById('pickCard');
 const shadePodium = document.getElementById('shadePodium');
-
-BRANDS.forEach(b => {
-  const pill = document.createElement('div');
-  pill.className = 'brand-pill';
-  pill.textContent = b.name;
-  pill.addEventListener('click', () => selectBrand(b, pill));
-  brandGrid.appendChild(pill);
-});
-
 
 function handleImageFile(file){
   if (!file) return;
@@ -2113,7 +2090,6 @@ analyzeBtn.addEventListener('click', async () => {
       resultCard.classList.add('show');
       chartSection.style.display = 'none';
       brandSection.style.display = 'none';
-      lineSection.style.display = 'none';
       return;
     }
 
@@ -2176,6 +2152,7 @@ analyzeBtn.addEventListener('click', async () => {
       result.quant_runner_up = measurements.quant_runner_up;
       result.quant_runner_up_dist = measurements.quant_runner_up_dist;
       result.quant_too_close = measurements.quant_too_close;
+      result.quant_poor_fit = measurements.quant_poor_fit;
       // Safety net: force the actual displayed season/family to match
       // the quantitative result exactly, regardless of what Claude
       // returned — same pattern already used for every other measured
@@ -2187,16 +2164,41 @@ analyzeBtn.addEventListener('click', async () => {
         "Soft Autumn":"Autumn", "True Autumn":"Autumn", "Deep Autumn":"Autumn", "Deep Soft Autumn":"Autumn",
         "Deep Winter":"Winter", "True Winter":"Winter", "Bright Winter":"Winter", "Soft Winter":"Winter"
       };
-      if(measurements.quant_too_close){
-        // Best and runner-up are too close to confidently distinguish
-        // (within 0.15) — don't force a season at all; flag for the
-        // customer to retest with a different photo instead of risking
-        // an arbitrary, unreliable pick.
+      const hasIssue = measurements.quant_too_close || measurements.quant_poor_fit;
+
+      if(hasIssue && !previousAttemptWasFlagged){
+        // First time hitting either condition -- ask for a retest
+        // rather than resolving immediately, since a second photo
+        // might clear it up entirely.
+        previousAttemptWasFlagged = true;
         result.needsRetest = true;
         result.season = null;
         result.family = null;
+      } else if(hasIssue && previousAttemptWasFlagged){
+        // Same condition persisted after a retest -- resolve now
+        // rather than asking a third time. Ties and poor fits resolve
+        // differently: a tie means two seasons are genuinely equally
+        // plausible, so show both; a poor fit means one season is the
+        // best available answer, just not a confident one.
+        previousAttemptWasFlagged = false;
+        if(measurements.quant_too_close){
+          result.season = `${measurements.quant_best}/${measurements.quant_runner_up}`;
+          result.shadeMatchSeason = measurements.quant_best; // for shade/chart lookups, which need a single real season key -- the combined name is display-only
+          result.family = seasonFamilyMap[measurements.quant_best] || result.family;
+          result.isCombinedSeason = true;
+        } else {
+          result.season = measurements.quant_best;
+          result.shadeMatchSeason = measurements.quant_best;
+          result.family = seasonFamilyMap[measurements.quant_best] || result.family;
+          result.isLowConfidence = true;
+        }
       } else {
+        // No issue this time -- reset the flag so a FUTURE unrelated
+        // occurrence is correctly treated as a fresh first occurrence,
+        // not mistaken for a second attempt at an already-resolved case.
+        previousAttemptWasFlagged = false;
         result.season = measurements.quant_best;
+        result.shadeMatchSeason = measurements.quant_best;
         result.family = seasonFamilyMap[measurements.quant_best] || result.family;
       }
       result.runner_up = measurements.quant_runner_up;
@@ -2364,7 +2366,18 @@ function renderSeasonResult(result){
   if(result.needsRetest){
     document.getElementById('seasonFamily').textContent = "";
     document.getElementById('seasonName').textContent = "Let's try another photo";
-    document.getElementById('seasonDesc').textContent = "Your coloring sits right between two seasons, close enough that we can't confidently tell which one fits best from this photo. Please retake your photo in bright, even natural light (near a window works well), with a plain background and no filters, then try again.";
+    const reason = result.quant_too_close
+      ? "Your coloring sits right between two seasons, close enough that we can't confidently tell which one fits best from this photo."
+      : "We couldn't find a confident match to any season from this photo.";
+    document.getElementById('seasonDesc').textContent = `${reason} Please retake your photo in bright, even natural light (near a window works well), with a plain background and no filters, then try again.`;
+  } else if(result.isCombinedSeason){
+    document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
+    document.getElementById('seasonName').textContent = result.season;
+    document.getElementById('seasonDesc').textContent = `Even after a second photo, your coloring sits genuinely between these two seasons — both fit about equally well. ${result.explanation || ''}`;
+  } else if(result.isLowConfidence){
+    document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
+    document.getElementById('seasonName').textContent = result.season;
+    document.getElementById('seasonDesc').textContent = `${result.explanation} (This is our best match, but confidence is lower than usual for your coloring — treat it as a starting point.)`;
   } else {
     document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
     document.getElementById('seasonName').textContent = result.season;
@@ -2406,22 +2419,16 @@ function renderSeasonResult(result){
 
   if(result.needsRetest){
     brandSection.style.display = 'none';
-    lineSection.style.display = 'none';
     pickCard.classList.remove('show');
     hideError(errorBox2);
-    document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('selected'));
-    selectedBrand = null;
     return;
   }
 
-  updateChart(result.season, null, result);
+  updateChart(result.shadeMatchSeason || result.season, null, result);
 
   brandSection.style.display = 'block';
-  lineSection.style.display = 'none';
-  pickCard.classList.remove('show');
   hideError(errorBox2);
-  document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('selected'));
-  selectedBrand = null;
+  showBestShadeMatches(result);
 
   setupSeasonOverride(result);
 }
@@ -2507,9 +2514,16 @@ document.addEventListener('click', () => shadeTooltip.classList.remove('show'));
 const seasonCorrectToggle = document.getElementById('seasonCorrectToggle');
 const seasonSelect = document.getElementById('seasonSelect');
 
+const ALL_SEASON_NAMES = [
+  "Light Spring", "True Spring", "Bright Spring", "Soft Spring",
+  "Light Summer", "True Summer", "Soft Summer", "Deep Soft Summer",
+  "Soft Autumn", "True Autumn", "Deep Autumn", "Deep Soft Autumn",
+  "Deep Winter", "True Winter", "Bright Winter", "Soft Winter"
+];
+
 function setupSeasonOverride(result){
   seasonSelect.innerHTML = '<option value="" disabled selected>Pick your actual season...</option>';
-  Object.keys(SEASON_MAP).forEach(name => {
+  ALL_SEASON_NAMES.forEach(name => {
     const opt = document.createElement('option');
     opt.value = name;
     opt.textContent = name + (name === result.season ? ' (AI\'s guess)' : '') + (result.runner_up === name ? ' (close runner-up)' : '');
@@ -2540,178 +2554,34 @@ seasonSelect.addEventListener('change', () => {
   seasonCorrectToggle.textContent = "Change season again";
   seasonSelect.style.display = 'none';
 
-  // Reset any in-progress brand/line selection so results re-match to the new season.
-  lineSection.style.display = 'none';
+  // Shade matching is based on the customer's actual measured color
+  // profile (Warmth/Value/Chroma), which doesn't change just because
+  // they picked a different season label -- so just re-render with
+  // the same underlying values.
   pickCard.classList.remove('show');
-  document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('selected'));
-  selectedBrand = null;
+  showBestShadeMatches(currentSeasonResult);
 });
 
-function selectBrand(brand, pillEl){
-  document.querySelectorAll('#brandGrid .brand-pill').forEach(p => p.classList.remove('selected'));
-  pillEl.classList.add('selected');
-  selectedBrand = brand;
-  pickCard.classList.remove('show');
+// Looks up a brand id's display name (e.g. "black-rouge" -> "Black Rouge").
+function brandDisplayName(brandId){
+  const found = BRANDS.find(b => b.id === brandId);
+  return found ? found.name : brandId;
+}
+
+// Splits a "brandId::Line Name" key into its display parts.
+function splitBrandLine(brandLine){
+  const [brandId, ...lineParts] = brandLine.split('::');
+  return { brandId, brand: brandDisplayName(brandId), line: lineParts.join('::') };
+}
+
+// Entry point: finds and renders the customer's best-matching shades
+// across the WHOLE database (brand-agnostic), using their already-
+// computed Warmth/Value/Chroma. No brand/line selection needed.
+function showBestShadeMatches(result){
+  if(!result || typeof result.quant_warmth !== 'number') return;
   hideError(errorBox2);
-
-  lineGrid.innerHTML = '';
-  (BRAND_LINES[brand.id] || []).forEach(line => {
-    const pill = document.createElement('div');
-    pill.className = 'brand-pill';
-    pill.textContent = line;
-    pill.addEventListener('click', () => selectLine(brand, line, pill));
-    lineGrid.appendChild(pill);
-  });
-  lineSection.style.display = 'block';
-}
-
-function euclidDist(a, b){
-  return Math.sqrt((a.x - b.x) ** 2 + (a.y - b.y) ** 2);
-}
-
-const AXIS_THRESH = 0.04;
-
-// Describes how an alt shade differs from the best match on whichever
-// axes are actually meaningfully different.
-function describeShadeWhy(alt, best){
-  const parts = [];
-  const yDiff = alt.y - best.y;
-  if(yDiff > AXIS_THRESH) parts.push("lighter");
-  else if(yDiff < -AXIS_THRESH) parts.push("deeper");
-  const isMoreNeutral = Math.abs(alt.x) < Math.abs(best.x) - AXIS_THRESH;
-  if(isMoreNeutral) parts.push("more neutral");
-  else {
-    const xDiff = alt.x - best.x;
-    if(xDiff > AXIS_THRESH) parts.push("cooler");
-    else if(xDiff < -AXIS_THRESH) parts.push("warmer");
-  }
-  if(parts.length === 0) return "A closely related shade from the same family.";
-  return "Slightly " + parts.join(" and ") + " than your best match.";
-}
-
-// Hard rule: if the customer reads warm, cool-side shades are never
-// recommended, and vice versa — a small neutral buffer around the
-// center line is allowed either way. No AI guessing involved when
-// real coordinates exist.
-const WARM_COOL_NEUTRAL_ZONE = 0.1;
-
-// Shade-matching formula (simplified, replaces the near-axis version):
-// 1. Determine the customer's quadrant on the warm/cool, light/dark
-//    chart — INCLUSIVE of the axis edges, so a shade sitting exactly
-//    on x=0 or y=0 still counts as being in the customer's quadrant
-//    as long as its other coordinate matches.
-// 2. Rank every shade within that quadrant by DEPTH similarity to the
-//    customer first (how light/deep), then TEMPERATURE similarity
-//    (how warm/cool) as the tiebreak.
-// 3. Best match = the top of that ranked list. 2nd and 3rd closest are
-//    the next two shades down the same ranked list.
-// 4. If the quadrant has fewer than 3 shades, widen to the full shade
-//    list (still ranked the same way) only to fill the remaining
-//    slots — this is the only case where the quadrant boundary is
-//    crossed.
-function pickByChartPosition(customerCoord, shadeList, customerSeasonName){
-  const isWarm = customerCoord.x < 0;
-  const filtered = shadeList.filter(s => {
-    if(isWarm) return s.x <= WARM_COOL_NEUTRAL_ZONE;   // exclude clearly cool shades
-    return s.x >= -WARM_COOL_NEUTRAL_ZONE;              // exclude clearly warm shades
-  });
-  const pool = filtered.length > 0 ? filtered : shadeList; // safety net, should rarely trigger
-
-  // Quadrant boundary, inclusive of the edges (x=0 or y=0 still counts
-  // as belonging, as long as the other axis matches the customer).
-  // The warm/cool side uses the same neutral buffer as the hard rule
-  // above — a shade within WARM_COOL_NEUTRAL_ZONE of center counts as
-  // neutral enough to qualify for EITHER side's quadrant, not just
-  // whichever side its sign technically falls on.
-  const isCustomerLight = customerCoord.y >= 0;
-  const quadrantPool = pool.filter(s => {
-    const xOk = isWarm ? s.x <= WARM_COOL_NEUTRAL_ZONE : s.x >= -WARM_COOL_NEUTRAL_ZONE;
-    const yOk = isCustomerLight ? s.y >= 0 : s.y <= 0;
-    return xOk && yOk;
-  });
-
-  // Rank by depth similarity to the customer first, temperature
-  // (warm/cool) similarity second — used both within the quadrant and
-  // as the fallback ranking across everything if needed.
-  function rankByDepthThenTemp(list){
-    return [...list].sort((a, b) => {
-      const aDepth = Math.abs(a.y - customerCoord.y);
-      const bDepth = Math.abs(b.y - customerCoord.y);
-      if(Math.abs(aDepth - bDepth) > AXIS_THRESH) return aDepth - bDepth;
-      const aWarmth = Math.abs(a.x - customerCoord.x);
-      const bWarmth = Math.abs(b.x - customerCoord.x);
-      return aWarmth - bWarmth;
-    });
-  }
-
-  const rankedQuadrant = rankByDepthThenTemp(quadrantPool);
-  let picks = rankedQuadrant.slice(0, 3);
-
-  // Only if the quadrant didn't yield 3 shades, fill the remaining
-  // slots from the COMPLETE shade list (bypassing even the warm/cool
-  // hard filter, which only applies within the quadrant search) —
-  // still ranked the same way, skipping whatever's already picked.
-  if(picks.length < 3){
-    const pickedNames = new Set(picks.map(s => s.name));
-    const rankedAll = rankByDepthThenTemp(shadeList).filter(s => !pickedNames.has(s.name));
-    picks = picks.concat(rankedAll.slice(0, 3 - picks.length));
-  }
-
-  const best = picks[0];
-  const alt1 = picks[1] || null;
-  const alt2 = picks[2] || null;
-
-  return {
-    best: { name: best.name, hex_approx: best.hex, why: "Closest match to your color chart position." },
-    alt1: alt1 ? { name: alt1.name, hex_approx: alt1.hex, why: describeShadeWhy(alt1, best) } : null,
-    alt2: alt2 ? { name: alt2.name, hex_approx: alt2.hex, why: describeShadeWhy(alt2, best) } : null
-  };
-}
-
-async function selectLine(brand, line, pillEl){
-  if(!currentSeasonResult) return;
-  document.querySelectorAll('#lineGrid .brand-pill').forEach(p => p.classList.remove('selected'));
-  pillEl.classList.add('selected');
-
-  hideError(errorBox2);
-  pickCard.classList.remove('show');
-
-  const verifiedList = VERIFIED_SHADES[`${brand.id}::${line}`];
-  const customerCoord = SEASON_MAP[currentSeasonResult.season];
-
-  // Fully deterministic path: real shades + real chart position, no AI call needed.
-  if(verifiedList && customerCoord && verifiedList.every(s => typeof s.x === 'number')){
-    const matched = pickByChartPosition(customerCoord, verifiedList, currentSeasonResult.season);
-    renderShadePodium({
-      brandId: brand.id,
-      brand: brand.name,
-      line: line,
-      shades: [
-        { rank: "best", ...matched.best },
-        ...(matched.alt1 ? [{ rank: "alt1", ...matched.alt1 }] : []),
-        ...(matched.alt2 ? [{ rank: "alt2", ...matched.alt2 }] : [])
-      ]
-    });
-    return;
-  }
-
-  loading2.classList.add('show');
-  try{
-    let promptText = `Customer's season result:\n${JSON.stringify(currentSeasonResult)}\n\nPreferred lipstick brand: ${brand.name}\nPreferred product line: ${line}\n\n`;
-    if(verifiedList){
-      promptText += `Verified real shade list for this exact line:\n${JSON.stringify(verifiedList)}\n\nPick exactly 3 shades ONLY from this list (best/lighter/deeper) and reuse their exact hex values as given.`;
-    } else {
-      promptText += `Recommend the 3 ranked shades from that exact line and respond with only the JSON object.`;
-    }
-    const userContent = [{ type: "text", text: promptText }];
-    const result = await callClaude(BRAND_SYSTEM_PROMPT, userContent);
-    result.brandId = brand.id;
-    renderShadePodium(result);
-  } catch(err){
-    showError(errorBox2, err.message || "Couldn't fetch shade picks. Please try again.");
-  } finally {
-    loading2.classList.remove('show');
-  }
+  const matches = findBestShades(result.quant_warmth, result.quant_value, result.quant_chroma, 6);
+  renderShadeMatches(matches);
 }
 
 // Small color helpers used to build a soft gradient on the swatch shape
@@ -2751,51 +2621,51 @@ function lipstickSwatch(hex, size){
 </svg>`;
 }
 
-function renderShadePodium(result){
-  document.getElementById('pickBrandTag').textContent = `${result.brand} · ${result.line || ''}`;
-  document.getElementById('pickBrandName').textContent = "Your 3 shades";
-
-  const shades = result.shades || [];
-  const best = shades.find(s => s.rank === 'best') || shades[0];
-  const alt1 = shades.find(s => s.rank === 'alt1');
-  const alt2 = shades.find(s => s.rank === 'alt2');
-
-  const affiliateUrl = AFFILIATE_LINKS[`${result.brandId}::${result.line}`];
+function renderShadeMatches(matches){
+  document.getElementById('pickBrandTag').textContent = "Matched from every brand in our database";
+  document.getElementById('pickBrandName').textContent = "Your best shade matches";
 
   shadePodium.innerHTML = '';
+  if(matches.length === 0) return;
 
-  if(best){
-    const bestEl = document.createElement('div');
-    bestEl.style.display = 'flex';
-    bestEl.style.flexDirection = 'column';
-    bestEl.style.alignItems = 'center';
-    bestEl.style.gap = '10px';
-    bestEl.innerHTML = `
-      ${lipstickSwatch(best.hex_approx, 130)}
-      <div class="shade-best-label">
-        <div class="tag">Best match</div>
-        <div class="name">${best.name}</div>
-        <div class="why">${best.why}</div>
-        ${affiliateUrl ? `<div class="shop-link">Buy now →</div>` : ''}
-      </div>`;
-    if(affiliateUrl){
-      bestEl.style.cursor = 'pointer';
-      bestEl.addEventListener('click', () => window.open(affiliateUrl, '_blank', 'noopener'));
-    }
-    shadePodium.appendChild(bestEl);
+  const best = matches[0];
+  const rest = matches.slice(1);
+
+  const bestParts = splitBrandLine(best.brandLine);
+  const bestAffiliateUrl = AFFILIATE_LINKS[best.brandLine];
+
+  const bestEl = document.createElement('div');
+  bestEl.style.display = 'flex';
+  bestEl.style.flexDirection = 'column';
+  bestEl.style.alignItems = 'center';
+  bestEl.style.gap = '10px';
+  bestEl.innerHTML = `
+    ${lipstickSwatch(best.hex, 130)}
+    <div class="shade-best-label">
+      <div class="tag">Best match</div>
+      <div class="name">${best.name}</div>
+      <div class="why">${bestParts.brand} · ${bestParts.line}</div>
+      ${bestAffiliateUrl ? `<div class="shop-link">Buy now →</div>` : ''}
+    </div>`;
+  if(bestAffiliateUrl){
+    bestEl.style.cursor = 'pointer';
+    bestEl.addEventListener('click', () => window.open(bestAffiliateUrl, '_blank', 'noopener'));
   }
+  shadePodium.appendChild(bestEl);
 
   const altsWrap = document.createElement('div');
   altsWrap.className = 'shade-alts';
-  [{data: alt1, tag: '2nd closest'}, {data: alt2, tag: '3rd closest'}].forEach(alt => {
-    if(!alt.data) return;
+  const ordinals = ['2nd', '3rd', '4th', '5th', '6th'];
+  rest.forEach((s, i) => {
+    const parts = splitBrandLine(s.brandLine);
+    const affiliateUrl = AFFILIATE_LINKS[s.brandLine];
     const el = document.createElement('div');
     el.className = 'shade-alt';
     el.innerHTML = `
-      ${lipstickSwatch(alt.data.hex_approx, 58)}
-      <div class="tag">${alt.tag}</div>
-      <div class="name">${alt.data.name}</div>
-      <div class="why">${alt.data.why}</div>
+      ${lipstickSwatch(s.hex, 58)}
+      <div class="tag">${ordinals[i] || `${i+2}th`} closest</div>
+      <div class="name">${s.name}</div>
+      <div class="why">${parts.brand} · ${parts.line}</div>
       ${affiliateUrl ? `<div class="shop-link">Shop →</div>` : ''}`;
     if(affiliateUrl){
       el.style.cursor = 'pointer';
