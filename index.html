@@ -1582,7 +1582,6 @@ function findBestMacShadesByFinish(customerLab, lookTier){
 // ---------------------------------------------------------------------
 let uploadedImage = null; // {base64, mediaType}
 let currentSeasonResult = null;
-let previousAttemptWasFlagged = false; // tracks whether the LAST analyze attempt hit a too-close-to-call or poor-fit condition, so a repeat on retest resolves differently than a first occurrence
 
 // ---------------------------------------------------------------------
 // Automatic face-landmark detection (MediaPipe Face Landmarker) for
@@ -2059,23 +2058,35 @@ async function measureFaceFromPhoto(imgEl){
       return null;
     }
 
-    const gMinusB = skinRgb.g - skinRgb.b;
-    const undertone = gMinusB < 20 ? "cool-leaning" : "warm-leaning";
+    // Undertone now uses CIELAB b* (skin only) instead of raw G-B.
+    // Switched after finding 9 independently human-verified real
+    // customers where Lab b* correctly called warm/cool and G-B did
+    // not -- concentrated exactly in the borderline population where
+    // the two metrics disagree or sit near their thresholds. G-B is
+    // a raw channel difference with no color-science grounding; Lab
+    // b* goes through gamma correction + the XYZ transform
+    // specifically designed to track human-perceived warmth, which
+    // plausibly explains why it outperforms G-B on ambiguous cases.
+    // Boundary (15.5) and 6-tier boundaries below were derived by
+    // preserving the same warmth-unit positions as the original G-B
+    // tiers (validated via the Soft Autumn cluster anchor), not
+    // independently re-derived from scratch -- worth re-validating
+    // as more real customer data accumulates.
+    const customerLab = rgbToLab(skinRgb);
+    const gMinusB = skinRgb.g - skinRgb.b; // kept for the debug panel and cross-reference only, no longer drives classification
+    const undertone = customerLab.b < 15.5 ? "cool-leaning" : "warm-leaning";
     // Purely descriptive 6-tier scale for customer-facing language and
     // internal reference — does NOT affect the strict binary routing
-    // decision above (cool-leaning/warm-leaning at G-B=20 is untouched
-    // and remains the sole basis for Spring/Autumn vs Summer/Winter
-    // family routing). Boundaries provided directly, not yet
-    // statistically validated against a large sample.
-    function classifyUndertoneDescriptive(gb){
-      if(gb <= 5) return "Blue-cool";
-      if(gb < 15) return "Cool";
-      if(gb < 20) return "Cool-neutral";
-      if(gb < 25) return "Warm-neutral";
-      if(gb <= 35) return "Warm";
+    // decision above.
+    function classifyUndertoneDescriptive(labB){
+      if(labB <= 1.55) return "Blue-cool";
+      if(labB < 10.85) return "Cool";
+      if(labB < 15.5) return "Cool-neutral";
+      if(labB < 20.15) return "Warm-neutral";
+      if(labB <= 29.45) return "Warm";
       return "Golden";
     }
-    const undertoneDescriptive = classifyUndertoneDescriptive(gMinusB);
+    const undertoneDescriptive = classifyUndertoneDescriptive(customerLab.b);
 
     // Classifies a score against two boundaries into 3 categories, but
     // with soft zones near each boundary instead of a hard cutoff:
@@ -2194,7 +2205,7 @@ async function measureFaceFromPhoto(imgEl){
     // range. Validated against 23 real photos: 0/23 incorrectly
     // landed in "Deep" seasons (an earlier, unanchored attempt had
     // 12/23), and 18/23 matched prior results.
-    function warmthTo10(gb){ return Math.max(0, Math.min(10, 5 + (1/2.7)*(gb-20))); }
+    function warmthTo10(labB){ return Math.max(0, Math.min(10, 5 + 0.3983*(labB-15.5))); }
     function valueTo10(ds){ return Math.max(0, Math.min(10, 2.5 + 0.1389*(ds-98))); }
     function chromaTo10(c){ return Math.max(0, Math.min(10, (2/7.4)*(c-16.0))); }
     function contrastTo10(cs){ return Math.max(0, Math.min(10, 3 + 0.0683*(cs-109.4))); }
@@ -2206,7 +2217,7 @@ async function measureFaceFromPhoto(imgEl){
       ["Deep Winter","Winter",2,1,7,7], ["True Winter","Winter",1,4,8,7], ["Bright Winter","Winter",3,5,10,10], ["Soft Winter","Winter",2,6,1,6],
     ];
     const avgChroma = (skinChroma + irisChroma + scleraChroma) / 3;
-    const qW = warmthTo10(gMinusB), qV = valueTo10(depthScore), qC = chromaTo10(avgChroma), qK = contrastTo10(contrastScore);
+    const qW = warmthTo10(customerLab.b), qV = valueTo10(depthScore), qC = chromaTo10(avgChroma), qK = contrastTo10(contrastScore);
     const quantScored = seasonReference.map(([name, fam, rw, rv, rc, rk]) => ({
       name, fam,
       dist: Math.sqrt((qW-rw)**2 + (qV-rv)**2 + (qC-rc)**2 + (qK-rk)**2)
@@ -2215,6 +2226,7 @@ async function measureFaceFromPhoto(imgEl){
     return {
       skin_rgb: skinRgb, iris_rgb: irisRgb, sclera_rgb: scleraRgb, eyebrow_rgb: eyebrowRgb,
       g_minus_b: Math.round(gMinusB), undertone, undertone_descriptive: undertoneDescriptive,
+      lab_temperature_b: Math.round(customerLab.b*10)/10,
       skin_luminance: Math.round(skinLuminance), eyebrow_luminance: Math.round(eyebrowLuminance),
       iris_luminance: Math.round(irisLuminance), sclera_luminance: Math.round(scleraLuminance),
       depth_score: Math.round(depthScore), depth_level: depthLevel,
@@ -2447,6 +2459,7 @@ analyzeBtn.addEventListener('click', async () => {
       result.quant_runner_up_dist = measurements.quant_runner_up_dist;
       result.quant_too_close = measurements.quant_too_close;
       result.quant_poor_fit = measurements.quant_poor_fit;
+      result.lab_temperature_b = measurements.lab_temperature_b;
       // Safety net: force the actual displayed season/family to match
       // the quantitative result exactly, regardless of what Claude
       // returned — same pattern already used for every other measured
@@ -2458,39 +2471,21 @@ analyzeBtn.addEventListener('click', async () => {
         "Soft Autumn":"Autumn", "True Autumn":"Autumn", "Deep Autumn":"Autumn", "Deep Soft Autumn":"Autumn",
         "Deep Winter":"Winter", "True Winter":"Winter", "Bright Winter":"Winter", "Soft Winter":"Winter"
       };
-      const hasIssue = measurements.quant_too_close || measurements.quant_poor_fit;
-
-      if(hasIssue && !previousAttemptWasFlagged){
-        // First time hitting either condition -- ask for a retest
-        // rather than resolving immediately, since a second photo
-        // might clear it up entirely.
-        previousAttemptWasFlagged = true;
-        result.needsRetest = true;
-        result.season = null;
-        result.family = null;
-      } else if(hasIssue && previousAttemptWasFlagged){
-        // Same condition persisted after a retest -- resolve now
-        // rather than asking a third time. Ties and poor fits resolve
-        // differently: a tie means two seasons are genuinely equally
-        // plausible, so show both; a poor fit means one season is the
-        // best available answer, just not a confident one.
-        previousAttemptWasFlagged = false;
-        if(measurements.quant_too_close){
-          result.season = `${measurements.quant_best}/${measurements.quant_runner_up}`;
-          result.shadeMatchSeason = measurements.quant_best; // for shade/chart lookups, which need a single real season key -- the combined name is display-only
-          result.family = seasonFamilyMap[measurements.quant_best] || result.family;
-          result.isCombinedSeason = true;
-        } else {
-          result.season = measurements.quant_best;
-          result.shadeMatchSeason = measurements.quant_best;
-          result.family = seasonFamilyMap[measurements.quant_best] || result.family;
-          result.isLowConfidence = true;
-        }
+      // Resolves immediately, no retry step -- a tie means two seasons
+      // are genuinely equally plausible, so show both; a poor fit
+      // means one season is the best available answer, just not a
+      // confident one.
+      if(measurements.quant_too_close){
+        result.season = `${measurements.quant_best}/${measurements.quant_runner_up}`;
+        result.shadeMatchSeason = measurements.quant_best; // for shade/chart lookups, which need a single real season key -- the combined name is display-only
+        result.family = seasonFamilyMap[measurements.quant_best] || result.family;
+        result.isCombinedSeason = true;
+      } else if(measurements.quant_poor_fit){
+        result.season = measurements.quant_best;
+        result.shadeMatchSeason = measurements.quant_best;
+        result.family = seasonFamilyMap[measurements.quant_best] || result.family;
+        result.isLowConfidence = true;
       } else {
-        // No issue this time -- reset the flag so a FUTURE unrelated
-        // occurrence is correctly treated as a fresh first occurrence,
-        // not mistaken for a second attempt at an already-resolved case.
-        previousAttemptWasFlagged = false;
         result.season = measurements.quant_best;
         result.shadeMatchSeason = measurements.quant_best;
         result.family = seasonFamilyMap[measurements.quant_best] || result.family;
@@ -2657,17 +2652,10 @@ updateDebugHistoryCount(); // module scripts run after DOM parsing, so call dire
 
 function renderSeasonResult(result){
   saveDebugHistory(result);
-  if(result.needsRetest){
-    document.getElementById('seasonFamily').textContent = "";
-    document.getElementById('seasonName').textContent = "Let's try another photo";
-    const reason = result.quant_too_close
-      ? "Your coloring sits right between two seasons, close enough that we can't confidently tell which one fits best from this photo."
-      : "We couldn't find a confident match to any season from this photo.";
-    document.getElementById('seasonDesc').textContent = `${reason} Please retake your photo in bright, even natural light (near a window works well), with a plain background and no filters, then try again.`;
-  } else if(result.isCombinedSeason){
+  if(result.isCombinedSeason){
     document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
     document.getElementById('seasonName').textContent = result.season;
-    document.getElementById('seasonDesc').textContent = `Even after a second photo, your coloring sits genuinely between these two seasons — both fit about equally well. ${result.explanation || ''}`;
+    document.getElementById('seasonDesc').textContent = `Your coloring sits genuinely between these two seasons — both fit about equally well. ${result.explanation || ''}`;
   } else if(result.isLowConfidence){
     document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
     document.getElementById('seasonName').textContent = result.season;
@@ -2694,7 +2682,7 @@ function renderSeasonResult(result){
       `iris_rgb: ${JSON.stringify(result.estimated_iris_rgb)}  L=${v(result.iris_luminance)}\n` +
       `sclera_rgb: ${JSON.stringify(result.estimated_sclera_rgb)}  L=${v(result.sclera_luminance)}\n` +
       `eyebrow_rgb: ${JSON.stringify(result.estimated_eyebrow_rgb)}  L=${v(result.eyebrow_luminance)}\n` +
-      `g_minus_b: ${v(result.g_minus_b)} -> ${result.undertone || ''}  [descriptive: ${v(result.undertone_descriptive)}]\n` +
+      `Lab b* (CIELAB, skin) = ${v(result.lab_temperature_b)} -> ${result.undertone || ''}  [descriptive: ${v(result.undertone_descriptive)}]  (reference: raw G-B=${v(result.g_minus_b)}, no longer drives classification)\n` +
       `Depth Score = avg(skin=${v(result.skin_luminance)}, iris=${v(result.iris_luminance)}, sclera=${v(result.sclera_luminance)}, brow=${v(result.eyebrow_luminance)}) = ${v(result.depth_score)} -> ${result.depth_level}\n` +
       `Lightness = 0.7*max(${v(result.skin_luminance)},${v(result.sclera_luminance)})+0.3*min(...) = ${v(result.lightness)}\n` +
       `Darkness = 0.7*${v(result.iris_luminance)}+0.3*${v(result.eyebrow_luminance)} = ${v(result.darkness)}\n` +
@@ -2710,13 +2698,6 @@ function renderSeasonResult(result){
   }
 
   resultCard.classList.add('show');
-
-  if(result.needsRetest){
-    brandSection.style.display = 'none';
-    pickCard.classList.remove('show');
-    hideError(errorBox2);
-    return;
-  }
 
   updateChart(result.shadeMatchSeason || result.season, null, result);
 
