@@ -2877,11 +2877,14 @@ function splitBrandLine(brandLine){
 let currentCustomerLab = null; // stored so tab switches can re-match without re-measuring
 let currentLookTier = 'natural';
 
+let currentCustomerSkinHex = null;
+
 function showBestShadeMatches(result){
   if(!result || !result.estimated_skin_rgb) return;
   hideError(errorBox2);
   const skinRgb = { r: result.estimated_skin_rgb[0], g: result.estimated_skin_rgb[1], b: result.estimated_skin_rgb[2] };
   currentCustomerLab = rgbToLab(skinRgb);
+  currentCustomerSkinHex = rgbToHex(skinRgb.r, skinRgb.g, skinRgb.b);
   currentLookTier = 'natural';
   renderLookTierTabs();
   renderTierBarChart(currentLookTier);
@@ -2896,12 +2899,6 @@ const TIER_COLORS = {
 };
 // Deeper end-of-gradient variant per tier, used for the far end of
 // each bar's gradient fill (bars run light-tier-color -> deep-variant).
-const TIER_DEEP = {
-  noMakeup: "#C86B87",
-  natural:  "#7A2E3D",
-  party:    "#4A1B24",
-};
-
 // Real, single-tier illustration -- shows only the currently selected
 // tier's chart (Lightness/Warmth/Chroma), built from the customer's
 // actual measured Lab values and that tier's actual offsets from
@@ -2912,10 +2909,10 @@ const TIER_DEEP = {
 // (covers the real MAC shade population's range with headroom).
 function renderTierBarChart(lookTierKey){
   const holder = document.getElementById('colorProgressionIllustration');
-  if(!currentCustomerLab) { holder.innerHTML = ''; return; }
+  if(!currentCustomerLab || !currentCustomerSkinHex) { holder.innerHTML = ''; return; }
   const tier = LOOK_TIERS[lookTierKey];
   const color = TIER_COLORS[lookTierKey] || '#C86B87';
-  const deep = TIER_DEEP[lookTierKey] || '#7A2E3D';
+  const skinHex = currentCustomerSkinHex;
 
   const trackW = 280, barH = 16, leftX = 130, rowGap = 42, topY = 20;
   const maxL = 100, maxB = 50, maxC = 80;
@@ -2926,42 +2923,46 @@ function renderTierBarChart(lookTierKey){
   const targetL = Math.max(0, origL + tier.lOffset);
   const targetC = Math.min(maxC, origC + tier.cOffset);
 
+  const lOrigW = (origL / maxL) * trackW;
   const lTargetW = (targetL / maxL) * trackW;
-  const lReducedW = (Math.min(origL, maxL) / maxL) * trackW - lTargetW;
   const wOrigW = (origB / maxB) * trackW;
   const cOrigW = (origC / maxC) * trackW;
   const cAddedW = (targetC / maxC) * trackW - cOrigW;
 
   const gid = 'tg' + Math.random().toString(36).slice(2,8);
   let svg = `<defs>
-    <linearGradient id="${gid}L" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="${color}"/><stop offset="100%" stop-color="${deep}"/></linearGradient>
-    <linearGradient id="${gid}W" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#F0BFC8"/><stop offset="100%" stop-color="${color}"/></linearGradient>
     <pattern id="${gid}slash" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#F5D5DE"/><line x1="0" y1="0" x2="0" y2="6" stroke="${color}" stroke-width="2"/></pattern>
     <clipPath id="${gid}cL"><rect x="${leftX}" y="${topY}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
     <clipPath id="${gid}cC"><rect x="${leftX}" y="${topY+rowGap*2}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
   </defs>`;
 
-  // Lightness row (sun icon)
+  // Lightness row (sun icon + label): full original value in skin
+  // color, with a slash-pattern overlay marking the reduced portion.
   const yL = topY;
-  svg += sunIconSVG(60, yL + barH/2, color);
+  svg += sunIconSVG(25, yL + barH/2, color);
+  svg += `<text x="40" y="${yL+barH/2}" dominant-baseline="central" font-size="11" fill="${color}" font-family="sans-serif">Lightness</text>`;
   svg += `<g clip-path="url(#${gid}cL)">
     <rect x="${leftX}" y="${yL}" width="${trackW}" height="${barH}" fill="#f0e4e6"/>
-    <rect x="${leftX}" y="${yL}" width="${Math.max(2,lTargetW)}" height="${barH}" rx="8" fill="url(#${gid}L)"/>
-    <rect x="${leftX+lTargetW}" y="${yL}" width="${Math.max(0,lReducedW)}" height="${barH}" rx="8" fill="url(#${gid}slash)"/>
+    <rect x="${leftX}" y="${yL}" width="${Math.max(2,lOrigW)}" height="${barH}" rx="8" fill="${skinHex}"/>
+    <rect x="${leftX+lTargetW}" y="${yL}" width="${Math.max(0,lOrigW-lTargetW)}" height="${barH}" fill="url(#${gid}slash)"/>
   </g>`;
 
-  // Warmth row (thermometer icon)
+  // Warmth row (thermometer icon + label): entirely skin color --
+  // warmth never shifts across tiers, so there's no adjustment to show.
   const yW = topY + rowGap;
-  svg += thermoIconSVG(60, yW + barH/2, color);
+  svg += thermoIconSVG(25, yW + barH/2, color);
+  svg += `<text x="40" y="${yW+barH/2}" dominant-baseline="central" font-size="11" fill="${color}" font-family="sans-serif">Warmth</text>`;
   svg += `<rect x="${leftX}" y="${yW}" width="${trackW}" height="${barH}" rx="8" fill="#f0e4e6"/>
-    <rect x="${leftX}" y="${yW}" width="${Math.max(2,wOrigW)}" height="${barH}" rx="8" fill="url(#${gid}W)"/>`;
+    <rect x="${leftX}" y="${yW}" width="${Math.max(2,wOrigW)}" height="${barH}" rx="8" fill="${skinHex}"/>`;
 
-  // Chroma row (droplet icon)
+  // Chroma row (droplet icon + label): original value in skin color,
+  // with a tier-colored extension showing the amount added.
   const yC = topY + rowGap*2;
-  svg += dropletIconSVG(60, yC + barH/2, color);
+  svg += dropletIconSVG(25, yC + barH/2, color);
+  svg += `<text x="40" y="${yC+barH/2}" dominant-baseline="central" font-size="11" fill="${color}" font-family="sans-serif">Chroma</text>`;
   svg += `<g clip-path="url(#${gid}cC)">
     <rect x="${leftX}" y="${yC}" width="${trackW}" height="${barH}" fill="#f0e4e6"/>
-    <rect x="${leftX}" y="${yC}" width="${Math.max(2,cOrigW)}" height="${barH}" rx="8" fill="#C9A8AE"/>
+    <rect x="${leftX}" y="${yC}" width="${Math.max(2,cOrigW)}" height="${barH}" rx="8" fill="${skinHex}"/>
     <rect x="${leftX+cOrigW}" y="${yC}" width="${Math.max(0,cAddedW)}" height="${barH}" rx="8" fill="${color}"/>
   </g>`;
 
