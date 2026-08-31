@@ -2922,6 +2922,15 @@ function darkenHex(hex, percent){
 // print) as an SVG mask, so the precise shape and texture from the
 // photo are preserved exactly, while the color changes per shade.
 const LIP_MASK_IMG = "data:image/png;base64,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";
+// Small inline icons in the site's rosy palette, used next to the
+// Finish and Description lines on each shade card.
+function sparkleIcon(){
+  return `<svg width="13" height="13" viewBox="0 0 20 20" style="vertical-align:-2px;display:inline-block;"><path d="M10 2 L11.5 8.5 L18 10 L11.5 11.5 L10 18 L8.5 11.5 L2 10 L8.5 8.5 Z" fill="#D6336C"/></svg>`;
+}
+function textLinesIcon(){
+  return `<svg width="13" height="13" viewBox="0 0 20 10" style="vertical-align:-1px;display:inline-block;"><line x1="4" y1="2" x2="16" y2="2" stroke="#7A2E3D" stroke-width="1.6" stroke-linecap="round"/><line x1="4" y1="5" x2="14" y2="5" stroke="#7A2E3D" stroke-width="1.6" stroke-linecap="round"/><line x1="4" y1="8" x2="15" y2="8" stroke="#7A2E3D" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+}
+
 function lipstickSwatch(hex, size){
   const mid = 'lm' + Math.random().toString(36).slice(2, 9);
   const w = Math.round(size * (300/241));
@@ -2942,8 +2951,14 @@ function renderShadeMatches(matches){
   shadePodium.innerHTML = '';
   if(matches.length === 0) return;
 
-  const best = matches[0];
-  const rest = matches.slice(1);
+  // Sort by actual fit quality first -- these 5 come back one-per-
+  // finish (see findBestMacShadesByFinish), in finish-list order, NOT
+  // ranked by distance. Sorting here ensures the spotlighted "best
+  // match" position is genuinely the closest fit among the 5, not
+  // just whichever finish happens to come first in the list.
+  const sorted = [...matches].sort((a,b) => a.dist - b.dist);
+  const best = sorted[0];
+  const rest = sorted.slice(1);
 
   const bestParts = splitBrandLine(best.brand_line);
   const bestAffiliateUrl = AFFILIATE_LINKS[best.brand_line];
@@ -2956,10 +2971,10 @@ function renderShadeMatches(matches){
   bestEl.innerHTML = `
     ${lipstickSwatch(best.hex, 130)}
     <div class="shade-best-label">
-      <div class="tag">Best match</div>
+      <div class="tag">Best match (1st) · ${bestParts.line}</div>
       <div class="name">${best.name}</div>
-      <div class="why">${bestParts.line} · ${best.finish}</div>
-      <div class="why" style="font-style:italic;">${best.description}</div>
+      <div class="why">${sparkleIcon()} ${best.finish}</div>
+      <div class="why" style="font-style:italic;">${textLinesIcon()} ${best.description}</div>
       ${bestAffiliateUrl ? `<div class="shop-link">Buy now →</div>` : ''}
     </div>`;
   if(bestAffiliateUrl){
@@ -2970,7 +2985,9 @@ function renderShadeMatches(matches){
 
   const altsWrap = document.createElement('div');
   altsWrap.className = 'shade-alts';
-  const ordinals = ['2nd', '3rd', '4th', '5th', '6th'];
+  // All 5 are now sorted by actual fit quality (see `sorted` above),
+  // so these ordinal labels are genuinely accurate.
+  const ordinals = ['2nd', '3rd', '4th', '5th'];
   rest.forEach((s, i) => {
     const parts = splitBrandLine(s.brand_line);
     const affiliateUrl = AFFILIATE_LINKS[s.brand_line];
@@ -2978,10 +2995,10 @@ function renderShadeMatches(matches){
     el.className = 'shade-alt';
     el.innerHTML = `
       ${lipstickSwatch(s.hex, 58)}
-      <div class="tag">${ordinals[i] || `${i+2}th`} closest</div>
+      <div class="tag">${ordinals[i] || `${i+2}th`} best match · ${parts.line}</div>
       <div class="name">${s.name}</div>
-      <div class="why">${parts.line} · ${s.finish}</div>
-      <div class="why" style="font-style:italic;">${s.description}</div>
+      <div class="why">${sparkleIcon()} ${s.finish}</div>
+      <div class="why" style="font-style:italic;">${textLinesIcon()} ${s.description}</div>
       ${affiliateUrl ? `<div class="shop-link">Shop →</div>` : ''}`;
     if(affiliateUrl){
       el.style.cursor = 'pointer';
