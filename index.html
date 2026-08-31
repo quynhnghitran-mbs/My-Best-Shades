@@ -271,6 +271,7 @@
   .shade-podium svg{filter: drop-shadow(0 8px 14px rgba(58,31,34,0.22));}
   .shade-best-label{text-align:center;}
   .shade-best-label .tag{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#7A2E3D;font-weight:600;}
+  .best-match-tag{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#7A2E3D;font-weight:600;}
   .shade-best-label .name{font-family:'Playfair Display', serif;font-weight:600;font-size:17px;color:#3a1f22;margin:2px 0 4px;}
   .shade-best-label .why{font-size:12.5px;color:#6b5157;max-width:260px;margin:0 auto;line-height:1.5;}
   .shade-best-label .shop-link{font-size:12px;font-weight:600;color:var(--rose-deep);margin-top:6px;}
@@ -3094,7 +3095,7 @@ function renderShadeMatches(matches){
   bestEl.style.alignItems = 'center';
   bestEl.style.gap = '10px';
   bestEl.innerHTML = `
-    <div class="tag">Best match</div>
+    <div class="tag best-match-tag">Best match</div>
     ${lipstickSwatch(best.hex, 130)}
     <div class="shade-best-label">
       <div class="name">${best.name}</div>
