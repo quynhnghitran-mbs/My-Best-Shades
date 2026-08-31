@@ -270,13 +270,13 @@
   }
   .shade-podium svg{filter: drop-shadow(0 8px 14px rgba(58,31,34,0.22));}
   .shade-best-label{text-align:center;}
-  .shade-best-label .tag{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:var(--rose-deep);font-weight:600;}
+  .shade-best-label .tag{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#C86B87;font-weight:600;}
   .shade-best-label .name{font-family:'Playfair Display', serif;font-weight:600;font-size:17px;color:#3a1f22;margin:2px 0 4px;}
   .shade-best-label .why{font-size:12.5px;color:#6b5157;max-width:260px;margin:0 auto;line-height:1.5;}
   .shade-best-label .shop-link{font-size:12px;font-weight:600;color:var(--rose-deep);margin-top:6px;}
   .shade-alts{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;}
   .shade-alt{display:flex;flex-direction:column;align-items:center;gap:8px;max-width:130px;}
-  .shade-alt .tag{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-weight:600;}
+  .shade-alt .tag{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#C86B87;font-weight:600;}
   .shade-alt .name{font-weight:600;font-size:12.5px;color:#3a1f22;margin:1px 0 2px;text-align:center;}
   .shade-alt .why{font-size:11px;color:#6b5157;text-align:center;line-height:1.4;}
   .shade-alt .shop-link{font-size:11px;font-weight:600;color:var(--rose-deep);margin-top:2px;}
@@ -418,6 +418,7 @@
       <div class="season-tag" id="pickBrandTag"></div>
       <div class="season-name" id="pickBrandName" style="font-size:19px;"></div>
       <div class="brand-grid" id="lookTierTabs" style="margin-top:6px;margin-bottom:18px;"></div>
+      <div id="colorProgressionIllustration" style="display:flex;justify-content:center;margin-bottom:18px;"></div>
       <div class="shade-podium" id="shadePodium"></div>
     </div>
   </div>
@@ -2883,20 +2884,132 @@ function showBestShadeMatches(result){
   currentCustomerLab = rgbToLab(skinRgb);
   currentLookTier = 'natural';
   renderLookTierTabs();
+  renderTierBarChart(currentLookTier);
   const matches = findBestMacShadesByFinish(currentCustomerLab, currentLookTier);
   renderShadeMatches(matches);
+}
+
+const TIER_COLORS = {
+  noMakeup: "#E0919E",
+  natural:  "#C86B87",
+  party:    "#7A2E3D",
+};
+// Deeper end-of-gradient variant per tier, used for the far end of
+// each bar's gradient fill (bars run light-tier-color -> deep-variant).
+const TIER_DEEP = {
+  noMakeup: "#C86B87",
+  natural:  "#7A2E3D",
+  party:    "#4A1B24",
+};
+
+// Real, single-tier illustration -- shows only the currently selected
+// tier's chart (Lightness/Warmth/Chroma), built from the customer's
+// actual measured Lab values and that tier's actual offsets from
+// LOOK_TIERS. Deliberately no numbers printed -- bar lengths are
+// proportional to the real values, normalized against a fixed
+// assumed range per dimension for display purposes only:
+// Lightness 0-100 (Lab's natural range), Warmth 0-50, Chroma 0-80
+// (covers the real MAC shade population's range with headroom).
+function renderTierBarChart(lookTierKey){
+  const holder = document.getElementById('colorProgressionIllustration');
+  if(!currentCustomerLab) { holder.innerHTML = ''; return; }
+  const tier = LOOK_TIERS[lookTierKey];
+  const color = TIER_COLORS[lookTierKey] || '#C86B87';
+  const deep = TIER_DEEP[lookTierKey] || '#7A2E3D';
+
+  const trackW = 280, barH = 16, leftX = 130, rowGap = 42, topY = 20;
+  const maxL = 100, maxB = 50, maxC = 80;
+
+  const origL = Math.max(0, Math.min(maxL, currentCustomerLab.L));
+  const origB = Math.max(0, Math.min(maxB, currentCustomerLab.b));
+  const origC = Math.max(0, Math.min(maxC, currentCustomerLab.C));
+  const targetL = Math.max(0, origL + tier.lOffset);
+  const targetC = Math.min(maxC, origC + tier.cOffset);
+
+  const lTargetW = (targetL / maxL) * trackW;
+  const lReducedW = (Math.min(origL, maxL) / maxL) * trackW - lTargetW;
+  const wOrigW = (origB / maxB) * trackW;
+  const cOrigW = (origC / maxC) * trackW;
+  const cAddedW = (targetC / maxC) * trackW - cOrigW;
+
+  const gid = 'tg' + Math.random().toString(36).slice(2,8);
+  let svg = `<defs>
+    <linearGradient id="${gid}L" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="${color}"/><stop offset="100%" stop-color="${deep}"/></linearGradient>
+    <linearGradient id="${gid}W" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#F0BFC8"/><stop offset="100%" stop-color="${color}"/></linearGradient>
+    <pattern id="${gid}slash" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#F5D5DE"/><line x1="0" y1="0" x2="0" y2="6" stroke="${color}" stroke-width="2"/></pattern>
+    <clipPath id="${gid}cL"><rect x="${leftX}" y="${topY}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
+    <clipPath id="${gid}cC"><rect x="${leftX}" y="${topY+rowGap*2}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
+  </defs>`;
+
+  // Lightness row (sun icon)
+  const yL = topY;
+  svg += sunIconSVG(60, yL + barH/2, color);
+  svg += `<g clip-path="url(#${gid}cL)">
+    <rect x="${leftX}" y="${yL}" width="${trackW}" height="${barH}" fill="#f0e4e6"/>
+    <rect x="${leftX}" y="${yL}" width="${Math.max(2,lTargetW)}" height="${barH}" rx="8" fill="url(#${gid}L)"/>
+    <rect x="${leftX+lTargetW}" y="${yL}" width="${Math.max(0,lReducedW)}" height="${barH}" rx="8" fill="url(#${gid}slash)"/>
+  </g>`;
+
+  // Warmth row (thermometer icon)
+  const yW = topY + rowGap;
+  svg += thermoIconSVG(60, yW + barH/2, color);
+  svg += `<rect x="${leftX}" y="${yW}" width="${trackW}" height="${barH}" rx="8" fill="#f0e4e6"/>
+    <rect x="${leftX}" y="${yW}" width="${Math.max(2,wOrigW)}" height="${barH}" rx="8" fill="url(#${gid}W)"/>`;
+
+  // Chroma row (droplet icon)
+  const yC = topY + rowGap*2;
+  svg += dropletIconSVG(60, yC + barH/2, color);
+  svg += `<g clip-path="url(#${gid}cC)">
+    <rect x="${leftX}" y="${yC}" width="${trackW}" height="${barH}" fill="#f0e4e6"/>
+    <rect x="${leftX}" y="${yC}" width="${Math.max(2,cOrigW)}" height="${barH}" rx="8" fill="#C9A8AE"/>
+    <rect x="${leftX+cOrigW}" y="${yC}" width="${Math.max(0,cAddedW)}" height="${barH}" rx="8" fill="${color}"/>
+  </g>`;
+
+  const totalW = leftX + trackW + 20, totalH = topY + rowGap*2 + barH + 20;
+  holder.innerHTML = `<svg viewBox="0 0 ${totalW} ${totalH}" width="${totalW}" height="${totalH}" xmlns="http://www.w3.org/2000/svg">${svg}</svg>`;
+}
+
+function sunIconSVG(cx, cy, color){
+  let s = `<circle cx="${cx}" cy="${cy}" r="5.5" fill="${color}"/>`;
+  for(let i=0;i<8;i++){
+    const ang = i*Math.PI/4;
+    const x1=cx+Math.cos(ang)*7, y1=cy+Math.sin(ang)*7, x2=cx+Math.cos(ang)*10, y2=cy+Math.sin(ang)*10;
+    s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${color}" stroke-width="1.4" stroke-linecap="round"/>`;
+  }
+  return s;
+}
+function thermoIconSVG(cx, cy, color){
+  return `<rect x="${cx-3}" y="${cy-17}" width="6" height="16" rx="3" fill="none" stroke="${color}" stroke-width="1.3"/>
+    <circle cx="${cx}" cy="${cy+4}" r="4.5" fill="${color}"/>
+    <rect x="${cx-1.7}" y="${cy-12}" width="3.4" height="12" fill="${color}"/>`;
+}
+function dropletIconSVG(cx, cy, color){
+  return `<path d="M${cx} ${cy-9} C${cx-5} ${cy-2} ${cx-5} ${cy+3} ${cx} ${cy+5} C${cx+5} ${cy+3} ${cx+5} ${cy-2} ${cx} ${cy-9} Z" fill="${color}"/>
+    <ellipse cx="${cx-2}" cy="${cy-1}" rx="1.3" ry="2" fill="#F5D5DE" opacity="0.8"/>`;
 }
 
 function renderLookTierTabs(){
   const tabsEl = document.getElementById('lookTierTabs');
   tabsEl.innerHTML = '';
   Object.entries(LOOK_TIERS).forEach(([key, tier]) => {
+    const color = TIER_COLORS[key] || '#C86B87';
+    const isSelected = key === currentLookTier;
     const pill = document.createElement('div');
-    pill.className = 'brand-pill' + (key === currentLookTier ? ' selected' : '');
+    pill.className = 'brand-pill' + (isSelected ? ' selected' : '');
     pill.textContent = tier.label;
+    if(isSelected){
+      pill.style.background = color;
+      pill.style.borderColor = color;
+      pill.style.color = '#fff';
+    } else {
+      pill.style.background = 'transparent';
+      pill.style.borderColor = color;
+      pill.style.color = color;
+    }
     pill.addEventListener('click', () => {
       currentLookTier = key;
       renderLookTierTabs();
+      renderTierBarChart(currentLookTier);
       const matches = findBestMacShadesByFinish(currentCustomerLab, currentLookTier);
       renderShadeMatches(matches);
     });
@@ -2951,7 +3064,7 @@ function lipstickSwatch(hex, size){
 }
 
 function renderShadeMatches(matches){
-  document.getElementById('pickBrandTag').textContent = "Matched from MAC's full shade range";
+  document.getElementById('pickBrandTag').textContent = "Matched from your color profile";
   document.getElementById('pickBrandName').textContent = (LOOK_TIERS[currentLookTier]?.label || '') + " look";
 
   shadePodium.innerHTML = '';
