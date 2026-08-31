@@ -270,13 +270,13 @@
   }
   .shade-podium svg{filter: drop-shadow(0 8px 14px rgba(58,31,34,0.22));}
   .shade-best-label{text-align:center;}
-  .shade-best-label .tag{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#C86B87;font-weight:600;}
+  .shade-best-label .tag{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#7A2E3D;font-weight:600;}
   .shade-best-label .name{font-family:'Playfair Display', serif;font-weight:600;font-size:17px;color:#3a1f22;margin:2px 0 4px;}
   .shade-best-label .why{font-size:12.5px;color:#6b5157;max-width:260px;margin:0 auto;line-height:1.5;}
   .shade-best-label .shop-link{font-size:12px;font-weight:600;color:var(--rose-deep);margin-top:6px;}
   .shade-alts{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;}
   .shade-alt{display:flex;flex-direction:column;align-items:center;gap:8px;max-width:130px;}
-  .shade-alt .tag{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#C86B87;font-weight:600;}
+  .shade-alt .tag{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#7A2E3D;font-weight:600;}
   .shade-alt .name{font-weight:600;font-size:12.5px;color:#3a1f22;margin:1px 0 2px;text-align:center;}
   .shade-alt .why{font-size:11px;color:#6b5157;text-align:center;line-height:1.4;}
   .shade-alt .shop-link{font-size:11px;font-weight:600;color:var(--rose-deep);margin-top:2px;}
@@ -2932,20 +2932,25 @@ function renderTierBarChart(lookTierKey){
   const gid = 'tg' + Math.random().toString(36).slice(2,8);
   let svg = `<defs>
     <pattern id="${gid}slash" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#F5D5DE"/><line x1="0" y1="0" x2="0" y2="6" stroke="${color}" stroke-width="2"/></pattern>
-    <clipPath id="${gid}cL"><rect x="${leftX}" y="${topY}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
+    <clipPath id="${gid}cLtrack"><rect x="${leftX}" y="${topY}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
+    <clipPath id="${gid}cLbar"><rect x="${leftX}" y="${topY}" width="${Math.max(2,lOrigW)}" height="${barH}" rx="8"/></clipPath>
     <clipPath id="${gid}cC"><rect x="${leftX}" y="${topY+rowGap*2}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
   </defs>`;
 
   // Lightness row (sun icon + label): full original value in skin
   // color, with a slash-pattern overlay marking the reduced portion.
+  // The visible bar length (not the full track) gets its own rounded
+  // clip so both outer ends are properly rounded regardless of value,
+  // with a straight divider line marking the original/removed seam.
   const yL = topY;
   svg += sunIconSVG(25, yL + barH/2, color);
   svg += `<text x="40" y="${yL+barH/2}" dominant-baseline="central" font-size="11" fill="${color}" font-family="sans-serif">Lightness</text>`;
-  svg += `<g clip-path="url(#${gid}cL)">
-    <rect x="${leftX}" y="${yL}" width="${trackW}" height="${barH}" fill="#f0e4e6"/>
-    <rect x="${leftX}" y="${yL}" width="${Math.max(2,lOrigW)}" height="${barH}" rx="8" fill="${skinHex}"/>
+  svg += `<g clip-path="url(#${gid}cLtrack)"><rect x="${leftX}" y="${yL}" width="${trackW}" height="${barH}" fill="#f0e4e6"/></g>
+  <g clip-path="url(#${gid}cLbar)">
+    <rect x="${leftX}" y="${yL}" width="${Math.max(2,lTargetW)}" height="${barH}" fill="${skinHex}"/>
     <rect x="${leftX+lTargetW}" y="${yL}" width="${Math.max(0,lOrigW-lTargetW)}" height="${barH}" fill="url(#${gid}slash)"/>
-  </g>`;
+  </g>
+  <line x1="${leftX+lTargetW}" y1="${yL}" x2="${leftX+lTargetW}" y2="${yL+barH}" stroke="${color}" stroke-width="1"/>`;
 
   // Warmth row (thermometer icon + label): entirely skin color --
   // warmth never shifts across tiers, so there's no adjustment to show.
