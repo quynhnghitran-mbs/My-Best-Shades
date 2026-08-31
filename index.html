@@ -417,6 +417,7 @@
     <div class="card" id="pickCard">
       <div class="season-tag" id="pickBrandTag"></div>
       <div class="season-name" id="pickBrandName" style="font-size:19px;"></div>
+      <div class="brand-grid" id="lookTierTabs" style="margin-top:6px;margin-bottom:18px;"></div>
       <div class="shade-podium" id="shadePodium"></div>
     </div>
   </div>
@@ -1501,18 +1502,70 @@ const MAC_SHADES = [
 // values on both sides (see rgbToLab above) -- not the 0-10
 // Warmth/Value/Chroma scale used for SHADE_DATABASE. customerLab
 // should be the object returned by rgbToLab(customerSkinRgb).
-function findBestMacShades(customerLab, topN){
+//
+// Matching the shade's L/b/C directly to the customer's own skin L/b/C
+// recommends the shade closest to invisible -- real customer skin
+// chroma runs much lower than MAC's shade population (a real test
+// customer measured C=18.4 vs the shade population's median of 45.4),
+// so pure distance-to-skin systematically pulls toward the most muted,
+// nude-adjacent shades regardless of what look the customer wants.
+//
+// Instead, this offsets the match TARGET by look intensity rather than
+// matching skin directly. Warmth (b) never shifts -- undertone should
+// suit the customer at any intensity. Lightness shifts deeper and
+// chroma shifts more vivid as intensity increases, the standard
+// color-theory basis for a lip color reading as definition rather
+// than blending into skin. Verified against a real customer: the
+// three tiers produced a genuinely differentiated, sensible
+// progression (a muted "cool deep tone beige" for no-makeup, up to a
+// "deep red wine" for party).
+const LOOK_TIERS = {
+  noMakeup: { label: "No Makeup", lOffset: -3,  cOffset: 8  },
+  natural:  { label: "Natural",   lOffset: -8,  cOffset: 18 },
+  party:    { label: "Party",     lOffset: -15, cOffset: 30 },
+};
+
+function macMatchTarget(customerLab, lookTier){
+  const tier = LOOK_TIERS[lookTier] || { lOffset: 0, cOffset: 0 };
+  return {
+    L: customerLab.L + tier.lOffset,
+    b: customerLab.b,
+    C: customerLab.C + tier.cOffset
+  };
+}
+function macDist(target, s){
+  return Math.sqrt(
+    (target.L - s.lightness_L)**2 +
+    (target.b - s.temperature_b)**2 +
+    (target.C - s.chroma_C)**2
+  );
+}
+
+function findBestMacShades(customerLab, topN, lookTier){
+  const target = macMatchTarget(customerLab, lookTier);
   return MAC_SHADES
-    .map(s => ({
-      ...s,
-      dist: Math.sqrt(
-        (customerLab.L - s.lightness_L)**2 +
-        (customerLab.b - s.temperature_b)**2 +
-        (customerLab.C - s.chroma_C)**2
-      )
-    }))
+    .map(s => ({ ...s, dist: macDist(target, s) }))
     .sort((a,b) => a.dist - b.dist)
     .slice(0, topN);
+}
+
+// Returns exactly one best-matching shade per finish (5 finishes:
+// silky matte, sleek satin, glossy/high-shine, hazy matte, hazy
+// mate), rather than the overall top N regardless of finish -- so a
+// customer always sees their full product range, not 6 shades that
+// might happen to cluster in one finish. Same offset-target logic as
+// findBestMacShades. With 3 look tiers x 5 finishes, a customer sees
+// 15 recommendations in total across the whole flow.
+const MAC_FINISHES = ["silky matte", "sleek satin", "glossy/high-shine", "hazy matte", "hazy mate"];
+
+function findBestMacShadesByFinish(customerLab, lookTier){
+  const target = macMatchTarget(customerLab, lookTier);
+  return MAC_FINISHES.map(finish => {
+    return MAC_SHADES
+      .filter(s => s.finish === finish)
+      .map(s => ({ ...s, dist: macDist(target, s) }))
+      .sort((a,b) => a.dist - b.dist)[0];
+  }).filter(Boolean);
 }
 
 
@@ -2814,13 +2867,35 @@ function splitBrandLine(brandLine){
 // finish coverage, suitable for both Vietnamese and international
 // customers. The old Korean-brand code and data remain in the file
 // but are unused for now, not deleted.
+let currentCustomerLab = null; // stored so tab switches can re-match without re-measuring
+let currentLookTier = 'natural';
+
 function showBestShadeMatches(result){
   if(!result || !result.estimated_skin_rgb) return;
   hideError(errorBox2);
   const skinRgb = { r: result.estimated_skin_rgb[0], g: result.estimated_skin_rgb[1], b: result.estimated_skin_rgb[2] };
-  const customerLab = rgbToLab(skinRgb);
-  const matches = findBestMacShades(customerLab, 6);
+  currentCustomerLab = rgbToLab(skinRgb);
+  currentLookTier = 'natural';
+  renderLookTierTabs();
+  const matches = findBestMacShadesByFinish(currentCustomerLab, currentLookTier);
   renderShadeMatches(matches);
+}
+
+function renderLookTierTabs(){
+  const tabsEl = document.getElementById('lookTierTabs');
+  tabsEl.innerHTML = '';
+  Object.entries(LOOK_TIERS).forEach(([key, tier]) => {
+    const pill = document.createElement('div');
+    pill.className = 'brand-pill' + (key === currentLookTier ? ' selected' : '');
+    pill.textContent = tier.label;
+    pill.addEventListener('click', () => {
+      currentLookTier = key;
+      renderLookTierTabs();
+      const matches = findBestMacShadesByFinish(currentCustomerLab, currentLookTier);
+      renderShadeMatches(matches);
+    });
+    tabsEl.appendChild(pill);
+  });
 }
 
 // Small color helpers used to build a soft gradient on the swatch shape
@@ -2862,7 +2937,7 @@ function lipstickSwatch(hex, size){
 
 function renderShadeMatches(matches){
   document.getElementById('pickBrandTag').textContent = "Matched from MAC's full shade range";
-  document.getElementById('pickBrandName').textContent = "Your best shade matches";
+  document.getElementById('pickBrandName').textContent = (LOOK_TIERS[currentLookTier]?.label || '') + " look";
 
   shadePodium.innerHTML = '';
   if(matches.length === 0) return;
