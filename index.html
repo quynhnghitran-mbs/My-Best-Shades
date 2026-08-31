@@ -1520,9 +1520,9 @@ const MAC_SHADES = [
 // progression (a muted "cool deep tone beige" for no-makeup, up to a
 // "deep red wine" for party).
 const LOOK_TIERS = {
-  noMakeup: { label: "No Makeup", lOffset: -3,  cOffset: 8  },
-  natural:  { label: "Natural",   lOffset: -8,  cOffset: 18 },
-  party:    { label: "Party",     lOffset: -15, cOffset: 30 },
+  noMakeup: { label: "Subtle",   lOffset: -5,  cOffset: 16 },
+  natural:  { label: "Natural",  lOffset: -8,  cOffset: 18 },
+  party:    { label: "Party",    lOffset: -15, cOffset: 30 },
 };
 
 function macMatchTarget(customerLab, lookTier){
@@ -1560,12 +1560,18 @@ const MAC_FINISHES = ["silky matte", "sleek satin", "glossy/high-shine", "hazy m
 
 function findBestMacShadesByFinish(customerLab, lookTier){
   const target = macMatchTarget(customerLab, lookTier);
-  return MAC_FINISHES.map(finish => {
+  const onePerFinish = MAC_FINISHES.map(finish => {
     return MAC_SHADES
       .filter(s => s.finish === finish)
       .map(s => ({ ...s, dist: macDist(target, s) }))
       .sort((a,b) => a.dist - b.dist)[0];
   }).filter(Boolean);
+  // Reduced from 5 (one per finish) to the top 3 by fit quality --
+  // since each of the 5 candidates already represents a distinct
+  // finish, keeping only the best 3 still naturally spans 3 different
+  // finishes, just the best-fitting 3 rather than all 5. 3 tiers x 3
+  // = 9 total recommendations.
+  return onePerFinish.sort((a,b) => a.dist - b.dist).slice(0, 3);
 }
 
 
@@ -2928,7 +2934,7 @@ function sparkleIcon(){
   return `<svg width="13" height="13" viewBox="0 0 20 20" style="vertical-align:-2px;display:inline-block;"><path d="M10 2 L11.5 8.5 L18 10 L11.5 11.5 L10 18 L8.5 11.5 L2 10 L8.5 8.5 Z" fill="#D6336C"/></svg>`;
 }
 function textLinesIcon(){
-  return `<svg width="13" height="13" viewBox="0 0 20 10" style="vertical-align:-1px;display:inline-block;"><line x1="4" y1="2" x2="16" y2="2" stroke="#7A2E3D" stroke-width="1.6" stroke-linecap="round"/><line x1="4" y1="5" x2="14" y2="5" stroke="#7A2E3D" stroke-width="1.6" stroke-linecap="round"/><line x1="4" y1="8" x2="15" y2="8" stroke="#7A2E3D" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+  return `<svg width="13" height="13" viewBox="0 0 20 10" style="vertical-align:-1px;display:inline-block;"><line x1="4" y1="2" x2="16" y2="2" stroke="#D6336C" stroke-width="1.6" stroke-linecap="round"/><line x1="4" y1="5" x2="14" y2="5" stroke="#D6336C" stroke-width="1.6" stroke-linecap="round"/><line x1="4" y1="8" x2="15" y2="8" stroke="#D6336C" stroke-width="1.6" stroke-linecap="round"/></svg>`;
 }
 
 function lipstickSwatch(hex, size){
@@ -2951,7 +2957,7 @@ function renderShadeMatches(matches){
   shadePodium.innerHTML = '';
   if(matches.length === 0) return;
 
-  // Sort by actual fit quality first -- these 5 come back one-per-
+  // Sort by actual fit quality first -- these 3 (top 3 of the 5
   // finish (see findBestMacShadesByFinish), in finish-list order, NOT
   // ranked by distance. Sorting here ensures the spotlighted "best
   // match" position is genuinely the closest fit among the 5, not
@@ -2969,10 +2975,11 @@ function renderShadeMatches(matches){
   bestEl.style.alignItems = 'center';
   bestEl.style.gap = '10px';
   bestEl.innerHTML = `
+    <div class="tag">Best match</div>
     ${lipstickSwatch(best.hex, 130)}
     <div class="shade-best-label">
-      <div class="tag">Best match (1st) · ${bestParts.line}</div>
       <div class="name">${best.name}</div>
+      <div class="why">${bestParts.line}</div>
       <div class="why">${sparkleIcon()} ${best.finish}</div>
       <div class="why" style="font-style:italic;">${textLinesIcon()} ${best.description}</div>
       ${bestAffiliateUrl ? `<div class="shop-link">Buy now →</div>` : ''}
@@ -2985,18 +2992,19 @@ function renderShadeMatches(matches){
 
   const altsWrap = document.createElement('div');
   altsWrap.className = 'shade-alts';
-  // All 5 are now sorted by actual fit quality (see `sorted` above),
-  // so these ordinal labels are genuinely accurate.
-  const ordinals = ['2nd', '3rd', '4th', '5th'];
+  // All 3 are sorted by actual fit quality (see `sorted` above), so
+  // these ordinal labels are genuinely accurate.
+  const ordinals = ['2nd option', '3rd option'];
   rest.forEach((s, i) => {
     const parts = splitBrandLine(s.brand_line);
     const affiliateUrl = AFFILIATE_LINKS[s.brand_line];
     const el = document.createElement('div');
     el.className = 'shade-alt';
     el.innerHTML = `
+      <div class="tag">${ordinals[i] || `${i+2}th option`}</div>
       ${lipstickSwatch(s.hex, 58)}
-      <div class="tag">${ordinals[i] || `${i+2}th`} best match · ${parts.line}</div>
       <div class="name">${s.name}</div>
+      <div class="why">${parts.line}</div>
       <div class="why">${sparkleIcon()} ${s.finish}</div>
       <div class="why" style="font-style:italic;">${textLinesIcon()} ${s.description}</div>
       ${affiliateUrl ? `<div class="shop-link">Shop →</div>` : ''}`;
