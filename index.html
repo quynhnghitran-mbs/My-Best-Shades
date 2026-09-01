@@ -2145,10 +2145,17 @@ async function measureFaceFromPhoto(imgEl){
     // by eyebrow tattooing). Eyebrow is down-weighted rather than
     // fully excluded, since it still carries some genuine signal for
     // people with natural, unaltered brows.
-    const lightness = 0.7 * Math.max(skinLuminance, scleraLuminance) + 0.3 * Math.min(skinLuminance, scleraLuminance);
-    const darkness = 0.7 * irisLuminance + 0.3 * eyebrowLuminance;
+    // CONTRAST: switched to CIELAB L* for all 4 features (skin, iris,
+    // sclera, eyebrow), keeping the same 0.7/0.3 weighting structure
+    // as before -- only the underlying per-feature values changed
+    // from luminance to Lab L*. Thresholds re-derived via the same
+    // 15th/85th percentile method on the real Lab-based distribution
+    // (Low<39.88, High>53.73, replacing the old luminance-scale
+    // 98/134).
+    const lightness = 0.7 * Math.max(customerLab.L, scleraLab.L) + 0.3 * Math.min(customerLab.L, scleraLab.L);
+    const darkness = 0.7 * irisLab.L + 0.3 * eyebrowLab.L;
     const contrastScore = lightness - darkness;
-    const contrastLevel = classifyWithZones(contrastScore, 98, 134, ["Low", "Medium", "High"], 0.01, 0.02); // narrowed from default 5%/10% -- fresh 37-photo data showed the SAME clustering-driven distortion already found and fixed for Depth (raw split was a clean 5/26/6, but standard zones inflated it to 13/8/16); 1%/2% restores 7/22/8, close to the intended 15/70/15
+    const contrastLevel = classifyWithZones(contrastScore, 39.88, 53.73, ["Low", "Medium", "High"], 0.01, 0.02);
 
     // LUMINANCE SPREAD (new, experimental, informational only — NOT a
     // replacement for Contrast Score above, and not yet part of
@@ -2218,7 +2225,7 @@ async function measureFaceFromPhoto(imgEl){
     // same way as before: population min Lab C*(3-feat avg)=7.93 ->
     // Chroma=0, Soft Autumn cluster avg=11.88 -> Chroma=2.
     function chromaTo10(c){ return Math.max(0, Math.min(10, 0.5060*(c-7.93))); }
-    function contrastTo10(cs){ return Math.max(0, Math.min(10, 3 + 0.0683*(cs-109.4))); }
+    function contrastTo10(cs){ return Math.max(0, Math.min(10, 3 + 0.1824*(cs-45.04))); }
 
     const seasonReference = [
       ["Light Spring","Spring",7,9,7,3], ["True Spring","Spring",10,6,8,5], ["Bright Spring","Spring",6,6,10,8], ["Soft Spring","Spring",7,7,3,3],
@@ -2242,8 +2249,8 @@ async function measureFaceFromPhoto(imgEl){
       skin_lab_L: Math.round(customerLab.L*10)/10, iris_lab_L: Math.round(irisLab.L*10)/10,
       sclera_lab_L: Math.round(scleraLab.L*10)/10, eyebrow_lab_L: Math.round(eyebrowLab.L*10)/10,
       depth_score: Math.round(depthScore*10)/10, depth_level: depthLevel,
-      lightness: Math.round(lightness), darkness: Math.round(darkness),
-      contrast_score: Math.round(contrastScore), contrast_level: contrastLevel,
+      lightness: Math.round(lightness*10)/10, darkness: Math.round(darkness*10)/10,
+      contrast_score: Math.round(contrastScore*10)/10, contrast_level: contrastLevel,
       image_width: w, image_height: h,
       skin_rgb_cheek: skinRgbCheek, skin_rgb_forehead: skinRgbForehead,
       skin_chroma: Math.round(skinChroma * 10) / 10, iris_chroma: Math.round(irisChroma * 10) / 10,
@@ -2738,8 +2745,8 @@ function renderSeasonResult(result){
       `eyebrow_rgb: ${JSON.stringify(result.estimated_eyebrow_rgb)}  L=${v(result.eyebrow_luminance)}\n` +
       `Lab b* (CIELAB, skin) = ${v(result.lab_temperature_b)} -> ${result.undertone || ''}  [descriptive: ${v(result.undertone_descriptive)}]  (reference: raw G-B=${v(result.g_minus_b)}, no longer drives classification)\n` +
       `Depth Score (CIELAB) = avg(skin_L=${v(result.skin_lab_L)}, iris_L=${v(result.iris_lab_L)}, sclera_L=${v(result.sclera_lab_L)}, brow_L=${v(result.eyebrow_lab_L)}) = ${v(result.depth_score)} -> ${result.depth_level}\n` +
-      `Lightness = 0.7*max(${v(result.skin_luminance)},${v(result.sclera_luminance)})+0.3*min(...) = ${v(result.lightness)}\n` +
-      `Darkness = 0.7*${v(result.iris_luminance)}+0.3*${v(result.eyebrow_luminance)} = ${v(result.darkness)}\n` +
+      `Lightness (CIELAB) = 0.7*max(${v(result.skin_lab_L)},${v(result.sclera_lab_L)})+0.3*min(...) = ${v(result.lightness)}\n` +
+      `Darkness (CIELAB) = 0.7*${v(result.iris_lab_L)}+0.3*${v(result.eyebrow_lab_L)} = ${v(result.darkness)}\n` +
       `Contrast Score = ${v(result.lightness)}-${v(result.darkness)} = ${v(result.contrast_score)} -> ${result.contrast_level}\n` +
       `[experimental] Chroma: skin=${v(result.skin_chroma)}%  iris=${v(result.iris_chroma)}%  sclera=${v(result.sclera_chroma)}%  (C = 3-way average)\n` +
       `[NEW, informational only] Chroma Contrast (spread) = ${v(result.chroma_contrast)}%  — not yet part of season matching\n` +
