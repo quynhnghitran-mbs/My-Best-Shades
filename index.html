@@ -345,6 +345,7 @@
     <input type="file" id="fileInputCamera" accept="image/*" capture="user" style="display:none;">
     <input type="file" id="fileInputUpload" accept="image/*" style="display:none;">
 
+    <div class="loading" id="exposureScanIndicator" style="display:none;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><br>Scanning exposure...</div>
     <button class="btn" id="analyzeBtn" disabled>Find My Season</button>
     <div class="hint-columns">
       <div class="hint-col yes">
@@ -2269,6 +2270,7 @@ const preview = document.getElementById('preview');
 const placeholderText = document.getElementById('placeholderText');
 const analyzeBtn = document.getElementById('analyzeBtn');
 const loading1 = document.getElementById('loading1');
+const exposureScanIndicator = document.getElementById('exposureScanIndicator');
 const errorBox1 = document.getElementById('errorBox1');
 const resultCard = document.getElementById('resultCard');
 const chartSection = document.getElementById('chartSection');
@@ -2424,8 +2426,11 @@ analyzeBtn.addEventListener('click', async () => {
     // Shown as its own visible loading step (with a brief deliberate
     // pause, since the check itself is instantaneous) so customers can
     // see this scan actually happens, not just a silent instant check.
-    if(loading1Text) loading1Text.textContent = 'Scanning exposure...';
+    // Uses a dedicated indicator above the button, separate from the
+    // measurement-stage loading indicator below it.
+    exposureScanIndicator.style.display = 'block';
     await new Promise(resolve => setTimeout(resolve, 500));
+    exposureScanIndicator.style.display = 'none';
     const skinLumCheck = luminance(measurements.skin_rgb);
     const scleraLumCheck = luminance(measurements.sclera_rgb);
     const isOverexposed = scleraLumCheck > 245 || skinLumCheck > 220;
