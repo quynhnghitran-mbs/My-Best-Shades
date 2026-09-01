@@ -1262,22 +1262,17 @@ function saturationShade(rgb){
 }
 
 // ---------------------------------------------------------------------
-// CIELAB conversion — a second, parallel matching system used
-// specifically for brands (starting with MAC) whose shade data was
-// built using genuine, standard CIELAB values (L*, a*, b*, C*) rather
-// than the ad-hoc G-B/luminance/HSV-saturation formulas used
-// elsewhere in this tool. These are NOT the same color model — G-B is
-// a raw channel difference, not Lab's b*; depth_score is a weighted
-// luminance blend, not Lab's L*; avgChroma is HSV saturation, not
-// Lab's C*. Directly comparing our existing customer numbers against
-// Lab-based shade data would compare different mathematical
-// quantities on different scales (verified: customer G-B roughly
-// -1 to 26, shade temperature_b roughly -32.5 to 49.9 — not
-// comparable). Instead, this computes the CUSTOMER'S skin color in
-// the SAME standard Lab space, so both sides are genuinely comparable
-// raw numbers, not an abstracted 0-10 scale. This is kept fully
-// separate from the existing skin-calibrated Depth/Contrast/quant
-// system used for season matching elsewhere — those remain untouched.
+// CIELAB conversion — originally built as a second, parallel matching
+// system for brands (starting with MAC) whose shade data used genuine
+// CIELAB values, kept separate from the ad-hoc G-B/luminance/HSV-
+// saturation formulas used for customer season matching. Since then,
+// Warmth, Depth, and Chroma in the season-matching pipeline below have
+// each been individually switched to CIELAB too (Warmth -> Lab b*,
+// Depth -> Lab L* 4-feature avg, Chroma -> Lab C* 3-feature avg),
+// after validating each switch against real customer data separately.
+// Contrast is the one dimension still on the original luminance-based
+// formula — CIELAB has no direct equivalent for it (contrast here
+// means light/dark spread across facial features, not a Lab axis).
 function srgbToLinear(c){
   c = c / 255;
   return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
@@ -2125,16 +2120,23 @@ async function measureFaceFromPhoto(imgEl){
     const scleraLuminance = luminance(scleraRgb);
     const eyelidLuminance = eyelidRgb ? luminance(eyelidRgb) : null;
 
-    // DEPTH: overall depth — average of skin, iris, sclera, and
-    // eyebrow luminance. NOTE: this reintroduces the eyebrow tattoo/
-    // microblading vulnerability that skin-only Depth was specifically
-    // built to eliminate (tattoo ink color has no relationship to
-    // genuine natural depth). Implemented at explicit request pending
-    // further review of real results. Thresholds re-derived via the
-    // same 15th/85th percentile method used throughout this
-    // calibration, applied to the real overall-depth distribution.
-    const depthScore = (skinLuminance + irisLuminance + scleraLuminance + eyebrowLuminance) / 4;
-    const depthLevel = classifyWithZones(depthScore, 98, 130, ["Deep", "Medium", "Light"], 0.01, 0.02);
+    // DEPTH: switched to CIELAB L* (4-feature average: skin, iris,
+    // sclera, eyebrow), as an experimental comparison against the
+    // previous luminance-based formula. NOTE: still reintroduces the
+    // eyebrow tattoo/microblading vulnerability that skin-only Depth
+    // was built to eliminate -- that tradeoff is unchanged by this
+    // switch. Real-data comparison before this change: the luminance
+    // formula and Lab L* performed nearly identically on season
+    // separation (ANOVA F=14.60 vs F=15.31, both highly significant)
+    // -- unlike Warmth, there wasn't strong independent evidence Lab
+    // was meaningfully better here. Switched anyway to compare actual
+    // results, not because the evidence demanded it. Thresholds
+    // re-derived via the same 15th/85th percentile method as before,
+    // applied to the real Lab L* distribution (Deep<40.8, Light>53.3,
+    // replacing the old luminance-scale 98/130).
+    const irisLab = rgbToLab(irisRgb), scleraLab = rgbToLab(scleraRgb), eyebrowLab = rgbToLab(eyebrowRgb);
+    const depthScore = (customerLab.L + irisLab.L + scleraLab.L + eyebrowLab.L) / 4;
+    const depthLevel = classifyWithZones(depthScore, 40.8, 53.3, ["Deep", "Medium", "Light"], 0.01, 0.02);
 
     // DARKNESS: iris weighted more heavily than eyebrow (0.7/0.3, was
     // an even 50/50) — same tattoo concern applies here, just less
@@ -2207,8 +2209,14 @@ async function measureFaceFromPhoto(imgEl){
     // landed in "Deep" seasons (an earlier, unanchored attempt had
     // 12/23), and 18/23 matched prior results.
     function warmthTo10(labB){ return Math.max(0, Math.min(10, 5 + 0.3983*(labB-15.5))); }
-    function valueTo10(ds){ return Math.max(0, Math.min(10, 2.5 + 0.1389*(ds-98))); }
-    function chromaTo10(c){ return Math.max(0, Math.min(10, (2/7.4)*(c-16.0))); }
+    function valueTo10(ds){ return Math.max(0, Math.min(10, 2.5 + 0.3839*(ds-40.8))); }
+    // CHROMA: switched to CIELAB C* (skin+iris+sclera average),
+    // matching the same 3-feature scope as the previous HSV-saturation
+    // formula (which is kept above, unchanged, for the separate
+    // Chroma Contrast informational feature). New anchors derived the
+    // same way as before: population min Lab C*(3-feat avg)=7.93 ->
+    // Chroma=0, Soft Autumn cluster avg=11.88 -> Chroma=2.
+    function chromaTo10(c){ return Math.max(0, Math.min(10, 0.5060*(c-7.93))); }
     function contrastTo10(cs){ return Math.max(0, Math.min(10, 3 + 0.0683*(cs-109.4))); }
 
     const seasonReference = [
@@ -2217,7 +2225,7 @@ async function measureFaceFromPhoto(imgEl){
       ["Soft Autumn","Autumn",6,5,2,3], ["True Autumn","Autumn",10,4,6,5], ["Deep Autumn","Autumn",7,2,6,6], ["Deep Soft Autumn","Autumn",7,2,2,4],
       ["Deep Winter","Winter",2,1,7,7], ["True Winter","Winter",1,4,8,7], ["Bright Winter","Winter",3,5,10,10], ["Soft Winter","Winter",2,6,1,6],
     ];
-    const avgChroma = (skinChroma + irisChroma + scleraChroma) / 3;
+    const avgChroma = (customerLab.C + irisLab.C + scleraLab.C) / 3;
     const qW = warmthTo10(customerLab.b), qV = valueTo10(depthScore), qC = chromaTo10(avgChroma), qK = contrastTo10(contrastScore);
     const quantScored = seasonReference.map(([name, fam, rw, rv, rc, rk]) => ({
       name, fam,
@@ -2230,7 +2238,9 @@ async function measureFaceFromPhoto(imgEl){
       lab_temperature_b: Math.round(customerLab.b*10)/10,
       skin_luminance: Math.round(skinLuminance), eyebrow_luminance: Math.round(eyebrowLuminance),
       iris_luminance: Math.round(irisLuminance), sclera_luminance: Math.round(scleraLuminance),
-      depth_score: Math.round(depthScore), depth_level: depthLevel,
+      skin_lab_L: Math.round(customerLab.L*10)/10, iris_lab_L: Math.round(irisLab.L*10)/10,
+      sclera_lab_L: Math.round(scleraLab.L*10)/10, eyebrow_lab_L: Math.round(eyebrowLab.L*10)/10,
+      depth_score: Math.round(depthScore*10)/10, depth_level: depthLevel,
       lightness: Math.round(lightness), darkness: Math.round(darkness),
       contrast_score: Math.round(contrastScore), contrast_level: contrastLevel,
       image_width: w, image_height: h,
@@ -2400,6 +2410,40 @@ analyzeBtn.addEventListener('click', async () => {
       return;
     }
 
+    // Exposure scan: flags extreme over/underexposure before showing
+    // results, since bad exposure directly corrupts the pixel
+    // measurements (an overexposed photo inflates luminance readings,
+    // which can throw off Contrast and season matching). Thresholds
+    // set conservatively -- well beyond the real customer population's
+    // own range (skin_lum 97.5-196.1, sclera_lum 119.4-233.6) -- and
+    // verified to produce zero false positives against all 37 real,
+    // confirmed-correct customers. This deliberately does NOT catch
+    // milder overexposure (a real, observed problem in some cases)
+    // since the margin needed to safely avoid flagging legitimate
+    // light-skinned or bright-eyed customers is larger than that.
+    // Shown as its own visible loading step (with a brief deliberate
+    // pause, since the check itself is instantaneous) so customers can
+    // see this scan actually happens, not just a silent instant check.
+    if(loading1Text) loading1Text.textContent = 'Scanning exposure...';
+    await new Promise(resolve => setTimeout(resolve, 500));
+    const skinLumCheck = luminance(measurements.skin_rgb);
+    const scleraLumCheck = luminance(measurements.sclera_rgb);
+    const isOverexposed = scleraLumCheck > 245 || skinLumCheck > 220;
+    const isUnderexposed = skinLumCheck < 50;
+    if(isOverexposed || isUnderexposed){
+      loading1.classList.remove('show');
+      analyzeBtn.disabled = false;
+      document.getElementById('seasonFamily').textContent = "";
+      document.getElementById('seasonName').textContent = "Let's try that again";
+      document.getElementById('seasonDesc').textContent = isOverexposed
+        ? "This photo looks overexposed — the lighting is too bright, which can throw off your reading. Please retake it in softer, even natural light (avoid direct sun or bright overhead light, and skip flash)."
+        : "This photo looks underexposed — it's too dark for an accurate reading. Please retake it somewhere brighter, ideally near a window with natural daylight.";
+      resultCard.classList.add('show');
+      chartSection.style.display = 'none';
+      brandSection.style.display = 'none';
+      return;
+    }
+
     let measurementText = "";
     if(measurements){
       measurementText = `\n\nPrecise measurements were taken directly from this photo's pixels (not estimated) — use these as given facts, do not re-estimate them yourself:\n` +
@@ -2431,6 +2475,10 @@ analyzeBtn.addEventListener('click', async () => {
       result.eyebrow_luminance = measurements.eyebrow_luminance;
       result.iris_luminance = measurements.iris_luminance;
       result.sclera_luminance = measurements.sclera_luminance;
+      result.skin_lab_L = measurements.skin_lab_L;
+      result.iris_lab_L = measurements.iris_lab_L;
+      result.sclera_lab_L = measurements.sclera_lab_L;
+      result.eyebrow_lab_L = measurements.eyebrow_lab_L;
       result.depth_score = measurements.depth_score;
       result.depth_level = measurements.depth_level;
       result.g_minus_b = measurements.g_minus_b;
@@ -2684,7 +2732,7 @@ function renderSeasonResult(result){
       `sclera_rgb: ${JSON.stringify(result.estimated_sclera_rgb)}  L=${v(result.sclera_luminance)}\n` +
       `eyebrow_rgb: ${JSON.stringify(result.estimated_eyebrow_rgb)}  L=${v(result.eyebrow_luminance)}\n` +
       `Lab b* (CIELAB, skin) = ${v(result.lab_temperature_b)} -> ${result.undertone || ''}  [descriptive: ${v(result.undertone_descriptive)}]  (reference: raw G-B=${v(result.g_minus_b)}, no longer drives classification)\n` +
-      `Depth Score = avg(skin=${v(result.skin_luminance)}, iris=${v(result.iris_luminance)}, sclera=${v(result.sclera_luminance)}, brow=${v(result.eyebrow_luminance)}) = ${v(result.depth_score)} -> ${result.depth_level}\n` +
+      `Depth Score (CIELAB) = avg(skin_L=${v(result.skin_lab_L)}, iris_L=${v(result.iris_lab_L)}, sclera_L=${v(result.sclera_lab_L)}, brow_L=${v(result.eyebrow_lab_L)}) = ${v(result.depth_score)} -> ${result.depth_level}\n` +
       `Lightness = 0.7*max(${v(result.skin_luminance)},${v(result.sclera_luminance)})+0.3*min(...) = ${v(result.lightness)}\n` +
       `Darkness = 0.7*${v(result.iris_luminance)}+0.3*${v(result.eyebrow_luminance)} = ${v(result.darkness)}\n` +
       `Contrast Score = ${v(result.lightness)}-${v(result.darkness)} = ${v(result.contrast_score)} -> ${result.contrast_level}\n` +
