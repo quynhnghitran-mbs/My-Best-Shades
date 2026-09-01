@@ -27,6 +27,7 @@
     font-family:'Work Sans', sans-serif;
     min-height:100vh;
     padding:48px 20px 80px;
+    overflow-x:hidden;
   }
   .wrap{max-width:640px;margin:0 auto;position:relative;}
   .eyebrow{
@@ -2803,7 +2804,7 @@ function quantBarChartSVG(warmth, value, chroma, contrast){
       <circle cx="${markerX}" cy="${y + barHeight/2}" r="7.5" fill="#fff" stroke="#3a1f22" stroke-width="2"/>
     `;
   });
-  return `<svg viewBox="0 0 ${leftPad*2 + barWidth} ${svgHeight}" width="${leftPad*2 + barWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg"><defs>${defs}</defs>${bars}</svg>`;
+  return `<svg viewBox="0 0 ${leftPad*2 + barWidth} ${svgHeight}" width="100%" style="max-width:${leftPad*2 + barWidth}px;height:auto;display:block;" xmlns="http://www.w3.org/2000/svg"><defs>${defs}</defs>${bars}</svg>`;
 }
 
 const shadeGuideSection = document.getElementById('shadeGuideSection');
@@ -3015,7 +3016,7 @@ function renderTierBarChart(lookTierKey){
   </g>`;
 
   const totalW = leftX + trackW + 20, totalH = topY + rowGap*2 + barH + 20;
-  holder.innerHTML = `<svg viewBox="0 0 ${totalW} ${totalH}" width="${totalW}" height="${totalH}" xmlns="http://www.w3.org/2000/svg">${svg}</svg>`;
+  holder.innerHTML = `<svg viewBox="0 0 ${totalW} ${totalH}" width="100%" style="max-width:${totalW}px;height:auto;display:block;" xmlns="http://www.w3.org/2000/svg">${svg}</svg>`;
 }
 
 function sunIconSVG(cx, cy, color){
