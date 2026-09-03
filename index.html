@@ -319,30 +319,41 @@
   .metric-subrow .sub-fill{height:100%;border-radius:3px;background:#cf99a1;}
   .metric-subrow .sub-value{font-size:10px;color:var(--text-light);margin-top:3px;font-weight:600;}
 
-  /* Two-marker "before -> after" variant of .metric-track, used by the
-     Subtle/Natural/Party look illustration -- same track/tick language
-     as the CIELAB Analysis meters, plus a second (hollow) marker and a
-     filled, tier-colored connecting segment (with a "+" badge) so it
-     visibly reads as an offset being ADDED on top of the customer's
-     own value, not just two unrelated points. */
-  .metric-progress-line{position:absolute;top:1px;height:7px;border-radius:4px;opacity:0.55;z-index:1;}
-  .metric-add-badge{
-    position:absolute;top:-15px;width:15px;height:15px;border-radius:50%;
+  /* Used by the Subtle/Natural/Party look illustration -- same
+     gradient/pole language as the CIELAB Analysis meters, with the
+     track left as a plain, unmodified gradient (never a colored fill):
+     "Your natural" and "Added for this look" are told apart purely by
+     mark shape. .metric-marker-static is the single circular mark
+     (also used, unmoving, for Warmth/Lightness, which never change
+     across tiers); .metric-add-end-badge is the "+"/"-" mark placed at
+     a look-adjusted target. */
+  .metric-marker-static{
+    position:absolute;top:-3.5px;width:16px;height:16px;border-radius:50%;
+    background:#fff;border:3px solid var(--rose-deep);
+    transform:translateX(-50%);box-shadow:0 2px 5px rgba(58,31,34,0.25);z-index:3;
+  }
+  .metric-add-end-badge{
+    position:absolute;top:-3px;width:15px;height:15px;border-radius:50%;
     transform:translateX(-50%);
     display:flex;align-items:center;justify-content:center;
     color:#fff;font-size:11px;font-weight:700;line-height:1;
-    box-shadow:0 2px 4px rgba(58,31,34,0.3);
+    border:2px solid #fff;box-shadow:0 2px 4px rgba(58,31,34,0.3);
     z-index:4;
   }
-  .metric-marker-orig{
-    position:absolute;top:-2px;width:13px;height:13px;border-radius:50%;
-    background:#fff;border:2.5px solid rgba(58,31,34,0.42);
-    transform:translateX(-50%);z-index:2;
+  .progression-legend{display:flex;gap:18px;justify-content:center;align-items:center;margin-top:4px;font-size:10.5px;color:var(--muted);}
+  /* The legend icons are miniatures of the chart's own marks -- a
+     white/rose-bordered dot for "Your natural" (matching
+     .metric-marker-static exactly) and a "+" badge for "Added for this
+     look" (matching .metric-add-end-badge exactly) -- so the legend
+     reads as a key to the chart's real marks rather than generic swatches. */
+  .legend-marker{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:13px;height:13px;border-radius:50%;
+    margin-right:6px;vertical-align:-3px;flex-shrink:0;
+    box-shadow:0 1px 3px rgba(58,31,34,0.25);
   }
-  .progression-legend{display:flex;gap:18px;justify-content:center;margin-top:2px;font-size:10.5px;color:var(--muted);}
-  .legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px;}
-  .legend-dot-orig{background:#fff;border:2px solid rgba(58,31,34,0.42);}
-  .legend-dot-target{border:2px solid var(--rose-deep);}
+  .legend-marker-orig{background:#fff;border:2.5px solid var(--rose-deep);}
+  .legend-marker-add{color:#fff;font-size:10px;font-weight:700;line-height:1;border:1.5px solid #fff;}
 
   #pickCard{margin-top:24px;}
   .shade-podium{
@@ -3031,20 +3042,30 @@ const TIER_COLORS = {
   natural:  "#C86B87",
   party:    "#7A2E3D",
 };
-// A "before -> after" meter row: same visual language as the CIELAB
-// Analysis meters (icon + name, two-pole gradient track, pole labels)
-// -- reusing the exact same gradient colors and icons -- but with two
-// markers instead of one: a hollow dot for the customer's own measured
-// value and a solid tier-colored dot for the look-adjusted target,
-// joined by a thin line so the shift is visible at a glance. When a
-// tier makes no change (Lightness -- its offset is 0 for every tier),
-// only the single marker is drawn rather than two overlapping dots.
+// A vivid two-tone gradient for the "added for this look" segment and
+// its legend swatch: from the tier's own color into #D6336C, the exact
+// "Vivid" reference color used at the saturated end of the CIELAB
+// Chroma meter's Muted<->Vivid track. Reusing that specific color (
+// instead of a lightened/desaturated tint) keeps the gradient punchy
+// and visually ties "added" to "more chroma/vividness."
+function tierAddGradient(tierColor){
+  return `linear-gradient(to right, ${tierColor}, #D6336C)`;
+}
+
+// A "before -> after" meter row: identical visual language to the
+// CIELAB Analysis meters -- icon + name, plain two-pole gradient track
+// (Muted -> Vivid, unmodified by any fill), pole labels. "Your natural"
+// and "Added for this look" are told apart purely by mark shape, not by
+// coloring the track: a single circular marker (exactly the same mark
+// used for the static Warmth/Lightness rows) sits at the customer's own
+// value, and a "+" badge (exactly the same mark used everywhere else a
+// look-adjustment is flagged) sits at the look-adjusted target. When a
+// tier makes no change, only the single marker is drawn, with no "+".
 function progressionRowHTML(opts){
   const pct = (v) => Math.max(0, Math.min(100, (v / opts.max) * 100));
   const origPct = pct(opts.orig);
   const targetPct = pct(opts.target);
-  const showBoth = Math.abs(targetPct - origPct) > 0.6;
-  const lineLeft = Math.min(origPct, targetPct), lineWidth = Math.abs(targetPct - origPct);
+  const showAdd = Math.abs(targetPct - origPct) > 0.6;
   const isIncrease = targetPct >= origPct;
   return `<div class="metric-row">
     <div class="metric-icon">${opts.icon}</div>
@@ -3053,10 +3074,32 @@ function progressionRowHTML(opts){
         <span class="metric-name">${opts.name}</span>
       </div>
       <div class="metric-track" style="background:linear-gradient(to right, ${opts.gradientFrom}, ${opts.gradientTo});">
-        ${showBoth ? `<div class="metric-progress-line" style="left:${lineLeft}%;width:${lineWidth}%;background:${opts.tierColor};"></div>` : ''}
-        ${showBoth ? `<div class="metric-add-badge" style="left:${(origPct+targetPct)/2}%;background:${opts.tierColor};">${isIncrease ? '+' : '−'}</div>` : ''}
-        ${showBoth ? `<div class="metric-marker-orig" style="left:${origPct}%;"></div>` : ''}
-        <div class="metric-marker" style="left:${targetPct}%;border-color:${opts.tierColor};"></div>
+        <div class="metric-marker-static" style="left:${origPct}%;"></div>
+        ${showAdd ? `<div class="metric-add-end-badge" style="left:${targetPct}%;background:${opts.tierColor};">${isIncrease ? '+' : '−'}</div>` : ''}
+      </div>
+      <div class="metric-poles"><span>${opts.poleLeft}</span><span>${opts.poleRight}</span></div>
+    </div>
+  </div>`;
+}
+
+// Static single-marker row (Warmth): same visual language as the
+// CIELAB Analysis Warmth meter -- icon, two-pole gradient track, pole
+// labels, one marker at the customer's own measured position. No
+// stacked bar and no "+" here: the warmth offset applied when matching
+// (+5.5, constant across all three tiers) is a behind-the-scenes
+// adjustment, never shown to the customer, so this row never changes
+// when switching Subtle/Natural/Party.
+function staticMarkerRowHTML(opts){
+  const pct = (v) => Math.max(0, Math.min(100, (v / opts.max) * 100));
+  const valuePct = pct(opts.value);
+  return `<div class="metric-row">
+    <div class="metric-icon">${opts.icon}</div>
+    <div class="metric-body">
+      <div class="metric-top">
+        <span class="metric-name">${opts.name}</span>
+      </div>
+      <div class="metric-track" style="background:linear-gradient(to right, ${opts.gradientFrom}, ${opts.gradientTo});">
+        <div class="metric-marker-static" style="left:${valuePct}%;"></div>
       </div>
       <div class="metric-poles"><span>${opts.poleLeft}</span><span>${opts.poleRight}</span></div>
     </div>
@@ -3064,38 +3107,45 @@ function progressionRowHTML(opts){
 }
 
 // Real, single-tier illustration -- shows only the currently selected
-// tier's chart (Lightness/Chroma), built from the customer's actual
-// measured Lab values and that tier's actual offsets from LOOK_TIERS.
-// Deliberately no numbers printed -- marker position is proportional to
-// the real values, normalized against a fixed assumed range per
-// dimension for display purposes only: Lightness 0-100 (Lab's natural
+// tier's chart (Warmth/Lightness/Chroma), built from the customer's
+// actual measured Lab values and that tier's actual offsets from
+// LOOK_TIERS. Deliberately no numbers printed -- marker/bar position is
+// proportional to the real values, normalized against a fixed assumed
+// range per dimension for display purposes only: Warmth 0-35 (b*, same
+// as the CIELAB Analysis Warmth meter), Lightness 0-100 (Lab's natural
 // range, same as the CIELAB Analysis Depth Score meter), Chroma 0-80
 // (wider than the CIELAB Chroma meter's 0-40, since a Party-tier target
-// can run well past the natural population range). The Warmth offset
-// (+5.5, constant across all three tiers) is a behind-the-scenes
-// matching adjustment, not something shown to the customer -- there is
-// deliberately no Warmth row here.
+// can run well past the natural population range). Warmth never shows
+// its offset (+5.5, constant across all three tiers) -- that's a
+// behind-the-scenes matching adjustment -- so its row is a single
+// static marker. Lightness is also a single static marker, since its
+// offset is 0 for every tier (there's nothing to add, ever). Only
+// Chroma actually changes per tier, so it alone uses the stacked "+" bar.
 function renderTierBarChart(lookTierKey){
   const holder = document.getElementById('colorProgressionIllustration');
   if(!currentCustomerLab || !currentCustomerSkinHex) { holder.innerHTML = ''; return; }
   const tier = LOOK_TIERS[lookTierKey];
   const tierColor = TIER_COLORS[lookTierKey] || '#C86B87';
 
-  const maxL = 100, maxC = 80;
+  const maxB = 35, maxL = 100, maxC = 80;
 
-  // Lightness/Chroma markers show the same 4-feature/3-feature averages
-  // that actually drive the match (see macMatchTarget).
+  // Warmth/Lightness/Chroma all show the same 4-feature/3-feature
+  // averages that actually drive the match (see macMatchTarget).
+  const origB = Math.max(0, Math.min(maxB, currentCustomerLab.b));
   const origL = Math.max(0, Math.min(maxL, currentCustomerLab.depthAvg != null ? currentCustomerLab.depthAvg : currentCustomerLab.L));
   const origC = Math.max(0, Math.min(maxC, currentCustomerLab.chromaAvg != null ? currentCustomerLab.chromaAvg : currentCustomerLab.C));
-  const targetL = Math.max(0, Math.min(maxL, origL + tier.lOffset));
   const targetC = Math.max(0, Math.min(maxC, origC + tier.cOffset));
 
   let html = '';
-  html += progressionRowHTML({
-    icon: iconLayers(tierColor), name: 'Lightness',
-    orig: origL, target: targetL, max: maxL,
-    gradientFrom: '#7A2E3D', gradientTo: '#F5D5DE', poleLeft: 'Deep', poleRight: 'Light',
-    tierColor
+  html += staticMarkerRowHTML({
+    icon: iconThermometer(ANALYSIS_ROSE), name: 'Warmth',
+    value: origB, max: maxB,
+    gradientFrom: '#C86B87', gradientTo: '#E0919E', poleLeft: 'Cool', poleRight: 'Warm'
+  });
+  html += staticMarkerRowHTML({
+    icon: iconLayers(ANALYSIS_ROSE), name: 'Lightness',
+    value: origL, max: maxL,
+    gradientFrom: '#7A2E3D', gradientTo: '#F5D5DE', poleLeft: 'Deep', poleRight: 'Light'
   });
   html += progressionRowHTML({
     icon: iconDropletSmall(tierColor), name: 'Chroma',
@@ -3104,8 +3154,8 @@ function renderTierBarChart(lookTierKey){
     tierColor
   });
   html += `<div class="progression-legend">
-    <span><span class="legend-dot legend-dot-orig"></span>Your natural</span>
-    <span><span class="legend-dot legend-dot-target" style="background:${tierColor};border-color:${tierColor};"></span>This look</span>
+    <span><span class="legend-marker legend-marker-orig"></span>Your natural</span>
+    <span><span class="legend-marker legend-marker-add" style="background:${tierAddGradient(tierColor)};">+</span>Added for this look</span>
   </div>`;
 
   holder.innerHTML = html;
