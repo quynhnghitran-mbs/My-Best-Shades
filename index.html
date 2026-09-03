@@ -319,6 +319,31 @@
   .metric-subrow .sub-fill{height:100%;border-radius:3px;background:#cf99a1;}
   .metric-subrow .sub-value{font-size:10px;color:var(--text-light);margin-top:3px;font-weight:600;}
 
+  /* Two-marker "before -> after" variant of .metric-track, used by the
+     Subtle/Natural/Party look illustration -- same track/tick language
+     as the CIELAB Analysis meters, plus a second (hollow) marker and a
+     filled, tier-colored connecting segment (with a "+" badge) so it
+     visibly reads as an offset being ADDED on top of the customer's
+     own value, not just two unrelated points. */
+  .metric-progress-line{position:absolute;top:1px;height:7px;border-radius:4px;opacity:0.55;z-index:1;}
+  .metric-add-badge{
+    position:absolute;top:-15px;width:15px;height:15px;border-radius:50%;
+    transform:translateX(-50%);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-size:11px;font-weight:700;line-height:1;
+    box-shadow:0 2px 4px rgba(58,31,34,0.3);
+    z-index:4;
+  }
+  .metric-marker-orig{
+    position:absolute;top:-2px;width:13px;height:13px;border-radius:50%;
+    background:#fff;border:2.5px solid rgba(58,31,34,0.42);
+    transform:translateX(-50%);z-index:2;
+  }
+  .progression-legend{display:flex;gap:18px;justify-content:center;margin-top:2px;font-size:10.5px;color:var(--muted);}
+  .legend-dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px;}
+  .legend-dot-orig{background:#fff;border:2px solid rgba(58,31,34,0.42);}
+  .legend-dot-target{border:2px solid var(--rose-deep);}
+
   #pickCard{margin-top:24px;}
   .shade-podium{
     display:flex;flex-direction:column;align-items:center;gap:22px;
@@ -430,7 +455,7 @@
     </div>
   </div>
 
-  <div class="loading" id="loading1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><br><span id="loading1Text">Reading your undertone and contrast...</span></div>
+  <div class="loading" id="loading1"><span class="dot"></span><span class="dot"></span><span class="dot"></span><br><span id="loading1Text">Skin, eyes, brows scanning...</span></div>
 
   <div class="error-box" id="errorBox1"></div>
 
@@ -450,11 +475,6 @@
         <div class="analysis-subhead second">CIELAB Analysis</div>
         <div id="cielabMetrics"></div>
       </div>
-    </div>
-    <div id="debugHistoryControls" style="display:none;margin:6px 0 14px 0;font-size:12px;">
-      <span id="debugHistoryCount" style="color:#3a1f22;opacity:0.7;"></span>
-      <button type="button" onclick="downloadDebugHistoryCSV()" style="margin-left:8px;padding:4px 10px;border-radius:6px;border:1px solid #3a1f22;background:transparent;color:#3a1f22;cursor:pointer;font-size:12px;">Download Test History (CSV)</button>
-      <button type="button" onclick="clearDebugHistory()" style="margin-left:6px;padding:4px 10px;border-radius:6px;border:1px solid #3a1f22;background:transparent;color:#3a1f22;cursor:pointer;font-size:12px;opacity:0.7;">Clear</button>
     </div>
 
     <div id="shadeGuideSection" style="display:none;">
@@ -479,7 +499,7 @@
       <div class="season-tag" id="pickBrandTag"></div>
       <div class="season-name" id="pickBrandName" style="font-size:19px;"></div>
       <div class="brand-grid" id="lookTierTabs" style="margin-top:6px;margin-bottom:18px;"></div>
-      <div id="colorProgressionIllustration" style="display:flex;justify-content:center;margin-bottom:18px;"></div>
+      <div id="colorProgressionIllustration" style="margin-bottom:18px;"></div>
       <div class="shade-podium" id="shadePodium"></div>
     </div>
   </div>
@@ -2508,12 +2528,12 @@ analyzeBtn.addEventListener('click', async () => {
     const loading1Text = document.getElementById('loading1Text');
     for(let attempt = 1; attempt <= maxAttempts; attempt++){
       if(attempt > 1 && loading1Text){
-        loading1Text.textContent = `Still working — attempt ${attempt} of ${maxAttempts}...`;
+        loading1Text.textContent = `Still scanning — attempt ${attempt} of ${maxAttempts}...`;
       }
       measurements = await measureFaceFromPhoto(preview);
       if(measurements) break;
     }
-    if(loading1Text) loading1Text.textContent = 'Reading your undertone and contrast...';
+    if(loading1Text) loading1Text.textContent = 'Undertone, depth & contrast computing...';
 
     if(!measurements){
       loading1.classList.remove('show');
@@ -2577,6 +2597,7 @@ analyzeBtn.addEventListener('click', async () => {
         `Use the Depth, Undertone, and Contrast results directly rather than recalculating from your own visual estimate.`;
     }
 
+    if(loading1Text) loading1Text.textContent = 'Season matching...';
     const userContent = [
       { type: "image", source: { type: "base64", media_type: uploadedImage.mediaType, data: uploadedImage.base64 } },
       { type: "text", text: "Analyze this person's color season using the seasonal color analysis framework in your instructions and respond with only the JSON object." + measurementText }
@@ -2673,11 +2694,12 @@ analyzeBtn.addEventListener('click', async () => {
 });
 
 // Debug test history — saves each real-measurement result to
-// localStorage so test cases can be reviewed/exported in bulk later,
-// instead of manually copying debug panel text each time. Only meant
-// for internal testing; safe here since this file runs as a normal
-// website (not inside Claude.ai's artifact sandbox, where browser
-// storage APIs are unsupported and excluded from that version).
+// localStorage (as a local backup) and posts it to the live tracking
+// sheet below. Only meant for internal testing; safe here since this
+// file runs as a normal website (not inside Claude.ai's artifact
+// sandbox, where browser storage APIs are unsupported and excluded
+// from that version). No customer-facing UI for this — the visible
+// "test cases saved" controls were removed.
 function saveDebugHistory(result){
   try{
     if(result.image_width === undefined) return; // only save real pixel measurements, not AI self-estimates
@@ -2704,7 +2726,6 @@ function saveDebugHistory(result){
     const history = JSON.parse(localStorage.getItem('ffbs_debug_history') || '[]');
     history.push(record);
     localStorage.setItem('ffbs_debug_history', JSON.stringify(history));
-    updateDebugHistoryCount();
     sendToLiveSheet(record);
   } catch(e){
     console.warn('[Debug history] Failed to save', e);
@@ -2723,103 +2744,6 @@ function sendToLiveSheet(record){
     console.warn('[Live sheet] Failed to send', e);
   }
 }
-function updateDebugHistoryCount(){
-  try{
-    const history = JSON.parse(localStorage.getItem('ffbs_debug_history') || '[]');
-    const controls = document.getElementById('debugHistoryControls');
-    const countEl = document.getElementById('debugHistoryCount');
-    if(history.length > 0){
-      controls.style.display = 'block';
-      countEl.textContent = `${history.length} test case${history.length===1?'':'s'} saved`;
-    } else {
-      controls.style.display = 'none';
-    }
-  } catch(e){}
-}
-function csvEscape(val){
-  if(val === undefined || val === null) return '';
-  const s = String(val);
-  return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
-}
-function downloadDebugHistoryCSV(){
-  try{
-    const history = JSON.parse(localStorage.getItem('ffbs_debug_history') || '[]');
-    if(history.length === 0){ alert('No saved test cases yet.'); return; }
-    // RGB array fields get split into separate _r/_g/_b columns rather
-    // than one JSON-array column, so values like G-B can be computed
-    // directly in the spreadsheet without any manual parsing.
-    const rgbFields = ['skin_rgb', 'skin_rgb_cheek', 'skin_rgb_forehead', 'iris_rgb', 'sclera_rgb', 'eyebrow_rgb'];
-    const scalarFields = [
-      'timestamp', 'image_width', 'image_height', 'image_mime_type',
-      'skin_luminance', 'iris_luminance', 'sclera_luminance', 'eyebrow_luminance',
-      'g_minus_b', 'undertone', 'undertone_descriptive',
-      'depth_score', 'depth_level', 'lightness', 'darkness', 'contrast_score', 'contrast_level',
-      'skin_chroma', 'iris_chroma', 'sclera_chroma', 'avg_chroma', 'chroma_level', 'chroma_contrast', 'luminance_spread',
-      'quant_warmth', 'quant_value', 'quant_chroma', 'quant_contrast',
-      'quant_best', 'quant_best_dist', 'quant_runner_up', 'quant_runner_up_dist',
-      'season', 'family'
-    ];
-    const headers = [];
-    rgbFields.forEach(f => headers.push(`${f}_r`, `${f}_g`, `${f}_b`));
-    headers.push(...scalarFields);
-
-    const rows = [headers.join(',')];
-    for(const record of history){
-      const cells = [];
-      for(const f of rgbFields){
-        const rgb = record[f];
-        if(Array.isArray(rgb) && rgb.length === 3){
-          cells.push(rgb[0], rgb[1], rgb[2]);
-        } else {
-          cells.push('', '', '');
-        }
-      }
-      for(const f of scalarFields){
-        cells.push(csvEscape(record[f]));
-      }
-      rows.push(cells.join(','));
-    }
-
-    const csv = rows.join('\n');
-
-    // Some mobile browsers (Safari on iOS especially) don't reliably
-    // trigger programmatic downloads. Try the normal download first;
-    // as a fallback that works far more universally, also open the
-    // raw CSV text in a new tab so it can always be selected and
-    // copied manually, or saved via the browser's own "Save Page As."
-    try{
-      const blob = new Blob([csv], {type: 'text/csv'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `debug_history_${new Date().toISOString().slice(0,10)}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch(e){
-      console.warn('[CSV export] Direct download failed, falling back to new-tab view', e);
-    }
-
-    const newTab = window.open('', '_blank');
-    if(newTab){
-      newTab.document.write(`<pre style="white-space:pre-wrap;word-break:break-all;font-family:monospace;font-size:12px;padding:16px;">${csv.replace(/</g,'&lt;')}</pre>`);
-      newTab.document.title = 'Debug history CSV — select all (Ctrl+A / Cmd+A) and copy';
-    } else {
-      alert('Download may not have worked on this browser, and a popup was blocked. Please allow popups for this site and try again.');
-    }
-  } catch(e){
-    alert('Could not export CSV: ' + e.message);
-  }
-}
-function clearDebugHistory(){
-  if(confirm('Clear all saved debug history? This cannot be undone.')){
-    localStorage.removeItem('ffbs_debug_history');
-    updateDebugHistoryCount();
-  }
-}
-updateDebugHistoryCount(); // module scripts run after DOM parsing, so call directly rather than waiting for DOMContentLoaded (which has already fired by this point)
-
 // ---------------------------------------------------------------------
 // Detailed Seasonal Color Analysis (customer-facing) — replaces the old
 // monospace debug dump with an illustrated, rose-themed walkthrough of
@@ -2960,7 +2884,7 @@ function renderColorAnalysis(result){
   });
 
   html += metricRowHTML({
-    icon: iconDropletSmall(ANALYSIS_ROSE), name: 'Chroma · C* (3-feature avg)',
+    icon: iconDropletSmall(ANALYSIS_ROSE), name: 'Chroma · C*',
     value: result.avg_chroma, max: 40,
     zones: [5, 19],
     valueLabel: `C* = ${result.avg_chroma}`,
@@ -3107,112 +3031,84 @@ const TIER_COLORS = {
   natural:  "#C86B87",
   party:    "#7A2E3D",
 };
-// Deeper end-of-gradient variant per tier, used for the far end of
-// each bar's gradient fill (bars run light-tier-color -> deep-variant).
+// A "before -> after" meter row: same visual language as the CIELAB
+// Analysis meters (icon + name, two-pole gradient track, pole labels)
+// -- reusing the exact same gradient colors and icons -- but with two
+// markers instead of one: a hollow dot for the customer's own measured
+// value and a solid tier-colored dot for the look-adjusted target,
+// joined by a thin line so the shift is visible at a glance. When a
+// tier makes no change (Lightness -- its offset is 0 for every tier),
+// only the single marker is drawn rather than two overlapping dots.
+function progressionRowHTML(opts){
+  const pct = (v) => Math.max(0, Math.min(100, (v / opts.max) * 100));
+  const origPct = pct(opts.orig);
+  const targetPct = pct(opts.target);
+  const showBoth = Math.abs(targetPct - origPct) > 0.6;
+  const lineLeft = Math.min(origPct, targetPct), lineWidth = Math.abs(targetPct - origPct);
+  const isIncrease = targetPct >= origPct;
+  return `<div class="metric-row">
+    <div class="metric-icon">${opts.icon}</div>
+    <div class="metric-body">
+      <div class="metric-top">
+        <span class="metric-name">${opts.name}</span>
+      </div>
+      <div class="metric-track" style="background:linear-gradient(to right, ${opts.gradientFrom}, ${opts.gradientTo});">
+        ${showBoth ? `<div class="metric-progress-line" style="left:${lineLeft}%;width:${lineWidth}%;background:${opts.tierColor};"></div>` : ''}
+        ${showBoth ? `<div class="metric-add-badge" style="left:${(origPct+targetPct)/2}%;background:${opts.tierColor};">${isIncrease ? '+' : '−'}</div>` : ''}
+        ${showBoth ? `<div class="metric-marker-orig" style="left:${origPct}%;"></div>` : ''}
+        <div class="metric-marker" style="left:${targetPct}%;border-color:${opts.tierColor};"></div>
+      </div>
+      <div class="metric-poles"><span>${opts.poleLeft}</span><span>${opts.poleRight}</span></div>
+    </div>
+  </div>`;
+}
+
 // Real, single-tier illustration -- shows only the currently selected
-// tier's chart (Lightness/Warmth/Chroma), built from the customer's
-// actual measured Lab values and that tier's actual offsets from
-// LOOK_TIERS. Deliberately no numbers printed -- bar lengths are
-// proportional to the real values, normalized against a fixed
-// assumed range per dimension for display purposes only:
-// Lightness 0-100 (Lab's natural range), Warmth 0-50, Chroma 0-80
-// (covers the real MAC shade population's range with headroom).
+// tier's chart (Lightness/Chroma), built from the customer's actual
+// measured Lab values and that tier's actual offsets from LOOK_TIERS.
+// Deliberately no numbers printed -- marker position is proportional to
+// the real values, normalized against a fixed assumed range per
+// dimension for display purposes only: Lightness 0-100 (Lab's natural
+// range, same as the CIELAB Analysis Depth Score meter), Chroma 0-80
+// (wider than the CIELAB Chroma meter's 0-40, since a Party-tier target
+// can run well past the natural population range). The Warmth offset
+// (+5.5, constant across all three tiers) is a behind-the-scenes
+// matching adjustment, not something shown to the customer -- there is
+// deliberately no Warmth row here.
 function renderTierBarChart(lookTierKey){
   const holder = document.getElementById('colorProgressionIllustration');
   if(!currentCustomerLab || !currentCustomerSkinHex) { holder.innerHTML = ''; return; }
   const tier = LOOK_TIERS[lookTierKey];
-  const color = TIER_COLORS[lookTierKey] || '#C86B87';
-  const skinHex = currentCustomerSkinHex;
+  const tierColor = TIER_COLORS[lookTierKey] || '#C86B87';
 
-  const trackW = 280, barH = 16, leftX = 130, rowGap = 42, topY = 20;
-  const maxL = 100, maxB = 50, maxC = 80;
+  const maxL = 100, maxC = 80;
 
-  // Lightness/Chroma bars show the same 4-feature/3-feature averages
-  // that actually drive the match (see macMatchTarget); Warmth stays
-  // skin-only in both the bar and the match itself.
+  // Lightness/Chroma markers show the same 4-feature/3-feature averages
+  // that actually drive the match (see macMatchTarget).
   const origL = Math.max(0, Math.min(maxL, currentCustomerLab.depthAvg != null ? currentCustomerLab.depthAvg : currentCustomerLab.L));
-  const origB = Math.max(0, Math.min(maxB, currentCustomerLab.b));
   const origC = Math.max(0, Math.min(maxC, currentCustomerLab.chromaAvg != null ? currentCustomerLab.chromaAvg : currentCustomerLab.C));
-  const targetL = Math.max(0, origL + tier.lOffset);
-  const targetC = Math.min(maxC, origC + tier.cOffset);
-  const targetB = Math.min(maxB, Math.max(0, origB + tier.bOffset));
+  const targetL = Math.max(0, Math.min(maxL, origL + tier.lOffset));
+  const targetC = Math.max(0, Math.min(maxC, origC + tier.cOffset));
 
-  const lOrigW = (origL / maxL) * trackW;
-  const lTargetW = (targetL / maxL) * trackW;
-  const wOrigW = (origB / maxB) * trackW;
-  const wTargetW = (targetB / maxB) * trackW;
-  const wAddedW = wTargetW - wOrigW;
-  const cOrigW = (origC / maxC) * trackW;
-  const cAddedW = (targetC / maxC) * trackW - cOrigW;
+  let html = '';
+  html += progressionRowHTML({
+    icon: iconLayers(tierColor), name: 'Lightness',
+    orig: origL, target: targetL, max: maxL,
+    gradientFrom: '#7A2E3D', gradientTo: '#F5D5DE', poleLeft: 'Deep', poleRight: 'Light',
+    tierColor
+  });
+  html += progressionRowHTML({
+    icon: iconDropletSmall(tierColor), name: 'Chroma',
+    orig: origC, target: targetC, max: maxC,
+    gradientFrom: '#C9A8AE', gradientTo: '#D6336C', poleLeft: 'Muted', poleRight: 'Vivid',
+    tierColor
+  });
+  html += `<div class="progression-legend">
+    <span><span class="legend-dot legend-dot-orig"></span>Your natural</span>
+    <span><span class="legend-dot legend-dot-target" style="background:${tierColor};border-color:${tierColor};"></span>This look</span>
+  </div>`;
 
-  const gid = 'tg' + Math.random().toString(36).slice(2,8);
-  let svg = `<defs>
-    <pattern id="${gid}slash" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="6" height="6" fill="#F5D5DE"/><line x1="0" y1="0" x2="0" y2="6" stroke="${color}" stroke-width="2"/></pattern>
-    <clipPath id="${gid}cLtrack"><rect x="${leftX}" y="${topY}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
-    <clipPath id="${gid}cLbar"><rect x="${leftX}" y="${topY}" width="${Math.max(2,lOrigW)}" height="${barH}" rx="8"/></clipPath>
-    <clipPath id="${gid}cC"><rect x="${leftX}" y="${topY+rowGap*2}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
-    <clipPath id="${gid}cW"><rect x="${leftX}" y="${topY+rowGap}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
-  </defs>`;
-
-  // Lightness row (sun icon + label): full original value in skin
-  // color, with a slash-pattern overlay marking the reduced portion.
-  // The visible bar length (not the full track) gets its own rounded
-  // clip so both outer ends are properly rounded regardless of value,
-  // with a straight divider line marking the original/removed seam.
-  const yL = topY;
-  svg += sunIconSVG(25, yL + barH/2, color);
-  svg += `<text x="40" y="${yL+barH/2}" dominant-baseline="central" font-size="11" fill="${color}" font-family="sans-serif">Lightness</text>`;
-  svg += `<g clip-path="url(#${gid}cLtrack)"><rect x="${leftX}" y="${yL}" width="${trackW}" height="${barH}" fill="#f0e4e6"/></g>
-  <g clip-path="url(#${gid}cLbar)">
-    <rect x="${leftX}" y="${yL}" width="${Math.max(2,lTargetW)}" height="${barH}" fill="${skinHex}"/>
-    <rect x="${leftX+lTargetW}" y="${yL}" width="${Math.max(0,lOrigW-lTargetW)}" height="${barH}" fill="url(#${gid}slash)"/>
-  </g>
-  <line x1="${leftX+lTargetW}" y1="${yL}" x2="${leftX+lTargetW}" y2="${yL+barH}" stroke="${color}" stroke-width="1"/>`;
-
-  // Warmth row (thermometer icon + label): original value in skin
-  // color, with a tier-colored extension showing the warmth offset
-  // added when matching (same visual language as the Chroma row).
-  const yW = topY + rowGap;
-  svg += thermoIconSVG(25, yW + barH/2, color);
-  svg += `<text x="40" y="${yW+barH/2}" dominant-baseline="central" font-size="11" fill="${color}" font-family="sans-serif">Warmth</text>`;
-  svg += `<g clip-path="url(#${gid}cW)">
-    <rect x="${leftX}" y="${yW}" width="${trackW}" height="${barH}" fill="#f0e4e6"/>
-    <rect x="${leftX}" y="${yW}" width="${Math.max(2,wOrigW)}" height="${barH}" rx="8" fill="${skinHex}"/>
-    <rect x="${leftX+wOrigW}" y="${yW}" width="${Math.max(0,wAddedW)}" height="${barH}" rx="8" fill="${color}"/>
-  </g>`;
-
-  // Chroma row (droplet icon + label): original value in skin color,
-  // with a tier-colored extension showing the amount added.
-  const yC = topY + rowGap*2;
-  svg += dropletIconSVG(25, yC + barH/2, color);
-  svg += `<text x="40" y="${yC+barH/2}" dominant-baseline="central" font-size="11" fill="${color}" font-family="sans-serif">Chroma</text>`;
-  svg += `<g clip-path="url(#${gid}cC)">
-    <rect x="${leftX}" y="${yC}" width="${trackW}" height="${barH}" fill="#f0e4e6"/>
-    <rect x="${leftX}" y="${yC}" width="${Math.max(2,cOrigW)}" height="${barH}" rx="8" fill="${skinHex}"/>
-    <rect x="${leftX+cOrigW}" y="${yC}" width="${Math.max(0,cAddedW)}" height="${barH}" rx="8" fill="${color}"/>
-  </g>`;
-
-  const totalW = leftX + trackW + 20, totalH = topY + rowGap*2 + barH + 20;
-  holder.innerHTML = `<svg viewBox="0 0 ${totalW} ${totalH}" width="100%" style="max-width:${totalW}px;height:auto;display:block;" xmlns="http://www.w3.org/2000/svg">${svg}</svg>`;
-}
-
-function sunIconSVG(cx, cy, color){
-  let s = `<circle cx="${cx}" cy="${cy}" r="5.5" fill="${color}"/>`;
-  for(let i=0;i<8;i++){
-    const ang = i*Math.PI/4;
-    const x1=cx+Math.cos(ang)*7, y1=cy+Math.sin(ang)*7, x2=cx+Math.cos(ang)*10, y2=cy+Math.sin(ang)*10;
-    s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${color}" stroke-width="1.4" stroke-linecap="round"/>`;
-  }
-  return s;
-}
-function thermoIconSVG(cx, cy, color){
-  return `<rect x="${cx-3}" y="${cy-17}" width="6" height="16" rx="3" fill="none" stroke="${color}" stroke-width="1.3"/>
-    <circle cx="${cx}" cy="${cy+4}" r="4.5" fill="${color}"/>
-    <rect x="${cx-1.7}" y="${cy-12}" width="3.4" height="12" fill="${color}"/>`;
-}
-function dropletIconSVG(cx, cy, color){
-  return `<path d="M${cx} ${cy-9} C${cx-5} ${cy-2} ${cx-5} ${cy+3} ${cx} ${cy+5} C${cx+5} ${cy+3} ${cx+5} ${cy-2} ${cx} ${cy-9} Z" fill="${color}"/>
-    <ellipse cx="${cx-2}" cy="${cy-1}" rx="1.3" ry="2" fill="#F5D5DE" opacity="0.8"/>`;
+  holder.innerHTML = html;
 }
 
 function renderLookTierTabs(){
