@@ -3021,6 +3021,11 @@ const SEASON_LOOK = {
 // depth_level, contrast_level, chroma_level) already computed
 // elsewhere. Same rosy palette and visual language as the shade-tier
 // bar chart, for a consistent feel between the two sections.
+const TIER_COLORS = {
+  noMakeup: "#E0919E",
+  natural:  "#C86B87",
+  party:    "#7A2E3D",
+};
 function renderColoringAnalysis(result){
   const holder = document.getElementById('coloringAnalysisHolder');
   if(!holder || typeof result.quant_warmth !== 'number') return;
