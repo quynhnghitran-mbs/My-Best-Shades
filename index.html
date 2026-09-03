@@ -1520,16 +1520,16 @@ const MAC_SHADES = [
 // progression (a muted "cool deep tone beige" for no-makeup, up to a
 // "deep red wine" for party).
 const LOOK_TIERS = {
-  noMakeup: { label: "Subtle",   lOffset: -5,  cOffset: 16 },
-  natural:  { label: "Natural",  lOffset: -8,  cOffset: 18 },
-  party:    { label: "Party",    lOffset: -15, cOffset: 30 },
+  noMakeup: { label: "Subtle",   lOffset: 0, cOffset: 34, bOffset: 5.5 },
+  natural:  { label: "Natural",  lOffset: 0, cOffset: 37, bOffset: 5.5 },
+  party:    { label: "Party",    lOffset: 0, cOffset: 41, bOffset: 5.5 },
 };
 
 function macMatchTarget(customerLab, lookTier){
-  const tier = LOOK_TIERS[lookTier] || { lOffset: 0, cOffset: 0 };
+  const tier = LOOK_TIERS[lookTier] || { lOffset: 0, cOffset: 0, bOffset: 0 };
   return {
     L: customerLab.L + tier.lOffset,
-    b: customerLab.b,
+    b: customerLab.b + tier.bOffset,
     C: customerLab.C + tier.cOffset
   };
 }
@@ -2065,22 +2065,24 @@ async function measureFaceFromPhoto(imgEl){
     // b* goes through gamma correction + the XYZ transform
     // specifically designed to track human-perceived warmth, which
     // plausibly explains why it outperforms G-B on ambiguous cases.
-    // Boundary (15.5) and 6-tier boundaries below were derived by
-    // preserving the same warmth-unit positions as the original G-B
-    // tiers (validated via the Soft Autumn cluster anchor), not
-    // independently re-derived from scratch -- worth re-validating
-    // as more real customer data accumulates.
+    // Boundary (15.5) below was derived by preserving the same
+    // warmth-unit position as the original G-B tiers (validated via
+    // the Soft Autumn cluster anchor), not independently re-derived
+    // from scratch -- worth re-validating as more real customer data
+    // accumulates.
     const customerLab = rgbToLab(skinRgb);
     const gMinusB = skinRgb.g - skinRgb.b; // kept for the debug panel and cross-reference only, no longer drives classification
     const undertone = customerLab.b < 15.5 ? "cool-leaning" : "warm-leaning";
     // Purely descriptive 6-tier scale for customer-facing language and
     // internal reference — does NOT affect the strict binary routing
-    // decision above.
+    // decision above. Middle two bands (Cool-neutral / Neutral-warm)
+    // tightened around a 17.0 pivot (14.5–17 / 17–19.5), replacing the
+    // wider original 10.85–15.5 / 15.5–20.15 split.
     function classifyUndertoneDescriptive(labB){
       if(labB <= 1.55) return "Blue-cool";
-      if(labB < 10.85) return "Cool";
-      if(labB < 15.5) return "Cool-neutral";
-      if(labB < 20.15) return "Warm-neutral";
+      if(labB < 14.5) return "Cool";
+      if(labB < 17.0) return "Cool-neutral";
+      if(labB <= 19.5) return "Neutral-warm";
       if(labB <= 29.45) return "Warm";
       return "Golden";
     }
@@ -2235,6 +2237,9 @@ async function measureFaceFromPhoto(imgEl){
       ["Deep Winter","Winter",2,1,7,7], ["True Winter","Winter",1,4,8,7], ["Bright Winter","Winter",3,5,10,10], ["Soft Winter","Winter",2,6,1,6],
     ];
     const avgChroma = (customerLab.C + irisLab.C + scleraLab.C) / 3;
+    // Discrete Muted/Balanced/Vivid classification on raw C* (3-feature
+    // avg), same soft-zone convention as Depth/Contrast above.
+    const chromaLevel = classifyWithZones(avgChroma, 5, 19, ["Muted", "Balanced", "Vivid"], 0.01, 0.02);
     const qW = warmthTo10(customerLab.b), qV = valueTo10(depthScore), qC = chromaTo10(avgChroma), qK = contrastTo10(contrastScore);
     const quantScored = seasonReference.map(([name, fam, rw, rv, rc, rk]) => ({
       name, fam,
@@ -2256,6 +2261,7 @@ async function measureFaceFromPhoto(imgEl){
       skin_rgb_cheek: skinRgbCheek, skin_rgb_forehead: skinRgbForehead,
       skin_chroma: Math.round(skinChroma * 10) / 10, iris_chroma: Math.round(irisChroma * 10) / 10,
       sclera_chroma: Math.round(scleraChroma * 10) / 10,
+      avg_chroma: Math.round(avgChroma*10)/10, chroma_level: chromaLevel,
       chroma_contrast: Math.round(chromaContrast * 10) / 10,
       luminance_spread: Math.round(luminanceSpread),
       eyelid_rgb: eyelidRgb, eyelid_luminance: eyelidLuminance !== null ? Math.round(eyelidLuminance) : null,
@@ -2506,6 +2512,8 @@ analyzeBtn.addEventListener('click', async () => {
       result.skin_chroma = measurements.skin_chroma;
       result.iris_chroma = measurements.iris_chroma;
       result.sclera_chroma = measurements.sclera_chroma;
+      result.avg_chroma = measurements.avg_chroma;
+      result.chroma_level = measurements.chroma_level;
       result.chroma_contrast = measurements.chroma_contrast;
       result.luminance_spread = measurements.luminance_spread;
       result.eyelid_rgb = measurements.eyelid_rgb;
@@ -2586,6 +2594,7 @@ function saveDebugHistory(result){
       lightness: result.lightness, darkness: result.darkness,
       contrast_score: result.contrast_score, contrast_level: result.contrast_level,
       skin_chroma: result.skin_chroma, iris_chroma: result.iris_chroma, sclera_chroma: result.sclera_chroma,
+      avg_chroma: result.avg_chroma, chroma_level: result.chroma_level,
       chroma_contrast: result.chroma_contrast, luminance_spread: result.luminance_spread,
       quant_warmth: result.quant_warmth, quant_value: result.quant_value,
       quant_chroma: result.quant_chroma, quant_contrast: result.quant_contrast,
@@ -2646,7 +2655,7 @@ function downloadDebugHistoryCSV(){
       'skin_luminance', 'iris_luminance', 'sclera_luminance', 'eyebrow_luminance',
       'g_minus_b', 'undertone', 'undertone_descriptive',
       'depth_score', 'depth_level', 'lightness', 'darkness', 'contrast_score', 'contrast_level',
-      'skin_chroma', 'iris_chroma', 'sclera_chroma', 'chroma_contrast', 'luminance_spread',
+      'skin_chroma', 'iris_chroma', 'sclera_chroma', 'avg_chroma', 'chroma_level', 'chroma_contrast', 'luminance_spread',
       'quant_warmth', 'quant_value', 'quant_chroma', 'quant_contrast',
       'quant_best', 'quant_best_dist', 'quant_runner_up', 'quant_runner_up_dist',
       'season', 'family'
@@ -2750,6 +2759,7 @@ function renderSeasonResult(result){
       `Darkness (CIELAB) = 0.7*${v(result.iris_lab_L)}+0.3*${v(result.eyebrow_lab_L)} = ${v(result.darkness)}\n` +
       `Contrast Score = ${v(result.lightness)}-${v(result.darkness)} = ${v(result.contrast_score)} -> ${result.contrast_level}\n` +
       `[experimental] Chroma: skin=${v(result.skin_chroma)}%  iris=${v(result.iris_chroma)}%  sclera=${v(result.sclera_chroma)}%  (C = 3-way average)\n` +
+      `Chroma (CIELAB C*, 3-feature avg) = ${v(result.avg_chroma)} -> ${result.chroma_level}\n` +
       `[NEW, informational only] Chroma Contrast (spread) = ${v(result.chroma_contrast)}%  — not yet part of season matching\n` +
       `[NEW, informational only] Luminance Spread = ${v(result.luminance_spread)}  (vs official Contrast Score = ${v(result.contrast_score)})  — not yet part of season matching\n` +
       `Eyelid: rgb=${result.eyelid_rgb ? JSON.stringify(result.eyelid_rgb) : 'N/A'}  L=${v(result.eyelid_luminance)}  — now part of skin_rgb (10 of 48 skin points, ~21%)\n` +
@@ -2966,10 +2976,13 @@ function renderTierBarChart(lookTierKey){
   const origC = Math.max(0, Math.min(maxC, currentCustomerLab.C));
   const targetL = Math.max(0, origL + tier.lOffset);
   const targetC = Math.min(maxC, origC + tier.cOffset);
+  const targetB = Math.min(maxB, Math.max(0, origB + tier.bOffset));
 
   const lOrigW = (origL / maxL) * trackW;
   const lTargetW = (targetL / maxL) * trackW;
   const wOrigW = (origB / maxB) * trackW;
+  const wTargetW = (targetB / maxB) * trackW;
+  const wAddedW = wTargetW - wOrigW;
   const cOrigW = (origC / maxC) * trackW;
   const cAddedW = (targetC / maxC) * trackW - cOrigW;
 
@@ -2979,6 +2992,7 @@ function renderTierBarChart(lookTierKey){
     <clipPath id="${gid}cLtrack"><rect x="${leftX}" y="${topY}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
     <clipPath id="${gid}cLbar"><rect x="${leftX}" y="${topY}" width="${Math.max(2,lOrigW)}" height="${barH}" rx="8"/></clipPath>
     <clipPath id="${gid}cC"><rect x="${leftX}" y="${topY+rowGap*2}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
+    <clipPath id="${gid}cW"><rect x="${leftX}" y="${topY+rowGap}" width="${trackW}" height="${barH}" rx="8"/></clipPath>
   </defs>`;
 
   // Lightness row (sun icon + label): full original value in skin
@@ -2996,13 +3010,17 @@ function renderTierBarChart(lookTierKey){
   </g>
   <line x1="${leftX+lTargetW}" y1="${yL}" x2="${leftX+lTargetW}" y2="${yL+barH}" stroke="${color}" stroke-width="1"/>`;
 
-  // Warmth row (thermometer icon + label): entirely skin color --
-  // warmth never shifts across tiers, so there's no adjustment to show.
+  // Warmth row (thermometer icon + label): original value in skin
+  // color, with a tier-colored extension showing the warmth offset
+  // added when matching (same visual language as the Chroma row).
   const yW = topY + rowGap;
   svg += thermoIconSVG(25, yW + barH/2, color);
   svg += `<text x="40" y="${yW+barH/2}" dominant-baseline="central" font-size="11" fill="${color}" font-family="sans-serif">Warmth</text>`;
-  svg += `<rect x="${leftX}" y="${yW}" width="${trackW}" height="${barH}" rx="8" fill="#f0e4e6"/>
-    <rect x="${leftX}" y="${yW}" width="${Math.max(2,wOrigW)}" height="${barH}" rx="8" fill="${skinHex}"/>`;
+  svg += `<g clip-path="url(#${gid}cW)">
+    <rect x="${leftX}" y="${yW}" width="${trackW}" height="${barH}" fill="#f0e4e6"/>
+    <rect x="${leftX}" y="${yW}" width="${Math.max(2,wOrigW)}" height="${barH}" rx="8" fill="${skinHex}"/>
+    <rect x="${leftX+wOrigW}" y="${yW}" width="${Math.max(0,wAddedW)}" height="${barH}" rx="8" fill="${color}"/>
+  </g>`;
 
   // Chroma row (droplet icon + label): original value in skin color,
   // with a tier-colored extension showing the amount added.
