@@ -1421,12 +1421,12 @@ const MAC_SHADES = [
 {name:"THANKS IT'S M·A·C!",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#DE8276",r:222,g:130,b:118,lightness_L:64.0,temperature_b:21.9,chroma_C:40.5,description:"taupey pink nude with silver pearl"},
 {name:"SIGNATURE MOVE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#C47865",r:196,g:120,b:101,lightness_L:58.1,temperature_b:23.0,chroma_C:36.0,description:"burnt orange brown"},
 {name:"POSH PIT",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#C26352",r:194,g:99,b:82,lightness_L:53.0,temperature_b:27.0,chroma_C:45.3,description:"warm rose brown nude"},
-{name:"LIKE I WAS SAYING...",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#CD6254",r:205,g:98,b:84,lightness_L:54.4,temperature_b:28.1,chroma_C:49.9,description:"extremely neutral light nude"},
-{name:"ALONE TIME",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#BF4C40",r:191,g:76,b:64,lightness_L:47.8,temperature_b:30.8,chroma_C:54.9,description:"greyish mauve"},
-{name:"CAN'T DULL MY SHINE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#B45436",r:180,g:84,b:54,lightness_L:47.4,temperature_b:35.6,chroma_C:51.2,description:"rich brown"},
-{name:"HOUSEWIFE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#AE3E38",r:174,g:62,b:56,lightness_L:42.4,temperature_b:28.3,chroma_C:53.4,description:"deep reddish brown with subtle red pearl"},
-{name:"UNCENSORED",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#96452D",r:150,g:69,b:45,lightness_L:39.5,temperature_b:30.3,chroma_C:44.2,description:"deep cool tone brown"},
-{name:"I DESERVE THIS",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#994234",r:153,g:66,b:52,lightness_L:39.4,temperature_b:26.3,chroma_C:44.1,description:"deep warm brown"},
+{name:"LIKE I WAS SAYING...",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#B07675",r:176,g:118,b:117,lightness_L:55.6,temperature_b:9.9,chroma_C:24.7,description:"extremely neutral light nude"},
+{name:"ALONE TIME",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#9F5353",r:159,g:83,b:83,lightness_L:44.5,temperature_b:14.3,chroma_C:34.5,description:"greyish mauve"},
+{name:"CAN'T DULL MY SHINE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#8A4237",r:138,g:66,b:55,lightness_L:37.1,temperature_b:21.0,chroma_C:36.3,description:"rich brown"},
+{name:"HOUSEWIFE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#893836",r:137,g:56,b:54,lightness_L:34.8,temperature_b:18.7,chroma_C:39.2,description:"deep reddish brown with subtle red pearl"},
+{name:"UNCENSORED",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#7E4535",r:126,g:69,b:53,lightness_L:35.9,temperature_b:20.3,chroma_C:30.5,description:"deep cool tone brown"},
+{name:"I DESERVE THIS",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#773E38",r:119,g:62,b:56,lightness_L:33.3,temperature_b:14.8,chroma_C:28.3,description:"deep warm brown"},
 {name:"LOCAL CELEB",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#DA6A4F",r:218,g:106,b:79,lightness_L:57.8,temperature_b:35.6,chroma_C:54.9,description:"burnt orange"},
 {name:"WORK CRUSH",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#DF3C3B",r:223,g:60,b:59,lightness_L:51.0,temperature_b:38.8,chroma_C:73.3,description:"light caramel orange"},
 {name:"COCKNEY",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#E33656",r:227,g:54,b:86,lightness_L:51.4,temperature_b:23.8,chroma_C:70.7,description:"yellow red with multidimensional pearl"},
@@ -1541,37 +1541,74 @@ function macDist(target, s){
   );
 }
 
-function findBestMacShades(customerLab, topN, lookTier){
+// Same descriptive 6-tier warmth scale used elsewhere in this file
+// (duplicated here at top level since the other copy is nested inside
+// the photo-analysis handler and not reachable from these matching
+// functions). Original wider boundaries -- see that copy's comments.
+function classifyUndertoneDescriptive(labB){
+  if(labB <= 1.55) return "Blue-cool";
+  if(labB < 10.85) return "Cool";
+  if(labB < 15.5) return "Cool-neutral";
+  if(labB < 20.15) return "Warm-neutral";
+  if(labB <= 29.45) return "Warm";
+  return "Golden";
+}
+// A shade's own tertile temperature (Cool/Neutral/Warm), same cut
+// points as the Shade Atlas's population tertile split.
+function classifyShadeTemp(t){
+  if(t < 20.2) return "Cool";
+  if(t < 25.8) return "Neutral";
+  return "Warm";
+}
+// Warm/Cool family constraint: Cool and Warm shades are never both
+// allowed for the same customer -- that border is strict. Only the
+// two "-neutral" customer tiers blend into the adjacent pure side.
+const WARMTH_ALLOWED_TEMPS = {
+  "Blue-cool":    ["Cool"],
+  "Cool":         ["Cool"],
+  "Cool-neutral": ["Cool", "Neutral"],
+  "Warm-neutral": ["Warm", "Neutral"],
+  "Warm":         ["Warm"],
+  "Golden":       ["Warm"]
+};
+
+// Candidate pool shared by both match functions below: chroma floor
+// (never recommend a shade less vivid than the offset target), chroma
+// ceiling (never more vivid than skin chroma + the most vivid Party
+// preset, +2% buffer, regardless of the live offset), and the
+// warm/cool family constraint.
+function macCandidates(customerLab, lookTier){
   const target = macMatchTarget(customerLab, lookTier);
-  return MAC_SHADES
+  const chromaCeiling = (customerLab.C + 41) * 1.02;
+  const allowedTemps = WARMTH_ALLOWED_TEMPS[classifyUndertoneDescriptive(customerLab.b)] || ["Cool", "Neutral", "Warm"];
+  const pool = MAC_SHADES.filter(s =>
+    s.chroma_C >= target.C &&
+    s.chroma_C <= chromaCeiling &&
+    allowedTemps.includes(classifyShadeTemp(s.temperature_b))
+  );
+  return { target, pool };
+}
+
+function findBestMacShades(customerLab, topN, lookTier){
+  const { target, pool } = macCandidates(customerLab, lookTier);
+  return pool
     .map(s => ({ ...s, dist: macDist(target, s) }))
     .sort((a,b) => a.dist - b.dist)
     .slice(0, topN);
 }
 
-// Returns exactly one best-matching shade per finish (5 finishes:
-// silky matte, sleek satin, glossy/high-shine, hazy matte, hazy
-// mate), rather than the overall top N regardless of finish -- so a
-// customer always sees their full product range, not 6 shades that
-// might happen to cluster in one finish. Same offset-target logic as
-// findBestMacShades. With 3 look tiers x 5 finishes, a customer sees
-// 15 recommendations in total across the whole flow.
-const MAC_FINISHES = ["silky matte", "sleek satin", "glossy/high-shine", "hazy matte", "hazy mate"];
-
+// Top 3 best-fitting shades overall from the filtered pool (chroma
+// floor/ceiling + warm/cool family), no finish diversity guarantee --
+// the finish constraint (one pick per finish, best 3 of those) was
+// removed; results can now cluster in a single finish if that's what
+// fits best. Same offset-target logic as findBestMacShades. With 3
+// look tiers x 3 shades, a customer sees 9 recommendations in total.
 function findBestMacShadesByFinish(customerLab, lookTier){
-  const target = macMatchTarget(customerLab, lookTier);
-  const onePerFinish = MAC_FINISHES.map(finish => {
-    return MAC_SHADES
-      .filter(s => s.finish === finish)
-      .map(s => ({ ...s, dist: macDist(target, s) }))
-      .sort((a,b) => a.dist - b.dist)[0];
-  }).filter(Boolean);
-  // Reduced from 5 (one per finish) to the top 3 by fit quality --
-  // since each of the 5 candidates already represents a distinct
-  // finish, keeping only the best 3 still naturally spans 3 different
-  // finishes, just the best-fitting 3 rather than all 5. 3 tiers x 3
-  // = 9 total recommendations.
-  return onePerFinish.sort((a,b) => a.dist - b.dist).slice(0, 3);
+  const { target, pool } = macCandidates(customerLab, lookTier);
+  return pool
+    .map(s => ({ ...s, dist: macDist(target, s) }))
+    .sort((a,b) => a.dist - b.dist)
+    .slice(0, 3);
 }
 
 
@@ -2075,14 +2112,13 @@ async function measureFaceFromPhoto(imgEl){
     const undertone = customerLab.b < 15.5 ? "cool-leaning" : "warm-leaning";
     // Purely descriptive 6-tier scale for customer-facing language and
     // internal reference — does NOT affect the strict binary routing
-    // decision above. Middle two bands (Cool-neutral / Neutral-warm)
-    // tightened around a 17.0 pivot (14.5–17 / 17–19.5), replacing the
-    // wider original 10.85–15.5 / 15.5–20.15 split.
+    // decision above. Reverted to the original wider split (10.85–15.5
+    // / 15.5–20.15) after a brief tightened-around-17.0 experiment.
     function classifyUndertoneDescriptive(labB){
       if(labB <= 1.55) return "Blue-cool";
-      if(labB < 14.5) return "Cool";
-      if(labB < 17.0) return "Cool-neutral";
-      if(labB <= 19.5) return "Neutral-warm";
+      if(labB < 10.85) return "Cool";
+      if(labB < 15.5) return "Cool-neutral";
+      if(labB < 20.15) return "Warm-neutral";
       if(labB <= 29.45) return "Warm";
       return "Golden";
     }
