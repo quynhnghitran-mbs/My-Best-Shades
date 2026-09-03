@@ -1527,10 +1527,15 @@ const LOOK_TIERS = {
 
 function macMatchTarget(customerLab, lookTier){
   const tier = LOOK_TIERS[lookTier] || { lOffset: 0, cOffset: 0, bOffset: 0 };
+  // Depth/Chroma use the 4-feature/3-feature averages when available
+  // (matching the Shade Atlas's Shade Matcher); fall back to skin-only
+  // L/C otherwise. Warmth (b*) is always skin-only in both tools.
+  const depthAvg = customerLab.depthAvg != null ? customerLab.depthAvg : customerLab.L;
+  const chromaAvg = customerLab.chromaAvg != null ? customerLab.chromaAvg : customerLab.C;
   return {
-    L: customerLab.L + tier.lOffset,
+    L: depthAvg + tier.lOffset,
     b: customerLab.b + tier.bOffset,
-    C: customerLab.C + tier.cOffset
+    C: chromaAvg + tier.cOffset
   };
 }
 function macDist(target, s){
@@ -1579,10 +1584,15 @@ const WARMTH_ALLOWED_TEMPS = {
 // warm/cool family constraint.
 function macCandidates(customerLab, lookTier){
   const target = macMatchTarget(customerLab, lookTier);
-  const chromaCeiling = (customerLab.C + 41) * 1.02;
+  const chromaAvg = customerLab.chromaAvg != null ? customerLab.chromaAvg : customerLab.C;
+  const chromaCeiling = (chromaAvg + 41) * 1.02;
+  // Same 2% soft zone on the floor side as the Shade Atlas, relaxing the
+  // "must be at least the target" rule slightly so a shade just under the
+  // target isn't excluded on a rounding-distance technicality.
+  const chromaFloor = target.C * 0.98;
   const allowedTemps = WARMTH_ALLOWED_TEMPS[classifyUndertoneDescriptive(customerLab.b)] || ["Cool", "Neutral", "Warm"];
   const pool = MAC_SHADES.filter(s =>
-    s.chroma_C >= target.C &&
+    s.chroma_C >= chromaFloor &&
     s.chroma_C <= chromaCeiling &&
     allowedTemps.includes(classifyShadeTemp(s.temperature_b))
   );
@@ -2975,6 +2985,23 @@ function showBestShadeMatches(result){
   const skinRgb = { r: result.estimated_skin_rgb[0], g: result.estimated_skin_rgb[1], b: result.estimated_skin_rgb[2] };
   currentCustomerLab = rgbToLab(skinRgb);
   currentCustomerSkinHex = rgbToHex(skinRgb.r, skinRgb.g, skinRgb.b);
+
+  // 4-feature Depth (skin+iris+sclera+eyebrow L* avg) / 3-feature
+  // Chroma (skin+iris+sclera C* avg) -- same basis the Shade Atlas's
+  // Shade Matcher uses, so both tools target the same point. Warmth
+  // (b*) stays skin-only in both, unchanged. Falls back to skin-only
+  // L/C if iris/sclera/eyebrow weren't captured for this photo.
+  if(result.estimated_iris_rgb && result.estimated_sclera_rgb && result.estimated_eyebrow_rgb){
+    const irisLab = rgbToLab({ r: result.estimated_iris_rgb[0], g: result.estimated_iris_rgb[1], b: result.estimated_iris_rgb[2] });
+    const scleraLab = rgbToLab({ r: result.estimated_sclera_rgb[0], g: result.estimated_sclera_rgb[1], b: result.estimated_sclera_rgb[2] });
+    const eyebrowLab = rgbToLab({ r: result.estimated_eyebrow_rgb[0], g: result.estimated_eyebrow_rgb[1], b: result.estimated_eyebrow_rgb[2] });
+    currentCustomerLab.depthAvg = (currentCustomerLab.L + irisLab.L + scleraLab.L + eyebrowLab.L) / 4;
+    currentCustomerLab.chromaAvg = (currentCustomerLab.C + irisLab.C + scleraLab.C) / 3;
+  } else {
+    currentCustomerLab.depthAvg = currentCustomerLab.L;
+    currentCustomerLab.chromaAvg = currentCustomerLab.C;
+  }
+
   currentLookTier = 'natural';
   renderLookTierTabs();
   renderTierBarChart(currentLookTier);
@@ -3007,9 +3034,12 @@ function renderTierBarChart(lookTierKey){
   const trackW = 280, barH = 16, leftX = 130, rowGap = 42, topY = 20;
   const maxL = 100, maxB = 50, maxC = 80;
 
-  const origL = Math.max(0, Math.min(maxL, currentCustomerLab.L));
+  // Lightness/Chroma bars show the same 4-feature/3-feature averages
+  // that actually drive the match (see macMatchTarget); Warmth stays
+  // skin-only in both the bar and the match itself.
+  const origL = Math.max(0, Math.min(maxL, currentCustomerLab.depthAvg != null ? currentCustomerLab.depthAvg : currentCustomerLab.L));
   const origB = Math.max(0, Math.min(maxB, currentCustomerLab.b));
-  const origC = Math.max(0, Math.min(maxC, currentCustomerLab.C));
+  const origC = Math.max(0, Math.min(maxC, currentCustomerLab.chromaAvg != null ? currentCustomerLab.chromaAvg : currentCustomerLab.C));
   const targetL = Math.max(0, origL + tier.lOffset);
   const targetC = Math.min(maxC, origC + tier.cOffset);
   const targetB = Math.min(maxB, Math.max(0, origB + tier.bOffset));
