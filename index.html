@@ -194,30 +194,6 @@
     margin:0 0 14px;
   }
   .season-desc{font-size:14.5px;line-height:1.6;color:rgba(33,31,21,0.75);margin-bottom:18px;}
-  .shade-guide-block{margin-top:20px;text-align:center;}
-  .shade-guide-label{
-    font-size:12px;text-transform:uppercase;letter-spacing:0.08em;
-    color:var(--muted);font-weight:600;margin-bottom:10px;
-  }
-  .shade-guide-row{
-    display:flex;justify-content:center;gap:12px;flex-wrap:wrap;
-  }
-  .shade-guide-dot{
-    width:30px;height:30px;border-radius:50%;
-    border:2px solid rgba(255,255,255,0.8);
-    box-shadow:0 2px 6px rgba(58,31,34,0.25);
-    cursor:pointer;
-  }
-  .shade-tooltip{
-    position:fixed;display:none;pointer-events:none;
-    background:#fdf5f3;color:#96333c;font-size:12px;font-weight:600;
-    padding:6px 12px;border-radius:8px;white-space:nowrap;
-    border:1px solid rgba(58,31,34,0.14);
-    box-shadow:0 4px 12px rgba(58,31,34,0.18);
-    transform:translate(-50%,-130%);
-    z-index:50;
-  }
-  .shade-tooltip.show{display:block;}
 
   .section-title{
     font-family:'Playfair Display', serif;
@@ -488,18 +464,6 @@
       </div>
     </div>
 
-    <div id="shadeGuideSection" style="display:none;">
-      <div class="shade-guide-block">
-        <div class="shade-guide-label">Best Lip Shades</div>
-        <div class="shade-guide-row" id="shadeGuideBest"></div>
-      </div>
-      <div class="shade-guide-block">
-        <div class="shade-guide-label">Avoid</div>
-        <div class="shade-guide-row" id="shadeGuideAvoid"></div>
-      </div>
-    </div>
-    <div class="shade-tooltip" id="shadeTooltip"></div>
-
   </div>
 
   <div id="brandSection" style="display:none;">
@@ -521,112 +485,6 @@
 // Seasonal color analysis knowledge base (12-season system), condensed
 // for use as the AI's reference. Written in plain descriptive terms.
 // ---------------------------------------------------------------------
-// ---------------------------------------------------------------------
-// ---------------------------------------------------------------------
-// General "shades to look for / avoid" guide per season, shown to
-// customers purely as visual reference AFTER their season is detected.
-// Sourced directly from the customer's spreadsheet. This is NOT read
-// by the AI during season detection or shade matching — display only.
-// ---------------------------------------------------------------------
-const SEASON_SHADE_GUIDE = {
-  "Bright Spring": {
-    best: [
-      {name:"Bright Coral", hex:"#FF5A5F"}, {name:"Vivid Pink", hex:"#FF4F8B"},
-      {name:"Tomato Red", hex:"#E53935"}, {name:"Bright Poppy", hex:"#FF4E42"},
-      {name:"Hot Coral", hex:"#FF6B4A"}
-    ],
-    avoid: [ {name:"Dark Berry", hex:"#5A1E3A"}, {name:"Cool Mauve", hex:"#9A6C86"} ]
-  },
-  "True/Warm Spring": {
-    best: [
-      {name:"Coral", hex:"#FF6F61"}, {name:"Salmon", hex:"#FA8072"},
-      {name:"Poppy Red", hex:"#E94B3C"}, {name:"Watermelon", hex:"#E8476A"},
-      {name:"Warm Pink", hex:"#E96A7D"}
-    ],
-    avoid: [ {name:"Blue-based Red", hex:"#C40233"}, {name:"Dusty Mauve", hex:"#A67C9D"} ]
-  },
-  "Light Spring": {
-    best: [
-      {name:"Peach Nude", hex:"#F6C7A8"}, {name:"Apricot", hex:"#F4A261"},
-      {name:"Melon Pink", hex:"#F7A7A3"}, {name:"Light Coral", hex:"#F88379"},
-      {name:"Warm Rose", hex:"#E98C8C"}
-    ],
-    avoid: [ {name:"Brown Nude", hex:"#9A6F5A"}, {name:"Muted Terracotta", hex:"#B3624E"} ]
-  },
-  "Light Summer": {
-    best: [
-      {name:"Ballet Pink", hex:"#F5D0D7"}, {name:"Rose Beige", hex:"#D8A7B1"},
-      {name:"Pink Nude", hex:"#E8C7C8"}, {name:"Soft Rose", hex:"#D98E9A"},
-      {name:"Blush Pink", hex:"#F3C6CF"}
-    ],
-    avoid: [ {name:"Orange Coral", hex:"#F56B42"}, {name:"Dark Plum", hex:"#4F2D52"} ]
-  },
-  "True/Cool Summer": {
-    best: [
-      {name:"Dusty Rose", hex:"#C08081"}, {name:"Mauve", hex:"#B784A7"},
-      {name:"Raspberry Rose", hex:"#B54B73"}, {name:"Cool Rose", hex:"#C66A7B"},
-      {name:"Soft Berry", hex:"#A45C74"}
-    ],
-    avoid: [ {name:"Orange Red", hex:"#E94B35"}, {name:"Brick", hex:"#A33A2A"} ]
-  },
-  "Soft Summer": {
-    best: [
-      {name:"Muted Rose", hex:"#B88A8E"}, {name:"Cocoa Rose", hex:"#A07B74"},
-      {name:"Soft Mauve", hex:"#A87D9C"}, {name:"Dusty Berry", hex:"#8F5B6A"},
-      {name:"Smoky Plum", hex:"#7E5A6C"}
-    ],
-    avoid: [ {name:"Neon Pink", hex:"#FF1493"}, {name:"Bright Coral", hex:"#FF5A5F"} ]
-  },
-  "Soft Autumn": {
-    best: [
-      {name:"Warm Nude", hex:"#C58C73"}, {name:"Caramel Rose", hex:"#B97A6B"},
-      {name:"Cinnamon", hex:"#A86C50"}, {name:"Muted Peach", hex:"#D99C7B"},
-      {name:"Terracotta Nude", hex:"#B66A50"}
-    ],
-    avoid: [ {name:"Bright Fuchsia", hex:"#D1007A"}, {name:"Icy Pink", hex:"#F9DCE8"} ]
-  },
-  "True/Warm Autumn": {
-    best: [
-      {name:"Terracotta", hex:"#C65D3B"}, {name:"Brick Red", hex:"#A33A2A"},
-      {name:"Burnt Coral", hex:"#C95B4A"}, {name:"Pumpkin", hex:"#D96C3A"},
-      {name:"Rust", hex:"#A64B2A"}
-    ],
-    avoid: [ {name:"Cool Berry", hex:"#8A3D5D"}, {name:"Blue-based Red", hex:"#C40233"} ]
-  },
-  "Dark Autumn": {
-    best: [
-      {name:"Deep Brick", hex:"#7F3128"}, {name:"Mahogany", hex:"#5C2E2E"},
-      {name:"Oxblood Brown", hex:"#5A2328"}, {name:"Chocolate Rose", hex:"#704040"},
-      {name:"Burnt Burgundy", hex:"#6B2C3B"}
-    ],
-    avoid: [ {name:"Baby Pink", hex:"#F8C8DC"}, {name:"Icy Lavender", hex:"#E8DDF7"} ]
-  },
-  "Dark Winter": {
-    best: [
-      {name:"Blackberry", hex:"#4A1F3A"}, {name:"Wine", hex:"#5E233D"},
-      {name:"Deep Cherry", hex:"#7A1F2D"}, {name:"Plum", hex:"#5B3256"},
-      {name:"Burgundy", hex:"#6A1E2D"}
-    ],
-    avoid: [ {name:"Orange Coral", hex:"#F56B42"}, {name:"Warm Brown", hex:"#7B4A36"} ]
-  },
-  "True/Cool Winter": {
-    best: [
-      {name:"Blue Red", hex:"#C40233"}, {name:"Ruby", hex:"#9B111E"},
-      {name:"Cranberry", hex:"#B31B4F"}, {name:"Magenta", hex:"#C2185B"},
-      {name:"Fuchsia", hex:"#D1007A"}
-    ],
-    avoid: [ {name:"Warm Brick", hex:"#8F3A2A"}, {name:"Peach", hex:"#FFCBA4"} ]
-  },
-  "Bright Winter": {
-    best: [
-      {name:"Electric Fuchsia", hex:"#E6007E"}, {name:"Cherry Red", hex:"#D2042D"},
-      {name:"Bright Raspberry", hex:"#D10056"}, {name:"Neon Pink", hex:"#FF1493"},
-      {name:"Cool Hot Pink", hex:"#FF1694"}
-    ],
-    avoid: [ {name:"Dusty Rose", hex:"#C08081"}, {name:"Muted Nude", hex:"#B89A8A"} ]
-  }
-};
-
 const SEASON_SYSTEM_PROMPT = `You are a color analyst trained in the 12-season seasonal color analysis system. You determine a person's color season from a selfie by reading three things, using ONLY the skin and eyes — never the hair, since hair is very commonly dyed and is not a reliable natural signal: undertone (warm/golden vs cool/pink-blue vs neutral) read from the skin, depth (how light or deep the skin and eyes are), and chroma/contrast (how bright and clear vs soft and muted the coloring is, and how much contrast exists specifically between the skin and the eyes).
 
 Use this reference for the 16 seasons (undertone, depth, chroma, contrast, and overall look):
@@ -2875,12 +2733,12 @@ function renderColorAnalysis(result){
   const darknessPct = Math.max(0, Math.min(100, (result.darkness / 100) * 100));
   html += `<div class="metric-subrow">
     <div class="sub">
-      <div class="sub-label">Lightness (skin &amp; sclera, weighted)</div>
+      <div class="sub-label">Lightness (skin &amp; sclera)</div>
       <div class="sub-track"><div class="sub-fill" style="width:${lightnessPct}%;"></div></div>
       <div class="sub-value">${result.lightness}</div>
     </div>
     <div class="sub">
-      <div class="sub-label">Darkness (iris &amp; brow, weighted)</div>
+      <div class="sub-label">Darkness (iris &amp; brow)</div>
       <div class="sub-track"><div class="sub-fill" style="width:${darknessPct}%;"></div></div>
       <div class="sub-value">${result.darkness}</div>
     </div>
@@ -2926,62 +2784,10 @@ function renderSeasonResult(result){
 
   resultCard.classList.add('show');
 
-  updateChart(result.shadeMatchSeason || result.season, null, result);
-
   brandSection.style.display = 'block';
   hideError(errorBox2);
   showBestShadeMatches(result);
 }
-
-// "Your color profile" (the standalone quant Warmth/Value/Chroma/
-// Contrast bar chart) was removed -- the gradient meters in the
-// Detailed Seasonal Color Analysis section now cover that same ground
-// with the real (non-experimental) classification values. updateChart
-// still drives the shade guide below it.
-function updateChart(seasonName, customerCoord, result){
-  renderShadeGuide(seasonName);
-}
-
-const shadeGuideSection = document.getElementById('shadeGuideSection');
-const shadeGuideBest = document.getElementById('shadeGuideBest');
-const shadeGuideAvoid = document.getElementById('shadeGuideAvoid');
-const shadeTooltip = document.getElementById('shadeTooltip');
-
-function renderShadeGuide(seasonName){
-  const guide = SEASON_SHADE_GUIDE[seasonName];
-  if(!guide){
-    shadeGuideSection.style.display = 'none';
-    return;
-  }
-  shadeGuideBest.innerHTML = '';
-  shadeGuideAvoid.innerHTML = '';
-  guide.best.forEach(s => shadeGuideBest.appendChild(makeShadeDot(s)));
-  guide.avoid.forEach(s => shadeGuideAvoid.appendChild(makeShadeDot(s)));
-  shadeGuideSection.style.display = 'block';
-}
-
-function makeShadeDot(shade){
-  const dot = document.createElement('div');
-  dot.className = 'shade-guide-dot';
-  dot.style.background = shade.hex;
-
-  dot.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const rect = dot.getBoundingClientRect();
-    const alreadyShowingThis = shadeTooltip.classList.contains('show') && shadeTooltip.textContent === shade.name;
-    if(alreadyShowingThis){
-      shadeTooltip.classList.remove('show');
-    } else {
-      shadeTooltip.textContent = shade.name;
-      shadeTooltip.style.left = (rect.left + rect.width / 2) + 'px';
-      shadeTooltip.style.top = rect.top + 'px';
-      shadeTooltip.classList.add('show');
-    }
-  });
-  return dot;
-}
-
-document.addEventListener('click', () => shadeTooltip.classList.remove('show'));
 
 // Looks up a brand id's display name (e.g. "black-rouge" -> "Black Rouge").
 function brandDisplayName(brandId){
