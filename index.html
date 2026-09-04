@@ -262,6 +262,27 @@
   .swatch-lum-fill{height:100%;background:var(--rose-deep);border-radius:2px;}
   .swatch-lum-value{font-size:9.5px;color:var(--muted);}
 
+  .palette-desc{font-size:13px;color:var(--muted);line-height:1.6;margin:-6px 0 22px;}
+  .palette-swatch-row{display:flex;flex-wrap:wrap;gap:16px 14px;margin-bottom:4px;}
+  .palette-chip{width:62px;text-align:center;}
+  .palette-dot{
+    width:42px;height:42px;border-radius:50%;margin:0 auto 7px;
+    border:3px solid #fff;box-shadow:0 3px 9px rgba(58,31,34,0.20);
+  }
+  .palette-chip .label{font-size:10.5px;color:var(--text-light);font-weight:600;line-height:1.25;}
+  .palette-note{font-size:12.5px;color:var(--muted);line-height:1.6;margin:10px 0 4px;}
+
+  .jewelry-metals{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
+  .jewelry-metal{
+    display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);
+    border-radius:24px;padding:6px 16px 6px 7px;
+  }
+  .jewelry-metal .dot{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 5px rgba(58,31,34,0.2);}
+  .jewelry-metal .name{font-size:12.5px;font-weight:600;color:var(--text-light);}
+  .jewelry-note{font-size:12.5px;color:var(--muted);line-height:1.6;}
+  .palette-download-row{display:flex;justify-content:center;margin-top:24px;}
+  .palette-download-btn{font-size:13px;padding:12px 26px;}
+
   .metric-row{display:flex;align-items:flex-start;gap:11px;margin-bottom:18px;}
   .metric-row:last-child{margin-bottom:2px;}
   .metric-icon{flex:0 0 22px;width:22px;height:22px;margin-top:1px;}
@@ -464,6 +485,26 @@
       </div>
     </div>
 
+    <div id="styleGuideSection" style="display:none;">
+      <div class="analysis-card">
+        <div class="analysis-eyebrow">Your</div>
+        <h3 class="analysis-title">Color Palette</h3>
+        <div class="palette-desc">Beyond lipstick — colors that work with your natural coloring across your wardrobe and jewelry.</div>
+
+        <div class="analysis-subhead">Clothing Colors</div>
+        <div id="paletteClothingRow" class="palette-swatch-row"></div>
+        <div class="palette-note">Built from your real skin, iris, sclera, and eyebrow color — not a generic season palette.</div>
+
+        <div class="analysis-subhead second">Jewelry</div>
+        <div id="paletteJewelryMetals" class="jewelry-metals"></div>
+        <div id="paletteJewelryNote" class="jewelry-note"></div>
+
+        <div class="palette-download-row">
+          <button class="btn ghost palette-download-btn" id="downloadStyleGuideBtn">Download as Story Card</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div id="brandSection" style="display:none;">
@@ -481,6 +522,327 @@
 </div>
 
 <script type="module">
+// ---------------------------------------------------------------------
+// Full seasonal color palette (clothing / hair / jewelry), shown to
+// customers as a section beyond just lipstick shades. Standard 16-
+// season color-analysis guidance -- keyed by the same season names
+// used throughout this file (see seasonFamilyMap). Display only, not
+// read by the AI during season detection or shade matching.
+// ---------------------------------------------------------------------
+const SEASON_STYLE_GUIDE = {
+  "Light Spring": {
+    hair: [
+      {name:"Golden Blonde", hex:"#E8C275"}, {name:"Strawberry Blonde", hex:"#E3A66F"},
+      {name:"Light Honey Brown", hex:"#B3823F"}, {name:"Warm Caramel", hex:"#A5652E"}
+    ],
+    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}], note:"Bright, polished gold suits you best — keep pieces light and warm rather than heavy or oxidized." }
+  },
+  "True Spring": {
+    hair: [
+      {name:"Golden Brown", hex:"#8A5A2B"}, {name:"Copper Red", hex:"#B5541A"},
+      {name:"Honey Blonde", hex:"#D9A64E"}, {name:"Warm Chestnut", hex:"#6E3B22"}
+    ],
+    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}], note:"Classic warm, polished gold — your go-to metal for everyday and statement pieces alike." }
+  },
+  "Bright Spring": {
+    hair: [
+      {name:"Rich Copper", hex:"#B5511F"}, {name:"Warm Chocolate with Copper", hex:"#5A3319"},
+      {name:"Golden Brown", hex:"#8A5A2B"}, {name:"Deep Auburn", hex:"#6B2C1A"}
+    ],
+    jewelry: { metals:[{name:"Bright Gold", hex:"#E5C158"}], note:"High-shine, saturated gold. You can also carry a little mixed metal as long as gold dominates." }
+  },
+  "Soft Spring": {
+    hair: [
+      {name:"Soft Honey Brown", hex:"#9C6E3E"}, {name:"Warm Ash-Beige Blonde", hex:"#C7A97A"},
+      {name:"Light Caramel", hex:"#B98552"}, {name:"Soft Chestnut", hex:"#7A4B2E"}
+    ],
+    jewelry: { metals:[{name:"Matte Gold", hex:"#C9A24B"}, {name:"Rose Gold", hex:"#B76E79"}], note:"Brushed, low-shine warm metals — avoid anything too bright or heavily polished." }
+  },
+
+  "Light Summer": {
+    hair: [
+      {name:"Ash Blonde", hex:"#C9BE9E"}, {name:"Cool Light Brown", hex:"#8C7460"},
+      {name:"Soft Beige Blonde", hex:"#D2C09A"}, {name:"Light Ash Brown", hex:"#7C6A57"}
+    ],
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}], note:"Soft, cool-toned silver. Keep it light and delicate rather than bold or heavy gold." }
+  },
+  "True Summer": {
+    hair: [
+      {name:"Cool Ash Brown", hex:"#6B594A"}, {name:"Cool Medium Brown", hex:"#5A4738"},
+      {name:"Taupe Brown", hex:"#7A6656"}, {name:"Soft Cool Blonde", hex:"#C4B594"}
+    ],
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Cool, softly polished metals — your classic pairing for everyday and dressier looks." }
+  },
+  "Soft Summer": {
+    hair: [
+      {name:"Cool Taupe Brown", hex:"#6E5D50"}, {name:"Ashy Medium Brown", hex:"#665648"},
+      {name:"Muted Cool Blonde", hex:"#B8A986"}, {name:"Soft Grey-Brown", hex:"#7D7266"}
+    ],
+    jewelry: { metals:[{name:"Brushed Silver", hex:"#B8BABC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Muted, low-shine cool metals — nothing too bright or high-contrast against your soft coloring." }
+  },
+  "Deep Soft Summer": {
+    hair: [
+      {name:"Deep Ash Brown", hex:"#4A3C33"}, {name:"Cool Espresso", hex:"#3A2C22"},
+      {name:"Dark Cool Chestnut", hex:"#4E3222"}, {name:"Deep Taupe Brown", hex:"#5A4A3D"}
+    ],
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Gunmetal", hex:"#4B4E52"}], note:"Cool, deeper-toned metals — silver and gunmetal read richer against your depth than pale silver alone." }
+  },
+
+  "Soft Autumn": {
+    hair: [
+      {name:"Warm Chestnut Brown", hex:"#6B3E24"}, {name:"Soft Caramel", hex:"#9C6B36"},
+      {name:"Golden Brown", hex:"#8A5A2B"}, {name:"Warm Ash Brown", hex:"#8A7256"}
+    ],
+    jewelry: { metals:[{name:"Matte Gold", hex:"#C9A24B"}, {name:"Antique Gold", hex:"#B08D57"}], note:"Soft, brushed warm metals — antique or matte finishes suit you better than bright polish." }
+  },
+  "True Autumn": {
+    hair: [
+      {name:"Chestnut", hex:"#6E3B1F"}, {name:"Copper Auburn", hex:"#9C4A22"},
+      {name:"Warm Chocolate Brown", hex:"#4A2E1C"}, {name:"Golden Copper", hex:"#A5622A"}
+    ],
+    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}, {name:"Bronze", hex:"#8C5E3C"}], note:"Rich, warm metals with real depth — gold and bronze both read beautifully against your coloring." }
+  },
+  "Deep Autumn": {
+    hair: [
+      {name:"Deep Auburn", hex:"#5E2718"}, {name:"Dark Chocolate Brown", hex:"#3A2415"},
+      {name:"Rich Copper Brown", hex:"#6B3A1E"}, {name:"Espresso", hex:"#33221A"}
+    ],
+    jewelry: { metals:[{name:"Antique Gold", hex:"#B08D57"}, {name:"Copper", hex:"#B5651D"}], note:"Deep, richly warm metals — bold gold or copper pieces hold their own against your depth and chroma." }
+  },
+  "Deep Soft Autumn": {
+    hair: [
+      {name:"Deep Warm Brunette", hex:"#43291B"}, {name:"Dark Chestnut", hex:"#4E2C1B"},
+      {name:"Espresso Brown", hex:"#33221A"}, {name:"Warm Dark Cocoa", hex:"#3A2517"}
+    ],
+    jewelry: { metals:[{name:"Matte Bronze", hex:"#8C5E3C"}, {name:"Antique Gold", hex:"#B08D57"}], note:"Muted, deep warm metals — brushed finishes suit your understated depth better than high shine." }
+  },
+
+  "Deep Winter": {
+    hair: [
+      {name:"Jet Black", hex:"#16130F"}, {name:"Darkest Brown", hex:"#2A1F18"},
+      {name:"Cool Espresso", hex:"#2E241F"}, {name:"Blue-Black", hex:"#12141C"}
+    ],
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Cool, high-polish metals — silver and platinum hold up against your depth and saturation." }
+  },
+  "True Winter": {
+    hair: [
+      {name:"Cool Black-Brown", hex:"#241E1A"}, {name:"Cool Dark Brown", hex:"#362A22"},
+      {name:"Blue-Black", hex:"#12141C"}, {name:"Ash Dark Brown", hex:"#3E332B"}
+    ],
+    jewelry: { metals:[{name:"Platinum", hex:"#E5E4E2"}, {name:"Silver", hex:"#C7C9CC"}], note:"Icy, high-shine cool metals — the classic jewel-tone-and-platinum pairing." }
+  },
+  "Bright Winter": {
+    hair: [
+      {name:"Blue-Black", hex:"#12141C"}, {name:"Cool Darkest Brown", hex:"#241C18"},
+      {name:"Deep Cool Brunette", hex:"#2E2420"}, {name:"Ash Black-Brown", hex:"#2A241F"}
+    ],
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Bright, high-polish cool metals to match your vividness — avoid anything brushed or muted." }
+  },
+  "Soft Winter": {
+    hair: [
+      {name:"Cool Ash Brown", hex:"#5A4C42"}, {name:"Soft Black", hex:"#262626"},
+      {name:"Dark Ash Brunette", hex:"#3E332C"}, {name:"Cool Medium Grey-Brown", hex:"#6B5F55"}
+    ],
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Cool, softly polished metals — striking against your contrast without competing with your muted coloring." }
+  }
+};
+
+// ---------------------------------------------------------------------
+// Live-generated clothing palette: instead of one fixed 28-color list per
+// season, the clothing swatches are generated per customer, nudged by how
+// her own measured CIELAB values sit relative to the *typical* member of
+// her matched season — real b* (warmth), L* (depth/lightness, 4-feature
+// skin+iris+sclera+eyebrow average), and C* (chroma, 3-feature skin+iris+
+// sclera average), the same raw values computed in measureFaceFromPhoto
+// and stored on the result as lab_temperature_b / depth_score / avg_chroma.
+// Two customers both matched to "True Autumn" will see slightly different
+// palettes if one measured warmer or deeper than the other within that
+// season. Hair and jewelry stay as fixed per-season picks above
+// (SEASON_STYLE_GUIDE) since those aren't derived from a continuous
+// measurement the way clothing hue/depth/chroma naturally are.
+// ---------------------------------------------------------------------
+
+// Season reference centroids in real CIELAB units — b* (warmth), L* (depth
+// average), C* (chroma average) — back-derived from the same calibrated
+// season-matching reference table used in measureFaceFromPhoto (that
+// table is anchored in a normalized 0-10 space; these are that same
+// calibration re-expressed in native Lab units via the exact inverse of
+// its warmthTo10/valueTo10/chromaTo10 mapping) so the "typical customer"
+// point for each season reflects real measured data, not an arbitrary
+// guess, while every comparison against it happens in raw CIELAB units.
+const SEASON_LAB_CENTROIDS = {
+  "Light Spring":      { b: 20.52, depthL: 57.73, chromaC: 21.76 },
+  "True Spring":       { b: 28.05, depthL: 49.92, chromaC: 23.74 },
+  "Bright Spring":     { b: 18.01, depthL: 49.92, chromaC: 27.69 },
+  "Soft Spring":       { b: 20.52, depthL: 52.52, chromaC: 13.86 },
+  "Light Summer":      { b: 10.48, depthL: 57.73, chromaC: 17.81 },
+  "True Summer":       { b: 5.46,  depthL: 47.31, chromaC: 15.84 },
+  "Soft Summer":       { b: 12.99, depthL: 47.31, chromaC: 11.88 },
+  "Deep Soft Summer":  { b: 10.48, depthL: 39.50, chromaC: 11.88 },
+  "Soft Autumn":       { b: 18.01, depthL: 47.31, chromaC: 11.88 },
+  "True Autumn":       { b: 28.05, depthL: 44.71, chromaC: 19.79 },
+  "Deep Autumn":       { b: 20.52, depthL: 39.50, chromaC: 19.79 },
+  "Deep Soft Autumn":  { b: 20.52, depthL: 39.50, chromaC: 11.88 },
+  "Deep Winter":       { b: 7.97,  depthL: 36.89, chromaC: 21.76 },
+  "True Winter":       { b: 5.46,  depthL: 44.71, chromaC: 23.74 },
+  "Bright Winter":     { b: 10.48, depthL: 47.31, chromaC: 27.69 },
+  "Soft Winter":       { b: 7.97,  depthL: 49.92, chromaC: 9.91  },
+};
+
+// 14 hue families used for warm-family seasons (Spring & Autumn) — each
+// carries a light-role and dark-role label + base hue/sat/lightness before
+// any per-season or per-customer shaping is applied.
+const CLOTHING_WARM_HUES = [
+  { hue: 42,  sat: 20, lightL: 93, darkL: 75, lightLabel: "Warm Ivory",       darkLabel: "Warm Beige" },
+  { hue: 24,  sat: 60, lightL: 80, darkL: 52, lightLabel: "Peach",            darkLabel: "Terracotta" },
+  { hue: 8,   sat: 68, lightL: 72, darkL: 46, lightLabel: "Coral",            darkLabel: "Brick Red" },
+  { hue: 2,   sat: 62, lightL: 60, darkL: 36, lightLabel: "Tomato Red",       darkLabel: "Warm Burgundy" },
+  { hue: 352, sat: 50, lightL: 70, darkL: 42, lightLabel: "Warm Rose",        darkLabel: "Deep Rose" },
+  { hue: 45,  sat: 78, lightL: 76, darkL: 48, lightLabel: "Golden Yellow",    darkLabel: "Mustard" },
+  { hue: 34,  sat: 35, lightL: 64, darkL: 36, lightLabel: "Camel",            darkLabel: "Umber" },
+  { hue: 100, sat: 42, lightL: 60, darkL: 32, lightLabel: "Warm Mint",        darkLabel: "Grass Green" },
+  { hue: 68,  sat: 36, lightL: 55, darkL: 28, lightLabel: "Soft Olive",       darkLabel: "Olive Green" },
+  { hue: 175, sat: 42, lightL: 62, darkL: 34, lightLabel: "Light Turquoise",  darkLabel: "Warm Teal" },
+  { hue: 228, sat: 42, lightL: 66, darkL: 40, lightLabel: "Warm Periwinkle",  darkLabel: "Warm Indigo" },
+  { hue: 282, sat: 38, lightL: 55, darkL: 28, lightLabel: "Warm Lilac",       darkLabel: "Warm Royal Purple" },
+  { hue: 330, sat: 55, lightL: 62, darkL: 36, lightLabel: "Warm Fuchsia",     darkLabel: "Warm Magenta" },
+  { hue: 25,  sat: 32, lightL: 38, darkL: 13, lightLabel: "Cocoa",            darkLabel: "Espresso" },
+];
+
+// 14 hue families used for cool-family seasons (Summer & Winter).
+const CLOTHING_COOL_HUES = [
+  { hue: 210, sat: 10, lightL: 96, darkL: 78, lightLabel: "Icy White",        darkLabel: "Cool Grey" },
+  { hue: 345, sat: 45, lightL: 85, darkL: 60, lightLabel: "Icy Pink",         darkLabel: "Dusty Rose" },
+  { hue: 350, sat: 52, lightL: 75, darkL: 50, lightLabel: "Rose Pink",        darkLabel: "Raspberry" },
+  { hue: 330, sat: 65, lightL: 62, darkL: 38, lightLabel: "Bright Fuchsia",   darkLabel: "Magenta" },
+  { hue: 355, sat: 66, lightL: 58, darkL: 34, lightLabel: "Blush Pink",       darkLabel: "True Red" },
+  { hue: 272, sat: 45, lightL: 62, darkL: 32, lightLabel: "Orchid",           darkLabel: "Royal Purple" },
+  { hue: 262, sat: 34, lightL: 75, darkL: 46, lightLabel: "Lavender",         darkLabel: "Deep Violet" },
+  { hue: 225, sat: 55, lightL: 58, darkL: 30, lightLabel: "Periwinkle Blue",  darkLabel: "Royal Blue" },
+  { hue: 212, sat: 60, lightL: 48, darkL: 24, lightLabel: "Sky Blue",         darkLabel: "Sapphire Blue" },
+  { hue: 212, sat: 24, lightL: 66, darkL: 34, lightLabel: "Powder Blue",      darkLabel: "Slate Blue" },
+  { hue: 155, sat: 45, lightL: 52, darkL: 26, lightLabel: "Mint Green",       darkLabel: "Emerald" },
+  { hue: 185, sat: 40, lightL: 54, darkL: 28, lightLabel: "Soft Teal",        darkLabel: "Deep Teal" },
+  { hue: 220, sat: 8,  lightL: 55, darkL: 24, lightLabel: "Cool Taupe",       darkLabel: "Charcoal Grey" },
+  { hue: 0,   sat: 0,  lightL: 16, darkL: 6,  lightLabel: "Slate Black",      darkLabel: "Black" },
+];
+
+// Per-season shaping for a *typical* member of that season: which hue
+// wheel, an overall saturation multiplier, additive lightness shifts for
+// the light/dark role of every hue, and caps/floors on how light or deep
+// the season is allowed to reach. Per-customer deltas (below) nudge these
+// same knobs up or down from here.
+const CLOTHING_SEASON_CONFIG = {
+  "Light Spring":      { wheel: "warm", satMult: 0.85, lightShift: +7,  darkShift: +20, lightCap: 97, darkFloor: 32 },
+  "True Spring":       { wheel: "warm", satMult: 1.05, lightShift: +2,  darkShift: +6,  lightCap: 95, darkFloor: 20 },
+  "Bright Spring":     { wheel: "warm", satMult: 1.35, lightShift: +3,  darkShift: -6,  lightCap: 97, darkFloor: 8  },
+  "Soft Spring":       { wheel: "warm", satMult: 0.5,  lightShift: +5,  darkShift: +12, lightCap: 95, darkFloor: 26 },
+  "Light Summer":      { wheel: "cool", satMult: 0.6,  lightShift: +6,  darkShift: +16, lightCap: 97, darkFloor: 32 },
+  "True Summer":       { wheel: "cool", satMult: 0.75, lightShift: +2,  darkShift: +6,  lightCap: 95, darkFloor: 22 },
+  "Soft Summer":       { wheel: "cool", satMult: 0.45, lightShift: +3,  darkShift: +9,  lightCap: 94, darkFloor: 24 },
+  "Deep Soft Summer":  { wheel: "cool", satMult: 0.55, lightShift: -8,  darkShift: -6,  lightCap: 88, darkFloor: 15 },
+  "Soft Autumn":       { wheel: "warm", satMult: 0.5,  lightShift: +4,  darkShift: +9,  lightCap: 95, darkFloor: 26 },
+  "True Autumn":       { wheel: "warm", satMult: 0.85, lightShift: 0,   darkShift: -3,  lightCap: 94, darkFloor: 11 },
+  "Deep Autumn":       { wheel: "warm", satMult: 0.9,  lightShift: -6,  darkShift: -9,  lightCap: 88, darkFloor: 7  },
+  "Deep Soft Autumn":  { wheel: "warm", satMult: 0.55, lightShift: -6,  darkShift: -7,  lightCap: 88, darkFloor: 9  },
+  "Deep Winter":       { wheel: "cool", satMult: 1.0,  lightShift: -3,  darkShift: -9,  lightCap: 92, darkFloor: 4  },
+  "True Winter":       { wheel: "cool", satMult: 1.1,  lightShift: 0,   darkShift: -7,  lightCap: 96, darkFloor: 3  },
+  "Bright Winter":     { wheel: "cool", satMult: 1.35, lightShift: 0,   darkShift: -7,  lightCap: 96, darkFloor: 3  },
+  "Soft Winter":       { wheel: "cool", satMult: 0.55, lightShift: +2,  darkShift: +3,  lightCap: 92, darkFloor: 17 },
+};
+
+function clothingHslToHex(h, s, l){
+  h = ((h % 360) + 360) % 360;
+  s = Math.max(0, Math.min(100, s)) / 100;
+  l = Math.max(0, Math.min(100, l)) / 100;
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+  const m = l - c / 2;
+  let r, g, b;
+  if (h < 60) [r, g, b] = [c, x, 0];
+  else if (h < 120) [r, g, b] = [x, c, 0];
+  else if (h < 180) [r, g, b] = [0, c, x];
+  else if (h < 240) [r, g, b] = [0, x, c];
+  else if (h < 300) [r, g, b] = [x, 0, c];
+  else [r, g, b] = [c, 0, x];
+  const toHex = v => Math.round((v + m) * 255).toString(16).padStart(2, '0');
+  return '#' + (toHex(r) + toHex(g) + toHex(b)).toUpperCase();
+}
+
+function clothingBrightness(hex){
+  const c = hex.replace('#', '');
+  const r = parseInt(c.substring(0, 2), 16), g = parseInt(c.substring(2, 4), 16), b = parseInt(c.substring(4, 6), 16);
+  return 0.299 * r + 0.587 * g + 0.114 * b;
+}
+
+function clothingRgbDist(hexA, hexB){
+  const a = hexA.replace('#', ''), b = hexB.replace('#', '');
+  const [ar, ag, ab] = [parseInt(a.slice(0, 2), 16), parseInt(a.slice(2, 4), 16), parseInt(a.slice(4, 6), 16)];
+  const [br, bg, bb] = [parseInt(b.slice(0, 2), 16), parseInt(b.slice(2, 4), 16), parseInt(b.slice(4, 6), 16)];
+  return Math.sqrt((ar - br) ** 2 + (ag - bg) ** 2 + (ab - bb) ** 2);
+}
+
+// Builds this customer's 28-color clothing palette for her matched season,
+// nudged by deltaB/deltaL/deltaC — her own real CIELAB b*/L*(depth avg)/
+// C*(chroma avg) minus her season's reference centroid (SEASON_LAB_
+// CENTROIDS), in native Lab units throughout. All three default to 0 (the
+// season's typical palette) when no real measurement was available for
+// this photo. Sensitivity constants below are the same ones used when
+// this was driven by the normalized 0-10 quant scale, rescaled by each
+// metric's own quant-per-Lab-unit factor (warmthTo10/valueTo10/
+// chromaTo10's slopes: 0.3983, 0.3839, 0.5060) so the net effect on the
+// palette is unchanged -- only the units of the input changed.
+function generateClothingPalette(seasonName, deltas){
+  const cfg = CLOTHING_SEASON_CONFIG[seasonName];
+  if(!cfg) return null;
+  const { deltaB = 0, deltaL = 0, deltaC = 0 } = deltas || {};
+
+  const satMult = Math.max(0.2, Math.min(1.7, cfg.satMult * (1 + deltaC * 0.0253)));
+  const lightShift = cfg.lightShift + deltaL * 0.614;
+  const darkShift = cfg.darkShift + deltaL * 0.614;
+  const lightCap = Math.max(55, Math.min(98, cfg.lightCap + deltaL * 0.384));
+  const darkFloor = Math.max(2, Math.min(60, cfg.darkFloor + deltaL * 0.384));
+  // Warmer-than-typical (higher b*) rotates every hue a few degrees toward
+  // red/orange/yellow; cooler-than-typical rotates toward blue/purple.
+  // Capped small so a hue family never crosses into a different identity.
+  const hueShiftDeg = Math.max(-9, Math.min(9, deltaB * 0.876));
+
+  const hues = cfg.wheel === "warm" ? CLOTHING_WARM_HUES : CLOTHING_COOL_HUES;
+  const colors = [];
+  const seen = new Set();
+  const MIN_GAP = 12;
+  for (const h of hues) {
+    const hue = h.hue - hueShiftDeg;
+    const lightL = Math.min(lightCap, h.lightL + lightShift);
+    let darkL = Math.max(darkFloor, h.darkL + darkShift);
+    if (lightL - darkL < MIN_GAP) darkL = Math.max(2, lightL - MIN_GAP);
+    const sat = Math.max(0, Math.min(100, h.sat * satMult));
+    let lightHex = clothingHslToHex(hue, sat, lightL);
+    let darkHex = clothingHslToHex(hue, sat, darkL);
+    if (lightHex === darkHex) darkHex = clothingHslToHex(hue, sat, Math.max(2, darkL - 8));
+    for (const [hex, name, L] of [[lightHex, h.lightLabel, lightL], [darkHex, h.darkLabel, darkL]]) {
+      if (seen.has(hex)) continue;
+      seen.add(hex);
+      colors.push({ name, hex, hue, sat, L });
+    }
+  }
+  colors.sort((a, b) => clothingBrightness(b.hex) - clothingBrightness(a.hex));
+
+  // Declump: two different hue families can still land close together in
+  // overall brightness (most often at the very dark, desaturated end) —
+  // nudge the darker one further down so every swatch stays distinct.
+  for (let i = 1; i < colors.length; i++) {
+    let attempts = 0;
+    while (clothingRgbDist(colors[i - 1].hex, colors[i].hex) < 14 && colors[i].L > 2 && attempts < 20) {
+      colors[i].L = Math.max(2, colors[i].L - 2);
+      colors[i].hex = clothingHslToHex(colors[i].hue, colors[i].sat, colors[i].L);
+      attempts++;
+    }
+  }
+  colors.sort((a, b) => clothingBrightness(b.hex) - clothingBrightness(a.hex));
+  return colors.map(({ name, hex }) => ({ name, hex }));
+}
+
 // ---------------------------------------------------------------------
 // Seasonal color analysis knowledge base (12-season system), condensed
 // for use as the AI's reference. Written in plain descriptive terms.
@@ -1573,6 +1935,11 @@ function findBestMacShadesByFinish(customerLab, lookTier){
 // ---------------------------------------------------------------------
 let uploadedImage = null; // {base64, mediaType}
 let currentSeasonResult = null;
+// Cached inputs for the "Download as Story Card" button -- set inside
+// renderStyleGuide each time it runs, so the downloaded card always
+// matches exactly what's on screen (same generated clothing palette,
+// same hair/jewelry picks) without recomputing anything.
+let lastStyleGuideData = null;
 
 // ---------------------------------------------------------------------
 // Automatic face-landmark detection (MediaPipe Face Landmarker) for
@@ -2198,44 +2565,64 @@ async function measureFaceFromPhoto(imgEl){
     // here for data collection until that calibration is possible.
     const chromaContrast = Math.max(skinChroma, irisChroma, scleraChroma) - Math.min(skinChroma, irisChroma, scleraChroma);
 
-    // QUANTITATIVE 12-SEASON MATCH (experimental, for testing only —
-    // does NOT replace the actual season Claude returns). Converts
-    // our raw measurements onto the same 0-10 Warmth/Value/Chroma/
-    // Contrast scale as the reference table, then finds the nearest
-    // of the 12 season archetypes by Euclidean distance. Calibration
-    // is empirically anchored: one point per dimension comes from the
-    // measured average of our own Soft-Autumn-labeled photo cluster
-    // (11 real photos) mapped to that season's reference position; a
-    // second point per dimension comes from our independently
-    // validated Depth/Contrast thresholds or the observed population
-    // range. Validated against 23 real photos: 0/23 incorrectly
-    // landed in "Deep" seasons (an earlier, unanchored attempt had
-    // 12/23), and 18/23 matched prior results.
-    function warmthTo10(labB){ return Math.max(0, Math.min(10, 5 + 0.3983*(labB-15.5))); }
-    function valueTo10(ds){ return Math.max(0, Math.min(10, 2.5 + 0.3839*(ds-40.8))); }
-    // CHROMA: switched to CIELAB C* (skin+iris+sclera average),
-    // matching the same 3-feature scope as the previous HSV-saturation
-    // formula (which is kept above, unchanged, for the separate
-    // Chroma Contrast informational feature). New anchors derived the
-    // same way as before: population min Lab C*(3-feat avg)=7.93 ->
-    // Chroma=0, Soft Autumn cluster avg=11.88 -> Chroma=2.
-    function chromaTo10(c){ return Math.max(0, Math.min(10, 0.5060*(c-7.93))); }
-    function contrastTo10(cs){ return Math.max(0, Math.min(10, 3 + 0.1824*(cs-45.04))); }
+    // QUANTITATIVE 16-SEASON MATCH (experimental, for testing only —
+    // does NOT replace the actual season Claude returns). Finds the
+    // nearest of the 16 season archetypes to the customer's raw
+    // CIELAB measurements (b* warmth, L* depth, C* chroma, contrast
+    // score) by weighted Euclidean distance, computed directly in
+    // CIELAB units — no intermediate 0-10 rescale. Each axis's weight
+    // is the same per-CIELAB-unit slope used to calibrate the
+    // archetype reference positions in the first place: empirically
+    // anchored, one point per axis from the measured average of our
+    // own Soft-Autumn-labeled photo cluster (11 real photos) mapped
+    // to that season's reference position, the other from our
+    // independently validated Depth/Contrast thresholds or the
+    // observed population range. Validated against 23 real photos:
+    // 0/23 incorrectly landed in "Deep" seasons (an earlier,
+    // unanchored attempt had 12/23), and 18/23 matched prior results.
+    const WARMTH_WEIGHT = 0.3983, VALUE_WEIGHT = 0.3839, CHROMA_WEIGHT = 0.5060, CONTRAST_WEIGHT = 0.1824;
+    // Each axis is clamped to the same effective raw-CIELAB range the
+    // old 0-10 scale used to clamp to (derived once from the same
+    // slopes/anchors above), so a wildly out-of-range photo still
+    // degrades gracefully instead of skewing the distance without
+    // bound.
+    const WARMTH_MIN = 2.946648, WARMTH_MAX = 28.053352;
+    const VALUE_MIN = 34.287887, VALUE_MAX = 60.336338;
+    const CHROMA_MIN = 7.93, CHROMA_MAX = 27.692846;
+    const CONTRAST_MIN = 28.592632, CONTRAST_MAX = 83.417193;
+    function clampTo(v, lo, hi){ return Math.max(lo, Math.min(hi, v)); }
 
+    // Season archetypes, given directly in raw CIELAB-equivalent units
+    // (b* warmth, L* depth, C* chroma, contrast score) — the same
+    // calibrated reference positions as before, just expressed in the
+    // same units as the customer's own measurements so no rescale is
+    // needed to compare them.
     const seasonReference = [
-      ["Light Spring","Spring",7,9,7,3], ["True Spring","Spring",10,6,8,5], ["Bright Spring","Spring",6,6,10,8], ["Soft Spring","Spring",7,7,3,3],
-      ["Light Summer","Summer",3,9,5,3], ["True Summer","Summer",1,5,4,4], ["Soft Summer","Summer",4,5,2,3], ["Deep Soft Summer","Summer",3,2,2,4],
-      ["Soft Autumn","Autumn",6,5,2,3], ["True Autumn","Autumn",10,4,6,5], ["Deep Autumn","Autumn",7,2,6,6], ["Deep Soft Autumn","Autumn",7,2,2,4],
-      ["Deep Winter","Winter",2,1,7,7], ["True Winter","Winter",1,4,8,7], ["Bright Winter","Winter",3,5,10,10], ["Soft Winter","Winter",2,6,1,6],
+      ["Light Spring","Spring",20.521341,57.731493,21.763992,45.040000], ["True Spring","Spring",28.053352,49.916958,23.740277,56.004912],
+      ["Bright Spring","Spring",18.010670,49.916958,27.692846,72.452281], ["Soft Spring","Spring",20.521341,52.521803,13.858854,45.040000],
+      ["Light Summer","Summer",10.478659,57.731493,17.811423,45.040000], ["True Summer","Summer",5.457319,47.312113,15.835138,50.522456],
+      ["Soft Summer","Summer",12.989330,47.312113,11.882569,45.040000], ["Deep Soft Summer","Summer",10.478659,39.497577,11.882569,50.522456],
+      ["Soft Autumn","Autumn",18.010670,47.312113,11.882569,45.040000], ["True Autumn","Autumn",28.053352,44.707268,19.787708,56.004912],
+      ["Deep Autumn","Autumn",20.521341,39.497577,19.787708,61.487368], ["Deep Soft Autumn","Autumn",20.521341,39.497577,11.882569,50.522456],
+      ["Deep Winter","Winter",7.967989,36.892732,21.763992,66.969825], ["True Winter","Winter",5.457319,44.707268,23.740277,66.969825],
+      ["Bright Winter","Winter",10.478659,47.312113,27.692846,83.417193], ["Soft Winter","Winter",7.967989,49.916958,9.906285,61.487368],
     ];
     const avgChroma = (customerLab.C + irisLab.C + scleraLab.C) / 3;
     // Discrete Muted/Balanced/Vivid classification on raw C* (3-feature
     // avg), same soft-zone convention as Depth/Contrast above.
     const chromaLevel = classifyWithZones(avgChroma, 5, 19, ["Muted", "Balanced", "Vivid"], 0.01, 0.02);
-    const qW = warmthTo10(customerLab.b), qV = valueTo10(depthScore), qC = chromaTo10(avgChroma), qK = contrastTo10(contrastScore);
-    const quantScored = seasonReference.map(([name, fam, rw, rv, rc, rk]) => ({
+    const warmthClamped = clampTo(customerLab.b, WARMTH_MIN, WARMTH_MAX);
+    const depthClamped = clampTo(depthScore, VALUE_MIN, VALUE_MAX);
+    const chromaClamped = clampTo(avgChroma, CHROMA_MIN, CHROMA_MAX);
+    const contrastClamped = clampTo(contrastScore, CONTRAST_MIN, CONTRAST_MAX);
+    const quantScored = seasonReference.map(([name, fam, refB, refL, refC, refCs]) => ({
       name, fam,
-      dist: Math.sqrt((qW-rw)**2 + (qV-rv)**2 + (qC-rc)**2 + (qK-rk)**2)
+      dist: Math.sqrt(
+        (WARMTH_WEIGHT*(warmthClamped-refB))**2 +
+        (VALUE_WEIGHT*(depthClamped-refL))**2 +
+        (CHROMA_WEIGHT*(chromaClamped-refC))**2 +
+        (CONTRAST_WEIGHT*(contrastClamped-refCs))**2
+      )
     })).sort((a, b) => a.dist - b.dist);
 
     return {
@@ -2257,8 +2644,6 @@ async function measureFaceFromPhoto(imgEl){
       chroma_contrast: Math.round(chromaContrast * 10) / 10,
       luminance_spread: Math.round(luminanceSpread),
       eyelid_rgb: eyelidRgb, eyelid_luminance: eyelidLuminance !== null ? Math.round(eyelidLuminance) : null,
-      quant_warmth: Math.round(qW*10)/10, quant_value: Math.round(qV*10)/10,
-      quant_chroma: Math.round(qC*10)/10, quant_contrast: Math.round(qK*10)/10,
       quant_best: quantScored[0].name, quant_best_dist: Math.round(quantScored[0].dist*100)/100,
       quant_runner_up: quantScored[1].name, quant_runner_up_dist: Math.round(quantScored[1].dist*100)/100,
       quant_too_close: (quantScored[1].dist - quantScored[0].dist) < 0.15,
@@ -2462,7 +2847,7 @@ analyzeBtn.addEventListener('click', async () => {
         `G-B (skin): ${measurements.g_minus_b} -> Undertone: ${measurements.undertone}\n` +
         `Contrast Score: ${measurements.contrast_score} -> Contrast: ${measurements.contrast_level}\n` +
         `Skin chroma (saturation): ${measurements.skin_chroma}%  Iris chroma (saturation): ${measurements.iris_chroma}%  Sclera chroma (saturation): ${measurements.sclera_chroma}%\n` +
-        `QUANTITATIVE SEASON MATCH: ${measurements.quant_best} (distance=${measurements.quant_best_dist}). This was computed by converting the measurements above onto the same 0-10 Warmth/Value/Chroma/Contrast scale used by the official 12-season reference table, then finding the nearest of the 12 season archetypes by direct distance. This IS the final season — use it exactly as given, do not perform your own comparison between candidate seasons or second-guess it based on your own visual impression. Your only job now is to write a warm, natural 2-3 sentence explanation for why this season fits, based on what you observe in the photo (skip any mention of the distance calculation or numeric methodology in that explanation).\n` +
+        `QUANTITATIVE SEASON MATCH: ${measurements.quant_best} (distance=${measurements.quant_best_dist}). This was computed by finding the nearest of the 16 season archetypes to the measurements above, by weighted Euclidean distance directly in CIELAB units (b*/L*/C*/contrast). This IS the final season — use it exactly as given, do not perform your own comparison between candidate seasons or second-guess it based on your own visual impression. Your only job now is to write a warm, natural 2-3 sentence explanation for why this season fits, based on what you observe in the photo (skip any mention of the distance calculation or numeric methodology in that explanation).\n` +
         `Use the Depth, Undertone, and Contrast results directly rather than recalculating from your own visual estimate.`;
     }
 
@@ -2508,10 +2893,6 @@ analyzeBtn.addEventListener('click', async () => {
       result.eyelid_rgb = measurements.eyelid_rgb;
       result.eyelid_luminance = measurements.eyelid_luminance;
       result.undertone_descriptive = measurements.undertone_descriptive;
-      result.quant_warmth = measurements.quant_warmth;
-      result.quant_value = measurements.quant_value;
-      result.quant_chroma = measurements.quant_chroma;
-      result.quant_contrast = measurements.quant_contrast;
       result.quant_best = measurements.quant_best;
       result.quant_best_dist = measurements.quant_best_dist;
       result.quant_runner_up = measurements.quant_runner_up;
@@ -2586,8 +2967,6 @@ function saveDebugHistory(result){
       skin_chroma: result.skin_chroma, iris_chroma: result.iris_chroma, sclera_chroma: result.sclera_chroma,
       avg_chroma: result.avg_chroma, chroma_level: result.chroma_level,
       chroma_contrast: result.chroma_contrast, luminance_spread: result.luminance_spread,
-      quant_warmth: result.quant_warmth, quant_value: result.quant_value,
-      quant_chroma: result.quant_chroma, quant_contrast: result.quant_contrast,
       quant_best: result.quant_best, quant_best_dist: result.quant_best_dist,
       quant_runner_up: result.quant_runner_up, quant_runner_up_dist: result.quant_runner_up_dist,
       season: result.season, family: result.family
@@ -2781,12 +3160,264 @@ function renderSeasonResult(result){
   }
 
   renderColorAnalysis(result);
+  renderStyleGuide(result);
 
   resultCard.classList.add('show');
 
   brandSection.style.display = 'block';
   hideError(errorBox2);
   showBestShadeMatches(result);
+}
+
+// Full color palette (clothing / hair / jewelry) for the detected
+// season -- a separate, broader companion to the lipstick shade
+// matching below. Hidden entirely if the season is a combined
+// "X/Y" display name with no direct guide entry.
+function renderStyleGuide(result){
+  const seasonName = result && (result.shadeMatchSeason || result.season);
+  const section = document.getElementById('styleGuideSection');
+  const guide = SEASON_STYLE_GUIDE[seasonName];
+  if(!guide){
+    section.style.display = 'none';
+    return;
+  }
+
+  // Nudge the clothing palette by how this customer's own real CIELAB
+  // b*/L*(depth avg)/C*(chroma avg) compares to the typical member of her
+  // matched season -- falls back to 0 (the season's default palette) when
+  // no real pixel measurement exists for this photo (AI-estimation-only
+  // path, where lab_temperature_b/depth_score/avg_chroma are never set).
+  const centroid = SEASON_LAB_CENTROIDS[seasonName];
+  let deltas = {};
+  if(centroid && result.lab_temperature_b != null && result.depth_score != null && result.avg_chroma != null){
+    deltas = {
+      deltaB: result.lab_temperature_b - centroid.b,
+      deltaL: result.depth_score - centroid.depthL,
+      deltaC: result.avg_chroma - centroid.chromaC,
+    };
+  }
+  const clothing = generateClothingPalette(seasonName, deltas);
+
+  const clothingRow = document.getElementById('paletteClothingRow');
+  clothingRow.innerHTML = clothing.map(c => `
+    <div class="palette-chip">
+      <div class="palette-dot" style="background:${c.hex};"></div>
+      <div class="label">${c.name}</div>
+    </div>`).join('');
+
+  const metalsRow = document.getElementById('paletteJewelryMetals');
+  metalsRow.innerHTML = guide.jewelry.metals.map(m => `
+    <div class="jewelry-metal">
+      <div class="dot" style="background:${m.hex};"></div>
+      <div class="name">${m.name}</div>
+    </div>`).join('');
+  document.getElementById('paletteJewelryNote').textContent = guide.jewelry.note;
+
+  lastStyleGuideData = {
+    seasonName, family: result.family, clothing, jewelry: guide.jewelry,
+  };
+
+  section.style.display = 'block';
+}
+// ---------------------------------------------------------------------
+// "Download as Story Card" for the Your Color Palette section --
+// draws a self-contained 1080x1920 (Instagram/TikTok Story-shaped) PNG
+// natively on a <canvas> from lastStyleGuideData, so it always matches
+// what's on screen. No external libraries (e.g. html2canvas) so the
+// button never depends on a CDN being reachable.
+// ---------------------------------------------------------------------
+const SG_THEME = {
+  bgDeep:'#f2d9d6', bgDeep2:'#f0d0cc', card:'#fdf5f3', roseDeep:'#96333c',
+  textLight:'#3a1f22', muted:'rgba(58,31,34,0.62)', line:'rgba(58,31,34,0.14)',
+};
+const SG_PLAYFAIR = "'Playfair Display', Georgia, serif";
+const SG_WORKSANS = "'Work Sans', Arial, sans-serif";
+
+function sgRoundRectPath(ctx, x, y, w, h, r){
+  if (typeof r === 'number') r = {tl:r, tr:r, br:r, bl:r};
+  ctx.beginPath();
+  ctx.moveTo(x + r.tl, y);
+  ctx.lineTo(x + w - r.tr, y);
+  ctx.arcTo(x + w, y, x + w, y + r.tr, r.tr);
+  ctx.lineTo(x + w, y + h - r.br);
+  ctx.arcTo(x + w, y + h, x + w - r.br, y + h, r.br);
+  ctx.lineTo(x + r.bl, y + h);
+  ctx.arcTo(x, y + h, x, y + h - r.bl, r.bl);
+  ctx.lineTo(x, y + r.tl);
+  ctx.arcTo(x, y, x + r.tl, y, r.tl);
+  ctx.closePath();
+}
+function sgFillRoundRect(ctx, x, y, w, h, r, color){
+  sgRoundRectPath(ctx, x, y, w, h, r);
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+function sgFillCircle(ctx, cx, cy, r, color, strokeColor, strokeW){
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fillStyle = color; ctx.fill();
+  if (strokeColor) { ctx.lineWidth = strokeW || 1; ctx.strokeStyle = strokeColor; ctx.stroke(); }
+}
+function sgText(ctx, str, x, y, { font, color, align = 'left', baseline = 'alphabetic', letterSpacing = 0 }){
+  ctx.font = font; ctx.fillStyle = color; ctx.textBaseline = baseline;
+  if (letterSpacing && ctx.letterSpacing !== undefined) ctx.letterSpacing = letterSpacing + 'px';
+  ctx.textAlign = align;
+  ctx.fillText(str, x, y);
+  if (letterSpacing && ctx.letterSpacing !== undefined) ctx.letterSpacing = '0px';
+}
+// Greedy word-wrap: splits str into lines no wider than maxWidth under font.
+function sgWrapText(ctx, str, maxWidth, font){
+  ctx.font = font;
+  const words = str.split(' ');
+  const lines = [];
+  let cur = '';
+  for (const w of words){
+    const test = cur ? cur + ' ' + w : w;
+    if (ctx.measureText(test).width > maxWidth && cur){
+      lines.push(cur);
+      cur = w;
+    } else {
+      cur = test;
+    }
+  }
+  if (cur) lines.push(cur);
+  return lines;
+}
+
+function sgSectionHeader(ctx, label, contentX, contentW, y){
+  sgText(ctx, label, contentX, y - 44, { font: `700 21px ${SG_WORKSANS}`, color: SG_THEME.roseDeep, align: 'left', letterSpacing: 1 });
+  ctx.strokeStyle = SG_THEME.line; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(contentX, y - 24); ctx.lineTo(contentX + contentW, y - 24); ctx.stroke();
+}
+
+function drawStyleGuideStoryCard(data){
+  const W = 1080;
+  // Use an off-screen measuring context first since the panel height
+  // depends on content (28 clothing colors can already run long) -- the
+  // canvas itself is sized to fit everything rather than a fixed 1920
+  // that risks clipping content off the bottom.
+  const measureCanvas = document.createElement('canvas');
+  const mctx = measureCanvas.getContext('2d');
+
+  const panelX = 60, panelY = 320, panelW = W - panelX * 2;
+  const contentX = panelX + 55, contentW = panelW - 110;
+  const dotR = 37;
+
+  const cols = 7;
+  const clothingRows = Math.ceil(data.clothing.length / cols);
+  const clothingTop = 470;
+  const clothingBottom = clothingTop + clothingRows * 152;
+  const clothingNoteText = 'Built from your real skin, iris, sclera, and eyebrow color — not a generic season palette.';
+  const clothingNoteLines = sgWrapText(mctx, clothingNoteText, contentW, `400 17px ${SG_WORKSANS}`);
+  const clothingNoteTop = clothingBottom + 20;
+  const clothingNoteBottom = clothingNoteTop + clothingNoteLines.length * 26;
+
+  const jewelryTop = clothingNoteBottom + 50;
+  const jewelryNoteLines = sgWrapText(mctx, data.jewelry.note, contentW, `400 17px ${SG_WORKSANS}`);
+  const jewelryBottom = jewelryTop + 90 + jewelryNoteLines.length * 26 + 20;
+
+  const panelH = jewelryBottom - panelY + 60;
+  const H = panelY + panelH + 160; // bottom margin + footer
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // Background
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, SG_THEME.bgDeep);
+  bgGrad.addColorStop(1, SG_THEME.bgDeep2);
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Header
+  sgText(ctx, 'Find My Best Shades', W / 2, 118, { font: `600 40px ${SG_PLAYFAIR}`, color: SG_THEME.textLight, align: 'center' });
+  sgText(ctx, 'YOUR COLOR PALETTE', W / 2, 156, { font: `600 16px ${SG_WORKSANS}`, color: SG_THEME.roseDeep, align: 'center', letterSpacing: 2 });
+  sgText(ctx, data.seasonName, W / 2, 246, { font: `700 76px ${SG_PLAYFAIR}`, color: SG_THEME.roseDeep, align: 'center' });
+  if (data.family) {
+    sgText(ctx, data.family, W / 2, 282, { font: `500 18px ${SG_WORKSANS}`, color: SG_THEME.muted, align: 'center' });
+  }
+
+  // Main panel
+  ctx.save();
+  ctx.shadowColor = 'rgba(58,31,34,0.12)';
+  ctx.shadowBlur = 40;
+  ctx.shadowOffsetY = 12;
+  sgFillRoundRect(ctx, panelX, panelY, panelW, panelH, 32, SG_THEME.card);
+  ctx.restore();
+
+  // Clothing section
+  sgSectionHeader(ctx, 'CLOTHING COLORS', contentX, contentW, clothingTop);
+  const colW = contentW / cols;
+  data.clothing.forEach((c, i) => {
+    const row = Math.floor(i / cols), col = i % cols;
+    const cx = contentX + colW * col + colW / 2;
+    const cy = clothingTop + row * 152 + dotR;
+    sgFillCircle(ctx, cx, cy, dotR, c.hex, '#ffffff', 5);
+    const lines = sgWrapText(ctx, c.name, colW - 6, `600 15px ${SG_WORKSANS}`);
+    lines.slice(0, 2).forEach((line, li) => {
+      sgText(ctx, line, cx, cy + dotR + 24 + li * 19, { font: `600 15px ${SG_WORKSANS}`, color: SG_THEME.textLight, align: 'center' });
+    });
+  });
+  clothingNoteLines.forEach((line, li) => {
+    sgText(ctx, line, contentX, clothingNoteTop + li * 26, { font: `400 17px ${SG_WORKSANS}`, color: SG_THEME.muted, align: 'left' });
+  });
+
+  // Jewelry section
+  sgSectionHeader(ctx, 'JEWELRY', contentX, contentW, jewelryTop);
+  let metalX = contentX;
+  const metalY = jewelryTop, metalH = 58;
+  data.jewelry.metals.forEach(m => {
+    ctx.font = `600 16px ${SG_WORKSANS}`;
+    const label = m.name;
+    const pillW = ctx.measureText(label).width + 34 + 44;
+    sgFillRoundRect(ctx, metalX, metalY, pillW, metalH, metalH / 2, '#ffffff');
+    sgFillCircle(ctx, metalX + 30, metalY + metalH / 2, 16, m.hex, '#ffffff', 2);
+    sgText(ctx, label, metalX + 54, metalY + metalH / 2 + 6, { font: `600 16px ${SG_WORKSANS}`, color: SG_THEME.textLight, align: 'left' });
+    metalX += pillW + 16;
+  });
+  jewelryNoteLines.forEach((line, li) => {
+    sgText(ctx, line, contentX, jewelryTop + 90 + li * 26, { font: `400 17px ${SG_WORKSANS}`, color: SG_THEME.muted, align: 'left' });
+  });
+
+  // Footer
+  sgText(ctx, 'PERSONALIZED BY FIND MY BEST SHADES', W / 2, H - 60, { font: `600 15px ${SG_WORKSANS}`, color: SG_THEME.roseDeep, align: 'center', letterSpacing: 1.5 });
+
+  return canvas;
+}
+
+const downloadStyleGuideBtn = document.getElementById('downloadStyleGuideBtn');
+if (downloadStyleGuideBtn) {
+  downloadStyleGuideBtn.addEventListener('click', async () => {
+    if (!lastStyleGuideData) return;
+    const originalLabel = downloadStyleGuideBtn.textContent;
+    downloadStyleGuideBtn.textContent = 'Preparing…';
+    downloadStyleGuideBtn.disabled = true;
+    try {
+      // Wait (briefly) for web fonts to be ready so the export picks up
+      // Playfair Display / Work Sans rather than a system fallback.
+      await Promise.race([
+        (document.fonts && document.fonts.ready) || Promise.resolve(),
+        new Promise(r => setTimeout(r, 400)),
+      ]);
+      const canvas = drawStyleGuideStoryCard(lastStyleGuideData);
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const slug = lastStyleGuideData.seasonName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        a.download = `find-my-best-shades-${slug}-palette.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        downloadStyleGuideBtn.textContent = originalLabel;
+        downloadStyleGuideBtn.disabled = false;
+      });
+    } catch (err) {
+      console.error('Story card download failed', err);
+      downloadStyleGuideBtn.textContent = originalLabel;
+      downloadStyleGuideBtn.disabled = false;
+    }
+  });
 }
 
 // Looks up a brand id's display name (e.g. "black-rouge" -> "Black Rouge").
@@ -2813,28 +3444,37 @@ let currentLookTier = 'natural';
 
 let currentCustomerSkinHex = null;
 
-function showBestShadeMatches(result){
-  if(!result || !result.estimated_skin_rgb) return;
-  hideError(errorBox2);
+// Derives this customer's real CIELAB position -- skin b*/L*/C*, plus the
+// 4-feature Depth (skin+iris+sclera+eyebrow L* avg) / 3-feature Chroma
+// (skin+iris+sclera C* avg) the MAC shade matcher targets -- from the
+// photo-analysis result. Shared by the "best matching lipstick shades"
+// flow (showBestShadeMatches) and the style guide's Lipstick row
+// (renderStyleGuide), so both pull real shade matches from the exact
+// same measurement. Falls back to skin-only L/C if iris/sclera/eyebrow
+// weren't captured for this photo; returns null if there's no skin
+// measurement at all yet.
+function computeCustomerLabFromResult(result){
+  if(!result || !result.estimated_skin_rgb) return null;
   const skinRgb = { r: result.estimated_skin_rgb[0], g: result.estimated_skin_rgb[1], b: result.estimated_skin_rgb[2] };
-  currentCustomerLab = rgbToLab(skinRgb);
-  currentCustomerSkinHex = rgbToHex(skinRgb.r, skinRgb.g, skinRgb.b);
-
-  // 4-feature Depth (skin+iris+sclera+eyebrow L* avg) / 3-feature
-  // Chroma (skin+iris+sclera C* avg) -- same basis the Shade Atlas's
-  // Shade Matcher uses, so both tools target the same point. Warmth
-  // (b*) stays skin-only in both, unchanged. Falls back to skin-only
-  // L/C if iris/sclera/eyebrow weren't captured for this photo.
+  const lab = rgbToLab(skinRgb);
   if(result.estimated_iris_rgb && result.estimated_sclera_rgb && result.estimated_eyebrow_rgb){
     const irisLab = rgbToLab({ r: result.estimated_iris_rgb[0], g: result.estimated_iris_rgb[1], b: result.estimated_iris_rgb[2] });
     const scleraLab = rgbToLab({ r: result.estimated_sclera_rgb[0], g: result.estimated_sclera_rgb[1], b: result.estimated_sclera_rgb[2] });
     const eyebrowLab = rgbToLab({ r: result.estimated_eyebrow_rgb[0], g: result.estimated_eyebrow_rgb[1], b: result.estimated_eyebrow_rgb[2] });
-    currentCustomerLab.depthAvg = (currentCustomerLab.L + irisLab.L + scleraLab.L + eyebrowLab.L) / 4;
-    currentCustomerLab.chromaAvg = (currentCustomerLab.C + irisLab.C + scleraLab.C) / 3;
+    lab.depthAvg = (lab.L + irisLab.L + scleraLab.L + eyebrowLab.L) / 4;
+    lab.chromaAvg = (lab.C + irisLab.C + scleraLab.C) / 3;
   } else {
-    currentCustomerLab.depthAvg = currentCustomerLab.L;
-    currentCustomerLab.chromaAvg = currentCustomerLab.C;
+    lab.depthAvg = lab.L;
+    lab.chromaAvg = lab.C;
   }
+  return lab;
+}
+
+function showBestShadeMatches(result){
+  if(!result || !result.estimated_skin_rgb) return;
+  hideError(errorBox2);
+  currentCustomerLab = computeCustomerLabFromResult(result);
+  currentCustomerSkinHex = rgbToHex(result.estimated_skin_rgb[0], result.estimated_skin_rgb[1], result.estimated_skin_rgb[2]);
 
   currentLookTier = 'natural';
   renderLookTierTabs();
