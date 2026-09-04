@@ -240,6 +240,10 @@
     font-family:'Playfair Display', serif;font-weight:600;font-size:19px;
     text-align:center;margin:0 0 20px;color:var(--text-light);
   }
+  .palette-season-name{
+    font-family:'Playfair Display', serif;font-weight:600;font-size:16px;
+    text-align:center;color:var(--rose-deep);margin:-14px 0 18px;
+  }
   .analysis-subhead{
     font-size:11px;text-transform:uppercase;letter-spacing:0.1em;
     color:var(--rose-deep);font-weight:600;margin:0 0 14px;
@@ -270,7 +274,6 @@
     border:3px solid #fff;box-shadow:0 3px 9px rgba(58,31,34,0.20);
   }
   .palette-chip .label{font-size:10.5px;color:var(--text-light);font-weight:600;line-height:1.25;}
-  .palette-note{font-size:12.5px;color:var(--muted);line-height:1.6;margin:10px 0 4px;}
 
   .jewelry-metals{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
   .jewelry-metal{
@@ -487,20 +490,19 @@
 
     <div id="styleGuideSection" style="display:none;">
       <div class="analysis-card">
-        <div class="analysis-eyebrow">Your</div>
-        <h3 class="analysis-title">Color Palette</h3>
-        <div class="palette-desc">Beyond lipstick — colors that work with your natural coloring across your wardrobe and jewelry.</div>
+        <h3 class="analysis-title">Your Color Palette</h3>
+        <div class="palette-season-name" id="paletteSeasonName"></div>
+        <div class="palette-desc">Built from your real skin, iris, sclera, and eyebrow color.</div>
 
-        <div class="analysis-subhead">Clothing Colors</div>
+        <div class="analysis-subhead">Personalized Colors</div>
         <div id="paletteClothingRow" class="palette-swatch-row"></div>
-        <div class="palette-note">Built from your real skin, iris, sclera, and eyebrow color — not a generic season palette.</div>
 
         <div class="analysis-subhead second">Jewelry</div>
         <div id="paletteJewelryMetals" class="jewelry-metals"></div>
         <div id="paletteJewelryNote" class="jewelry-note"></div>
 
         <div class="palette-download-row">
-          <button class="btn ghost palette-download-btn" id="downloadStyleGuideBtn">Download as Story Card</button>
+          <button class="btn ghost palette-download-btn" id="downloadStyleGuideBtn">Download</button>
         </div>
       </div>
     </div>
@@ -1935,7 +1937,7 @@ function findBestMacShadesByFinish(customerLab, lookTier){
 // ---------------------------------------------------------------------
 let uploadedImage = null; // {base64, mediaType}
 let currentSeasonResult = null;
-// Cached inputs for the "Download as Story Card" button -- set inside
+// Cached inputs for the "Download" button -- set inside
 // renderStyleGuide each time it runs, so the downloaded card always
 // matches exactly what's on screen (same generated clothing palette,
 // same hair/jewelry picks) without recomputing anything.
@@ -2519,22 +2521,6 @@ async function measureFaceFromPhoto(imgEl){
     const contrastScore = lightness - darkness;
     const contrastLevel = classifyWithZones(contrastScore, 39.88, 53.73, ["Low", "Medium", "High"], 0.01, 0.02);
 
-    // LUMINANCE SPREAD (new, experimental, informational only — NOT a
-    // replacement for Contrast Score above, and not yet part of
-    // season matching). The true widest gap across all 4 features
-    // (brightest minus darkest, regardless of which pair), rather
-    // than a blend of averaged pairs — captures cases like nearly-
-    // black iris + nearly-white sclera + deep skin, where the blended
-    // Contrast Score can understate the real visual drama. Tested
-    // directly against the existing formula on real data: replacing
-    // Contrast Score with this outright changed labels for 11-14 of
-    // 23 real photos, including cases where a Summer-family person
-    // would land in "High" contrast — a category no Summer season
-    // supports at all. Kept separate until there's a way to use it
-    // that doesn't break that validated fit.
-    const luminanceSpread = Math.max(skinLuminance, scleraLuminance, irisLuminance, eyebrowLuminance)
-      - Math.min(skinLuminance, scleraLuminance, irisLuminance, eyebrowLuminance);
-
     // CHROMA (experimental, informational only — no threshold rule
     // yet). Standard HSV saturation formula: how colorful/vivid a
     // color is vs how gray/muted, independent of brightness. This is
@@ -2550,20 +2536,6 @@ async function measureFaceFromPhoto(imgEl){
     const skinChroma = saturation(skinRgb);
     const irisChroma = saturation(irisRgb);
     const scleraChroma = saturation(scleraRgb);
-    // CHROMA CONTRAST (new, experimental, informational only — NOT
-    // part of the 4D quantitative match below). The spread between
-    // skin/iris/sclera chroma: a vividly saturated feature standing
-    // out against otherwise muted coloring is itself a form of visual
-    // contrast, separate from pure lightness/darkness contrast.
-    // Confirmed as a genuinely distinct (not redundant) signal against
-    // real data: moderately, significantly correlated with luminance
-    // Contrast Score (r=-0.486, p=0.019, n=23) but NOT strongly enough
-    // to just merge into it — the relationship is inverse, so blending
-    // them naively could cancel out real signal from each. Not yet
-    // integrated into season matching since the 12-season reference
-    // table has no equivalent column to calibrate against — exposed
-    // here for data collection until that calibration is possible.
-    const chromaContrast = Math.max(skinChroma, irisChroma, scleraChroma) - Math.min(skinChroma, irisChroma, scleraChroma);
 
     // QUANTITATIVE 16-SEASON MATCH (experimental, for testing only —
     // does NOT replace the actual season Claude returns). Finds the
@@ -2641,8 +2613,6 @@ async function measureFaceFromPhoto(imgEl){
       skin_chroma: Math.round(skinChroma * 10) / 10, iris_chroma: Math.round(irisChroma * 10) / 10,
       sclera_chroma: Math.round(scleraChroma * 10) / 10,
       avg_chroma: Math.round(avgChroma*10)/10, chroma_level: chromaLevel,
-      chroma_contrast: Math.round(chromaContrast * 10) / 10,
-      luminance_spread: Math.round(luminanceSpread),
       eyelid_rgb: eyelidRgb, eyelid_luminance: eyelidLuminance !== null ? Math.round(eyelidLuminance) : null,
       quant_best: quantScored[0].name, quant_best_dist: Math.round(quantScored[0].dist*100)/100,
       quant_runner_up: quantScored[1].name, quant_runner_up_dist: Math.round(quantScored[1].dist*100)/100,
@@ -2888,8 +2858,6 @@ analyzeBtn.addEventListener('click', async () => {
       result.sclera_chroma = measurements.sclera_chroma;
       result.avg_chroma = measurements.avg_chroma;
       result.chroma_level = measurements.chroma_level;
-      result.chroma_contrast = measurements.chroma_contrast;
-      result.luminance_spread = measurements.luminance_spread;
       result.eyelid_rgb = measurements.eyelid_rgb;
       result.eyelid_luminance = measurements.eyelid_luminance;
       result.undertone_descriptive = measurements.undertone_descriptive;
@@ -2966,7 +2934,6 @@ function saveDebugHistory(result){
       contrast_score: result.contrast_score, contrast_level: result.contrast_level,
       skin_chroma: result.skin_chroma, iris_chroma: result.iris_chroma, sclera_chroma: result.sclera_chroma,
       avg_chroma: result.avg_chroma, chroma_level: result.chroma_level,
-      chroma_contrast: result.chroma_contrast, luminance_spread: result.luminance_spread,
       quant_best: result.quant_best, quant_best_dist: result.quant_best_dist,
       quant_runner_up: result.quant_runner_up, quant_runner_up_dist: result.quant_runner_up_dist,
       season: result.season, family: result.family
@@ -3198,6 +3165,8 @@ function renderStyleGuide(result){
   }
   const clothing = generateClothingPalette(seasonName, deltas);
 
+  document.getElementById('paletteSeasonName').textContent = seasonName;
+
   const clothingRow = document.getElementById('paletteClothingRow');
   clothingRow.innerHTML = clothing.map(c => `
     <div class="palette-chip">
@@ -3220,7 +3189,7 @@ function renderStyleGuide(result){
   section.style.display = 'block';
 }
 // ---------------------------------------------------------------------
-// "Download as Story Card" for the Your Color Palette section --
+// "Download" (Story Card image) for the Your Color Palette section --
 // draws a self-contained 1080x1920 (Instagram/TikTok Story-shaped) PNG
 // natively on a <canvas> from lastStyleGuideData, so it always matches
 // what's on screen. No external libraries (e.g. html2canvas) so the
@@ -3305,12 +3274,8 @@ function drawStyleGuideStoryCard(data){
   const clothingRows = Math.ceil(data.clothing.length / cols);
   const clothingTop = 470;
   const clothingBottom = clothingTop + clothingRows * 152;
-  const clothingNoteText = 'Built from your real skin, iris, sclera, and eyebrow color — not a generic season palette.';
-  const clothingNoteLines = sgWrapText(mctx, clothingNoteText, contentW, `400 17px ${SG_WORKSANS}`);
-  const clothingNoteTop = clothingBottom + 20;
-  const clothingNoteBottom = clothingNoteTop + clothingNoteLines.length * 26;
 
-  const jewelryTop = clothingNoteBottom + 50;
+  const jewelryTop = clothingBottom + 70;
   const jewelryNoteLines = sgWrapText(mctx, data.jewelry.note, contentW, `400 17px ${SG_WORKSANS}`);
   const jewelryBottom = jewelryTop + 90 + jewelryNoteLines.length * 26 + 20;
 
@@ -3344,8 +3309,8 @@ function drawStyleGuideStoryCard(data){
   sgFillRoundRect(ctx, panelX, panelY, panelW, panelH, 32, SG_THEME.card);
   ctx.restore();
 
-  // Clothing section
-  sgSectionHeader(ctx, 'CLOTHING COLORS', contentX, contentW, clothingTop);
+  // Personalized Colors section
+  sgSectionHeader(ctx, 'PERSONALIZED COLORS', contentX, contentW, clothingTop);
   const colW = contentW / cols;
   data.clothing.forEach((c, i) => {
     const row = Math.floor(i / cols), col = i % cols;
@@ -3356,9 +3321,6 @@ function drawStyleGuideStoryCard(data){
     lines.slice(0, 2).forEach((line, li) => {
       sgText(ctx, line, cx, cy + dotR + 24 + li * 19, { font: `600 15px ${SG_WORKSANS}`, color: SG_THEME.textLight, align: 'center' });
     });
-  });
-  clothingNoteLines.forEach((line, li) => {
-    sgText(ctx, line, contentX, clothingNoteTop + li * 26, { font: `400 17px ${SG_WORKSANS}`, color: SG_THEME.muted, align: 'left' });
   });
 
   // Jewelry section
@@ -3683,8 +3645,9 @@ function lipstickSwatch(hex, size){
 }
 
 function renderShadeMatches(matches){
-  document.getElementById('pickBrandTag').textContent = "Matched from your color profile";
-  document.getElementById('pickBrandName').textContent = (LOOK_TIERS[currentLookTier]?.label || '') + " look";
+  const shadeMatchSeasonName = currentSeasonResult && (currentSeasonResult.shadeMatchSeason || currentSeasonResult.season);
+  document.getElementById('pickBrandTag').textContent = "Lipstick Shades Matched from your color profile";
+  document.getElementById('pickBrandName').textContent = shadeMatchSeasonName || '';
 
   shadePodium.innerHTML = '';
   if(matches.length === 0) return;
