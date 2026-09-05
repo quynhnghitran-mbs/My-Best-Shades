@@ -29,7 +29,7 @@
     padding:48px 20px 80px;
     overflow-x:hidden;
   }
-  .wrap{max-width:640px;margin:0 auto;position:relative;}
+  .wrap{max-width:640px;margin:0 auto;}
   .eyebrow{
     text-transform:uppercase;
     letter-spacing:0.18em;
@@ -500,10 +500,10 @@
           <span>YES</span>
         </div>
         <ul>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg>Natural light</li>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg>Eyes visible</li>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg>Face forward</li>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg>Hair off face</li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg><span>Natural light</span></li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg><span>Eyes visible</span></li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg><span>Face forward</span></li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg><span>Hair off face</span></li>
         </ul>
       </div>
       <div class="hint-col no">
@@ -512,9 +512,9 @@
           <span>NO</span>
         </div>
         <ul>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#8a7176"/></svg>Filter</li>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#8a7176"/></svg>Makeup</li>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#8a7176"/></svg>Contact lenses</li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#8a7176"/></svg><span>Filter</span></li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#8a7176"/></svg><span>Makeup</span></li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#8a7176"/></svg><span>Contact lenses</span></li>
         </ul>
       </div>
     </div>
@@ -759,36 +759,62 @@ const SEASON_LAB_CENTROIDS = {
 // 14 hue families used for warm-family seasons (Spring & Autumn) — each
 // carries a light-role and dark-role label + base hue/sat/lightness before
 // any per-season or per-customer shaping is applied.
+// mutedLightLabel/mutedDarkLabel are used instead of lightLabel/darkLabel
+// whenever this customer's final satMult (season config x her own chroma
+// nudge) comes out low enough that the hue is genuinely desaturated --
+// see the "vivid vs muted naming" comment in generateClothingPalette.
+// Omitted entirely for hue families that are already fairly neutral/soft
+// by nature (the ivory/beige/camel/umber/cocoa/espresso neutrals, plus a
+// couple of already-soft-sounding names), since further desaturating
+// those doesn't make their vivid-mode name inaccurate.
 const CLOTHING_WARM_HUES = [
   { hue: 42,  sat: 20, lightL: 93, darkL: 75, lightLabel: "Warm Ivory",       darkLabel: "Warm Beige" },
-  { hue: 24,  sat: 60, lightL: 80, darkL: 52, lightLabel: "Peach",            darkLabel: "Terracotta" },
-  { hue: 8,   sat: 68, lightL: 72, darkL: 46, lightLabel: "Coral",            darkLabel: "Brick Red" },
-  { hue: 2,   sat: 62, lightL: 60, darkL: 36, lightLabel: "Tomato Red",       darkLabel: "Warm Burgundy" },
-  { hue: 352, sat: 50, lightL: 70, darkL: 42, lightLabel: "Warm Rose",        darkLabel: "Deep Rose" },
-  { hue: 45,  sat: 78, lightL: 76, darkL: 48, lightLabel: "Golden Yellow",    darkLabel: "Mustard" },
+  { hue: 24,  sat: 60, lightL: 80, darkL: 52, lightLabel: "Peach",            darkLabel: "Terracotta",
+    mutedLightLabel: "Soft Peach",       mutedDarkLabel: "Warm Clay" },
+  { hue: 8,   sat: 68, lightL: 72, darkL: 46, lightLabel: "Coral",            darkLabel: "Brick Red",
+    mutedLightLabel: "Salmon",           mutedDarkLabel: "Clay Red" },
+  { hue: 2,   sat: 62, lightL: 60, darkL: 36, lightLabel: "Tomato Red",       darkLabel: "Warm Burgundy",
+    mutedLightLabel: "Dusty Red",        mutedDarkLabel: "Warm Maroon" },
+  { hue: 352, sat: 50, lightL: 70, darkL: 42, lightLabel: "Warm Rose",        darkLabel: "Deep Rose",
+    mutedLightLabel: "Dusty Rose",       mutedDarkLabel: "Mauve" },
+  { hue: 45,  sat: 78, lightL: 76, darkL: 48, lightLabel: "Golden Yellow",    darkLabel: "Mustard",
+    mutedLightLabel: "Honey",            mutedDarkLabel: "Ochre" },
   { hue: 34,  sat: 35, lightL: 64, darkL: 36, lightLabel: "Camel",            darkLabel: "Umber" },
-  { hue: 100, sat: 42, lightL: 60, darkL: 32, lightLabel: "Warm Mint",        darkLabel: "Grass Green" },
+  { hue: 100, sat: 42, lightL: 60, darkL: 32, lightLabel: "Warm Mint",        darkLabel: "Grass Green",
+    mutedLightLabel: "Warm Sage",        mutedDarkLabel: "Fern Green" },
   { hue: 68,  sat: 36, lightL: 55, darkL: 28, lightLabel: "Soft Olive",       darkLabel: "Olive Green" },
-  { hue: 175, sat: 42, lightL: 62, darkL: 34, lightLabel: "Light Turquoise",  darkLabel: "Warm Teal" },
-  { hue: 228, sat: 42, lightL: 66, darkL: 40, lightLabel: "Warm Periwinkle",  darkLabel: "Warm Indigo" },
-  { hue: 282, sat: 38, lightL: 55, darkL: 28, lightLabel: "Warm Lilac",       darkLabel: "Warm Royal Purple" },
-  { hue: 330, sat: 55, lightL: 62, darkL: 36, lightLabel: "Warm Fuchsia",     darkLabel: "Warm Magenta" },
-  { hue: 25,  sat: 32, lightL: 38, darkL: 13, lightLabel: "Cocoa",            darkLabel: "Espresso" },
+  { hue: 175, sat: 42, lightL: 62, darkL: 34, lightLabel: "Light Turquoise",  darkLabel: "Warm Teal",
+    mutedLightLabel: "Dusty Teal",       mutedDarkLabel: "Slate Teal" },
+  { hue: 228, sat: 42, lightL: 66, darkL: 40, lightLabel: "Warm Periwinkle",  darkLabel: "Warm Indigo",
+    mutedLightLabel: "Dusty Periwinkle", mutedDarkLabel: "Slate Indigo" },
+  { hue: 282, sat: 38, lightL: 55, darkL: 28, lightLabel: "Warm Lilac",       darkLabel: "Warm Royal Purple",
+    mutedLightLabel: "Dusty Lilac",      mutedDarkLabel: "Plum" },
+  { hue: 330, sat: 55, lightL: 62, darkL: 36, lightLabel: "Warm Fuchsia",     darkLabel: "Warm Magenta",
+    mutedLightLabel: "Dusty Mauve",      mutedDarkLabel: "Berry" },
+  { hue: 25,  sat: 32, lightL: 38, darkL: 13, lightLabel: "Cocoa",            darkLabel: "Espresso",
+    blackoutDarkLabel: "Onyx" },
 ];
 
 // 14 hue families used for cool-family seasons (Summer & Winter).
 const CLOTHING_COOL_HUES = [
   { hue: 210, sat: 10, lightL: 96, darkL: 78, lightLabel: "Icy White",        darkLabel: "Cool Grey" },
   { hue: 345, sat: 45, lightL: 85, darkL: 60, lightLabel: "Icy Pink",         darkLabel: "Dusty Rose" },
-  { hue: 350, sat: 52, lightL: 75, darkL: 50, lightLabel: "Rose Pink",        darkLabel: "Raspberry" },
-  { hue: 330, sat: 65, lightL: 62, darkL: 38, lightLabel: "Bright Fuchsia",   darkLabel: "Magenta" },
-  { hue: 355, sat: 66, lightL: 58, darkL: 34, lightLabel: "Blush Pink",       darkLabel: "True Red" },
-  { hue: 272, sat: 45, lightL: 62, darkL: 32, lightLabel: "Orchid",           darkLabel: "Royal Purple" },
+  { hue: 350, sat: 52, lightL: 75, darkL: 50, lightLabel: "Rose Pink",        darkLabel: "Raspberry",
+    mutedLightLabel: "Dusty Blush",      mutedDarkLabel: "Wine" },
+  { hue: 330, sat: 65, lightL: 62, darkL: 38, lightLabel: "Bright Fuchsia",   darkLabel: "Magenta",
+    mutedLightLabel: "Mauve",            mutedDarkLabel: "Berry Plum" },
+  { hue: 355, sat: 66, lightL: 58, darkL: 34, lightLabel: "Blush Pink",       darkLabel: "True Red",
+    mutedLightLabel: "Soft Blush",       mutedDarkLabel: "Brick Red" },
+  { hue: 272, sat: 45, lightL: 62, darkL: 32, lightLabel: "Orchid",           darkLabel: "Royal Purple",
+    mutedLightLabel: "Dusty Orchid",     mutedDarkLabel: "Plum" },
   { hue: 262, sat: 34, lightL: 75, darkL: 46, lightLabel: "Lavender",         darkLabel: "Deep Violet" },
-  { hue: 225, sat: 55, lightL: 58, darkL: 30, lightLabel: "Periwinkle Blue",  darkLabel: "Royal Blue" },
-  { hue: 212, sat: 60, lightL: 48, darkL: 24, lightLabel: "Sky Blue",         darkLabel: "Sapphire Blue" },
+  { hue: 225, sat: 55, lightL: 58, darkL: 30, lightLabel: "Periwinkle Blue",  darkLabel: "Royal Blue",
+    mutedLightLabel: "Dusty Periwinkle", mutedDarkLabel: "Denim Blue" },
+  { hue: 212, sat: 60, lightL: 48, darkL: 24, lightLabel: "Sky Blue",         darkLabel: "Sapphire Blue",
+    mutedLightLabel: "Dusty Blue",       mutedDarkLabel: "Slate Sapphire" },
   { hue: 212, sat: 24, lightL: 66, darkL: 34, lightLabel: "Powder Blue",      darkLabel: "Slate Blue" },
-  { hue: 155, sat: 45, lightL: 52, darkL: 26, lightLabel: "Mint Green",       darkLabel: "Emerald" },
+  { hue: 155, sat: 45, lightL: 52, darkL: 26, lightLabel: "Mint Green",       darkLabel: "Emerald",
+    mutedLightLabel: "Sage Green",       mutedDarkLabel: "Moss Green" },
   { hue: 185, sat: 40, lightL: 54, darkL: 28, lightLabel: "Soft Teal",        darkLabel: "Deep Teal" },
   { hue: 220, sat: 8,  lightL: 55, darkL: 24, lightLabel: "Cool Taupe",       darkLabel: "Charcoal Grey" },
   { hue: 0,   sat: 0,  lightL: 16, darkL: 6,  lightLabel: "Slate Black",      darkLabel: "Black" },
@@ -875,6 +901,17 @@ function generateClothingPalette(seasonName, deltas){
   const hueShiftDeg = Math.max(-9, Math.min(9, deltaB * 0.876));
 
   const hues = cfg.wheel === "warm" ? CLOTHING_WARM_HUES : CLOTHING_COOL_HUES;
+  // Below this satMult, a hue family's *vivid*-mode name (Tomato Red,
+  // Fuchsia, Mint, Turquoise, Periwinkle, ...) no longer matches what's on
+  // screen -- the color itself is genuinely desaturated, not just this
+  // customer's own nudge, so the label needs to change too, not just the
+  // hex. 0.7 sits just above every "Soft"/"Deep Soft" season's satMult and
+  // Light Summer's (which reads as soft too in this system) and just below
+  // every "True"/"Bright"/"Deep" season's, using each season's *final*
+  // satMult (after this customer's own chroma delta) rather than the
+  // config default, so an unusually vivid or muted individual customer
+  // can cross the line either way.
+  const useMuted = satMult < 0.7;
   const colors = [];
   const seen = new Set();
   const MIN_GAP = 12;
@@ -884,10 +921,22 @@ function generateClothingPalette(seasonName, deltas){
     let darkL = Math.max(darkFloor, h.darkL + darkShift);
     if (lightL - darkL < MIN_GAP) darkL = Math.max(2, lightL - MIN_GAP);
     const sat = Math.max(0, Math.min(100, h.sat * satMult));
+    const lightLabel = (useMuted && h.mutedLightLabel) ? h.mutedLightLabel : h.lightLabel;
+    // Below ~12% lightness with sat this low, a swatch reads as visually
+    // black no matter whose hue it started from -- there isn't enough
+    // light for the eye to register a color cast. A hue family whose dark
+    // slot can bottom out that low (in practice only the warm wheel's
+    // deepest neutral, Espresso, once a season stacks a low darkFloor on
+    // top of an already-muted satMult) needs a genuinely black-reading
+    // name here instead of its normal one, or the label stops matching
+    // what's actually on screen.
+    const looksBlack = darkL <= 12 && sat <= 40;
+    const darkLabel = (looksBlack && h.blackoutDarkLabel) ? h.blackoutDarkLabel
+      : (useMuted && h.mutedDarkLabel) ? h.mutedDarkLabel : h.darkLabel;
     let lightHex = clothingHslToHex(hue, sat, lightL);
     let darkHex = clothingHslToHex(hue, sat, darkL);
     if (lightHex === darkHex) darkHex = clothingHslToHex(hue, sat, Math.max(2, darkL - 8));
-    for (const [hex, name, L] of [[lightHex, h.lightLabel, lightL], [darkHex, h.darkLabel, darkL]]) {
+    for (const [hex, name, L] of [[lightHex, lightLabel, lightL], [darkHex, darkLabel, darkL]]) {
       if (seen.has(hex)) continue;
       seen.add(hex);
       colors.push({ name, hex, hue, sat, L });
@@ -1887,37 +1936,59 @@ const MAC_SHADES = [
 //
 // Instead, this offsets the match TARGET by look intensity rather than
 // matching skin directly. Warmth (b) never shifts -- undertone should
-// suit the customer at any intensity. Lightness shifts deeper and
-// chroma shifts more vivid as intensity increases, the standard
-// color-theory basis for a lip color reading as definition rather
-// than blending into skin. Verified against a real customer: the
-// three tiers produced a genuinely differentiated, sensible
-// progression (a muted "cool deep tone beige" for no-makeup, up to a
-// "deep red wine" for party).
+// suit the customer at any intensity, so it always gets the same
+// constant nudge (WARMTH_OFFSET) regardless of tier.
+//
+// Chroma no longer targets three separate fixed offsets (previously
+// +34/+37/+41 per tier). Instead the whole +34..+41 span is treated as
+// one continuous "makeup intensity" band (with a 2% soft zone on each
+// edge, same soft-zone convention as the floor/ceiling below), and any
+// shade whose real chroma falls inside it is an equally valid fit on
+// the chroma axis. We rank every shade in the band by fit (distance
+// from the customer's own L*/b* position; 0 chroma-penalty anywhere
+// inside the band), take the 9 best fits overall, then split those 9 --
+// lightest to darkest -- into three groups of three: the lightest
+// three become Subtle, the middle three Natural, and the darkest three
+// Party. So the tiers are shaped by what real shades exist in the
+// range rather than by an arbitrary preset target per tier.
 const LOOK_TIERS = {
-  noMakeup: { label: "Subtle",   lOffset: 0, cOffset: 34, bOffset: 5.5 },
-  natural:  { label: "Natural",  lOffset: 0, cOffset: 37, bOffset: 5.5 },
-  party:    { label: "Party",    lOffset: 0, cOffset: 41, bOffset: 5.5 },
+  noMakeup: { label: "Subtle" },
+  natural:  { label: "Natural" },
+  party:    { label: "Party" },
 };
+const LOOK_TIER_ORDER = ['noMakeup', 'natural', 'party']; // lightest group -> darkest group
+const CHROMA_RANGE_LOW = 34;
+const CHROMA_RANGE_HIGH = 41;
+const CHROMA_SOFT_ZONE = 0.02; // 2%, same soft-zone convention used below
+const WARMTH_OFFSET = 5.5; // constant warmth nudge, unchanged across all three tiers
 
-function macMatchTarget(customerLab, lookTier){
-  const tier = LOOK_TIERS[lookTier] || { lOffset: 0, cOffset: 0, bOffset: 0 };
+function macMatchTarget(customerLab){
   // Depth/Chroma use the 4-feature/3-feature averages when available
   // (matching the Shade Atlas's Shade Matcher); fall back to skin-only
   // L/C otherwise. Warmth (b*) is always skin-only in both tools.
   const depthAvg = customerLab.depthAvg != null ? customerLab.depthAvg : customerLab.L;
   const chromaAvg = customerLab.chromaAvg != null ? customerLab.chromaAvg : customerLab.C;
   return {
-    L: depthAvg + tier.lOffset,
-    b: customerLab.b + tier.bOffset,
-    C: chromaAvg + tier.cOffset
+    L: depthAvg,
+    b: customerLab.b + WARMTH_OFFSET,
+    rangeLow: chromaAvg + CHROMA_RANGE_LOW,
+    rangeHigh: chromaAvg + CHROMA_RANGE_HIGH,
   };
 }
+// Distance-to-band for chroma: 0 anywhere inside [rangeLow, rangeHigh]
+// (every shade in that span is an equally good chroma fit), otherwise
+// the distance past whichever edge was missed.
+function chromaBandDistance(chromaC, rangeLow, rangeHigh){
+  if(chromaC < rangeLow) return rangeLow - chromaC;
+  if(chromaC > rangeHigh) return chromaC - rangeHigh;
+  return 0;
+}
 function macDist(target, s){
+  const chromaDist = chromaBandDistance(s.chroma_C, target.rangeLow, target.rangeHigh);
   return Math.sqrt(
     (target.L - s.lightness_L)**2 +
     (target.b - s.temperature_b)**2 +
-    (target.C - s.chroma_C)**2
+    chromaDist**2
   );
 }
 
@@ -1952,19 +2023,15 @@ const WARMTH_ALLOWED_TEMPS = {
   "Golden":       ["Warm"]
 };
 
-// Candidate pool shared by both match functions below: chroma floor
-// (never recommend a shade less vivid than the offset target), chroma
-// ceiling (never more vivid than skin chroma + the most vivid Party
-// preset, +2% buffer, regardless of the live offset), and the
-// warm/cool family constraint.
-function macCandidates(customerLab, lookTier){
-  const target = macMatchTarget(customerLab, lookTier);
-  const chromaAvg = customerLab.chromaAvg != null ? customerLab.chromaAvg : customerLab.C;
-  const chromaCeiling = (chromaAvg + 41) * 1.02;
-  // Same 2% soft zone on the floor side as the Shade Atlas, relaxing the
-  // "must be at least the target" rule slightly so a shade just under the
-  // target isn't excluded on a rounding-distance technicality.
-  const chromaFloor = target.C * 0.98;
+// Candidate pool shared by the match functions below: chroma floor
+// (2% soft zone under the band's low edge) and ceiling (2% soft zone
+// over the band's high edge) -- so a shade just outside the +34..+41
+// band on either side isn't excluded on a rounding-distance technicality
+// -- plus the warm/cool family constraint.
+function macCandidates(customerLab){
+  const target = macMatchTarget(customerLab);
+  const chromaFloor = target.rangeLow * (1 - CHROMA_SOFT_ZONE);
+  const chromaCeiling = target.rangeHigh * (1 + CHROMA_SOFT_ZONE);
   const allowedTemps = WARMTH_ALLOWED_TEMPS[classifyUndertoneDescriptive(customerLab.b)] || ["Cool", "Neutral", "Warm"];
   const pool = MAC_SHADES.filter(s =>
     s.chroma_C >= chromaFloor &&
@@ -1974,26 +2041,38 @@ function macCandidates(customerLab, lookTier){
   return { target, pool };
 }
 
-function findBestMacShades(customerLab, topN, lookTier){
-  const { target, pool } = macCandidates(customerLab, lookTier);
+function findBestMacShades(customerLab, topN){
+  const { target, pool } = macCandidates(customerLab);
   return pool
     .map(s => ({ ...s, dist: macDist(target, s) }))
     .sort((a,b) => a.dist - b.dist)
     .slice(0, topN);
 }
 
-// Top 3 best-fitting shades overall from the filtered pool (chroma
-// floor/ceiling + warm/cool family), no finish diversity guarantee --
-// the finish constraint (one pick per finish, best 3 of those) was
-// removed; results can now cluster in a single finish if that's what
-// fits best. Same offset-target logic as findBestMacShades. With 3
+// Picks the 9 best-fitting shades overall from the filtered pool
+// (chroma floor/ceiling + warm/cool family; no finish diversity
+// guarantee -- results can cluster in a single finish if that's what
+// fits best), then splits those 9 -- lightest to darkest -- into three
+// even groups of three: the lightest three go to Subtle, the middle
+// three to Natural, and the darkest three to Party. Each group is later
+// re-sorted by its own fit (dist) when displayed (see renderShadeMatches),
+// so the "best match" shown per tier is still the closest-fitting shade
+// in that group, not just the lightest/darkest of the three. With 3
 // look tiers x 3 shades, a customer sees 9 recommendations in total.
-function findBestMacShadesByFinish(customerLab, lookTier){
-  const { target, pool } = macCandidates(customerLab, lookTier);
-  return pool
+function allocateShadesToTiers(customerLab){
+  const { target, pool } = macCandidates(customerLab);
+  const ranked = pool
     .map(s => ({ ...s, dist: macDist(target, s) }))
     .sort((a,b) => a.dist - b.dist)
-    .slice(0, 3);
+    .slice(0, 9);
+  const byLightness = [...ranked].sort((a,b) => b.lightness_L - a.lightness_L); // lightest first
+  const n = byLightness.length;
+  const groupSize = Math.ceil(n / 3) || 1;
+  const groups = {};
+  LOOK_TIER_ORDER.forEach((key, i) => {
+    groups[key] = byLightness.slice(i * groupSize, i === LOOK_TIER_ORDER.length - 1 ? n : (i + 1) * groupSize);
+  });
+  return groups;
 }
 
 
@@ -3645,6 +3724,7 @@ function splitBrandLine(brandLine){
 // but are unused for now, not deleted.
 let currentCustomerLab = null; // stored so tab switches can re-match without re-measuring
 let currentLookTier = 'natural';
+let currentTierGroups = null; // the 9 allocated shades, pre-split into {noMakeup, natural, party}
 
 let currentCustomerSkinHex = null;
 
@@ -3681,10 +3761,10 @@ function showBestShadeMatches(result){
   currentCustomerSkinHex = rgbToHex(result.estimated_skin_rgb[0], result.estimated_skin_rgb[1], result.estimated_skin_rgb[2]);
 
   currentLookTier = 'natural';
+  currentTierGroups = allocateShadesToTiers(currentCustomerLab);
   renderLookTierTabs();
   renderTierBarChart(currentLookTier);
-  const matches = findBestMacShadesByFinish(currentCustomerLab, currentLookTier);
-  renderShadeMatches(matches);
+  renderShadeMatches(currentTierGroups[currentLookTier]);
 }
 
 const TIER_COLORS = {
@@ -3758,23 +3838,26 @@ function staticMarkerRowHTML(opts){
 
 // Real, single-tier illustration -- shows only the currently selected
 // tier's chart (Warmth/Lightness/Chroma), built from the customer's
-// actual measured Lab values and that tier's actual offsets from
-// LOOK_TIERS. Deliberately no numbers printed -- marker/bar position is
-// proportional to the real values, normalized against a fixed assumed
-// range per dimension for display purposes only: Warmth 0-35 (b*, same
-// as the CIELAB Analysis Warmth meter), Lightness 0-100 (Lab's natural
-// range, same as the CIELAB Analysis Depth Score meter), Chroma 0-80
-// (wider than the CIELAB Chroma meter's 0-40, since a Party-tier target
-// can run well past the natural population range). Warmth never shows
-// its offset (+5.5, constant across all three tiers) -- that's a
-// behind-the-scenes matching adjustment -- so its row is a single
-// static marker. Lightness is also a single static marker, since its
-// offset is 0 for every tier (there's nothing to add, ever). Only
-// Chroma actually changes per tier, so it alone uses the stacked "+" bar.
+// actual measured Lab values and this tier's actual allocated shades
+// (see allocateShadesToTiers). Deliberately no numbers printed --
+// marker/bar position is proportional to the real values, normalized
+// against a fixed assumed range per dimension for display purposes
+// only: Warmth 0-35 (b*, same as the CIELAB Analysis Warmth meter),
+// Lightness 0-100 (Lab's natural range, same as the CIELAB Analysis
+// Depth Score meter), Chroma 0-80 (wider than the CIELAB Chroma
+// meter's 0-40, since a Party-tier shade can run well past the natural
+// population range). Warmth never shows its offset (+5.5, constant
+// across all three tiers) -- that's a behind-the-scenes matching
+// adjustment -- so its row is a single static marker. Lightness is
+// also a single static marker: the customer's own measured lightness
+// never changes, only which real shade gets picked does. Only Chroma
+// shows a "+" bar, using this tier's actual best-matching shade's real
+// chroma_C as the target (not a formula) -- since chroma is now a
+// continuous +34..+41 band rather than one fixed offset per tier, the
+// bar reflects whatever shade was actually allocated here.
 function renderTierBarChart(lookTierKey){
   const holder = document.getElementById('colorProgressionIllustration');
   if(!currentCustomerLab || !currentCustomerSkinHex) { holder.innerHTML = ''; return; }
-  const tier = LOOK_TIERS[lookTierKey];
   const tierColor = TIER_COLORS[lookTierKey] || '#C86B87';
 
   const maxB = 35, maxL = 100, maxC = 80;
@@ -3784,7 +3867,9 @@ function renderTierBarChart(lookTierKey){
   const origB = Math.max(0, Math.min(maxB, currentCustomerLab.b));
   const origL = Math.max(0, Math.min(maxL, currentCustomerLab.depthAvg != null ? currentCustomerLab.depthAvg : currentCustomerLab.L));
   const origC = Math.max(0, Math.min(maxC, currentCustomerLab.chromaAvg != null ? currentCustomerLab.chromaAvg : currentCustomerLab.C));
-  const targetC = Math.max(0, Math.min(maxC, origC + tier.cOffset));
+  const tierShades = (currentTierGroups && currentTierGroups[lookTierKey]) || [];
+  const bestTierShade = tierShades.length ? [...tierShades].sort((a,b) => a.dist - b.dist)[0] : null;
+  const targetC = Math.max(0, Math.min(maxC, bestTierShade ? bestTierShade.chroma_C : origC));
 
   let html = '';
   html += staticMarkerRowHTML({
@@ -3833,8 +3918,7 @@ function renderLookTierTabs(){
       currentLookTier = key;
       renderLookTierTabs();
       renderTierBarChart(currentLookTier);
-      const matches = findBestMacShadesByFinish(currentCustomerLab, currentLookTier);
-      renderShadeMatches(matches);
+      renderShadeMatches((currentTierGroups && currentTierGroups[currentLookTier]) || []);
     });
     tabsEl.appendChild(pill);
   });
@@ -3894,11 +3978,12 @@ function renderShadeMatches(matches){
   shadePodium.innerHTML = '';
   if(matches.length === 0) return;
 
-  // Sort by actual fit quality first -- these 3 (top 3 of the 5
-  // finish (see findBestMacShadesByFinish), in finish-list order, NOT
-  // ranked by distance. Sorting here ensures the spotlighted "best
-  // match" position is genuinely the closest fit among the 5, not
-  // just whichever finish happens to come first in the list.
+  // Sort by actual fit quality first -- these 3 are this tier's slice
+  // of the 9 shades allocated lightest-to-darkest across all three
+  // tiers (see allocateShadesToTiers), in lightness order, NOT ranked
+  // by distance. Sorting here ensures the spotlighted "best match"
+  // position is genuinely the closest fit among the 3, not just
+  // whichever one happens to be lightest/darkest.
   const sorted = [...matches].sort((a,b) => a.dist - b.dist);
   const best = sorted[0];
   const rest = sorted.slice(1);
