@@ -54,6 +54,7 @@
     line-height:1.5;
     max-width:440px;
     margin:0 auto 40px;
+    text-wrap:balance;
   }
   .mirror-stage{
     display:flex;
@@ -111,6 +112,7 @@
     font-size:11px;
     letter-spacing:0.03em;
     color:var(--muted);
+    text-wrap:balance;
   }
   input[type=file]{display:none;}
   .btn{
@@ -193,7 +195,7 @@
     font-size:26px;
     margin:0 0 14px;
   }
-  .season-desc{font-size:14.5px;line-height:1.6;color:rgba(33,31,21,0.75);margin-bottom:18px;}
+  .season-desc{font-size:14.5px;line-height:1.6;color:rgba(33,31,21,0.75);margin-bottom:18px;text-wrap:balance;}
   .confidence-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 8px;}
   .confidence-pill{
     font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
@@ -203,7 +205,7 @@
   .confidence-pill.lower, .confidence-pill.split{background:rgba(58,31,34,0.08);color:var(--muted);}
   .confidence-bar-track{height:8px;border-radius:4px;background:rgba(58,31,34,0.08);overflow:hidden;margin:2px 0 10px;}
   .confidence-bar-fill{height:100%;border-radius:4px;background:linear-gradient(to right, #C9A8AE, var(--rose-deep));}
-  .confidence-explain{font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:18px;}
+  .confidence-explain{font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:18px;text-wrap:balance;}
 
   .section-title{
     font-family:'Playfair Display', serif;
@@ -257,6 +259,37 @@
   }
   .analysis-subhead.second{margin-top:26px;}
 
+  /* "Your Filter" chip row shown above the 3 shade picks -- surfaces
+     the same undertone/depth/chroma readings already shown as pills in
+     the CIELAB Analysis section above, so the customer sees exactly
+     what criteria narrowed the shade pool before the picks themselves
+     appear. The 3 values are usually short ("Warm-neutral", "Light",
+     "Balanced") and fit one line, but depth/chroma can also come back
+     as a blended boundary label ("Medium-to-Light", "Muted-to-Balanced"
+     -- up to ~18 characters, real data, not a hypothetical) which
+     genuinely cannot share one line with the other two chips at a
+     readable size. flex-wrap:wrap lets the row take a 2nd line only
+     when it actually needs to, instead of the earlier nowrap+ellipsis
+     version, which was silently clipping long values (same mistake as
+     the jewelry-pill bug -- fixed the same way: never truncate). */
+  .pick-filters-label{
+    font-size:11px;text-transform:uppercase;letter-spacing:0.08em;
+    color:var(--muted);margin:14px 0 8px;
+  }
+  .pick-filters{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:2px;}
+  /* justify-content:flex-start reads fine when all 3 chips fit one
+     line (the common case, and the only case the layout is actually
+     tuned for). If the rare double-blended-label combination still
+     doesn't fit, this is the one spot in the app where a lone trailing
+     item on its own line is structurally unavoidable (3 items, 2
+     rows), rather than a wrap that could be fixed. */
+  .pick-filter-chip{
+    padding:4px 8px;border-radius:20px;
+    background:rgba(150,51,60,0.08);
+    font-size:11px;font-weight:700;color:var(--rose-deep);
+    white-space:nowrap;
+  }
+
   .swatch-row{
     display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));
     gap:14px;margin-bottom:4px;
@@ -280,9 +313,11 @@
      are single-value gradient-pole meters and must not be affected. */
   .dials-subtitle{
     font-size:12.5px;color:var(--muted);line-height:1.55;text-align:center;margin:0 0 18px;
+    text-wrap:balance;
   }
   .dials-footnote{
     font-size:12px;color:var(--muted);line-height:1.6;text-align:center;margin:6px 0 22px;
+    text-wrap:balance;
   }
   .dial-row{margin-bottom:20px;}
   .dial-row:last-child{margin-bottom:4px;}
@@ -321,22 +356,43 @@
     display:inline-flex;width:11px;height:11px;border-radius:50%;
     background:#fff;border:2.5px solid var(--rose-deep);margin-right:6px;vertical-align:-1.5px;
   }
-  .palette-swatch-row{display:flex;flex-wrap:wrap;gap:16px 14px;margin-bottom:4px;}
-  .palette-chip{width:62px;text-align:center;}
+  /* Fixed 4-column grid so the 28 personalized colors always lay out as
+     a clean 4x7 block, on any card width -- not a flex-wrap that
+     reflows to 3-per-row (10 rows, one orphan chip) depending on
+     available space. */
+  .palette-swatch-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 8px;margin-bottom:4px;}
+  .palette-chip{width:auto;text-align:center;}
   .palette-dot{
-    width:42px;height:42px;border-radius:50%;margin:0 auto 7px;
+    width:38px;height:38px;border-radius:50%;margin:0 auto 7px;
     border:3px solid #fff;box-shadow:0 3px 9px rgba(58,31,34,0.20);
   }
-  .palette-chip .label{font-size:10.5px;color:var(--text-light);font-weight:600;line-height:1.25;}
-
-  .jewelry-metals{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;}
-  .jewelry-metal{
-    display:flex;align-items:center;gap:9px;background:#fff;border:1px solid var(--line);
-    border-radius:24px;padding:6px 16px 6px 7px;
+  .palette-chip .label{
+    font-size:10.5px;color:var(--text-light);font-weight:600;line-height:1.25;
+    text-wrap:balance;
   }
-  .jewelry-metal .dot{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 5px rgba(58,31,34,0.2);}
-  .jewelry-metal .name{font-size:12.5px;font-weight:600;color:var(--text-light);}
-  .jewelry-note{font-size:12.5px;color:var(--muted);line-height:1.6;}
+
+  /* flex-wrap:nowrap + equal flex share (via .multi, added in JS when
+     there's more than one metal) keeps 2-up jewelry pills on a single
+     row at any width instead of wrapping to two stacked rows -- each
+     pill shrinks to fit rather than the row breaking. Single-metal
+     seasons skip .multi and keep their natural, compact pill width.
+     Sized (dot/gap/padding) against the real Work Sans metrics for the
+     longest actual pairing in the data ("Matte Bronze" + "Antique
+     Gold", ~155px of text combined) with margin to spare -- no
+     text-overflow:ellipsis fallback, because a metal name silently
+     clipping to "Matte Br…" is worse than any reasonable pill size. */
+  .jewelry-metals{display:flex;gap:6px;margin-bottom:12px;flex-wrap:nowrap;}
+  .jewelry-metal{
+    display:flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--line);
+    border-radius:24px;padding:5px 9px 5px 5px;min-width:0;
+  }
+  .jewelry-metals.multi .jewelry-metal{flex:1 1 0;justify-content:center;}
+  .jewelry-metal .dot{width:16px;height:16px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 5px rgba(58,31,34,0.2);flex-shrink:0;}
+  .jewelry-metal .name{
+    font-size:12px;font-weight:600;color:var(--text-light);
+    white-space:nowrap;
+  }
+  .jewelry-note{font-size:12.5px;color:var(--muted);line-height:1.6;text-wrap:balance;}
   .palette-download-row{display:flex;justify-content:center;margin-top:24px;}
   .palette-download-btn{font-size:13px;padding:12px 26px;}
 
@@ -410,23 +466,145 @@
   .legend-marker-add{color:#fff;font-size:10px;font-weight:700;line-height:1;border:1.5px solid #fff;}
 
   #pickCard{margin-top:24px;}
-  .shade-podium{
-    display:flex;flex-direction:column;align-items:center;gap:22px;
-    margin-top:8px;
+  /* Best match / 2nd / 3rd, told apart by a clear size hierarchy
+     (swatch, name, confidence bar and reason all scale down by rank)
+     plus a rosy open-ring rank badge set apart from the swatch corner.
+     The row itself stays vertically centered -- the swatch sits in the
+     middle, not top-aligned to the name -- and the badge is a plain
+     unfilled circle (no ribbon, no fill) so it reads as a quiet mark
+     rather than a sticker. Confidence is a thin fill bar instead of a
+     bare number, and the mismatch reason (when there is one) is kept
+     to a couple of words instead of a full sentence. */
+  .shade-podium{margin-top:4px;}
+  .shade-result-row{
+    display:flex;align-items:center;gap:20px;
+    border-top:1px solid var(--line);
   }
-  .shade-podium svg{filter: drop-shadow(0 8px 14px rgba(58,31,34,0.22));}
-  .shade-best-label{text-align:center;}
-  .shade-best-label .tag{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#7A2E3D;font-weight:600;}
-  .best-match-tag{font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#7A2E3D;font-weight:600;}
-  .shade-best-label .name{font-family:'Playfair Display', serif;font-weight:600;font-size:17px;color:#3a1f22;margin:2px 0 4px;}
-  .shade-best-label .why{font-size:12.5px;color:#6b5157;max-width:260px;margin:0 auto;line-height:1.5;}
-  .shade-best-label .shop-link{font-size:12px;font-weight:600;color:var(--rose-deep);margin-top:6px;}
-  .shade-alts{display:flex;gap:30px;justify-content:center;flex-wrap:wrap;}
-  .shade-alt{display:flex;flex-direction:column;align-items:center;gap:8px;max-width:130px;}
-  .shade-alt .tag{font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:#7A2E3D;font-weight:600;}
-  .shade-alt .name{font-weight:600;font-size:12.5px;color:#3a1f22;margin:1px 0 2px;text-align:center;}
-  .shade-alt .why{font-size:11px;color:#6b5157;text-align:center;line-height:1.4;}
-  .shade-alt .shop-link{font-size:11px;font-weight:600;color:var(--rose-deep);margin-top:2px;}
+  .shade-result-row:first-child{border-top:none;}
+  .shade-result-row.clickable{cursor:pointer;}
+  .shade-result-row.rank-1{padding:38px 2px 32px;}
+  .shade-result-row.rank-2{padding:28px 2px;}
+  .shade-result-row.rank-3{padding:22px 2px;}
+
+  .shade-result-swatch{flex:none;position:relative;}
+  .shade-result-swatch svg.lip-swatch{filter: drop-shadow(0 6px 12px rgba(58,31,34,0.18));display:block;}
+
+  /* Open-ring rank badge -- no fill, just a thin rosy outline and the
+     rank numeral in the same tone, set apart from the swatch corner
+     rather than overlapping it. Rank reads through depth of the same
+     rosy family: 1st deepest, 3rd palest. The numeral is SVG text with
+     dominant-baseline="central" so it centers on the font's own
+     reported metrics, not a CSS line-box guess that can drift with
+     whichever font actually loads. */
+  .medal-badge{position:absolute;display:block;}
+  .rank-1 .medal-badge{top:-26px;left:-26px;}
+  .rank-2 .medal-badge{top:-20px;left:-20px;}
+  .rank-3 .medal-badge{top:-15px;left:-15px;}
+
+  .shade-result-info{flex:1;min-width:0;}
+
+  .shade-result-name{
+    font-family:'Playfair Display', serif;font-weight:600;
+    color:var(--text-light);margin:0 0 10px;letter-spacing:0.01em;
+  }
+  .rank-1 .shade-result-name{font-size:23px;}
+  .rank-2 .shade-result-name{font-size:18px;margin-bottom:8px;}
+  .rank-3 .shade-result-name{font-size:15px;margin-bottom:7px;}
+
+  .shade-result-conf-row{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
+  .shade-result-conf-track{
+    flex:none;height:4px;border-radius:2px;
+    background:rgba(150,51,60,0.14);overflow:hidden;
+  }
+  .rank-1 .shade-result-conf-track{width:170px;}
+  .rank-2 .shade-result-conf-track{width:122px;height:3.5px;}
+  .rank-3 .shade-result-conf-track{width:90px;height:3px;}
+  .rank-2 .shade-result-conf-row{margin-bottom:9px;}
+  .rank-3 .shade-result-conf-row{margin-bottom:8px;}
+  .shade-result-conf-fill{height:100%;border-radius:2px;background:linear-gradient(90deg, #c9707c, var(--rose-deep));}
+  .shade-result-conf-num{font-family:'Playfair Display', serif;font-weight:600;color:var(--rose-deep);white-space:nowrap;}
+  .rank-1 .shade-result-conf-num{font-size:14px;}
+  .rank-2 .shade-result-conf-num{font-size:12.5px;}
+  .rank-3 .shade-result-conf-num{font-size:11.5px;}
+
+  .shade-result-why{font-family:'Playfair Display', serif;font-style:italic;color:var(--rose-deep);margin-bottom:4px;}
+  .rank-1 .shade-result-why{font-size:13px;}
+  .rank-2 .shade-result-why{font-size:12px;}
+  .rank-3 .shade-result-why{font-size:11px;}
+
+  .shade-result-meta-line{color:var(--muted);line-height:1.5;text-wrap:balance;}
+  /* Icon-led lines (finish/description) hang-indent so a wrapped
+     continuation line aligns under the TEXT, not back under the icon --
+     without this, a long description (this catalog has some up to ~50
+     characters) wraps with its second line flush against the card edge,
+     visibly out of step with the first line. */
+  .shade-result-meta-line.with-icon{padding-left:15px;text-indent:-15px;}
+  .shade-result-meta-line.with-icon svg{text-indent:0;}
+  .shade-result-meta-line.desc{font-style:italic;}
+  .rank-1 .shade-result-meta-line{font-size:12.5px;margin-top:3px;}
+  .rank-2 .shade-result-meta-line{font-size:11.5px;margin-top:2px;}
+  .rank-3 .shade-result-meta-line{font-size:11px;margin-top:2px;}
+
+  .shade-result-shop{
+    display:inline-block;font-weight:600;color:var(--rose-deep);
+    margin-top:9px;letter-spacing:0.01em;border-bottom:1px solid rgba(150,51,60,0.35);
+    padding-bottom:1px;
+  }
+  .rank-1 .shade-result-shop{font-size:12.5px;}
+  .rank-2 .shade-result-shop{font-size:11.5px;margin-top:7px;}
+  .rank-3 .shade-result-shop{font-size:11px;margin-top:6px;}
+
+  @media (max-width:480px){
+    .shade-result-row{gap:12px;}
+    .rank-1 .shade-result-swatch svg.lip-swatch{width:72px !important;height:auto !important;}
+    .rank-2 .shade-result-swatch svg.lip-swatch{width:56px !important;height:auto !important;}
+    .rank-3 .shade-result-swatch svg.lip-swatch{width:44px !important;height:auto !important;}
+    .rank-1 .shade-result-conf-track{width:90px;}
+    .rank-2 .shade-result-conf-track{width:66px;}
+    .rank-3 .shade-result-conf-track{width:50px;}
+    .rank-1 .shade-result-conf-num{font-size:13px;}
+    .rank-2 .shade-result-conf-num{font-size:11.5px;}
+    .rank-3 .shade-result-conf-num{font-size:10.5px;}
+    /* Deliberately NOT shrinking the medal-badge offset here. This
+       card's own padding stays a fixed 32px at every width (unlike the
+       standalone sample this was first prototyped in, which shrank its
+       card padding on mobile) -- so there's no clipping risk that would
+       call for pulling the badge in closer. Keeping the same offset as
+       desktop, against a smaller swatch, actually reads as MORE
+       separation on mobile, not less, which is what avoids the ring
+       overlapping/touching the swatch. */
+  }
+
+  /* Post-results feedback: two 5-star ratings (season/color analysis,
+     and the shade matches) plus an optional free-text comment. A
+     closing "how did we do?" card after the download button -- entirely
+     optional, easy to ignore, never blocks anything else in the flow. */
+  #feedbackCard{margin-top:24px;}
+  .feedback-block{margin-bottom:22px;}
+  .feedback-block:last-of-type{margin-bottom:18px;}
+  .feedback-label{font-size:13px;color:var(--text-light);font-weight:600;margin-bottom:8px;}
+  .star-rating{display:flex;gap:6px;}
+  .star-btn{
+    background:none;border:none;padding:0;cursor:pointer;
+    width:26px;height:26px;display:flex;align-items:center;justify-content:center;
+    transition:transform 0.1s ease;
+  }
+  .star-btn:hover{transform:scale(1.12);}
+  .star-btn svg{width:24px;height:24px;}
+  .star-btn path{transition:fill 0.1s ease, stroke 0.1s ease;}
+  .feedback-textarea{
+    width:100%;min-height:78px;resize:vertical;box-sizing:border-box;
+    border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;font-family:'Work Sans', sans-serif;font-size:13.5px;
+    color:var(--text-light);background:rgba(255,255,255,0.5);
+    margin-bottom:18px;
+  }
+  .feedback-textarea:focus{outline:none;border-color:var(--rose-deep);}
+  .feedback-textarea::placeholder{color:var(--muted);}
+  .feedback-thanks{
+    text-align:center;font-family:'Playfair Display', serif;font-style:italic;
+    font-size:14px;color:var(--rose-deep);padding:8px 0 2px;
+  }
 
   .loading{
     text-align:center;color:var(--muted);font-size:13.5px;
@@ -567,9 +745,21 @@
         <div id="paletteJewelryNote" class="jewelry-note"></div>
 
         <div class="palette-download-row">
-          <button class="btn ghost palette-download-btn" id="downloadStyleGuideBtn">Download</button>
+          <button class="btn ghost palette-download-btn" id="downloadStyleGuideBtn">Download Your Palette</button>
         </div>
       </div>
+    </div>
+
+    <!-- Downloads the combined season analysis + shade matches as one
+         image. Lives here in the analysis card (not down in the shade
+         results) since it's the "download everything" action for this
+         whole card, not something specific to the shade picks. It's
+         safe to show as soon as this card is visible: renderSeasonResult
+         populates currentBestMatches (via showBestShadeMatches) in the
+         same synchronous call that reveals this card, so the data this
+         button needs already exists by the time anyone could click it. -->
+    <div class="palette-download-row">
+      <button class="btn ghost palette-download-btn" id="downloadFullAnalysisBtn">Download Full Analysis</button>
     </div>
 
   </div>
@@ -581,9 +771,42 @@
     <div class="card" id="pickCard">
       <div class="season-tag" id="pickBrandTag"></div>
       <div class="season-name" id="pickBrandName" style="font-size:19px;"></div>
-      <div class="brand-grid" id="lookTierTabs" style="margin-top:6px;margin-bottom:18px;"></div>
-      <div id="colorProgressionIllustration" style="margin-bottom:18px;"></div>
+      <div class="pick-filters-label">Your Filter</div>
+      <div class="pick-filters" id="pickFilters"></div>
       <div class="shade-podium" id="shadePodium"></div>
+    </div>
+
+    <div class="card" id="feedbackCard">
+      <div class="season-tag">One last thing</div>
+      <div class="season-name" style="font-size:19px;">How did we do?</div>
+
+      <div id="feedbackFormBlock">
+        <div class="feedback-block">
+          <div class="feedback-label">Season &amp; color analysis</div>
+          <div class="star-rating" id="seasonStarRating">
+            <button type="button" class="star-btn" data-rating-value="1" aria-label="1 star"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+            <button type="button" class="star-btn" data-rating-value="2" aria-label="2 stars"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+            <button type="button" class="star-btn" data-rating-value="3" aria-label="3 stars"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+            <button type="button" class="star-btn" data-rating-value="4" aria-label="4 stars"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+            <button type="button" class="star-btn" data-rating-value="5" aria-label="5 stars"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+          </div>
+        </div>
+        <div class="feedback-block">
+          <div class="feedback-label">Lipstick shade matches</div>
+          <div class="star-rating" id="shadeStarRating">
+            <button type="button" class="star-btn" data-rating-value="1" aria-label="1 star"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+            <button type="button" class="star-btn" data-rating-value="2" aria-label="2 stars"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+            <button type="button" class="star-btn" data-rating-value="3" aria-label="3 stars"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+            <button type="button" class="star-btn" data-rating-value="4" aria-label="4 stars"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+            <button type="button" class="star-btn" data-rating-value="5" aria-label="5 stars"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+          </div>
+        </div>
+        <textarea id="feedbackComment" class="feedback-textarea" placeholder="Anything else you'd like to share? (optional)"></textarea>
+        <div class="palette-download-row">
+          <button class="btn ghost palette-download-btn" id="submitFeedbackBtn">Submit Feedback</button>
+        </div>
+      </div>
+      <div class="feedback-thanks" id="feedbackThanks" style="display:none;">Thank you for your feedback! 💌</div>
     </div>
   </div>
 </div>
@@ -1940,27 +2163,42 @@ const MAC_SHADES = [
 // constant nudge (WARMTH_OFFSET) regardless of tier.
 //
 // Chroma no longer targets three separate fixed offsets (previously
-// +34/+37/+41 per tier). Instead the whole +34..+41 span is treated as
-// one continuous "makeup intensity" band (with a 2% soft zone on each
-// edge, same soft-zone convention as the floor/ceiling below), and any
-// shade whose real chroma falls inside it is an equally valid fit on
-// the chroma axis. We rank every shade in the band by fit (distance
-// from the customer's own L*/b* position; 0 chroma-penalty anywhere
-// inside the band), take the 9 best fits overall, then split those 9 --
-// lightest to darkest -- into three groups of three: the lightest
-// three become Subtle, the middle three Natural, and the darkest three
-// Party. So the tiers are shaped by what real shades exist in the
-// range rather than by an arbitrary preset target per tier.
-const LOOK_TIERS = {
-  noMakeup: { label: "Subtle" },
-  natural:  { label: "Natural" },
-  party:    { label: "Party" },
-};
-const LOOK_TIER_ORDER = ['noMakeup', 'natural', 'party']; // lightest group -> darkest group
+// +34/+37/+41 per tier, back when there were tiers at all). Instead the
+// whole +34..+41 span is treated as one continuous "makeup intensity"
+// band: any shade's real chroma is scored by its distance from that
+// band (0 anywhere inside it) as part of the shade's overall fit
+// quality, rather than being screened in or out of candidacy by it --
+// see bestShadeMatches below, which gates candidacy on warmth family,
+// depth zone, and shade chroma tertile instead, then ranks by overall
+// fit (including this band) and keeps the top 3 as best/2nd/3rd. There
+// is no longer a Subtle/Natural/Party split.
 const CHROMA_RANGE_LOW = 34;
 const CHROMA_RANGE_HIGH = 41;
-const CHROMA_SOFT_ZONE = 0.02; // 2%, same soft-zone convention used below
-const WARMTH_OFFSET = 5.5; // constant warmth nudge, unchanged across all three tiers
+const WARMTH_OFFSET = 5.5; // constant warmth nudge
+// Confidence %: every one of the (up to) 3 shown shades is labeled with
+// a confidence percentage that reflects the
+// ABSOLUTE quality of its fit (its own macDist, straight up) -- not how
+// it compares to whatever else this customer happened to have available.
+// A customer whose best-available shade is itself a mediocre fit (large
+// dist) sees that honestly reflected in a moderate/low confidence on
+// their "best match" too, rather than every customer's top pick always
+// reading as a reassuring 100%. Same exp-decay shape already used for
+// season-match confidence elsewhere in this file (see
+// quantDistToConfidencePercent), reparameterized for the macDist scale:
+// CONFIDENCE_DECAY_TAU is the dist at which un-floored confidence has
+// decayed to ~37%, and CONFIDENCE_FLOOR_PCT keeps a small minimum so a
+// very poor fit still reads as "low confidence" rather than a bare,
+// slightly alarming "0%" next to a product. Loosened from an earlier,
+// tighter curve (TAU 10 / floor 10) -- this one holds higher percentages
+// further out before it starts dropping.
+//   dist  0    2    5    8    13   20   30
+//   pct  100   88   73   61   44   29   15 (~= floor)
+const CONFIDENCE_FLOOR_PCT = 15;
+const CONFIDENCE_DECAY_TAU = 16;
+function shadeConfidencePct(dist){
+  const raw = 100 * Math.exp(-Math.max(0, dist) / CONFIDENCE_DECAY_TAU);
+  return Math.max(CONFIDENCE_FLOOR_PCT, Math.min(100, Math.round(raw)));
+}
 
 function macMatchTarget(customerLab){
   // Depth/Chroma use the 4-feature/3-feature averages when available
@@ -1983,13 +2221,57 @@ function chromaBandDistance(chromaC, rangeLow, rangeHigh){
   if(chromaC > rangeHigh) return chromaC - rangeHigh;
   return 0;
 }
+// Depth gets extra pull in the overall fit ranking -- a shade closer to
+// the customer's own depth outranks one that's a better warmth/chroma
+// fit but further off on depth, even though depth-delta is what narrows
+// the pool to 10 candidates in bestShadeMatches below (a separate,
+// unweighted step). 1.5x was chosen by checking real candidate pools:
+// it's enough to visibly reorder the top matches toward closer-depth
+// shades (and lower their confidence % when depth is off) without
+// letting depth swamp warmth/chroma entirely the way a much higher
+// weight would. Applied consistently here and in shadeMismatchReason's
+// "worst axis" pick below, so the displayed reason always matches what's
+// actually driving the ranking/confidence.
+const DEPTH_RANK_WEIGHT = 1.5;
 function macDist(target, s){
   const chromaDist = chromaBandDistance(s.chroma_C, target.rangeLow, target.rangeHigh);
   return Math.sqrt(
-    (target.L - s.lightness_L)**2 +
+    (DEPTH_RANK_WEIGHT * (target.L - s.lightness_L))**2 +
     (target.b - s.temperature_b)**2 +
     chromaDist**2
   );
+}
+
+// Short, plain-language reason a shade isn't a perfect (dist = 0) match --
+// picks whichever of the three axes (depth L*, warmth b*, chroma band)
+// contributes the most to its distance and describes that one
+// direction. MISMATCH_REASON_MIN_DELTA keeps this quiet when every axis
+// is essentially tied with the customer's target (a shade shouldn't get
+// a reason attached over a rounding-level difference) -- so even a
+// customer's own best match can get a reason if it isn't a near-exact
+// fit, consistent with confidence no longer being pinned to 100% for it.
+const MISMATCH_REASON_MIN_DELTA = 0.5;
+function shadeMismatchReason(target, s){
+  const dL = target.L - s.lightness_L; // >0: shade is darker than the customer's own depth
+  const db = target.b - s.temperature_b; // >0: shade reads cooler than the customer's ideal warmth
+  const chromaDist = chromaBandDistance(s.chroma_C, target.rangeLow, target.rangeHigh);
+  const chromaSign = s.chroma_C < target.rangeLow ? -1 : (s.chroma_C > target.rangeHigh ? 1 : 0);
+
+  // Same DEPTH_RANK_WEIGHT applied here as in macDist, so "worst axis"
+  // reflects the same depth preference driving the ranking/confidence --
+  // a shade is called out for depth more readily than before, since
+  // depth now counts for more in what makes a shade fall short.
+  const absL = Math.abs(dL) * DEPTH_RANK_WEIGHT, absB = Math.abs(db), absC = chromaDist;
+  const worst = Math.max(absL, absB, absC);
+  if(worst < MISMATCH_REASON_MIN_DELTA) return null;
+
+  if(worst === absC){
+    return chromaSign < 0 ? 'softer than your ideal intensity' : 'bolder than your ideal intensity';
+  }
+  if(worst === absL){
+    return dL > 0 ? 'a touch darker than your depth' : 'a touch lighter than your depth';
+  }
+  return db > 0 ? 'leans a bit cooler than you' : 'leans a bit warmer than you';
 }
 
 // Same descriptive 6-tier warmth scale used elsewhere in this file
@@ -2023,56 +2305,92 @@ const WARMTH_ALLOWED_TEMPS = {
   "Golden":       ["Warm"]
 };
 
-// Candidate pool shared by the match functions below: chroma floor
-// (2% soft zone under the band's low edge) and ceiling (2% soft zone
-// over the band's high edge) -- so a shade just outside the +34..+41
-// band on either side isn't excluded on a rounding-distance technicality
-// -- plus the warm/cool family constraint.
-function macCandidates(customerLab){
+// Active depth zone: the shade catalog's own Light/Medium/Deep tertile
+// split (33rd/66th percentile of MAC_SHADES's lightness_L, outliers
+// excluded when setting the cuts) -- same cutoffs the Shade Atlas uses
+// to label each shade's own depth tertile, so "the Deep zone" means the
+// same set of shades the Atlas itself would call Deep.
+const DEPTH_ZONE_LOW = 43.0;  // Deep/Medium boundary
+const DEPTH_ZONE_HIGH = 54.6; // Medium/Light boundary
+function classifyDepthZone(L){
+  if(L < DEPTH_ZONE_LOW) return 'Deep';
+  if(L < DEPTH_ZONE_HIGH) return 'Medium';
+  return 'Light';
+}
+// A customer only ever draws from her own depth zone plus whichever
+// zone(s) sit immediately next to it on the Deep-Medium-Light ladder --
+// Deep pairs with Medium, Light pairs with Medium, and Medium (sitting
+// between both) pairs with everything. This replaces the old hard
+// floor/ceiling gate: the categorical zone match here is intentionally
+// loose (it's just a coarse pre-filter), because the depth-delta ranking
+// right below narrows it back down to whatever's genuinely closest to
+// her own reading -- so being loose here can't let in a bad match, only
+// widen the pool the ranking step gets to choose from.
+const DEPTH_ZONE_NEIGHBORS = {
+  Deep:   ['Deep', 'Medium'],
+  Medium: ['Deep', 'Medium', 'Light'],
+  Light:  ['Medium', 'Light'],
+};
+
+// A shade's own chroma tertile, on the same shade-population cut points
+// as the Atlas's CUTS.c (its own catalog-wide Muted/Balanced/Vivid
+// split) -- a separate scale from the customer-facing chroma_level
+// (which classifies a customer's own chromaAvg on a 5/19 scale). Only
+// used as a coarse pre-filter below, matched against the customer's own
+// chroma_level by category NAME even though the two scales' numbers
+// aren't comparable -- "my chroma reads Balanced, so give me shades
+// that read Balanced on their own scale too."
+const SHADE_CHROMA_LOW = 39.0;
+const SHADE_CHROMA_HIGH = 53.3;
+function classifyShadeChroma(chromaC){
+  if(chromaC < SHADE_CHROMA_LOW) return 'Muted';
+  if(chromaC < SHADE_CHROMA_HIGH) return 'Balanced';
+  return 'Vivid';
+}
+
+// Picks the 3 best-fitting shades overall, following the same manual
+// process used to sanity-check this by hand:
+//   1. Warmth family (shade's own Cool/Neutral/Warm tertile allowed for
+//      this customer's descriptive undertone -- unchanged from before).
+//   2. Depth zone neighbors (shade's own Deep/Medium/Light tertile is
+//      the customer's own zone or an adjacent one).
+//   3. Shade chroma tertile matches the customer's own chroma_level by
+//      name (a blended customer label like "Muted-to-Balanced" allows
+//      either named tier).
+//   4. Of whatever survives, keep the 10 closest by depth alone (plain
+//      |L* difference|, no warmth/chroma involved at this step).
+//   5. Re-rank those 10 by overall fit quality (macDist, which still
+//      folds in the full continuous chroma-band distance and the
+//      depth-weighted ranking) and keep the top 3.
+// Each of the 3 gets its confidence % and mismatch reason exactly as
+// before. Nothing pads out to a fixed count -- if fewer than 3 shades
+// survive the filters, fewer than 3 are returned.
+function bestShadeMatches(customerLab, chromaLevel){
   const target = macMatchTarget(customerLab);
-  const chromaFloor = target.rangeLow * (1 - CHROMA_SOFT_ZONE);
-  const chromaCeiling = target.rangeHigh * (1 + CHROMA_SOFT_ZONE);
   const allowedTemps = WARMTH_ALLOWED_TEMPS[classifyUndertoneDescriptive(customerLab.b)] || ["Cool", "Neutral", "Warm"];
+  const allowedDepthZones = DEPTH_ZONE_NEIGHBORS[classifyDepthZone(target.L)] || ['Deep', 'Medium', 'Light'];
+  const allowedChromaLevels = (chromaLevel || '').includes('-to-') ? chromaLevel.split('-to-') : [chromaLevel];
+
   const pool = MAC_SHADES.filter(s =>
-    s.chroma_C >= chromaFloor &&
-    s.chroma_C <= chromaCeiling &&
-    allowedTemps.includes(classifyShadeTemp(s.temperature_b))
+    allowedTemps.includes(classifyShadeTemp(s.temperature_b)) &&
+    allowedDepthZones.includes(classifyDepthZone(s.lightness_L)) &&
+    allowedChromaLevels.includes(classifyShadeChroma(s.chroma_C))
   );
-  return { target, pool };
-}
 
-function findBestMacShades(customerLab, topN){
-  const { target, pool } = macCandidates(customerLab);
-  return pool
-    .map(s => ({ ...s, dist: macDist(target, s) }))
-    .sort((a,b) => a.dist - b.dist)
-    .slice(0, topN);
-}
+  const closestByDepth = pool
+    .map(s => ({ ...s, depthDelta: Math.abs(target.L - s.lightness_L) }))
+    .sort((a, b) => a.depthDelta - b.depthDelta)
+    .slice(0, 10);
 
-// Picks the 9 best-fitting shades overall from the filtered pool
-// (chroma floor/ceiling + warm/cool family; no finish diversity
-// guarantee -- results can cluster in a single finish if that's what
-// fits best), then splits those 9 -- lightest to darkest -- into three
-// even groups of three: the lightest three go to Subtle, the middle
-// three to Natural, and the darkest three to Party. Each group is later
-// re-sorted by its own fit (dist) when displayed (see renderShadeMatches),
-// so the "best match" shown per tier is still the closest-fitting shade
-// in that group, not just the lightest/darkest of the three. With 3
-// look tiers x 3 shades, a customer sees 9 recommendations in total.
-function allocateShadesToTiers(customerLab){
-  const { target, pool } = macCandidates(customerLab);
-  const ranked = pool
+  return closestByDepth
     .map(s => ({ ...s, dist: macDist(target, s) }))
-    .sort((a,b) => a.dist - b.dist)
-    .slice(0, 9);
-  const byLightness = [...ranked].sort((a,b) => b.lightness_L - a.lightness_L); // lightest first
-  const n = byLightness.length;
-  const groupSize = Math.ceil(n / 3) || 1;
-  const groups = {};
-  LOOK_TIER_ORDER.forEach((key, i) => {
-    groups[key] = byLightness.slice(i * groupSize, i === LOOK_TIER_ORDER.length - 1 ? n : (i + 1) * groupSize);
-  });
-  return groups;
+    .sort((a, b) => a.dist - b.dist)
+    .slice(0, 3)
+    .map(s => ({
+      ...s,
+      confidencePct: shadeConfidencePct(s.dist),
+      mismatchReason: shadeMismatchReason(target, s),
+    }));
 }
 
 
@@ -3159,6 +3477,96 @@ function sendToLiveSheet(record){
     console.warn('[Live sheet] Failed to send', e);
   }
 }
+
+// Post-results feedback: two 5-star ratings (season/color analysis,
+// shade matches) plus an optional free-text comment. Entirely
+// optional -- there's no validation gating the submit button, so a
+// customer can rate one thing and skip the other, or just type a
+// comment with no stars at all. On submit, the record is saved to
+// localStorage (same local-backup pattern as saveDebugHistory) and
+// posted to the same live tracking sheet as the measurement record,
+// tagged type:"feedback" so it's distinguishable there -- reuses
+// sendToLiveSheet/LIVE_SHEET_URL rather than a second endpoint.
+const feedbackRatingState = { season: 0, shade: 0 };
+function setupStarRating(containerId, stateKey){
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  const buttons = [...container.querySelectorAll('.star-btn')];
+  function paint(uptoValue){
+    buttons.forEach(btn => {
+      const v = Number(btn.dataset.ratingValue);
+      const path = btn.querySelector('path');
+      if(v <= uptoValue){
+        path.setAttribute('fill', 'var(--rose-deep)');
+        path.setAttribute('stroke', 'var(--rose-deep)');
+      } else {
+        path.setAttribute('fill', 'none');
+        path.setAttribute('stroke', 'var(--muted)');
+      }
+    });
+  }
+  buttons.forEach(btn => {
+    btn.addEventListener('mouseenter', () => paint(Number(btn.dataset.ratingValue)));
+    btn.addEventListener('click', () => {
+      feedbackRatingState[stateKey] = Number(btn.dataset.ratingValue);
+      paint(feedbackRatingState[stateKey]);
+    });
+  });
+  container.addEventListener('mouseleave', () => paint(feedbackRatingState[stateKey]));
+}
+
+async function submitFeedback(){
+  const commentEl = document.getElementById('feedbackComment');
+  const comment = commentEl ? commentEl.value.trim() : '';
+
+  // Same best-effort location lookup as saveDebugHistory: race against
+  // a short timeout so a slow/failed lookup never blocks submitting.
+  let location = null;
+  try{
+    location = customerLocationPromise
+      ? await Promise.race([
+          customerLocationPromise,
+          new Promise(resolve => setTimeout(() => resolve(null), 1500)),
+        ])
+      : null;
+  } catch(e){ location = null; }
+
+  const shadeMatchSeasonName = currentSeasonResult && (currentSeasonResult.shadeMatchSeason || currentSeasonResult.season);
+  const record = {
+    type: 'feedback',
+    timestamp: new Date().toISOString(),
+    location_city: location ? location.city : '',
+    location_region: location ? location.region : '',
+    location_country: location ? location.country : '',
+    location_country_code: location ? location.country_code : '',
+    season: shadeMatchSeasonName || '',
+    best_shade_name: (currentBestMatches && currentBestMatches[0]) ? currentBestMatches[0].name : '',
+    season_rating: feedbackRatingState.season || null,
+    shade_rating: feedbackRatingState.shade || null,
+    comment: comment,
+  };
+
+  try{
+    const history = JSON.parse(localStorage.getItem('ffbs_feedback_history') || '[]');
+    history.push(record);
+    localStorage.setItem('ffbs_feedback_history', JSON.stringify(history));
+  } catch(e){
+    console.warn('[Feedback] Local save failed', e);
+  }
+  sendToLiveSheet(record);
+
+  const formBlock = document.getElementById('feedbackFormBlock');
+  const thanks = document.getElementById('feedbackThanks');
+  if(formBlock) formBlock.style.display = 'none';
+  if(thanks) thanks.style.display = 'block';
+}
+
+setupStarRating('seasonStarRating', 'season');
+setupStarRating('shadeStarRating', 'shade');
+const submitFeedbackBtn = document.getElementById('submitFeedbackBtn');
+if(submitFeedbackBtn){
+  submitFeedbackBtn.addEventListener('click', submitFeedback);
+}
 // ---------------------------------------------------------------------
 // Detailed Seasonal Color Analysis (customer-facing) — replaces the old
 // monospace debug dump with an illustrated, rose-themed walkthrough of
@@ -3452,7 +3860,7 @@ function renderPaletteDials(seasonName, result, centroid, deltas, hasRealDelta){
     `${seasonName}'s typical recipe, stacked with your own nudge, lands on your exact palette.`;
   document.getElementById('paletteDialsLegendSeason').textContent = seasonName;
   document.getElementById('paletteDialsFootnote').textContent =
-    `Each bar is the base recipe (light segment) plus your own tiny nudge (dark segment) — stacked together they land the white dot at your real measured position. Those three nudges are what turn ${seasonName}'s stock palette into the 28 colors below, made just for you.`;
+    `Light = base recipe, dark = your nudge — together they land the white dot at your exact position, shaping the 28 personalized colors below.`;
   section.style.display = 'block';
 }
 
@@ -3496,6 +3904,7 @@ function renderStyleGuide(result){
     </div>`).join('');
 
   const metalsRow = document.getElementById('paletteJewelryMetals');
+  metalsRow.classList.toggle('multi', guide.jewelry.metals.length > 1);
   metalsRow.innerHTML = guide.jewelry.metals.map(m => `
     <div class="jewelry-metal">
       <div class="dot" style="background:${m.hex};"></div>
@@ -3703,6 +4112,238 @@ if (downloadStyleGuideBtn) {
   });
 }
 
+// ---------------------------------------------------------------------
+// "Download Full Analysis" -- a single shareable PNG covering the whole
+// customer journey end to end: her season match + confidence, the raw
+// Pixel Measurement swatches, the CIELAB Analysis (Warmth/Depth/
+// Contrast/Chroma) readouts, and ALL 9 matched lipstick shades across
+// all three look tiers (Subtle/Natural/Party) -- not just whichever
+// tier tab happens to be selected on screen. Reuses the same native-
+// canvas drawing approach as the style guide's story card (sg* helpers
+// above) so there's no CDN dependency, but uses its own fa* row helpers
+// below: every row here has a height that's knowable from the data
+// alone (no wrapped text), so the whole card is laid out in one forward
+// pass -- no separate measure-then-draw pass is needed.
+// ---------------------------------------------------------------------
+function faSectionHeader(ctx, x, w, y, label){
+  sgText(ctx, label, x, y + 21, { font: `700 20px ${SG_WORKSANS}`, color: SG_THEME.roseDeep, align: 'left', letterSpacing: 1 });
+  ctx.strokeStyle = SG_THEME.line; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(x, y + 41); ctx.lineTo(x + w, y + 41); ctx.stroke();
+  return 75; // header line + gap before content
+}
+function faSubhead(ctx, x, y, text, color){
+  sgText(ctx, text, x, y + 15, { font: `700 14px ${SG_WORKSANS}`, color: color || SG_THEME.roseDeep, align: 'left', letterSpacing: 1 });
+  return 38;
+}
+function faPixelRow(ctx, x, w, y, features){
+  const r = 34;
+  const colW = w / features.length;
+  features.forEach((f, i) => {
+    const hex = rgbToHex(f.rgb[0], f.rgb[1], f.rgb[2]);
+    const cx = x + colW * i + colW / 2, cy = y + r;
+    sgFillCircle(ctx, cx, cy, r, hex, '#ffffff', 4);
+    sgText(ctx, f.label, cx, cy + r + 26, { font: `600 15px ${SG_WORKSANS}`, color: SG_THEME.textLight, align: 'center' });
+    sgText(ctx, `${f.rgb[0]}, ${f.rgb[1]}, ${f.rgb[2]}`, cx, cy + r + 46, { font: `400 13px ${SG_WORKSANS}`, color: SG_THEME.muted, align: 'center' });
+  });
+  return r * 2 + 60;
+}
+function faMeterRow(ctx, x, y, w, opts){
+  sgText(ctx, opts.name, x, y + 18, { font: `600 18px ${SG_WORKSANS}`, color: SG_THEME.textLight, align: 'left' });
+  sgText(ctx, opts.valueLabel, x + w, y + 18, { font: `400 15px ${SG_WORKSANS}`, color: SG_THEME.muted, align: 'right' });
+  const trackY = y + 30, trackH = 16;
+  const grad = ctx.createLinearGradient(x, 0, x + w, 0);
+  grad.addColorStop(0, opts.gradientFrom); grad.addColorStop(1, opts.gradientTo);
+  sgRoundRectPath(ctx, x, trackY, w, trackH, trackH / 2);
+  ctx.fillStyle = grad; ctx.fill();
+  (opts.zones || []).forEach(z => {
+    const zx = x + Math.max(0, Math.min(1, z / opts.max)) * w;
+    ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(zx, trackY + 2); ctx.lineTo(zx, trackY + trackH - 2); ctx.stroke();
+  });
+  const markerX = x + Math.max(0, Math.min(1, (opts.value || 0) / opts.max)) * w;
+  sgFillCircle(ctx, markerX, trackY + trackH / 2, 9, '#ffffff', SG_THEME.roseDeep, 3);
+  const polesY = trackY + trackH + 20;
+  sgText(ctx, opts.poleLeft, x, polesY, { font: `500 13px ${SG_WORKSANS}`, color: SG_THEME.muted, align: 'left' });
+  sgText(ctx, opts.poleRight, x + w, polesY, { font: `500 13px ${SG_WORKSANS}`, color: SG_THEME.muted, align: 'right' });
+  if (opts.categoryText) {
+    sgText(ctx, opts.categoryText, x, polesY + 26, { font: `700 15px ${SG_WORKSANS}`, color: SG_THEME.roseDeep, align: 'left' });
+  }
+  return 116; // fixed: 30 (name) + 16 (track) + 20 (poles gap) + 26 (pill) + 24 (bottom gap)
+}
+// Height per shade row is knowable purely from whether it has a
+// mismatchReason -- no text wrapping, so no measuring pass is needed.
+function faShadeRowHeight(shade){
+  return 88 + (shade.mismatchReason ? 22 : 0);
+}
+function faShadeRow(ctx, x, y, w, shade){
+  const swatchR = 30;
+  sgFillCircle(ctx, x + swatchR, y + swatchR, swatchR, shade.hex, '#ffffff', 3);
+  const textX = x + swatchR * 2 + 24;
+  let ty = y + 24;
+  const rankPrefix = shade.rankLabel ? `${shade.rankLabel.toUpperCase()}  ·  ` : '';
+  sgText(ctx, `${rankPrefix}${shade.name}  ·  ${shade.confidencePct}%`, textX, ty, { font: `700 19px ${SG_WORKSANS}`, color: SG_THEME.textLight, align: 'left' });
+  ty += 26;
+  if (shade.mismatchReason) {
+    sgText(ctx, shade.mismatchReason, textX, ty, { font: `italic 400 14px ${SG_WORKSANS}`, color: SG_THEME.roseDeep, align: 'left' });
+    ty += 22;
+  }
+  const parts = splitBrandLine(shade.brand_line);
+  const metaBits = [parts.line, shade.finish, shade.description].filter(Boolean);
+  sgText(ctx, metaBits.join(' · '), textX, ty, { font: `400 13px ${SG_WORKSANS}`, color: SG_THEME.muted, align: 'left' });
+}
+
+// Pulls everything the card needs straight from the live globals
+// (currentSeasonResult / currentBestMatches) rather than a separate
+// cache -- both are already kept current by showBestShadeMatches, so
+// there's nothing extra to keep in sync.
+function buildFullAnalysisData(){
+  const result = currentSeasonResult;
+  const bestMatches = currentBestMatches;
+  if (!result || !bestMatches || !result.estimated_skin_rgb) return null;
+
+  const pctConfidence = quantDistToConfidencePercent(result.quant_best_dist);
+  let confidenceLabel = 'Good confidence';
+  if (result.isCombinedSeason) confidenceLabel = 'Split match';
+  else if (result.isLowConfidence) confidenceLabel = 'Lower confidence';
+  else if (result.quant_best_dist < 2) confidenceLabel = 'High confidence';
+  const confidencePillText = pctConfidence != null ? `${confidenceLabel} · ${pctConfidence}%` : confidenceLabel;
+
+  const pixelFeatures = [
+    { label: 'Skin',    rgb: result.estimated_skin_rgb },
+    { label: 'Iris',    rgb: result.estimated_iris_rgb },
+    { label: 'Sclera',  rgb: result.estimated_sclera_rgb },
+    { label: 'Eyebrow', rgb: result.estimated_eyebrow_rgb },
+  ].filter(f => Array.isArray(f.rgb));
+
+  const cielabRows = [
+    { name: 'Warmth · skin b*', value: result.lab_temperature_b, max: 35, zones: [1.55, 10.85, 15.5, 20.15, 29.45],
+      valueLabel: `b* = ${result.lab_temperature_b}`, categoryText: result.undertone_descriptive,
+      gradientFrom: '#C86B87', gradientTo: '#E0919E', poleLeft: 'Cool', poleRight: 'Warm' },
+    { name: 'Depth Score', value: result.depth_score, max: 100, zones: [40.8, 53.3],
+      valueLabel: `avg L* = ${result.depth_score}`, categoryText: result.depth_level,
+      gradientFrom: '#7A2E3D', gradientTo: '#F5D5DE', poleLeft: 'Deep', poleRight: 'Light' },
+    { name: 'Contrast Score', value: result.contrast_score, max: 80, zones: [39.88, 53.73],
+      valueLabel: `${result.lightness} − ${result.darkness} = ${result.contrast_score}`, categoryText: result.contrast_level,
+      gradientFrom: '#F0D8DC', gradientTo: '#5C2430', poleLeft: 'Low', poleRight: 'High Contrast' },
+    { name: 'Chroma · C*', value: result.avg_chroma, max: 40, zones: [5, 19],
+      valueLabel: `C* = ${result.avg_chroma}`, categoryText: result.chroma_level,
+      gradientFrom: '#C9A8AE', gradientTo: '#D6336C', poleLeft: 'Muted', poleRight: 'Vivid' },
+  ].filter(r => r.value != null && r.categoryText != null);
+
+  // No more Subtle/Natural/Party tiers -- just the (up to) 3 best-fitting
+  // shades overall, already sorted by fit quality (see bestShadeMatches),
+  // labeled the same way the on-page podium labels them.
+  const rankLabels = ['Best match', '2nd option', '3rd option'];
+  const shades = bestMatches.slice().sort((a, b) => a.dist - b.dist)
+    .map((s, i) => ({ ...s, rankLabel: rankLabels[i] || `Option ${i + 1}` }));
+
+  return { season: result.season, family: result.family, confidencePillText, pixelFeatures, cielabRows, shades };
+}
+
+function drawFullAnalysisCard(data){
+  const W = 1080;
+  const panelX = 60, panelW = W - panelX * 2;
+  const contentX = panelX + 55, contentW = panelW - 110;
+
+  // Panel content height is computed directly from the data (every row
+  // height above is a fixed constant or a simple function of the data),
+  // so the canvas can be sized correctly in a single pass -- no
+  // measure-then-redraw step like the style guide card needs.
+  let contentH = 34 + 75 + 38 + 128 + 30 + 38 + data.cielabRows.length * 116 + 50 + 75;
+  data.shades.forEach(s => { contentH += faShadeRowHeight(s); });
+  contentH += 20;
+
+  const panelY = 350; // clears the confidence pill (drawn at y=290, height 40) with a 20px gap
+  const panelH = contentH;
+  const H = panelY + panelH + 140;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, SG_THEME.bgDeep);
+  bgGrad.addColorStop(1, SG_THEME.bgDeep2);
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  sgText(ctx, 'Find My Best Shades', W / 2, 118, { font: `600 40px ${SG_PLAYFAIR}`, color: SG_THEME.textLight, align: 'center' });
+  sgText(ctx, 'YOUR FULL SHADE ANALYSIS', W / 2, 156, { font: `600 16px ${SG_WORKSANS}`, color: SG_THEME.roseDeep, align: 'center', letterSpacing: 2 });
+  sgText(ctx, data.season || '', W / 2, 234, { font: `700 62px ${SG_PLAYFAIR}`, color: SG_THEME.roseDeep, align: 'center' });
+  if (data.family) {
+    sgText(ctx, data.family, W / 2, 266, { font: `500 17px ${SG_WORKSANS}`, color: SG_THEME.muted, align: 'center' });
+  }
+  ctx.font = `700 16px ${SG_WORKSANS}`;
+  const pillTextW = ctx.measureText(data.confidencePillText).width;
+  const pillW = pillTextW + 48, pillH = 40;
+  sgFillRoundRect(ctx, W / 2 - pillW / 2, 290, pillW, pillH, pillH / 2, '#ffffff');
+  sgText(ctx, data.confidencePillText, W / 2, 290 + pillH / 2 + 6, { font: `700 16px ${SG_WORKSANS}`, color: SG_THEME.roseDeep, align: 'center' });
+
+  ctx.save();
+  ctx.shadowColor = 'rgba(58,31,34,0.12)';
+  ctx.shadowBlur = 40;
+  ctx.shadowOffsetY = 12;
+  sgFillRoundRect(ctx, panelX, panelY, panelW, panelH, 32, SG_THEME.card);
+  ctx.restore();
+
+  let cursor = panelY + 34;
+  cursor += faSectionHeader(ctx, contentX, contentW, cursor, 'YOUR COLOR PROFILE');
+  cursor += faSubhead(ctx, contentX, cursor, 'PIXEL MEASUREMENT');
+  faPixelRow(ctx, contentX, contentW, cursor, data.pixelFeatures);
+  cursor += 128;
+  cursor += 30;
+  cursor += faSubhead(ctx, contentX, cursor, 'CIELAB ANALYSIS');
+  data.cielabRows.forEach(row => {
+    faMeterRow(ctx, contentX, cursor, contentW, row);
+    cursor += 116;
+  });
+  cursor += 50;
+  cursor += faSectionHeader(ctx, contentX, contentW, cursor, 'YOUR BEST SHADES');
+  data.shades.forEach(s => {
+    faShadeRow(ctx, contentX, cursor, contentW, s);
+    cursor += faShadeRowHeight(s);
+  });
+
+  sgText(ctx, 'PERSONALIZED BY FIND MY BEST SHADES', W / 2, H - 60, { font: `600 15px ${SG_WORKSANS}`, color: SG_THEME.roseDeep, align: 'center', letterSpacing: 1.5 });
+
+  return canvas;
+}
+
+const downloadFullAnalysisBtn = document.getElementById('downloadFullAnalysisBtn');
+if (downloadFullAnalysisBtn) {
+  downloadFullAnalysisBtn.addEventListener('click', async () => {
+    const data = buildFullAnalysisData();
+    if (!data) return;
+    const originalLabel = downloadFullAnalysisBtn.textContent;
+    downloadFullAnalysisBtn.textContent = 'Preparing…';
+    downloadFullAnalysisBtn.disabled = true;
+    try {
+      await Promise.race([
+        (document.fonts && document.fonts.ready) || Promise.resolve(),
+        new Promise(r => setTimeout(r, 400)),
+      ]);
+      const canvas = drawFullAnalysisCard(data);
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const slug = (data.season || 'analysis').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+        a.download = `find-my-best-shades-${slug}-full-analysis.png`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        downloadFullAnalysisBtn.textContent = originalLabel;
+        downloadFullAnalysisBtn.disabled = false;
+      });
+    } catch (err) {
+      console.error('Full analysis download failed', err);
+      downloadFullAnalysisBtn.textContent = originalLabel;
+      downloadFullAnalysisBtn.disabled = false;
+    }
+  });
+}
+
 // Looks up a brand id's display name (e.g. "black-rouge" -> "Black Rouge").
 function brandDisplayName(brandId){
   const found = BRANDS.find(b => b.id === brandId);
@@ -3722,9 +4363,8 @@ function splitBrandLine(brandLine){
 // finish coverage, suitable for both Vietnamese and international
 // customers. The old Korean-brand code and data remain in the file
 // but are unused for now, not deleted.
-let currentCustomerLab = null; // stored so tab switches can re-match without re-measuring
-let currentLookTier = 'natural';
-let currentTierGroups = null; // the 9 allocated shades, pre-split into {noMakeup, natural, party}
+let currentCustomerLab = null; // stored so the Download Full Analysis card can rebuild without re-measuring
+let currentBestMatches = null; // the (up to) 3 shades from bestShadeMatches: best/2nd/3rd
 
 let currentCustomerSkinHex = null;
 
@@ -3760,168 +4400,8 @@ function showBestShadeMatches(result){
   currentCustomerLab = computeCustomerLabFromResult(result);
   currentCustomerSkinHex = rgbToHex(result.estimated_skin_rgb[0], result.estimated_skin_rgb[1], result.estimated_skin_rgb[2]);
 
-  currentLookTier = 'natural';
-  currentTierGroups = allocateShadesToTiers(currentCustomerLab);
-  renderLookTierTabs();
-  renderTierBarChart(currentLookTier);
-  renderShadeMatches(currentTierGroups[currentLookTier]);
-}
-
-const TIER_COLORS = {
-  noMakeup: "#E0919E",
-  natural:  "#C86B87",
-  party:    "#7A2E3D",
-};
-// A vivid two-tone gradient for the "added for this look" segment and
-// its legend swatch: from the tier's own color into #D6336C, the exact
-// "Vivid" reference color used at the saturated end of the CIELAB
-// Chroma meter's Muted<->Vivid track. Reusing that specific color (
-// instead of a lightened/desaturated tint) keeps the gradient punchy
-// and visually ties "added" to "more chroma/vividness."
-function tierAddGradient(tierColor){
-  return `linear-gradient(to right, ${tierColor}, #D6336C)`;
-}
-
-// A "before -> after" meter row: identical visual language to the
-// CIELAB Analysis meters -- icon + name, plain two-pole gradient track
-// (Muted -> Vivid, unmodified by any fill), pole labels. "Your natural"
-// and "Added for this look" are told apart purely by mark shape, not by
-// coloring the track: a single circular marker (exactly the same mark
-// used for the static Warmth/Lightness rows) sits at the customer's own
-// value, and a "+" badge (exactly the same mark used everywhere else a
-// look-adjustment is flagged) sits at the look-adjusted target. When a
-// tier makes no change, only the single marker is drawn, with no "+".
-function progressionRowHTML(opts){
-  const pct = (v) => Math.max(0, Math.min(100, (v / opts.max) * 100));
-  const origPct = pct(opts.orig);
-  const targetPct = pct(opts.target);
-  const showAdd = Math.abs(targetPct - origPct) > 0.6;
-  const isIncrease = targetPct >= origPct;
-  return `<div class="metric-row">
-    <div class="metric-icon">${opts.icon}</div>
-    <div class="metric-body">
-      <div class="metric-top">
-        <span class="metric-name">${opts.name}</span>
-      </div>
-      <div class="metric-track" style="background:linear-gradient(to right, ${opts.gradientFrom}, ${opts.gradientTo});">
-        <div class="metric-marker-static" style="left:${origPct}%;"></div>
-        ${showAdd ? `<div class="metric-add-end-badge" style="left:${targetPct}%;background:${opts.tierColor};">${isIncrease ? '+' : '−'}</div>` : ''}
-      </div>
-      <div class="metric-poles"><span>${opts.poleLeft}</span><span>${opts.poleRight}</span></div>
-    </div>
-  </div>`;
-}
-
-// Static single-marker row (Warmth): same visual language as the
-// CIELAB Analysis Warmth meter -- icon, two-pole gradient track, pole
-// labels, one marker at the customer's own measured position. No
-// stacked bar and no "+" here: the warmth offset applied when matching
-// (+5.5, constant across all three tiers) is a behind-the-scenes
-// adjustment, never shown to the customer, so this row never changes
-// when switching Subtle/Natural/Party.
-function staticMarkerRowHTML(opts){
-  const pct = (v) => Math.max(0, Math.min(100, (v / opts.max) * 100));
-  const valuePct = pct(opts.value);
-  return `<div class="metric-row">
-    <div class="metric-icon">${opts.icon}</div>
-    <div class="metric-body">
-      <div class="metric-top">
-        <span class="metric-name">${opts.name}</span>
-      </div>
-      <div class="metric-track" style="background:linear-gradient(to right, ${opts.gradientFrom}, ${opts.gradientTo});">
-        <div class="metric-marker-static" style="left:${valuePct}%;"></div>
-      </div>
-      <div class="metric-poles"><span>${opts.poleLeft}</span><span>${opts.poleRight}</span></div>
-    </div>
-  </div>`;
-}
-
-// Real, single-tier illustration -- shows only the currently selected
-// tier's chart (Warmth/Lightness/Chroma), built from the customer's
-// actual measured Lab values and this tier's actual allocated shades
-// (see allocateShadesToTiers). Deliberately no numbers printed --
-// marker/bar position is proportional to the real values, normalized
-// against a fixed assumed range per dimension for display purposes
-// only: Warmth 0-35 (b*, same as the CIELAB Analysis Warmth meter),
-// Lightness 0-100 (Lab's natural range, same as the CIELAB Analysis
-// Depth Score meter), Chroma 0-80 (wider than the CIELAB Chroma
-// meter's 0-40, since a Party-tier shade can run well past the natural
-// population range). Warmth never shows its offset (+5.5, constant
-// across all three tiers) -- that's a behind-the-scenes matching
-// adjustment -- so its row is a single static marker. Lightness is
-// also a single static marker: the customer's own measured lightness
-// never changes, only which real shade gets picked does. Only Chroma
-// shows a "+" bar, using this tier's actual best-matching shade's real
-// chroma_C as the target (not a formula) -- since chroma is now a
-// continuous +34..+41 band rather than one fixed offset per tier, the
-// bar reflects whatever shade was actually allocated here.
-function renderTierBarChart(lookTierKey){
-  const holder = document.getElementById('colorProgressionIllustration');
-  if(!currentCustomerLab || !currentCustomerSkinHex) { holder.innerHTML = ''; return; }
-  const tierColor = TIER_COLORS[lookTierKey] || '#C86B87';
-
-  const maxB = 35, maxL = 100, maxC = 80;
-
-  // Warmth/Lightness/Chroma all show the same 4-feature/3-feature
-  // averages that actually drive the match (see macMatchTarget).
-  const origB = Math.max(0, Math.min(maxB, currentCustomerLab.b));
-  const origL = Math.max(0, Math.min(maxL, currentCustomerLab.depthAvg != null ? currentCustomerLab.depthAvg : currentCustomerLab.L));
-  const origC = Math.max(0, Math.min(maxC, currentCustomerLab.chromaAvg != null ? currentCustomerLab.chromaAvg : currentCustomerLab.C));
-  const tierShades = (currentTierGroups && currentTierGroups[lookTierKey]) || [];
-  const bestTierShade = tierShades.length ? [...tierShades].sort((a,b) => a.dist - b.dist)[0] : null;
-  const targetC = Math.max(0, Math.min(maxC, bestTierShade ? bestTierShade.chroma_C : origC));
-
-  let html = '';
-  html += staticMarkerRowHTML({
-    icon: iconThermometer(ANALYSIS_ROSE), name: 'Warmth',
-    value: origB, max: maxB,
-    gradientFrom: '#C86B87', gradientTo: '#E0919E', poleLeft: 'Cool', poleRight: 'Warm'
-  });
-  html += staticMarkerRowHTML({
-    icon: iconLayers(ANALYSIS_ROSE), name: 'Lightness',
-    value: origL, max: maxL,
-    gradientFrom: '#7A2E3D', gradientTo: '#F5D5DE', poleLeft: 'Deep', poleRight: 'Light'
-  });
-  html += progressionRowHTML({
-    icon: iconDropletSmall(tierColor), name: 'Chroma',
-    orig: origC, target: targetC, max: maxC,
-    gradientFrom: '#C9A8AE', gradientTo: '#D6336C', poleLeft: 'Muted', poleRight: 'Vivid',
-    tierColor
-  });
-  html += `<div class="progression-legend">
-    <span><span class="legend-marker legend-marker-orig"></span>Your natural</span>
-    <span><span class="legend-marker legend-marker-add" style="background:${tierAddGradient(tierColor)};">+</span>Added for this look</span>
-  </div>`;
-
-  holder.innerHTML = html;
-}
-
-function renderLookTierTabs(){
-  const tabsEl = document.getElementById('lookTierTabs');
-  tabsEl.innerHTML = '';
-  Object.entries(LOOK_TIERS).forEach(([key, tier]) => {
-    const color = TIER_COLORS[key] || '#C86B87';
-    const isSelected = key === currentLookTier;
-    const pill = document.createElement('div');
-    pill.className = 'brand-pill' + (isSelected ? ' selected' : '');
-    pill.textContent = tier.label;
-    if(isSelected){
-      pill.style.background = color;
-      pill.style.borderColor = color;
-      pill.style.color = '#fff';
-    } else {
-      pill.style.background = 'transparent';
-      pill.style.borderColor = color;
-      pill.style.color = color;
-    }
-    pill.addEventListener('click', () => {
-      currentLookTier = key;
-      renderLookTierTabs();
-      renderTierBarChart(currentLookTier);
-      renderShadeMatches((currentTierGroups && currentTierGroups[currentLookTier]) || []);
-    });
-    tabsEl.appendChild(pill);
-  });
+  currentBestMatches = bestShadeMatches(currentCustomerLab, result.chroma_level);
+  renderShadeMatches(currentBestMatches);
 }
 
 // Small color helpers used to build a soft gradient on the swatch shape
@@ -3948,19 +4428,10 @@ function darkenHex(hex, percent){
 // print) as an SVG mask, so the precise shape and texture from the
 // photo are preserved exactly, while the color changes per shade.
 const LIP_MASK_IMG = "data:image/png;base64,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";
-// Small inline icons in the site's rosy palette, used next to the
-// Finish and Description lines on each shade card.
-function sparkleIcon(){
-  return `<svg width="13" height="13" viewBox="0 0 20 20" style="vertical-align:-2px;display:inline-block;"><path d="M10 2 L11.5 8.5 L18 10 L11.5 11.5 L10 18 L8.5 11.5 L2 10 L8.5 8.5 Z" fill="#D6336C"/></svg>`;
-}
-function textLinesIcon(){
-  return `<svg width="13" height="13" viewBox="0 0 20 10" style="vertical-align:-1px;display:inline-block;"><line x1="4" y1="2" x2="16" y2="2" stroke="#D6336C" stroke-width="1.6" stroke-linecap="round"/><line x1="4" y1="5" x2="14" y2="5" stroke="#D6336C" stroke-width="1.6" stroke-linecap="round"/><line x1="4" y1="8" x2="15" y2="8" stroke="#D6336C" stroke-width="1.6" stroke-linecap="round"/></svg>`;
-}
-
 function lipstickSwatch(hex, size){
   const mid = 'lm' + Math.random().toString(36).slice(2, 9);
   const w = Math.round(size * (300/241));
-  return `<svg viewBox="0 0 300 241" width="${w}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+  return `<svg class="lip-swatch" viewBox="0 0 300 241" width="${w}" height="${size}" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <mask id="${mid}">
         <image href="${LIP_MASK_IMG}" width="300" height="241" preserveAspectRatio="none"/>
@@ -3970,75 +4441,125 @@ function lipstickSwatch(hex, size){
 </svg>`;
 }
 
+// Small sparkle + text-lines glyphs shown next to the finish and
+// description meta lines respectively, so those two lines read at a
+// glance instead of blurring into one long dot-separated string.
+function sparkleIcon(){
+  return '<svg width="12" height="12" viewBox="0 0 20 20" style="vertical-align:-2px;display:inline-block;"><path d="M10 2 L11.5 8.5 L18 10 L11.5 11.5 L10 18 L8.5 11.5 L2 10 L8.5 8.5 Z" fill="#D6336C"/></svg>';
+}
+function textLinesIcon(){
+  return '<svg width="12" height="12" viewBox="0 0 20 10" style="vertical-align:-1px;display:inline-block;"><line x1="4" y1="2" x2="16" y2="2" stroke="#D6336C" stroke-width="1.6" stroke-linecap="round"/><line x1="4" y1="5" x2="14" y2="5" stroke="#D6336C" stroke-width="1.6" stroke-linecap="round"/><line x1="4" y1="8" x2="15" y2="8" stroke="#D6336C" stroke-width="1.6" stroke-linecap="round"/></svg>';
+}
+
+// Rank badge: an unfilled ring (no fill, just a thin rosy outline) with
+// the rank numeral in the same tone, set apart from the swatch corner.
+// The numeral is rendered as SVG text with dominant-baseline="central"
+// rather than centered via CSS line-height, so it centers on the font's
+// own reported metrics instead of drifting with whichever font actually
+// loads in the browser.
+function medalBadgeSvg(rankNum, color, w, strokePx){
+  const strokeW = (strokePx * 100 / w).toFixed(2);
+  return `<svg class="medal-badge" width="${w}" height="${w}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="46" fill="none" stroke="${color}" stroke-width="${strokeW}"/>
+    <text x="50" y="51" text-anchor="middle" dominant-baseline="central" font-family="'Playfair Display', serif" font-weight="700" font-size="46" fill="${color}">${rankNum}</text>
+  </svg>`;
+}
+
+// Rank-dependent visual settings for the size hierarchy: swatch size,
+// badge color/size/offset, and all the type scales. Ranks beyond 3rd
+// (shouldn't normally happen -- bestShadeMatches returns at most 3)
+// fall back to the 3rd-place settings rather than throwing.
+const SHADE_RESULT_RANKS = [
+  { swatchSize: 104, medalColor: '#7a222b', medalWidth: 38, medalStroke: 1.8 },
+  { swatchSize: 76,  medalColor: '#a8636d', medalWidth: 30, medalStroke: 1.6 },
+  { swatchSize: 56,  medalColor: '#c48f96', medalWidth: 24, medalStroke: 1.4 },
+];
+
+// Short (2-3 word) version of the full-sentence mismatch reason, for
+// display under the shade name -- the full sentence still lives in
+// s.mismatchReason for anywhere else that wants it verbatim.
+const SHORT_MISMATCH_REASON = {
+  'softer than your ideal intensity': 'Softer finish',
+  'bolder than your ideal intensity': 'Bolder finish',
+  'a touch darker than your depth': 'Deeper shade',
+  'a touch lighter than your depth': 'Lighter shade',
+  'leans a bit cooler than you': 'Cooler undertone',
+  'leans a bit warmer than you': 'Warmer undertone',
+};
+
+// Best match / 2nd / 3rd, with a clear size hierarchy (swatch, name,
+// confidence bar and reason all scale down by rank) and a rosy
+// open-ring rank badge set apart from the swatch corner.
 function renderShadeMatches(matches){
   const shadeMatchSeasonName = currentSeasonResult && (currentSeasonResult.shadeMatchSeason || currentSeasonResult.season);
   document.getElementById('pickBrandTag').textContent = "Lipstick shades matched from your color profile";
   document.getElementById('pickBrandName').textContent = shadeMatchSeasonName || '';
 
+  // Same undertone/depth/chroma readings already shown as pills up in
+  // the CIELAB Analysis section -- surfaced again here as "your filters"
+  // right before the 3 picks, so it's clear what narrowed the shade
+  // pool down before the results themselves land.
+  const pickFiltersEl = document.getElementById('pickFilters');
+  if(pickFiltersEl){
+    const r = currentSeasonResult || {};
+    const filterChips = [
+      r.undertone_descriptive,
+      r.depth_level,
+      r.chroma_level,
+    ].filter(Boolean);
+    pickFiltersEl.innerHTML = filterChips.map(text =>
+      `<span class="pick-filter-chip">${text}</span>`
+    ).join('');
+  }
+
   shadePodium.innerHTML = '';
   if(matches.length === 0) return;
 
-  // Sort by actual fit quality first -- these 3 are this tier's slice
-  // of the 9 shades allocated lightest-to-darkest across all three
-  // tiers (see allocateShadesToTiers), in lightness order, NOT ranked
-  // by distance. Sorting here ensures the spotlighted "best match"
-  // position is genuinely the closest fit among the 3, not just
-  // whichever one happens to be lightest/darkest.
+  // Sort by actual fit quality first -- these are the (up to) 3 shades
+  // bestShadeMatches already picked as the closest overall fit: best
+  // match, 2nd option, and 3rd option. bestShadeMatches already returns
+  // them in this order, so this sort should be a no-op in practice, but
+  // it's the belt-and-suspenders guarantee that the spotlighted "best
+  // match" position is genuinely the closest fit among the 3, not just
+  // whichever one happens to be listed first.
   const sorted = [...matches].sort((a,b) => a.dist - b.dist);
-  const best = sorted[0];
-  const rest = sorted.slice(1);
+  const rankLabels = ['1', '2', '3'];
 
-  const bestParts = splitBrandLine(best.brand_line);
-  const bestAffiliateUrl = AFFILIATE_LINKS[best.brand_line];
-
-  const bestEl = document.createElement('div');
-  bestEl.style.display = 'flex';
-  bestEl.style.flexDirection = 'column';
-  bestEl.style.alignItems = 'center';
-  bestEl.style.gap = '10px';
-  bestEl.innerHTML = `
-    <div class="tag best-match-tag">Best match</div>
-    ${lipstickSwatch(best.hex, 130)}
-    <div class="shade-best-label">
-      <div class="name">${best.name}</div>
-      <div class="why">${bestParts.line}</div>
-      <div class="why">${sparkleIcon()} ${best.finish}</div>
-      <div class="why" style="font-style:italic;">${textLinesIcon()} ${best.description}</div>
-      ${bestAffiliateUrl ? `<div class="shop-link">Buy now →</div>` : ''}
-    </div>`;
-  if(bestAffiliateUrl){
-    bestEl.style.cursor = 'pointer';
-    bestEl.addEventListener('click', () => window.open(bestAffiliateUrl, '_blank', 'noopener'));
-  }
-  shadePodium.appendChild(bestEl);
-
-  const altsWrap = document.createElement('div');
-  altsWrap.className = 'shade-alts';
-  // All 3 are sorted by actual fit quality (see `sorted` above), so
-  // these ordinal labels are genuinely accurate.
-  const ordinals = ['2nd option', '3rd option'];
-  rest.forEach((s, i) => {
+  sorted.forEach((s, i) => {
     const parts = splitBrandLine(s.brand_line);
     const affiliateUrl = AFFILIATE_LINKS[s.brand_line];
-    const el = document.createElement('div');
-    el.className = 'shade-alt';
-    el.innerHTML = `
-      <div class="tag">${ordinals[i] || `${i+2}th option`}</div>
-      ${lipstickSwatch(s.hex, 58)}
-      <div class="name">${s.name}</div>
-      <div class="why">${parts.line}</div>
-      <div class="why">${sparkleIcon()} ${s.finish}</div>
-      <div class="why" style="font-style:italic;">${textLinesIcon()} ${s.description}</div>
-      ${affiliateUrl ? `<div class="shop-link">Shop →</div>` : ''}`;
+    const rankCfg = SHADE_RESULT_RANKS[i] || SHADE_RESULT_RANKS[SHADE_RESULT_RANKS.length - 1];
+    const shortWhy = s.mismatchReason ? (SHORT_MISMATCH_REASON[s.mismatchReason] || s.mismatchReason) : null;
+
+    const row = document.createElement('div');
+    row.className = `shade-result-row rank-${i+1}` + (affiliateUrl ? ' clickable' : '');
+    row.innerHTML = `
+      <div class="shade-result-swatch">
+        ${lipstickSwatch(s.hex, rankCfg.swatchSize)}
+        ${medalBadgeSvg(rankLabels[i] || (i+1), rankCfg.medalColor, rankCfg.medalWidth, rankCfg.medalStroke)}
+      </div>
+      <div class="shade-result-info">
+        <div class="shade-result-name">${s.name}</div>
+        <div class="shade-result-conf-row">
+          <div class="shade-result-conf-track"><div class="shade-result-conf-fill" style="width:${s.confidencePct}%;"></div></div>
+          <div class="shade-result-conf-num">${s.confidencePct}% matching</div>
+        </div>
+        ${shortWhy ? `<div class="shade-result-why">${shortWhy}</div>` : ''}
+        ${parts.line ? `<div class="shade-result-meta-line">${parts.line}</div>` : ''}
+        ${s.finish ? `<div class="shade-result-meta-line with-icon">${sparkleIcon()} ${s.finish}</div>` : ''}
+        ${s.description ? `<div class="shade-result-meta-line desc with-icon">${textLinesIcon()} ${s.description}</div>` : ''}
+        ${affiliateUrl ? `<div class="shade-result-shop">${i === 0 ? 'Buy now' : 'Shop'} →</div>` : ''}
+      </div>
+    `;
     if(affiliateUrl){
-      el.style.cursor = 'pointer';
-      el.addEventListener('click', () => window.open(affiliateUrl, '_blank', 'noopener'));
+      row.addEventListener('click', () => window.open(affiliateUrl, '_blank', 'noopener'));
     }
-    altsWrap.appendChild(el);
+    shadePodium.appendChild(row);
   });
-  shadePodium.appendChild(altsWrap);
 
   pickCard.classList.add('show');
+  const feedbackCardEl = document.getElementById('feedbackCard');
+  if(feedbackCardEl) feedbackCardEl.classList.add('show');
 }
 </script>
 </body>
