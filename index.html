@@ -54,7 +54,7 @@
     line-height:1.5;
     max-width:440px;
     margin:0 auto 40px;
-    text-wrap:balance;
+    text-wrap:pretty;
   }
   .mirror-stage{
     display:flex;
@@ -112,7 +112,7 @@
     font-size:11px;
     letter-spacing:0.03em;
     color:var(--muted);
-    text-wrap:balance;
+    text-wrap:pretty;
   }
   input[type=file]{display:none;}
   .btn{
@@ -182,6 +182,55 @@
   .card.show{display:block; animation: reveal 0.5s ease;}
   @keyframes reveal{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
 
+  /* Payment paywall -- added 2026-09-12, per Nghi (PayPal, two one-time
+     tiers). Hidden until the visitor clicks "Find My Season" without a
+     purchase on file; see the analyzeBtn click handler and
+     applyUnlockState(). */
+  .paywall-card{ text-align:center; }
+  .paywall-head{ margin-bottom:22px; }
+  .paywall-tiers{
+    display:flex; gap:18px; flex-wrap:wrap; justify-content:center;
+    text-align:left;
+  }
+  .paywall-tier{
+    flex:1 1 220px; max-width:280px;
+    border:1.5px solid var(--line);
+    border-radius:16px;
+    padding:22px 20px 24px;
+    position:relative;
+    display:flex; flex-direction:column;
+  }
+  .paywall-tier.featured{ border-color:var(--rose-deep); }
+  .paywall-tier-badge{
+    position:absolute; top:-11px; left:50%; transform:translateX(-50%);
+    background:var(--rose-deep); color:var(--card);
+    font-family:'Work Sans', sans-serif; font-weight:700;
+    font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase;
+    padding:4px 12px; border-radius:100px; white-space:nowrap;
+  }
+  .paywall-tier-name{
+    font-family:'Playfair Display', serif; font-style:italic;
+    font-size:17px; color:var(--rose-deep); margin-bottom:6px;
+  }
+  .paywall-tier-price{
+    font-family:'Work Sans', sans-serif; font-weight:700;
+    font-size:28px; color:var(--text-dark); margin-bottom:14px;
+  }
+  .paywall-tier-features{
+    list-style:none; margin:0 0 18px; padding:0; flex:1;
+  }
+  .paywall-tier-features li{
+    font-size:13px; color:var(--text-light); margin-bottom:8px;
+    padding-left:18px; position:relative;
+  }
+  .paywall-tier-features li::before{
+    content:'✓'; position:absolute; left:0; color:var(--rose-deep); font-weight:700;
+  }
+  .paypal-btn-slot{ min-height:45px; }
+  .paywall-note{
+    margin-top:20px; font-size:11.5px; color:var(--muted);
+  }
+
   .season-tag{
     font-family:'Playfair Display', serif;
     font-style:italic;
@@ -195,7 +244,7 @@
     font-size:26px;
     margin:0 0 14px;
   }
-  .season-desc{font-size:14.5px;line-height:1.6;color:rgba(33,31,21,0.75);margin-bottom:18px;text-wrap:balance;}
+  .season-desc{font-size:14.5px;line-height:1.6;color:rgba(33,31,21,0.75);margin-bottom:18px;text-wrap:pretty;}
   .confidence-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:-8px 0 8px;}
   .confidence-pill{
     font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;
@@ -205,7 +254,7 @@
   .confidence-pill.lower, .confidence-pill.split{background:rgba(58,31,34,0.08);color:var(--muted);}
   .confidence-bar-track{height:8px;border-radius:4px;background:rgba(58,31,34,0.08);overflow:hidden;margin:2px 0 10px;}
   .confidence-bar-fill{height:100%;border-radius:4px;background:linear-gradient(to right, #C9A8AE, var(--rose-deep));}
-  .confidence-explain{font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:18px;text-wrap:balance;}
+  .confidence-explain{font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:18px;text-wrap:pretty;}
 
   .section-title{
     font-family:'Playfair Display', serif;
@@ -260,18 +309,19 @@
   .analysis-subhead.second{margin-top:26px;}
 
   /* "Your Filter" chip row shown above the 3 shade picks -- surfaces
-     the same undertone/depth/chroma readings already shown as pills in
-     the CIELAB Analysis section above, so the customer sees exactly
-     what criteria narrowed the shade pool before the picks themselves
-     appear. The 3 values are usually short ("Warm-neutral", "Light",
-     "Balanced") and fit one line, but depth/chroma can also come back
-     as a blended boundary label ("Medium-to-Light", "Muted-to-Balanced"
-     -- up to ~18 characters, real data, not a hypothetical) which
-     genuinely cannot share one line with the other two chips at a
-     readable size. flex-wrap:wrap lets the row take a 2nd line only
-     when it actually needs to, instead of the earlier nowrap+ellipsis
-     version, which was silently clipping long values (same mistake as
-     the jewelry-pill bug -- fixed the same way: never truncate). */
+     the same undertone/depth/contrast/chroma readings already shown as
+     pills in the CIELAB Analysis section above, so the customer sees
+     exactly what shaped the picks before they appear. The 4 values are
+     usually short ("Warm-neutral", "Light", "High", "Balanced") and fit
+     one or two lines, but any of depth/contrast/chroma can also come
+     back as a blended boundary label ("Medium-to-Light",
+     "Medium-to-High", "Muted-to-Balanced" -- up to ~18 characters, real
+     data, not a hypothetical) which may not share a line with the
+     others at a readable size. flex-wrap:wrap lets the row take
+     however many lines it actually needs, instead of the earlier
+     nowrap+ellipsis version, which was silently clipping long values
+     (same mistake as the jewelry-pill bug -- fixed the same way: never
+     truncate). */
   .pick-filters-label{
     font-size:11px;text-transform:uppercase;letter-spacing:0.08em;
     color:var(--muted);margin:14px 0 8px;
@@ -289,10 +339,19 @@
     font-size:11px;font-weight:700;color:var(--rose-deep);
     white-space:nowrap;
   }
+  /* Contrast and Chroma read as bare "Medium-to-Low" / "Balanced" --
+     ambiguous once the row is 2 chips wide instead of 1 (Contrast's
+     Low/Medium/High scale can otherwise be mistaken for Depth's
+     Deep/Medium/Light one sitting right next to it). This small muted
+     prefix names the axis without needing its own separate line the
+     way the CIELAB Analysis section's fuller labels do. Undertone and
+     Depth aren't prefixed -- their own values ("Warm-neutral", "Deep")
+     already read unambiguously on their own. */
+  .pick-filter-chip-label{font-weight:500;color:var(--muted);}
 
   .swatch-row{
-    display:grid;grid-template-columns:repeat(auto-fit,minmax(108px,1fr));
-    gap:14px;margin-bottom:4px;
+    display:grid;grid-template-columns:repeat(2,1fr);
+    gap:16px 14px;margin-bottom:4px;
   }
   .swatch-chip{text-align:center;}
   .swatch-circle{
@@ -313,11 +372,11 @@
      are single-value gradient-pole meters and must not be affected. */
   .dials-subtitle{
     font-size:12.5px;color:var(--muted);line-height:1.55;text-align:center;margin:0 0 18px;
-    text-wrap:balance;
+    text-wrap:pretty;
   }
   .dials-footnote{
     font-size:12px;color:var(--muted);line-height:1.6;text-align:center;margin:6px 0 22px;
-    text-wrap:balance;
+    text-wrap:pretty;
   }
   .dial-row{margin-bottom:20px;}
   .dial-row:last-child{margin-bottom:4px;}
@@ -368,7 +427,7 @@
   }
   .palette-chip .label{
     font-size:10.5px;color:var(--text-light);font-weight:600;line-height:1.25;
-    text-wrap:balance;
+    text-wrap:pretty;
   }
 
   /* flex-wrap:nowrap + equal flex share (via .multi, added in JS when
@@ -392,7 +451,7 @@
     font-size:12px;font-weight:600;color:var(--text-light);
     white-space:nowrap;
   }
-  .jewelry-note{font-size:12.5px;color:var(--muted);line-height:1.6;text-wrap:balance;}
+  .jewelry-note{font-size:12.5px;color:var(--muted);line-height:1.6;text-wrap:pretty;}
   .palette-download-row{display:flex;justify-content:center;margin-top:24px;}
   .palette-download-btn{font-size:13px;padding:12px 26px;}
 
@@ -423,7 +482,13 @@
   }
 
   .metric-subrow{display:flex;gap:16px;margin:0 0 14px 33px;}
-  .metric-subrow .sub{flex:1;}
+  /* This re-uses the ".sub" class name for an unrelated purpose (a
+     Lightness/Darkness stat block), which also picks up the intro
+     paragraph's ".sub" rule further up (center-aligned, 40px bottom
+     margin, 440px max-width, 15px text) since nothing here overrode
+     it. Reset every one of those to neutral so this block is styled
+     only by its own rules below. */
+  .metric-subrow .sub{flex:1;text-align:left;max-width:none;margin:0;line-height:normal;text-wrap:wrap;}
   .metric-subrow .sub-label{font-size:9.5px;color:var(--muted);margin-bottom:4px;}
   .metric-subrow .sub-track{height:5px;border-radius:3px;background:#f0e0e2;overflow:hidden;}
   .metric-subrow .sub-fill{height:100%;border-radius:3px;background:#cf99a1;}
@@ -492,10 +557,12 @@
   /* Open-ring rank badge -- no fill, just a thin rosy outline and the
      rank numeral in the same tone, set apart from the swatch corner
      rather than overlapping it. Rank reads through depth of the same
-     rosy family: 1st deepest, 3rd palest. The numeral is SVG text with
-     dominant-baseline="central" so it centers on the font's own
-     reported metrics, not a CSS line-box guess that can drift with
-     whichever font actually loads. */
+     rosy family: 1st deepest, 3rd palest. The numeral is SVG text
+     centered with y="50" (the ring's own center) plus dy="0.35em" --
+     a fixed, font-size-relative nudge off the alphabetic baseline.
+     This renders the same everywhere (unlike dominant-baseline="central",
+     which several WebKit/Safari versions render inconsistently and can
+     leave the numeral sitting low in the ring). */
   .medal-badge{position:absolute;display:block;}
   .rank-1 .medal-badge{top:-26px;left:-26px;}
   .rank-2 .medal-badge{top:-20px;left:-20px;}
@@ -512,16 +579,18 @@
   .rank-3 .shade-result-name{font-size:15px;margin-bottom:7px;}
 
   .shade-result-conf-row{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
-  .shade-result-conf-track{
-    flex:none;height:4px;border-radius:2px;
-    background:rgba(150,51,60,0.14);overflow:hidden;
-  }
-  .rank-1 .shade-result-conf-track{width:170px;}
-  .rank-2 .shade-result-conf-track{width:122px;height:3.5px;}
-  .rank-3 .shade-result-conf-track{width:90px;height:3px;}
   .rank-2 .shade-result-conf-row{margin-bottom:9px;}
   .rank-3 .shade-result-conf-row{margin-bottom:8px;}
-  .shade-result-conf-fill{height:100%;border-radius:2px;background:linear-gradient(90deg, #c9707c, var(--rose-deep));}
+  /* Love-icon confidence display (2026-09-11, per Nghi -- replaces the
+     bar chart with 1-5 icons, same glyph/threshold convention as the
+     Shade Atlas debug tool: >90=5, >80=4, >70=3, >60=2, else=1, never
+     0 -- paired with the "X% matching" text it used to sit next to
+     (kept, per Nghi, just moved off the bar). */
+  .shade-result-conf-icons{letter-spacing:1px;white-space:nowrap;}
+  .shade-result-conf-icons .love-icons-empty{opacity:0.35;filter:grayscale(1);}
+  .rank-1 .shade-result-conf-icons{font-size:15px;}
+  .rank-2 .shade-result-conf-icons{font-size:13px;}
+  .rank-3 .shade-result-conf-icons{font-size:11.5px;}
   .shade-result-conf-num{font-family:'Playfair Display', serif;font-weight:600;color:var(--rose-deep);white-space:nowrap;}
   .rank-1 .shade-result-conf-num{font-size:14px;}
   .rank-2 .shade-result-conf-num{font-size:12.5px;}
@@ -532,7 +601,7 @@
   .rank-2 .shade-result-why{font-size:12px;}
   .rank-3 .shade-result-why{font-size:11px;}
 
-  .shade-result-meta-line{color:var(--muted);line-height:1.5;text-wrap:balance;}
+  .shade-result-meta-line{color:var(--muted);line-height:1.5;text-wrap:pretty;}
   /* Icon-led lines (finish/description) hang-indent so a wrapped
      continuation line aligns under the TEXT, not back under the icon --
      without this, a long description (this catalog has some up to ~50
@@ -555,13 +624,19 @@
   .rank-3 .shade-result-shop{font-size:11px;margin-top:6px;}
 
   @media (max-width:480px){
-    .shade-result-row{gap:12px;}
-    .rank-1 .shade-result-swatch svg.lip-swatch{width:72px !important;height:auto !important;}
+    .shade-result-row{gap:10px;}
+    /* Rank-1's swatch is 64px here, not the 72px it'd get by the same
+       ratio as rank-2/3 -- the extra ~8px goes to the info column
+       instead. Several real MAC line names (e.g. "M·A·Cximal Sleek
+       Satin Lipstick") sit right at the edge of fitting rank-1's text
+       column on one line; this reclaims just enough width to clear
+       that edge with real margin, without shrinking the type. */
+    .rank-1 .shade-result-swatch svg.lip-swatch{width:64px !important;height:auto !important;}
     .rank-2 .shade-result-swatch svg.lip-swatch{width:56px !important;height:auto !important;}
     .rank-3 .shade-result-swatch svg.lip-swatch{width:44px !important;height:auto !important;}
-    .rank-1 .shade-result-conf-track{width:90px;}
-    .rank-2 .shade-result-conf-track{width:66px;}
-    .rank-3 .shade-result-conf-track{width:50px;}
+    .rank-1 .shade-result-conf-icons{font-size:13px;}
+    .rank-2 .shade-result-conf-icons{font-size:11.5px;}
+    .rank-3 .shade-result-conf-icons{font-size:10.5px;}
     .rank-1 .shade-result-conf-num{font-size:13px;}
     .rank-2 .shade-result-conf-num{font-size:11.5px;}
     .rank-3 .shade-result-conf-num{font-size:10.5px;}
@@ -632,7 +707,39 @@
   <h1>Find My Best Shades</h1>
   <p class="sub">Upload a clear, well-lit selfie.<br>We'll figure out your color season and the lip shades that suit you best.</p>
 
-  <div class="mirror-stage">
+  <div class="card paywall-card" id="paywallCard">
+    <div class="paywall-head">
+      <div class="season-tag">Find My Best Shades</div>
+      <div class="season-name" style="font-size:22px;">Choose your reading</div>
+      <div class="season-desc">A one-time purchase — pay once, then use your result on this device whenever you like.</div>
+    </div>
+    <div class="paywall-tiers">
+      <div class="paywall-tier">
+        <div class="paywall-tier-name">Season Analysis</div>
+        <div class="paywall-tier-price">$9.99</div>
+        <ul class="paywall-tier-features">
+          <li>Your color season &amp; undertone</li>
+          <li>Depth, contrast &amp; chroma breakdown</li>
+          <li>A personalized style palette</li>
+        </ul>
+        <div id="paypalBtn-season" class="paypal-btn-slot"></div>
+      </div>
+      <div class="paywall-tier featured">
+        <div class="paywall-tier-badge">Most Popular</div>
+        <div class="paywall-tier-name">Season + Shade Matching</div>
+        <div class="paywall-tier-price">$12.99</div>
+        <ul class="paywall-tier-features">
+          <li>Everything in Season Analysis</li>
+          <li>Your best-matching lipstick shades</li>
+          <li>Brand &amp; finish picks, ranked by fit</li>
+        </ul>
+        <div id="paypalBtn-seasonShade" class="paypal-btn-slot"></div>
+      </div>
+    </div>
+    <div class="paywall-note">Payments are processed securely by PayPal — we never see or store your card details.</div>
+  </div>
+
+  <div class="mirror-stage" id="mirrorStage">
     <div class="magic-mirror-wrap">
       <div class="mirror" id="mirrorLabel">
         <span class="placeholder" id="placeholderText"><span class="mirror-line">Mirror, mirror<br>on the wall...</span><span class="mirror-hint">choose an option below</span></span>
@@ -771,7 +878,7 @@
     <div class="card" id="pickCard">
       <div class="season-tag" id="pickBrandTag"></div>
       <div class="season-name" id="pickBrandName" style="font-size:19px;"></div>
-      <div class="pick-filters-label">Your Filter</div>
+      <div class="pick-filters-label"><svg width="11" height="11" viewBox="0 0 20 20" style="vertical-align:-1px;display:inline-block;margin-right:4px;"><line x1="3" y1="5" x2="17" y2="5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="8" cy="5" r="2.2" fill="var(--card)" stroke="currentColor" stroke-width="1.8"/><line x1="3" y1="15" x2="17" y2="15" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="13" cy="15" r="2.2" fill="var(--card)" stroke="currentColor" stroke-width="1.8"/></svg>Your Filter</div>
       <div class="pick-filters" id="pickFilters"></div>
       <div class="shade-podium" id="shadePodium"></div>
     </div>
@@ -825,14 +932,14 @@ const SEASON_STYLE_GUIDE = {
       {name:"Golden Blonde", hex:"#E8C275"}, {name:"Strawberry Blonde", hex:"#E3A66F"},
       {name:"Light Honey Brown", hex:"#B3823F"}, {name:"Warm Caramel", hex:"#A5652E"}
     ],
-    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}], note:"Bright, polished gold suits you best — keep pieces light and warm rather than heavy or oxidized." }
+    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}], note:"Bright, polished gold suits you best — keep pieces light and warm rather than heavy or oxidized." }
   },
   "True Spring": {
     hair: [
       {name:"Golden Brown", hex:"#8A5A2B"}, {name:"Copper Red", hex:"#B5541A"},
       {name:"Honey Blonde", hex:"#D9A64E"}, {name:"Warm Chestnut", hex:"#6E3B22"}
     ],
-    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}], note:"Classic warm, polished gold — your go-to metal for everyday and statement pieces alike." }
+    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}], note:"Classic warm, polished gold — your go-to metal for everyday and statement pieces alike." }
   },
   "Bright Spring": {
     hair: [
@@ -846,7 +953,7 @@ const SEASON_STYLE_GUIDE = {
       {name:"Soft Honey Brown", hex:"#9C6E3E"}, {name:"Warm Ash-Beige Blonde", hex:"#C7A97A"},
       {name:"Light Caramel", hex:"#B98552"}, {name:"Soft Chestnut", hex:"#7A4B2E"}
     ],
-    jewelry: { metals:[{name:"Matte Gold", hex:"#C9A24B"}, {name:"Rose Gold", hex:"#B76E79"}], note:"Brushed, low-shine warm metals — avoid anything too bright or heavily polished." }
+    jewelry: { metals:[{name:"Matte Gold", hex:"#C9A24B"}, {name:"Rose Gold", hex:"#B76E79"}], note:"Brushed, low-shine warm metals — avoid anything too bright or heavily polished." }
   },
 
   "Light Summer": {
@@ -861,21 +968,21 @@ const SEASON_STYLE_GUIDE = {
       {name:"Cool Ash Brown", hex:"#6B594A"}, {name:"Cool Medium Brown", hex:"#5A4738"},
       {name:"Taupe Brown", hex:"#7A6656"}, {name:"Soft Cool Blonde", hex:"#C4B594"}
     ],
-    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Cool, softly polished metals — your classic pairing for everyday and dressier looks." }
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Cool, softly polished metals — your classic pairing for everyday and dressier looks." }
   },
   "Soft Summer": {
     hair: [
       {name:"Cool Taupe Brown", hex:"#6E5D50"}, {name:"Ashy Medium Brown", hex:"#665648"},
       {name:"Muted Cool Blonde", hex:"#B8A986"}, {name:"Soft Grey-Brown", hex:"#7D7266"}
     ],
-    jewelry: { metals:[{name:"Brushed Silver", hex:"#B8BABC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Muted, low-shine cool metals — nothing too bright or high-contrast against your soft coloring." }
+    jewelry: { metals:[{name:"Brushed Silver", hex:"#B8BABC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Muted, low-shine cool metals — nothing too bright or high-contrast against your soft coloring." }
   },
   "Deep Soft Summer": {
     hair: [
       {name:"Deep Ash Brown", hex:"#4A3C33"}, {name:"Cool Espresso", hex:"#3A2C22"},
       {name:"Dark Cool Chestnut", hex:"#4E3222"}, {name:"Deep Taupe Brown", hex:"#5A4A3D"}
     ],
-    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Gunmetal", hex:"#4B4E52"}], note:"Cool, deeper-toned metals — silver and gunmetal read richer against your depth than pale silver alone." }
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Gunmetal", hex:"#4B4E52"}], note:"Cool, deeper-toned metals — silver and gunmetal read richer against your depth than pale silver alone." }
   },
 
   "Soft Autumn": {
@@ -883,28 +990,28 @@ const SEASON_STYLE_GUIDE = {
       {name:"Warm Chestnut Brown", hex:"#6B3E24"}, {name:"Soft Caramel", hex:"#9C6B36"},
       {name:"Golden Brown", hex:"#8A5A2B"}, {name:"Warm Ash Brown", hex:"#8A7256"}
     ],
-    jewelry: { metals:[{name:"Matte Gold", hex:"#C9A24B"}, {name:"Antique Gold", hex:"#B08D57"}], note:"Soft, brushed warm metals — antique or matte finishes suit you better than bright polish." }
+    jewelry: { metals:[{name:"Matte Gold", hex:"#C9A24B"}, {name:"Antique Gold", hex:"#B08D57"}], note:"Soft, brushed warm metals — antique or matte finishes suit you better than bright polish." }
   },
   "True Autumn": {
     hair: [
       {name:"Chestnut", hex:"#6E3B1F"}, {name:"Copper Auburn", hex:"#9C4A22"},
       {name:"Warm Chocolate Brown", hex:"#4A2E1C"}, {name:"Golden Copper", hex:"#A5622A"}
     ],
-    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}, {name:"Bronze", hex:"#8C5E3C"}], note:"Rich, warm metals with real depth — gold and bronze both read beautifully against your coloring." }
+    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}, {name:"Bronze", hex:"#8C5E3C"}], note:"Rich, warm metals with real depth — gold and bronze both read beautifully against your coloring." }
   },
   "Deep Autumn": {
     hair: [
       {name:"Deep Auburn", hex:"#5E2718"}, {name:"Dark Chocolate Brown", hex:"#3A2415"},
       {name:"Rich Copper Brown", hex:"#6B3A1E"}, {name:"Espresso", hex:"#33221A"}
     ],
-    jewelry: { metals:[{name:"Antique Gold", hex:"#B08D57"}, {name:"Copper", hex:"#B5651D"}], note:"Deep, richly warm metals — bold gold or copper pieces hold their own against your depth and chroma." }
+    jewelry: { metals:[{name:"Antique Gold", hex:"#B08D57"}, {name:"Copper", hex:"#B5651D"}], note:"Deep, richly warm metals — bold gold or copper pieces hold their own against your depth and chroma." }
   },
   "Deep Soft Autumn": {
     hair: [
       {name:"Deep Warm Brunette", hex:"#43291B"}, {name:"Dark Chestnut", hex:"#4E2C1B"},
       {name:"Espresso Brown", hex:"#33221A"}, {name:"Warm Dark Cocoa", hex:"#3A2517"}
     ],
-    jewelry: { metals:[{name:"Matte Bronze", hex:"#8C5E3C"}, {name:"Antique Gold", hex:"#B08D57"}], note:"Muted, deep warm metals — brushed finishes suit your understated depth better than high shine." }
+    jewelry: { metals:[{name:"Matte Bronze", hex:"#8C5E3C"}, {name:"Antique Gold", hex:"#B08D57"}], note:"Muted, deep warm metals — brushed finishes suit your understated depth better than high shine." }
   },
 
   "Deep Winter": {
@@ -912,28 +1019,28 @@ const SEASON_STYLE_GUIDE = {
       {name:"Jet Black", hex:"#16130F"}, {name:"Darkest Brown", hex:"#2A1F18"},
       {name:"Cool Espresso", hex:"#2E241F"}, {name:"Blue-Black", hex:"#12141C"}
     ],
-    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Cool, high-polish metals — silver and platinum hold up against your depth and saturation." }
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Cool, high-polish metals — silver and platinum hold up against your depth and saturation." }
   },
   "True Winter": {
     hair: [
       {name:"Cool Black-Brown", hex:"#241E1A"}, {name:"Cool Dark Brown", hex:"#362A22"},
       {name:"Blue-Black", hex:"#12141C"}, {name:"Ash Dark Brown", hex:"#3E332B"}
     ],
-    jewelry: { metals:[{name:"Platinum", hex:"#E5E4E2"}, {name:"Silver", hex:"#C7C9CC"}], note:"Icy, high-shine cool metals — the classic jewel-tone-and-platinum pairing." }
+    jewelry: { metals:[{name:"Platinum", hex:"#E5E4E2"}, {name:"Silver", hex:"#C7C9CC"}], note:"Icy, high-shine cool metals — the classic jewel-tone-and-platinum pairing." }
   },
   "Bright Winter": {
     hair: [
       {name:"Blue-Black", hex:"#12141C"}, {name:"Cool Darkest Brown", hex:"#241C18"},
       {name:"Deep Cool Brunette", hex:"#2E2420"}, {name:"Ash Black-Brown", hex:"#2A241F"}
     ],
-    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Bright, high-polish cool metals to match your vividness — avoid anything brushed or muted." }
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Bright, high-polish cool metals to match your vividness — avoid anything brushed or muted." }
   },
   "Soft Winter": {
     hair: [
       {name:"Cool Ash Brown", hex:"#5A4C42"}, {name:"Soft Black", hex:"#262626"},
       {name:"Dark Ash Brunette", hex:"#3E332C"}, {name:"Cool Medium Grey-Brown", hex:"#6B5F55"}
     ],
-    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Cool, softly polished metals — striking against your contrast without competing with your muted coloring." }
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Cool, softly polished metals — striking against your contrast without competing with your muted coloring." }
   }
 };
 
@@ -1968,182 +2075,7 @@ function findBestShades(customerWarmth, customerValue, customerChroma, topN){
     .slice(0, topN);
 }
 
-const MAC_SHADES = [
-{name:"WHIRL",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#A55F5A",r:165,g:95,b:90,lightness_L:48.2,temperature_b:15.3,chroma_C:31.8,description:"dirty rose"},
-{name:"WARM TEDDY",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B36961",r:179,g:105,b:97,lightness_L:52.5,temperature_b:17.3,chroma_C:33.5,description:"dirty warm nude"},
-{name:"TAUPE",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#BD695C",r:189,g:105,b:92,lightness_L:53.7,temperature_b:22.1,chroma_C:39.0,description:"muted reddish taupe brown"},
-{name:"MULL IT TO THE MAX",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#D0796F",r:208,g:121,b:111,lightness_L:60.1,temperature_b:20.2,chroma_C:38.5,description:"dirty peach"},
-{name:"VELVET TEDDY",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#C37F78",r:195,g:127,b:120,lightness_L:60.0,temperature_b:14.7,chroma_C:29.4,description:"deep tone beige"},
-{name:"CAFE MOCHA",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#C57367",r:197,g:115,b:103,lightness_L:57.2,temperature_b:20.6,chroma_C:37.2,description:"mauvey pinky nude"},
-{name:"KINDA SEXY",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#D68F88",r:214,g:143,b:136,lightness_L:66.3,temperature_b:14.8,chroma_C:30.0,description:"neutral pinky rose"},
-{name:"HONEY LOVE",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#D79D97",r:215,g:157,b:151,lightness_L:70.0,temperature_b:11.7,chroma_C:23.8,description:"light beige toned rose"},
-{name:"ACTING NATURAL",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#AA8271",r:170,g:130,b:113,lightness_L:57.8,temperature_b:15.1,chroma_C:19.9,description:"warm toned light nude beige"},
-{name:"FOLIO",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#9A7562",r:154,g:117,b:98,lightness_L:52.4,temperature_b:16.1,chroma_C:20.0,description:"greyish nude"},
-{name:"YASH",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#AA725E",r:170,g:114,b:94,lightness_L:53.4,temperature_b:20.1,chroma_C:28.1,description:"ultra light neutral"},
-{name:"COOL TEDDY",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#9C655B",r:156,g:101,b:91,lightness_L:48.4,temperature_b:14.8,chroma_C:25.7,description:"cool deep tone beige"},
-{name:"ICONIC PHOTO",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#7C4434",r:124,g:68,b:52,lightness_L:35.3,temperature_b:20.2,chroma_C:30.1,description:"golden brown"},
-{name:"BARE M·A·CXIMAL",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#452D25",r:69,g:45,b:37,lightness_L:21.1,temperature_b:9.6,chroma_C:13.8,description:"deep rich chocolate brown"},
-{name:"CAVIAR",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#1F1C1B",r:31,g:28,b:27,lightness_L:10.6,temperature_b:1.2,chroma_C:1.7,description:"black"},
-{name:"EVERYBODY'S HEROINE",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#913B79",r:145,g:59,b:121,lightness_L:38.8,temperature_b:-17.8,chroma_C:47.4,description:"bright purple"},
-{name:"SMOKED PURPLE",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#622D2F",r:98,g:45,b:47,lightness_L:25.8,temperature_b:10.0,chroma_C:26.2,description:"deep eggplant purple"},
-{name:"ANTIQUE VELVET",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#57251F",r:87,g:37,b:31,lightness_L:21.8,temperature_b:15.0,chroma_C:27.1,description:"intense brown"},
-{name:"SIN",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#6A2121",r:106,g:33,b:33,lightness_L:24.5,temperature_b:17.9,chroma_C:37.1,description:"deep dark blue red"},
-{name:"MIXED MEDIA",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#611B1C",r:97,g:27,b:28,lightness_L:21.6,temperature_b:17.3,chroma_C:36.0,description:"a deep, muted brick brown"},
-{name:"DIVA",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#641C18",r:100,g:28,b:24,lightness_L:22.3,temperature_b:20.9,chroma_C:38.3,description:"intense reddish burgundy"},
-{name:"CAPTIVE AUDIENCE",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#A33743",r:163,g:55,b:67,lightness_L:39.5,temperature_b:17.5,chroma_C:48.6,description:"pinkish plum"},
-{name:"RUBY WOO",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B21920",r:178,g:25,b:32,lightness_L:38.3,temperature_b:38.0,chroma_C:69.4,description:"vivid blue red"},
-{name:"RED ROCK",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B3181E",r:179,g:24,b:30,lightness_L:38.4,temperature_b:39.3,chroma_C:70.5,description:"classic clean red"},
-{name:"OVERSTATEMENT",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#A11B16",r:161,g:27,b:22,lightness_L:34.8,temperature_b:38.9,chroma_C:65.3,description:"burnt orange with intensity"},
-{name:"CHILI",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#911F1B",r:145,g:31,b:27,lightness_L:32.0,temperature_b:32.2,chroma_C:56.6,description:"warm brick red"},
-{name:"SUGAR DADA",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#A52E1F",r:165,g:46,b:31,lightness_L:37.9,temperature_b:37.3,chroma_C:60.6,description:"brownish orange red"},
-{name:"LADY DANGER",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#C02D22",r:192,g:45,b:34,lightness_L:43.1,temperature_b:42.4,chroma_C:70.9,description:"vivid bright coral red"},
-{name:"NO CORAL-ATION",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#CB4337",r:203,g:67,b:55,lightness_L:48.2,temperature_b:37.0,chroma_C:64.7,description:"light muted coral"},
-{name:"FLAMINGO",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#DD7263",r:221,g:114,b:99,lightness_L:60.2,temperature_b:27.4,chroma_C:48.8,description:"clean yellow baby pink"},
-{name:"D FOR DANGER",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#A4232F",r:164,g:35,b:47,lightness_L:36.6,temperature_b:26.3,chroma_C:58.2,description:"brick red"},
-{name:"KEEP DREAMING",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#962930",r:150,g:41,b:48,lightness_L:34.6,temperature_b:22.6,chroma_C:50.8,description:"deep rose with blue undertones"},
-{name:"GO RETRO",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#933432",r:147,g:52,b:50,lightness_L:35.8,temperature_b:22.8,chroma_C:45.9,description:"muted peachy pinky brown"},
-{name:"AVANT GARNET",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#9A1C21",r:154,g:28,b:33,lightness_L:33.6,temperature_b:31.0,chroma_C:59.2,description:"rich dirty red"},
-{name:"RUSSIAN RED",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#AF252E",r:175,g:37,b:46,lightness_L:39.0,temperature_b:30.3,chroma_C:62.4,description:"intense bluish red"},
-{name:"RING THE ALARM",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#A9222A",r:169,g:34,b:42,lightness_L:37.4,temperature_b:30.6,chroma_C:61.7,description:"milky pink red"},
-{name:"MARRAKESH",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#A1372B",r:161,g:55,b:43,lightness_L:38.7,temperature_b:31.1,chroma_C:53.2,description:"intense orange brown"},
-{name:"FOREVER CURIOUS",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#BB4443",r:187,g:68,b:67,lightness_L:45.8,temperature_b:26.5,chroma_C:54.7,description:"pinky red"},
-{name:"VERVE SWERVE",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#BA4C51",r:186,g:76,b:81,lightness_L:47.2,temperature_b:19.9,chroma_C:49.1,description:"deep mauve pink"},
-{name:"UNBOTHERED",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B94244",r:185,g:66,b:68,lightness_L:45.1,temperature_b:25.0,chroma_C:54.2,description:"peachy nude pink"},
-{name:"DARE ME",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#DB3D44",r:219,g:61,b:68,lightness_L:50.5,temperature_b:32.9,chroma_C:69.4,description:"deep peachy coral"},
-{name:"HOT GIRL PINK",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#D61742",r:214,g:23,b:66,lightness_L:46.1,temperature_b:28.5,chroma_C:74.9,description:"bright watermelon pink"},
-{name:"SOAR",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#893A36",r:137,g:58,b:54,lightness_L:35.2,temperature_b:19.2,chroma_C:38.6,description:"midtone cool mauve"},
-{name:"TWIG TWIST",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#A24542",r:162,g:69,b:66,lightness_L:41.7,temperature_b:21.0,chroma_C:43.7,description:"soft muted brownish pink"},
-{name:"SWEET DEAL",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#A64C44",r:166,g:76,b:68,lightness_L:43.8,temperature_b:22.6,chroma_C:42.9,description:"midtone nudey pink"},
-{name:"MEHR",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#AE5452",r:174,g:84,b:82,lightness_L:46.9,temperature_b:18.6,chroma_C:41.0,description:"midtone mauve pink"},
-{name:"GET THE HINT",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#BD4F51",r:189,g:79,b:81,lightness_L:48.3,temperature_b:21.4,chroma_C:49.3,description:"warm rose"},
-{name:"YOU WOULDN'T GET IT",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#C36062",r:195,g:96,b:98,lightness_L:52.8,temperature_b:17.5,chroma_C:43.4,description:"midtone pink"},
-{name:"LIPSTICK SNOB",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#D88294",r:216,g:130,b:148,lightness_L:63.9,temperature_b:4.6,chroma_C:35.6,description:"light neutral pink"},
-{name:"CANDY YUM YUM",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#E24F8D",r:226,g:79,b:141,lightness_L:55.8,temperature_b:-3.0,chroma_C:62.1,description:"neon pink"},
-{name:"CRÈME D'NUDE",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#C68970",r:198,g:137,b:112,lightness_L:62.6,temperature_b:22.8,chroma_C:30.5,description:"pale peachy beige"},
-{name:"CALL IT COZY",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#B5693F",r:181,g:105,b:63,lightness_L:52.2,temperature_b:36.3,chroma_C:45.0,description:"caramel"},
-{name:"MYTH",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#C68472",r:198,g:132,b:114,lightness_L:61.4,temperature_b:20.1,chroma_C:30.7,description:"light neutral nude"},
-{name:"BLANKETY",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#B77060",r:183,g:112,b:96,lightness_L:54.6,temperature_b:20.8,chroma_C:33.5,description:"soft beige pink"},
-{name:"TRUTH BE UNTOLD",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#88372C",r:136,g:55,b:44,lightness_L:34.3,temperature_b:24.2,chroma_C:41.6,description:"deeper warm nude"},
-{name:"CRÈME IN YOUR COFFEE",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#973F36",r:151,g:63,b:54,lightness_L:38.6,temperature_b:23.9,chroma_C:43.5,description:"midtone pink brown"},
-{name:"DEL RIO",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#8E2D29",r:142,g:45,b:41,lightness_L:33.5,temperature_b:25.4,chroma_C:48.0,description:"cool rose"},
-{name:"PARAMOUNT",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#711F19",r:113,g:31,b:25,lightness_L:25.4,temperature_b:24.5,chroma_C:43.2,description:"reddish brown"},
-{name:"FILM NOIR",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#5B211B",r:91,g:33,b:27,lightness_L:21.5,temperature_b:17.6,chroma_C:31.6,description:"deep cool brown"},
-{name:"FLESHPOT",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#BC8B79",r:188,g:139,b:121,lightness_L:62.1,temperature_b:16.9,chroma_C:23.4,description:"warm light beige-flesh tone like nude"},
-{name:"PEACHSTOCK",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#BD8D70",r:189,g:141,b:112,lightness_L:62.5,temperature_b:22.6,chroma_C:26.8,description:"warm toned light medium peach"},
-{name:"HODGEPODGE",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#956048",r:149,g:96,b:72,lightness_L:45.9,temperature_b:22.6,chroma_C:29.4,description:"mocha mid-tone brown"},
-{name:"STONE",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#875A49",r:135,g:90,b:73,lightness_L:42.7,temperature_b:17.3,chroma_C:23.8,description:"muted greyish taupe brown"},
-{name:"SWEETHEART",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#983334",r:152,g:51,b:52,lightness_L:36.5,temperature_b:22.7,chroma_C:47.9,description:"shimmering warm pink"},
-{name:"ESPRESSO YOURSELF",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#772C21",r:119,g:44,b:33,lightness_L:29.0,temperature_b:23.9,chroma_C:40.1,description:"blackened orange"},
-{name:"MORANGE",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#AD392B",r:173,g:57,b:43,lightness_L:41.2,temperature_b:34.5,chroma_C:57.9,description:"bright orange"},
-{name:"LEFT ON RED",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#901C1F",r:144,g:28,b:31,lightness_L:31.5,temperature_b:29.3,chroma_C:55.6,description:"deep brick red"},
-{name:"CENTRE OF ATTENTION",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#691522",r:105,g:21,b:34,lightness_L:22.5,temperature_b:14.7,chroma_C:40.1,description:"bright yellow red"},
-{name:"BRAVE RED",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#9D252D",r:157,g:37,b:45,lightness_L:35.4,temperature_b:25.8,chroma_C:55.4,description:"yellow red"},
-{name:"DUBONNET",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#88292A",r:136,g:41,b:42,lightness_L:31.8,temperature_b:22.4,chroma_C:46.2,description:"midtone wine"},
-{name:"CRÈME CUP",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#C3796D",r:195,g:121,b:109,lightness_L:58.4,temperature_b:18.8,chroma_C:33.3,description:"light blue pink"},
-{name:"MODESTY",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#AD5B4F",r:173,g:91,b:79,lightness_L:48.2,temperature_b:22.0,chroma_C:39.0,description:"muted neutral pink"},
-{name:"BRAVE",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#B74F4D",r:183,g:79,b:77,lightness_L:47.2,temperature_b:22.2,chroma_C:47.5,description:"pink beige with a white pearl"},
-{name:"GRAPEFRUIT PUCKER",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#DB7674",r:219,g:118,b:116,lightness_L:61.0,temperature_b:18.9,chroma_C:43.4,description:"warm midtone pink"},
-{name:"SITTING PRETTY",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#AF4F48",r:175,g:79,b:72,lightness_L:45.9,temperature_b:23.2,chroma_C:45.1,description:"light rose"},
-{name:"BRICK-O-LA",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#9B302D",r:155,g:48,b:45,lightness_L:36.5,temperature_b:27.1,chroma_C:51.8,description:"warm dusty rose"},
-{name:"MARASCHINO, MUCH?",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#B11E39",r:177,g:30,b:57,lightness_L:38.9,temperature_b:23.5,chroma_C:62.2,description:"vibrant blue red"},
-{name:"POPSTAR PINK",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#C21C58",r:194,g:28,b:88,lightness_L:42.8,temperature_b:9.8,chroma_C:65.3,description:"vivid magenta"},
-{name:"LOVERS ONLY",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#AA0620",r:170,g:6,b:32,lightness_L:35.6,temperature_b:34.7,chroma_C:68.4,description:"raspberry pink"},
-{name:"PINK PEPPERMINT",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#BE6F80",r:190,g:111,b:128,lightness_L:56.0,temperature_b:4.3,chroma_C:33.6,description:"dusty lavender"},
-{name:"SAINT GERMAIN",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#D9719A",r:217,g:113,b:154,lightness_L:60.7,temperature_b:-3.5,chroma_C:45.4,description:"clean pastel pink"},
-{name:"VIOLET VAPOUR",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#AD095D",r:173,g:9,b:93,lightness_L:37.6,temperature_b:-1.4,chroma_C:62.9,description:"electric violet"},
-{name:"AMOROUS",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#942A30",r:148,g:42,b:48,lightness_L:34.3,temperature_b:22.2,chroma_C:49.7,description:"dusty blue pink"},
-{name:"REBEL",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#981930",r:152,g:25,b:48,lightness_L:33.1,temperature_b:20.9,chroma_C:55.4,description:"midtonal cream plum"},
-{name:"GUESSING GAME",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#5A1312",r:90,g:19,b:18,lightness_L:18.7,temperature_b:20.1,chroma_C:37.8,description:"blackened red"},
-{name:"CYBER",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#2C0D11",r:44,g:13,b:17,lightness_L:7.8,temperature_b:4.5,chroma_C:17.1,description:"blackened purple"},
-{name:"TILTED DENIM",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#4470A4",r:68,g:112,b:164,lightness_L:46.3,temperature_b:-32.5,chroma_C:32.6,description:"pale dusty blue"},
-{name:"SUNNY VANILLA",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#E1C1A5",r:225,g:193,b:165,lightness_L:80.1,temperature_b:18.3,chroma_C:19.7,description:"pale sheer banana yellow with reddish yellow pearl"},
-{name:"LIL SQUIRT",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#DEBF9A",r:222,g:191,b:154,lightness_L:79.1,temperature_b:22.8,chroma_C:23.5,description:"sheer green with gold pearl"},
-{name:"NOT HUMBLE JUST BRAGGING",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#D88A8E",r:216,g:138,b:142,lightness_L:65.5,temperature_b:10.4,chroma_C:32.0,description:"light lavender with silver pearl"},
-{name:"SYRUP",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#C9656B",r:201,g:101,b:107,lightness_L:54.9,temperature_b:15.2,chroma_C:43.0,description:"blue pink"},
-{name:"FIGGY",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#C02B63",r:192,g:43,b:99,lightness_L:44.0,temperature_b:4.6,chroma_C:61.3,description:"deep vibrant purple"},
-{name:"IT'S YOURS",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#940029",r:148,g:0,b:41,lightness_L:30.5,temperature_b:22.1,chroma_C:58.7,description:"deep reddish berry"},
-{name:"SURPRISE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#E2C2AA",r:226,g:194,b:170,lightness_L:80.5,temperature_b:16.3,chroma_C:18.0,description:"clear with champagne / gold universal pearl"},
-{name:"PARTY TRICK",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#E0B99B",r:224,g:185,b:155,lightness_L:77.8,temperature_b:20.5,chroma_C:22.7,description:"champagne pearly"},
-{name:"HUG ME",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#D46965",r:212,g:105,b:101,lightness_L:57.1,temperature_b:22.0,chroma_C:47.2,description:"blushed nude"},
-{name:"THANKS IT'S M·A·C!",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#DE8276",r:222,g:130,b:118,lightness_L:64.0,temperature_b:21.9,chroma_C:40.5,description:"taupey pink nude with silver pearl"},
-{name:"SIGNATURE MOVE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#C47865",r:196,g:120,b:101,lightness_L:58.1,temperature_b:23.0,chroma_C:36.0,description:"burnt orange brown"},
-{name:"POSH PIT",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#C26352",r:194,g:99,b:82,lightness_L:53.0,temperature_b:27.0,chroma_C:45.3,description:"warm rose brown nude"},
-{name:"LIKE I WAS SAYING...",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#B07675",r:176,g:118,b:117,lightness_L:55.6,temperature_b:9.9,chroma_C:24.7,description:"extremely neutral light nude"},
-{name:"ALONE TIME",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#9F5353",r:159,g:83,b:83,lightness_L:44.5,temperature_b:14.3,chroma_C:34.5,description:"greyish mauve"},
-{name:"CAN'T DULL MY SHINE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#8A4237",r:138,g:66,b:55,lightness_L:37.1,temperature_b:21.0,chroma_C:36.3,description:"rich brown"},
-{name:"HOUSEWIFE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#893836",r:137,g:56,b:54,lightness_L:34.8,temperature_b:18.7,chroma_C:39.2,description:"deep reddish brown with subtle red pearl"},
-{name:"UNCENSORED",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#7E4535",r:126,g:69,b:53,lightness_L:35.9,temperature_b:20.3,chroma_C:30.5,description:"deep cool tone brown"},
-{name:"I DESERVE THIS",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#773E38",r:119,g:62,b:56,lightness_L:33.3,temperature_b:14.8,chroma_C:28.3,description:"deep warm brown"},
-{name:"LOCAL CELEB",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#DA6A4F",r:218,g:106,b:79,lightness_L:57.8,temperature_b:35.6,chroma_C:54.9,description:"burnt orange"},
-{name:"WORK CRUSH",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#DF3C3B",r:223,g:60,b:59,lightness_L:51.0,temperature_b:38.8,chroma_C:73.3,description:"light caramel orange"},
-{name:"COCKNEY",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#E33656",r:227,g:54,b:86,lightness_L:51.4,temperature_b:23.8,chroma_C:70.7,description:"yellow red with multidimensional pearl"},
-{name:"LADY BUG",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#D9314D",r:217,g:49,b:77,lightness_L:48.9,temperature_b:25.5,chroma_C:69.6,description:"tomato red"},
-{name:"BUSINESS CASUAL",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#D6454F",r:214,g:69,b:79,lightness_L:50.8,temperature_b:26.7,chroma_C:63.1,description:"warm rose nude"},
-{name:"PDA",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#CF3342",r:207,g:51,b:66,lightness_L:47.0,temperature_b:29.4,chroma_C:67.4,description:"bricky red"},
-{name:"SPICE IT UP",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#C6233E",r:198,g:35,b:62,lightness_L:43.6,temperature_b:27.2,chroma_C:68.1,description:"a deep reddish nude"},
-{name:"SELLOUT",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#CE7169",r:206,g:113,b:105,lightness_L:58.0,temperature_b:20.8,chroma_C:41.3,description:"pinky nude with silver pearl"},
-{name:"WELL, WELL, WELL!",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#D5816D",r:213,g:129,b:109,lightness_L:62.5,temperature_b:24.6,chroma_C:39.0,description:"light pink peachy nude"},
-{name:"SEE SHEER",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#CF5754",r:207,g:87,b:84,lightness_L:52.6,temperature_b:25.9,chroma_C:53.9,description:"grapefruit pink"},
-{name:"GUMMY BARE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#D85953",r:216,g:89,b:83,lightness_L:54.4,temperature_b:29.0,chroma_C:57.4,description:"clean light pink"},
-{name:"OH, GOODIE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#E67272",r:230,g:114,b:114,lightness_L:61.7,temperature_b:21.2,chroma_C:49.7,description:"clean light coral"},
-{name:"FRIENDA",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#DF6368",r:223,g:99,b:104,lightness_L:57.7,temperature_b:21.3,chroma_C:53.3,description:"midtone coral"},
-{name:"NO PHOTOS",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#ED5974",r:237,g:89,b:116,lightness_L:58.4,temperature_b:15.7,chroma_C:61.0,description:"bright coral pink"},
-{name:"PIGMENT OF YOUR IMAGINATION",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#C22939",r:194,g:41,b:57,lightness_L:43.3,temperature_b:29.7,chroma_C:66.5,description:"cool pink"},
-{name:"BEAM THERE, DONE THAT",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#AC1333",r:172,g:19,b:51,lightness_L:36.9,temperature_b:24.6,chroma_C:63.3,description:"rosy plum pink"},
-{name:"KISSING STRANGERS",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#9E252E",r:158,g:37,b:46,lightness_L:35.6,temperature_b:25.5,chroma_C:55.6,description:"dirty rose"},
-{name:"OFF THE MARKET",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#D48E6F",r:212,g:142,b:111,lightness_L:65.4,temperature_b:27.3,chroma_C:35.8,description:"warm neutral beige"},
-{name:"BIG PROMOTION",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#CA886A",r:202,g:136,b:106,lightness_L:62.7,temperature_b:26.4,chroma_C:34.2,description:"warm caramel"},
-{name:"TAKEN",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#C97D67",r:201,g:125,b:103,lightness_L:59.9,temperature_b:24.4,chroma_C:36.5,description:"warm red-beige"},
-{name:"TEDDY 2.0",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#D07E6C",r:208,g:126,b:108,lightness_L:61.1,temperature_b:23.3,chroma_C:37.9,description:"midtoned pink beige"},
-{name:"MULL IT OVER",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#D87766",r:216,g:119,b:102,lightness_L:60.6,temperature_b:26.1,chroma_C:44.6,description:"midtone pink-peach"},
-{name:"TURN TO THE LEFT",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#B66655",r:182,g:102,b:85,lightness_L:52.0,temperature_b:23.7,chroma_C:38.5,description:"rich red brown"},
-{name:"GOOD FOR YOU!",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#9C5848",r:156,g:88,b:72,lightness_L:45.0,temperature_b:21.5,chroma_C:34.0,description:"rich cool brown"},
-{name:"CHESTNUT",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#9B5C44",r:155,g:92,b:68,lightness_L:45.7,temperature_b:24.7,chroma_C:34.0,description:"deep golden brown"},
-{name:"BE MY BRIDESMAID",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#D7857F",r:215,g:133,b:127,lightness_L:64.0,temperature_b:16.6,chroma_C:35.0,description:"neutral cool beige"},
-{name:"SULTRINESS",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#E08D89",r:224,g:141,b:137,lightness_L:67.1,temperature_b:15.4,chroma_C:34.7,description:"baby-blue pink"},
-{name:"A LITTLE TAMED",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#DD6A6B",r:221,g:106,b:107,lightness_L:58.7,temperature_b:21.0,chroma_C:49.6,description:"midtoned yellow pink"},
-{name:"MANDARIN O",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#E4635E",r:228,g:99,b:94,lightness_L:58.3,temperature_b:28.0,chroma_C:57.1,description:"salmon pink"},
-{name:"BRICKTHROUGH",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#CF5454",r:207,g:84,b:84,lightness_L:52.1,temperature_b:25.2,chroma_C:54.8,description:"warm dusty rose"},
-{name:"STAY CURIOUS",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#D4736D",r:212,g:115,b:109,lightness_L:59.3,temperature_b:20.4,chroma_C:42.5,description:"midtoned red pink"},
-{name:"GIRLS WEEKEND",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#DA9191",r:218,g:145,b:145,lightness_L:67.4,temperature_b:11.4,chroma_C:29.9,description:"dusty mauve"},
-{name:"ON MY MIND",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#D26083",r:210,g:96,b:131,lightness_L:55.8,temperature_b:2.6,chroma_C:48.5,description:"deep berry wine"},
-{name:"READY TO MINGLE",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#DC8763",r:220,g:135,b:99,lightness_L:64.5,temperature_b:33.0,chroma_C:43.9,description:"honey orange"},
-{name:"MY BEST LIFE",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#DE6648",r:222,g:102,b:72,lightness_L:57.6,temperature_b:39.2,chroma_C:59.6,description:"saturated rich orange"},
-{name:"MOVING ON UP",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#D57554",r:213,g:117,b:84,lightness_L:59.4,temperature_b:34.6,chroma_C:48.9,description:"burnt peach"},
-{name:"MARRAKESH-MERE",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#C15C46",r:193,g:92,b:70,lightness_L:51.2,temperature_b:31.6,chroma_C:50.0,description:"rich orange brown"},
-{name:"DEVOTED TO CHILLI",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#BF3B36",r:191,g:59,b:54,lightness_L:44.9,temperature_b:33.2,chroma_C:61.9,description:"warm brick red"},
-{name:"DUBONNET BUZZ",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#C34646",r:195,g:70,b:70,lightness_L:47.5,temperature_b:27.2,chroma_C:56.8,description:"deep brown red"},
-{name:"RUBY NEW",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#D44951",r:212,g:73,b:81,lightness_L:51.1,temperature_b:25.8,chroma_C:60.8,description:"vivid cool red"},
-{name:"TWENTY-FUN",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#CE4056",r:206,g:64,b:86,lightness_L:48.8,temperature_b:19.7,chroma_C:60.3,description:"vibrant hot pink"},
-{name:"WARM HUG",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#D27D65",r:210,g:125,b:101,lightness_L:61.1,temperature_b:27.2,chroma_C:40.9,description:"dirty midtoned beige"},
-{name:"DATE-MAKER",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#D4826B",r:212,g:130,b:107,lightness_L:62.5,temperature_b:25.8,chroma_C:39.0,description:"warm nude"},
-{name:"HABIT",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#CE836C",r:206,g:131,b:108,lightness_L:62.0,temperature_b:24.5,chroma_C:36.0,description:"peachy nude"},
-{name:"VELVET TEDDY",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#CA7970",r:202,g:121,b:112,lightness_L:59.3,temperature_b:18.5,chroma_C:35.7,description:"deep-toned beige"},
-{name:"TAKEN",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#C57863",r:197,g:120,b:99,lightness_L:58.2,temperature_b:24.3,chroma_C:37.0,description:"warm-toned light brown"},
-{name:"IT'S PERSONAL",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#CF9888",r:207,g:152,b:136,lightness_L:67.7,temperature_b:16.5,chroma_C:24.8,description:"cool dusty nude"},
-{name:"BUFFIEST",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#BF7F67",r:191,g:127,b:103,lightness_L:59.2,temperature_b:23.2,chroma_C:32.0,description:"midtone nudey pink"},
-{name:"REKINDLED",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#7D4238",r:125,g:66,b:56,lightness_L:35.1,temperature_b:17.4,chroma_C:29.9,description:"deep cool brown"},
-{name:"CHESTNUT",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#814434",r:129,g:68,b:52,lightness_L:36.1,temperature_b:21.3,chroma_C:32.5,description:"deep warm brown"},
-{name:"MULL IT OVER",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#DB7365",r:219,g:115,b:101,lightness_L:60.1,temperature_b:26.2,chroma_C:47.2,description:"dirty peach"},
-{name:"PINK ROSES",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#C45D5B",r:196,g:93,b:91,lightness_L:52.2,temperature_b:20.9,chroma_C:46.0,description:"moderately warm-toned, very dark mauve"},
-{name:"MORE THE MEHR-IER",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#C56063",r:197,g:96,b:99,lightness_L:53.1,temperature_b:17.4,chroma_C:44.1,description:"midtoned mauve pink"},
-{name:"OVER THE TAUPE",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#BF6957",r:191,g:105,b:87,lightness_L:53.9,temperature_b:25.3,chroma_C:41.2,description:"midtoned dirty nude"},
-{name:"FASHION EMERGENCY",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#A63A3A",r:166,g:58,b:58,lightness_L:40.3,temperature_b:24.2,chroma_C:50.6,description:"intense rose brown"},
-{name:"A LITTLE TAMED",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#D65259",r:214,g:82,b:89,lightness_L:53.0,temperature_b:23.6,chroma_C:57.5,description:"mid-tone pink with yellow undertones"},
-{name:"SOMETHING BORROWED",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#DC7795",r:220,g:119,b:149,lightness_L:62.2,temperature_b:1.6,chroma_C:42.6,description:"soft lilac"},
-{name:"MAKE IT FASHUN!",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#CB3460",r:203,g:52,b:96,lightness_L:47.0,temperature_b:10.9,chroma_C:62.1,description:"fuchsia"},
-{name:"BILLION $ SMILE",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#E14C62",r:225,g:76,b:98,lightness_L:54.1,temperature_b:20.1,chroma_C:62.4,description:"bright fluorescent pink"},
-{name:"RESORT SEASON",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#DE572D",r:222,g:87,b:45,lightness_L:54.6,temperature_b:49.9,chroma_C:71.1,description:"bright orange"},
-{name:"CREAMSICLE",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#D16252",r:209,g:98,b:82,lightness_L:55.0,temperature_b:30.1,chroma_C:52.1,description:"midtoned raspberry peach"},
-{name:"RHYTHM 'N' ROSES",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#B63B32",r:182,g:59,b:50,lightness_L:43.2,temperature_b:33.2,chroma_C:59.2,description:"very warm-toned, medium-dark red"},
-{name:"M·A·C SMASH",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#CA343E",r:202,g:52,b:62,lightness_L:46.1,temperature_b:30.5,chroma_C:66.1,description:"true red"},
-{name:"RUBY BOO",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#C33B42",r:195,g:59,b:66,lightness_L:45.8,temperature_b:27.4,chroma_C:60.7,description:"vivid blue red"},
-{name:"DEVOTED TO CHILI",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#B83F39",r:184,g:63,b:57,lightness_L:44.3,temperature_b:30.4,chroma_C:57.2,description:"warm brick red"},
-{name:"MARRAKESH-MER",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#B44436",r:180,g:68,b:54,lightness_L:44.4,temperature_b:32.1,chroma_C:55.0,description:"intense orange brown"},
-{name:"BURNING LOVE",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#A22539",r:162,g:37,b:57,lightness_L:36.6,temperature_b:19.9,chroma_C:55.0,description:"deep intense berry"},
-{name:"DATE NIGHT",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#98253C",r:152,g:37,b:60,lightness_L:34.7,temperature_b:15.1,chroma_C:50.7,description:"deep red wine"},
-{name:"PRETTY PLEATS!",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#853231",r:133,g:50,b:49,lightness_L:32.9,temperature_b:19.2,chroma_C:40.4,description:"burgundy brown"}
-];
+const MAC_SHADES = [{name:"WHIRL",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#8C4648",r:140,g:70,b:72,lightness_L:38.6,temperature_b:12.5,chroma_C:32.4,description:"dirty rose"},{name:"WARM TEDDY",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#8C3D2F",r:140,g:61,b:47,lightness_L:36.2,temperature_b:24.9,chroma_C:41,description:"dirty warm nude"},{name:"TAUPE",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#722D2F",r:114,g:45,b:47,lightness_L:28.5,temperature_b:14.2,chroma_C:33.8,description:"muted reddish taupe brown"},{name:"MULL IT TO THE MAX",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#BE5649",r:190,g:86,b:73,lightness_L:49.6,temperature_b:27.8,chroma_C:49.4,description:"dirty peach"},{name:"VELVET TEDDY",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#883E39",r:136,g:62,b:57,lightness_L:35.9,temperature_b:18.2,chroma_C:36.1,description:"deep tone beige"},{name:"CAFE MOCHA",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B14744",r:177,g:71,b:68,lightness_L:44.6,temperature_b:24,chroma_C:49.3,description:"mauvey pinky nude"},{name:"KINDA SEXY",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#A65247",r:166,g:82,b:71,lightness_L:45.1,temperature_b:22.5,chroma_C:40.4,description:"neutral pinky rose"},{name:"HONEY LOVE",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#CD8078",r:205,g:128,b:120,lightness_L:61.5,temperature_b:16.9,chroma_C:33.4,description:"light beige toned rose"},{name:"ACTING NATURAL",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#C17B67",r:193,g:123,b:103,lightness_L:58.5,temperature_b:22.3,chroma_C:33.5,description:"warm toned light nude beige"},{name:"FOLIO",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B48776",r:180,g:135,b:118,lightness_L:60.2,temperature_b:15.8,chroma_C:21.7,description:"greyish nude"},{name:"YASH",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B3796E",r:179,g:121,b:110,lightness_L:56.5,temperature_b:15.3,chroma_C:26.2,description:"ultra light neutral"},{name:"COOL TEDDY",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#75423C",r:117,g:66,b:60,lightness_L:34,temperature_b:13.2,chroma_C:25.1,description:"cool deep tone beige"},{name:"ICONIC PHOTO",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#87452E",r:135,g:69,b:46,lightness_L:37.1,temperature_b:26.4,chroma_C:37.1,description:"golden brown"},{name:"BARE M·A·CXIMAL",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#4F201E",r:79,g:32,b:30,lightness_L:19.2,temperature_b:12.1,chroma_C:25,description:"deep rich chocolate brown"},{name:"CAVIAR",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#141413",r:20,g:20,b:19,lightness_L:6.3,temperature_b:0.6,chroma_C:0.6,description:"black"},{name:"EVERYBODY'S HEROINE",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#992C7E",r:153,g:44,b:126,lightness_L:38,temperature_b:-22,chroma_C:57.7,description:"bright purple"},{name:"SMOKED PURPLE",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#42222D",r:66,g:34,b:45,lightness_L:17.9,temperature_b:-0.5,chroma_C:17,description:"deep eggplant purple"},{name:"ANTIQUE VELVET",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#4C2627",r:76,g:38,b:39,lightness_L:20.3,temperature_b:7.3,chroma_C:19.4,description:"intense brown"},{name:"SIN",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#4A1722",r:74,g:23,b:34,lightness_L:16.4,temperature_b:5.4,chroma_C:25.9,description:"deep dark blue red"},{name:"MIXED MEDIA",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#4B0E1E",r:75,g:14,b:30,lightness_L:15,temperature_b:6.3,chroma_C:30.2,description:"a deep, muted brick brown"},{name:"DIVA",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#601C25",r:96,g:28,b:37,lightness_L:21.8,temperature_b:11.3,chroma_C:33.4,description:"intense reddish burgundy"},{name:"CAPTIVE AUDIENCE",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#931643",r:147,g:22,b:67,lightness_L:32.2,temperature_b:7.1,chroma_C:52.4,description:"pinkish plum"},{name:"RUBY WOO",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#AD1C36",r:173,g:28,b:54,lightness_L:37.8,temperature_b:23.9,chroma_C:61.7,description:"vivid blue red"},{name:"RED ROCK",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#C21C18",r:194,g:28,b:24,lightness_L:41.8,temperature_b:46.4,chroma_C:77.2,description:"classic clean red"},{name:"OVERSTATEMENT",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#9B0809",r:155,g:8,b:9,lightness_L:32.2,temperature_b:42.3,chroma_C:68.8,description:"burnt orange with intensity"},{name:"CHILI",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#7F0A0A",r:127,g:10,b:10,lightness_L:26,temperature_b:34.3,chroma_C:57.5,description:"warm brick red"},{name:"SUGAR DADA",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B73221",r:183,g:50,b:33,lightness_L:41.9,temperature_b:41.3,chroma_C:66.6,description:"brownish orange red"},{name:"LADY DANGER",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#C92419",r:201,g:36,b:25,lightness_L:43.9,temperature_b:48.2,chroma_C:78.4,description:"vivid bright coral red"},{name:"NO CORAL-ATION",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B54037",r:181,g:64,b:55,lightness_L:43.9,temperature_b:31,chroma_C:56.2,description:"light muted coral"},{name:"FLAMINGO",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#E54157",r:229,g:65,b:87,lightness_L:53.1,temperature_b:25.4,chroma_C:68.6,description:"clean yellow baby pink"},{name:"D FOR DANGER",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#741220",r:116,g:18,b:32,lightness_L:24.5,temperature_b:19,chroma_C:45.8,description:"brick red"},{name:"KEEP DREAMING",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B8263D",r:184,g:38,b:61,lightness_L:41.1,temperature_b:24.1,chroma_C:62.5,description:"deep rose with blue undertones"},{name:"GO RETRO",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#813239",r:129,g:50,b:57,lightness_L:32.4,temperature_b:13.3,chroma_C:37.2,description:"muted peachy pinky brown"},{name:"AVANT GARNET",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#5D1314",r:93,g:19,b:20,lightness_L:19.4,temperature_b:19.8,chroma_C:38.6,description:"rich dirty red"},{name:"RUSSIAN RED",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#6E0914",r:110,g:9,b:20,lightness_L:22.2,temperature_b:23.9,chroma_C:48,description:"intense bluish red"},{name:"RING THE ALARM",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#9E1F2B",r:158,g:31,b:43,lightness_L:34.9,temperature_b:26.5,chroma_C:57.6,description:"milky pink red"},{name:"MARRAKESH",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#751C08",r:117,g:28,b:8,lightness_L:25.7,temperature_b:34,chroma_C:50.8,description:"intense orange brown"},{name:"FOREVER CURIOUS",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#9E1D37",r:158,g:29,b:55,lightness_L:34.9,temperature_b:18.9,chroma_C:55.7,description:"pinky red"},{name:"VERVE SWERVE",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#A44353",r:164,g:67,b:83,lightness_L:42.1,temperature_b:11.1,chroma_C:43,description:"deep mauve pink"},{name:"UNBOTHERED",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B04A3D",r:176,g:74,b:61,lightness_L:44.9,temperature_b:28.5,chroma_C:49.7,description:"peachy nude pink"},{name:"DARE ME",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#C5453A",r:197,g:69,b:58,lightness_L:47.5,temperature_b:34.3,chroma_C:60.9,description:"deep peachy coral"},{name:"HOT GIRL PINK",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#CC2C57",r:204,g:44,b:87,lightness_L:46.1,temperature_b:15.3,chroma_C:65,description:"bright watermelon pink"},{name:"SOAR",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#91535E",r:145,g:83,b:94,lightness_L:42.8,temperature_b:4.9,chroma_C:27.6,description:"midtone cool mauve"},{name:"TWIG TWIST",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#884347",r:136,g:67,b:71,lightness_L:37.3,temperature_b:11.3,chroma_C:31.9,description:"soft muted brownish pink"},{name:"SWEET DEAL",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#9C4A52",r:156,g:74,b:82,lightness_L:42.1,temperature_b:11.6,chroma_C:36.8,description:"midtone nudey pink"},{name:"MEHR",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B94E5A",r:185,g:78,b:90,lightness_L:47.6,temperature_b:15,chroma_C:46.8,description:"midtone mauve pink"},{name:"GET THE HINT",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#B04555",r:176,g:69,b:85,lightness_L:44.4,temperature_b:13.4,chroma_C:46.9,description:"warm rose"},{name:"YOU WOULDN'T GET IT",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#D75675",r:215,g:86,b:117,lightness_L:54.4,temperature_b:9,chroma_C:54,description:"midtone pink"},{name:"LIPSTICK SNOB",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#CD718E",r:205,g:113,b:142,lightness_L:58.7,temperature_b:0.4,chroma_C:39.5,description:"light neutral pink"},{name:"CANDY YUM YUM",brand_line:"mac::M·A·Cximal Silky Matte Lipstick",finish:"silky matte",hex:"#F4489A",r:244,g:72,b:154,lightness_L:58.2,temperature_b:-6.7,chroma_C:71.4,description:"neon pink"},{name:"CRÈME D'NUDE",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#E39182",r:227,g:145,b:130,lightness_L:68.2,temperature_b:20.9,chroma_C:36,description:"pale peachy beige"},{name:"CALL IT COZY",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#BE6338",r:190,g:99,b:56,lightness_L:52,temperature_b:40.2,chroma_C:52,description:"caramel"},{name:"MYTH",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#D78E7B",r:215,g:142,b:123,lightness_L:65.9,temperature_b:21.5,chroma_C:33.4,description:"light neutral nude"},{name:"BLANKETY",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#D18F8A",r:209,g:143,b:138,lightness_L:65.8,temperature_b:12.8,chroma_C:27.6,description:"soft beige pink"},{name:"TRUTH BE UNTOLD",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#89392E",r:137,g:57,b:46,lightness_L:34.9,temperature_b:23.7,chroma_C:41,description:"deeper warm nude"},{name:"CRÈME IN YOUR COFFEE",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#B0585B",r:176,g:88,b:91,lightness_L:48.2,temperature_b:15,chroma_C:39,description:"midtone pink brown"},{name:"DEL RIO",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#9B3F4F",r:155,g:63,b:79,lightness_L:39.7,temperature_b:10.1,chroma_C:41.1,description:"cool rose"},{name:"PARAMOUNT",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#71121A",r:113,g:18,b:26,lightness_L:23.7,temperature_b:22,chroma_C:46,description:"reddish brown"},{name:"FILM NOIR",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#3C2723",r:60,g:39,b:35,lightness_L:18.1,temperature_b:6.6,chroma_C:11.4,description:"deep cool brown"},{name:"FLESHPOT",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#D18B79",r:209,g:139,b:121,lightness_L:64.5,temperature_b:20.6,chroma_C:32,description:"warm light beige-flesh tone like nude"},{name:"PEACHSTOCK",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#B97356",r:185,g:115,b:86,lightness_L:55.3,temperature_b:27.6,chroma_C:36.9,description:"warm toned light medium peach"},{name:"HODGEPODGE",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#9F664E",r:159,g:102,b:78,lightness_L:48.8,temperature_b:23,chroma_C:30.6,description:"mocha mid-tone brown"},{name:"STONE",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#734C44",r:115,g:76,b:68,lightness_L:36.4,temperature_b:11.5,chroma_C:19.2,description:"muted greyish taupe brown"},{name:"SWEETHEART",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#B62B39",r:182,g:43,b:57,lightness_L:41.2,temperature_b:26.6,chroma_C:61.4,description:"shimmering warm pink"},{name:"ESPRESSO YOURSELF",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#96352C",r:150,g:53,b:44,lightness_L:36.4,temperature_b:27.3,chroma_C:48.5,description:"blackened orange"},{name:"MORANGE",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#ED4135",r:237,g:65,b:53,lightness_L:54.1,temperature_b:46.2,chroma_C:79.4,description:"bright orange"},{name:"LEFT ON RED",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#AE0B17",r:174,g:11,b:23,lightness_L:36.6,temperature_b:40.9,chroma_C:71.9,description:"deep brick red"},{name:"CENTRE OF ATTENTION",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#CB001E",r:203,g:0,b:30,lightness_L:42.5,temperature_b:44.8,chroma_C:81.3,description:"bright yellow red"},{name:"BRAVE RED",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#E5312C",r:229,g:49,b:44,lightness_L:50.7,temperature_b:47.1,chroma_C:81.8,description:"yellow red"},{name:"DUBONNET",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#911F27",r:145,g:31,b:39,lightness_L:32.1,temperature_b:25.1,chroma_C:53.3,description:"midtone wine"},{name:"CRÈME CUP",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#DD8E88",r:221,g:142,b:136,lightness_L:66.9,temperature_b:15.7,chroma_C:33.2,description:"light blue pink"},{name:"MODESTY",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#CA8588",r:202,g:133,b:136,lightness_L:62.6,temperature_b:9.4,chroma_C:28.5,description:"muted neutral pink"},{name:"BRAVE",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#A04E62",r:160,g:78,b:98,lightness_L:44,temperature_b:4.4,chroma_C:36.4,description:"pink beige with a white pearl"},{name:"GRAPEFRUIT PUCKER",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#D26364",r:210,g:99,b:100,lightness_L:55.6,temperature_b:20.6,chroma_C:48.5,description:"warm midtone pink"},{name:"SITTING PRETTY",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#B95D6D",r:185,g:93,b:109,lightness_L:51,temperature_b:8.3,chroma_C:39.6,description:"light rose"},{name:"BRICK-O-LA",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#AE4154",r:174,g:65,b:84,lightness_L:43.4,temperature_b:12.5,chroma_C:47.7,description:"warm dusty rose"},{name:"MARASCHINO, MUCH?",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#C2105C",r:194,g:16,b:92,lightness_L:42.2,temperature_b:6.4,chroma_C:67.2,description:"vibrant blue red"},{name:"POPSTAR PINK",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#9D1858",r:157,g:24,b:88,lightness_L:35.1,temperature_b:-2.3,chroma_C:56,description:"vivid magenta"},{name:"LOVERS ONLY",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#9E1A3D",r:158,g:26,b:61,lightness_L:34.7,temperature_b:14.8,chroma_C:55.6,description:"raspberry pink"},{name:"PINK PEPPERMINT",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#C589A2",r:197,g:137,b:162,lightness_L:63.6,temperature_b:-4,chroma_C:26.9,description:"dusty lavender"},{name:"SAINT GERMAIN",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#F476B2",r:244,g:118,b:178,lightness_L:66.1,temperature_b:-8.8,chroma_C:55.5,description:"clean pastel pink"},{name:"VIOLET VAPOUR",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#AD2965",r:173,g:41,b:101,lightness_L:40.3,temperature_b:-2.6,chroma_C:56.8,description:"electric violet"},{name:"AMOROUS",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#732439",r:115,g:36,b:57,lightness_L:27.3,temperature_b:5.9,chroma_C:36.9,description:"dusty blue pink"},{name:"REBEL",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#621A31",r:98,g:26,b:49,lightness_L:22.2,temperature_b:3.6,chroma_C:34.4,description:"midtonal cream plum"},{name:"GUESSING GAME",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#500F19",r:80,g:15,b:25,lightness_L:16.1,temperature_b:11.6,chroma_C:32.6,description:"blackened red"},{name:"CYBER",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#311926",r:49,g:25,b:38,lightness_L:12.5,temperature_b:-3.7,chroma_C:14.7,description:"blackened purple"},{name:"TILTED DENIM",brand_line:"mac::M·A·Cximal Sleek Satin Lipstick",finish:"sleek satin",hex:"#4470A4",r:68,g:112,b:164,lightness_L:46.3,temperature_b:-32.5,chroma_C:32.6,description:"pale dusty blue"},{name:"SUNNY VANILLA",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#E1C1A5",r:225,g:193,b:165,lightness_L:80.1,temperature_b:18.3,chroma_C:19.7,description:"pale sheer banana yellow with reddish yellow pearl"},{name:"LIL SQUIRT",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#DEBF9A",r:222,g:191,b:154,lightness_L:79.1,temperature_b:22.8,chroma_C:23.5,description:"sheer green with gold pearl"},{name:"NOT HUMBLE JUST BRAGGING",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#AB4D6F",r:171,g:77,b:111,lightness_L:45.8,temperature_b:-0.7,chroma_C:42.1,description:"light lavender with silver pearl"},{name:"SYRUP",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#C16674",r:193,g:102,b:116,lightness_L:54.1,temperature_b:8.8,chroma_C:38.7,description:"blue pink"},{name:"FIGGY",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#9A3475",r:154,g:52,b:117,lightness_L:38.9,temperature_b:-15,chroma_C:51.4,description:"deep vibrant purple"},{name:"IT'S YOURS",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#671C2F",r:103,g:28,b:47,lightness_L:23.4,temperature_b:6.9,chroma_C:35.5,description:"deep reddish berry"},{name:"SURPRISE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#E2C2AA",r:226,g:194,b:170,lightness_L:80.5,temperature_b:16.3,chroma_C:18,description:"clear with champagne / gold universal pearl"},{name:"PARTY TRICK",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#E0B99B",r:224,g:185,b:155,lightness_L:77.8,temperature_b:20.5,chroma_C:22.7,description:"champagne pearly"},{name:"HUG ME",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#B76455",r:183,g:100,b:85,lightness_L:51.7,temperature_b:23.3,chroma_C:39.4,description:"blushed nude"},{name:"THANKS IT'S M·A·C!",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#B96A68",r:185,g:106,b:104,lightness_L:53.6,temperature_b:14.9,chroma_C:34.6,description:"taupey pink nude with silver pearl"},{name:"SIGNATURE MOVE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#974E42",r:151,g:78,b:66,lightness_L:41.9,temperature_b:20.9,chroma_C:36,description:"burnt orange brown"},{name:"POSH PIT",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#9A3530",r:154,g:53,b:48,lightness_L:37.2,temperature_b:26,chroma_C:49.2,description:"warm rose brown nude"},{name:"LIKE I WAS SAYING...",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#803D2E",r:128,g:61,b:46,lightness_L:34.2,temperature_b:22.6,chroma_C:35.7,description:"extremely neutral light nude"},{name:"ALONE TIME",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#9B5B5A",r:155,g:91,b:90,lightness_L:45.9,temperature_b:11.9,chroma_C:28.7,description:"greyish mauve"},{name:"CAN'T DULL MY SHINE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#93371D",r:147,g:55,b:29,lightness_L:36,temperature_b:35.3,chroma_C:51.4,description:"rich brown"},{name:"HOUSEWIFE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#63171E",r:99,g:23,b:30,lightness_L:21.4,temperature_b:15.8,chroma_C:37.7,description:"deep reddish brown with subtle red pearl"},{name:"UNCENSORED",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#673E2F",r:103,g:62,b:47,lightness_L:30.7,temperature_b:16.7,chroma_C:23.3,description:"deep cool tone brown"},{name:"I DESERVE THIS",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#772D1E",r:119,g:45,b:30,lightness_L:29.1,temperature_b:25.9,chroma_C:40.8,description:"deep warm brown"},{name:"LOCAL CELEB",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#C53D2F",r:197,g:61,b:47,lightness_L:46.2,temperature_b:38.9,chroma_C:65.9,description:"burnt orange"},{name:"WORK CRUSH",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#A24825",r:162,g:72,b:37,lightness_L:41.9,temperature_b:38,chroma_C:51.7,description:"light caramel orange"},{name:"COCKNEY",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#B01924",r:176,g:25,b:36,lightness_L:37.9,temperature_b:35.2,chroma_C:67.5,description:"yellow red with multidimensional pearl"},{name:"LADY BUG",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#A81116",r:168,g:17,b:22,lightness_L:35.6,temperature_b:40.1,chroma_C:69.4,description:"tomato red"},{name:"BUSINESS CASUAL",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#A02E2E",r:160,g:46,b:46,lightness_L:37.2,temperature_b:27.5,chroma_C:54.2,description:"warm rose nude"},{name:"PDA",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#A7261C",r:167,g:38,b:28,lightness_L:37.3,temperature_b:38.4,chroma_C:64,description:"bricky red"},{name:"SPICE IT UP",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#902C32",r:144,g:44,b:50,lightness_L:33.9,temperature_b:20.3,chroma_C:47,description:"a deep reddish nude"},{name:"SELLOUT",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#D87782",r:216,g:119,b:130,lightness_L:61.1,temperature_b:11,chroma_C:40.4,description:"pinky nude with silver pearl"},{name:"WELL, WELL, WELL!",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#DE6A5E",r:222,g:106,b:94,lightness_L:58.6,temperature_b:28.3,chroma_C:52.6,description:"light pink peachy nude"},{name:"SEE SHEER",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#CE4453",r:206,g:68,b:83,lightness_L:49.4,temperature_b:22.1,chroma_C:59.5,description:"grapefruit pink"},{name:"GUMMY BARE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#E14A51",r:225,g:74,b:81,lightness_L:53.5,temperature_b:29.3,chroma_C:65.7,description:"clean light pink"},{name:"OH, GOODIE",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#E05968",r:224,g:89,b:104,lightness_L:56.1,temperature_b:19.2,chroma_C:57.1,description:"clean light coral"},{name:"FRIENDA",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#CA435B",r:202,g:67,b:91,lightness_L:48.7,temperature_b:16.3,chroma_C:57.3,description:"midtone coral"},{name:"NO PHOTOS",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#D54469",r:213,g:68,b:105,lightness_L:51,temperature_b:11.4,chroma_C:60.2,description:"bright coral pink"},{name:"PIGMENT OF YOUR IMAGINATION",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#D85A69",r:216,g:90,b:105,lightness_L:55,temperature_b:16.9,chroma_C:53.5,description:"cool pink"},{name:"BEAM THERE, DONE THAT",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#C12C4A",r:193,g:44,b:74,lightness_L:43.7,temperature_b:19.7,chroma_C:62.4,description:"rosy plum pink"},{name:"KISSING STRANGERS",brand_line:"mac::M·A·C Lustreglass Sheer-Shine Lipstick",finish:"glossy/high-shine",hex:"#82262E",r:130,g:38,b:46,lightness_L:30.2,temperature_b:17.6,chroma_C:43.5,description:"dirty rose"},{name:"OFF THE MARKET",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#9F614A",r:159,g:97,b:74,lightness_L:47.5,temperature_b:23.7,chroma_C:32.8,description:"warm neutral beige"},{name:"BIG PROMOTION",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#B36650",r:179,g:102,b:80,lightness_L:51.5,temperature_b:25.8,chroma_C:38.6,description:"warm caramel"},{name:"TAKEN",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#975747",r:151,g:87,b:71,lightness_L:44,temperature_b:20.7,chroma_C:32.2,description:"warm red-beige"},{name:"TEDDY 2.0",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#B96357",r:185,g:99,b:87,lightness_L:51.8,temperature_b:22.3,chroma_C:40.1,description:"midtoned pink beige"},{name:"MULL IT OVER",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#E86456",r:232,g:100,b:86,lightness_L:58.9,temperature_b:33.5,chroma_C:60.4,description:"midtone pink-peach"},{name:"TURN TO THE LEFT",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#772E2E",r:119,g:46,b:46,lightness_L:29.6,temperature_b:16.4,chroma_C:36,description:"rich red brown"},{name:"GOOD FOR YOU!",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#693830",r:105,g:56,b:48,lightness_L:29.5,temperature_b:14.6,chroma_C:25.4,description:"rich cool brown"},{name:"CHESTNUT",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#703E2D",r:112,g:62,b:45,lightness_L:32,temperature_b:19.9,chroma_C:28.2,description:"deep golden brown"},{name:"BE MY BRIDESMAID",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#D9887F",r:217,g:136,b:127,lightness_L:64.9,temperature_b:17.9,chroma_C:34.9,description:"neutral cool beige"},{name:"SULTRINESS",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#F36C74",r:243,g:108,b:116,lightness_L:62.5,temperature_b:21.5,chroma_C:56.8,description:"baby-blue pink"},{name:"A LITTLE TAMED",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#D34043",r:211,g:64,b:67,lightness_L:49.4,temperature_b:31.9,chroma_C:65.7,description:"midtoned yellow pink"},{name:"MANDARIN O",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#F0444F",r:240,g:68,b:79,lightness_L:55.3,temperature_b:33.3,chroma_C:73.5,description:"salmon pink"},{name:"BRICKTHROUGH",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#C55454",r:197,g:84,b:84,lightness_L:50.5,temperature_b:22.8,chroma_C:50.6,description:"warm dusty rose"},{name:"STAY CURIOUS",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#D13D40",r:209,g:61,b:64,lightness_L:48.6,temperature_b:32.6,chroma_C:66.3,description:"midtoned red pink"},{name:"GIRLS WEEKEND",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#C97176",r:201,g:113,b:118,lightness_L:57.6,temperature_b:12.6,chroma_C:37.3,description:"dusty mauve"},{name:"ON MY MIND",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#863249",r:134,g:50,b:73,lightness_L:33.6,temperature_b:4.8,chroma_C:38.4,description:"deep berry wine"},{name:"READY TO MINGLE",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#BE6440",r:190,g:100,b:64,lightness_L:52.3,temperature_b:36.2,chroma_C:49,description:"honey orange"},{name:"MY BEST LIFE",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#CA4131",r:202,g:65,b:49,lightness_L:47.7,temperature_b:39.7,chroma_C:66.5,description:"saturated rich orange"},{name:"MOVING ON UP",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#D05336",r:208,g:83,b:54,lightness_L:51.7,temperature_b:41.6,chroma_C:63.4,description:"burnt peach"},{name:"MARRAKESH-MERE",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#7E1F09",r:126,g:31,b:9,lightness_L:27.9,temperature_b:36.4,chroma_C:53.8,description:"rich orange brown"},{name:"DEVOTED TO CHILLI",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#A02123",r:160,g:33,b:35,lightness_L:35.4,temperature_b:32,chroma_C:60.1,description:"warm brick red"},{name:"DUBONNET BUZZ",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#8F3433",r:143,g:52,b:51,lightness_L:35.1,temperature_b:21.1,chroma_C:43.9,description:"deep brown red"},{name:"RUBY NEW",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#F1182B",r:241,g:24,b:43,lightness_L:51.3,temperature_b:49,chroma_C:89.7,description:"vivid cool red"},{name:"TWENTY-FUN",brand_line:"mac::M·A·C Powder Kiss Hazy Matte Lipstick",finish:"hazy matte",hex:"#B42C46",r:180,g:44,b:70,lightness_L:41.1,temperature_b:18.4,chroma_C:58.2,description:"vibrant hot pink"},{name:"WARM HUG",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#CC6C52",r:204,g:108,b:82,lightness_L:56.3,temperature_b:31.5,chroma_C:47.5,description:"dirty midtoned beige"},{name:"DATE-MAKER",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#D97E67",r:217,g:126,b:103,lightness_L:62.2,temperature_b:27.8,chroma_C:43,description:"warm nude"},{name:"HABIT",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#D58369",r:213,g:131,b:105,lightness_L:62.8,temperature_b:27.4,chroma_C:39.8,description:"peachy nude"},{name:"VELVET TEDDY",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#C3675D",r:195,g:103,b:93,lightness_L:54.1,temperature_b:22.2,chroma_C:42,description:"deep-toned beige"},{name:"TAKEN",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#B86656",r:184,g:102,b:86,lightness_L:52.3,temperature_b:23.5,chroma_C:39.1,description:"warm-toned light brown"},{name:"IT'S PERSONAL",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#D09885",r:208,g:152,b:133,lightness_L:67.7,temperature_b:18.3,chroma_C:26,description:"cool dusty nude"},{name:"BUFFIEST",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#BF7C63",r:191,g:124,b:99,lightness_L:58.4,temperature_b:24.4,chroma_C:33.7,description:"midtone nudey pink"},{name:"REKINDLED",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#6C372F",r:108,g:55,b:47,lightness_L:29.7,temperature_b:15.6,chroma_C:27.4,description:"deep cool brown"},{name:"CHESTNUT",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#703A2A",r:112,g:58,b:42,lightness_L:31,temperature_b:20.5,chroma_C:30.1,description:"deep warm brown"},{name:"MULL IT OVER",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#E37567",r:227,g:117,b:103,lightness_L:61.7,temperature_b:27.3,chroma_C:49.6,description:"dirty peach"},{name:"PINK ROSES",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#A74947",r:167,g:73,b:71,lightness_L:43.4,temperature_b:20.4,chroma_C:43.6,description:"moderately warm-toned, very dark mauve"},{name:"MORE THE MEHR-IER",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#C06466",r:192,g:100,b:102,lightness_L:53.3,temperature_b:15.7,chroma_C:40.1,description:"midtoned mauve pink"},{name:"OVER THE TAUPE",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#B5624E",r:181,g:98,b:78,lightness_L:50.8,temperature_b:26.2,chroma_C:41,description:"midtoned dirty nude"},{name:"FASHION EMERGENCY",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#9F3836",r:159,g:56,b:54,lightness_L:38.7,temperature_b:24.4,chroma_C:49.1,description:"intense rose brown"},{name:"A LITTLE TAMED",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#D04950",r:208,g:73,b:80,lightness_L:50.4,temperature_b:25.4,chroma_C:59.3,description:"mid-tone pink with yellow undertones"},{name:"SOMETHING BORROWED",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#DF7493",r:223,g:116,b:147,lightness_L:61.9,temperature_b:2.4,chroma_C:44.9,description:"soft lilac"},{name:"MAKE IT FASHUN!",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#C7315B",r:199,g:49,b:91,lightness_L:45.8,temperature_b:12.2,chroma_C:61.8,description:"fuchsia"},{name:"BILLION $ SMILE",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#D5364E",r:213,g:54,b:78,lightness_L:48.7,temperature_b:24.5,chroma_C:66.8,description:"bright fluorescent pink"},{name:"RESORT SEASON",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#DF5027",r:223,g:80,b:39,lightness_L:53.6,temperature_b:51.8,chroma_C:74.7,description:"bright orange"},{name:"CREAMSICLE",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#C34E43",r:195,g:78,b:67,lightness_L:48.8,temperature_b:30.5,chroma_C:55.3,description:"midtoned raspberry peach"},{name:"RHYTHM 'N' ROSES",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#B02F28",r:176,g:47,b:40,lightness_L:40.3,temperature_b:35.3,chroma_C:62.3,description:"very warm-toned, medium-dark red"},{name:"M·A·C SMASH",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#CE0724",r:206,g:7,b:36,lightness_L:43.4,temperature_b:42.7,chroma_C:80.3,description:"true red"},{name:"RUBY BOO",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#C01929",r:192,g:25,b:41,lightness_L:41.3,temperature_b:36.8,chroma_C:72.3,description:"vivid blue red"},{name:"DEVOTED TO CHILI",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#A82E2D",r:168,g:46,b:45,lightness_L:38.7,temperature_b:30.2,chroma_C:57.8,description:"warm brick red"},{name:"MARRAKESH-MER",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#A53126",r:165,g:49,b:38,lightness_L:38.4,temperature_b:33.9,chroma_C:57.8,description:"intense orange brown"},{name:"BURNING LOVE",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#9C1E34",r:156,g:30,b:52,lightness_L:34.5,temperature_b:20.2,chroma_C:55.2,description:"deep intense berry"},{name:"DATE NIGHT",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#881930",r:136,g:25,b:48,lightness_L:29.8,temperature_b:15.9,chroma_C:49.3,description:"deep red wine"},{name:"PRETTY PLEATS!",brand_line:"mac::M·A·C Powder Kiss Lip + Cheek Mousse",finish:"hazy mate",hex:"#6F2424",r:111,g:36,b:36,lightness_L:26.1,temperature_b:18.1,chroma_C:37.8,description:"burgundy brown"}];
 
 // Matches customers directly to MAC shades using genuine CIELAB
 // values on both sides (see rgbToLab above) -- not the 0-10
@@ -2174,6 +2106,19 @@ const MAC_SHADES = [
 // is no longer a Subtle/Natural/Party split.
 const CHROMA_RANGE_LOW = 34;
 const CHROMA_RANGE_HIGH = 41;
+// Hard chroma band: the customer's own +34..+41 "makeup intensity" band
+// (same offset used for rangeLow/rangeHigh below) is, on top of feeding
+// the soft tie-break distance, now ALSO enforced as a hard candidacy
+// requirement -- a shade must land inside [rangeLow, rangeHigh] (each
+// edge loosened by 5%) to be eligible at all, not just ranked worse for
+// falling outside it. 5% keeps the cutoff from being razor-sharp right
+// at the band edge (a shade a hair outside the strict band is still a
+// reasonable "adds visible color, doesn't blow past what she asked for"
+// fit). Replaces an earlier, coarser version of this rule that compared
+// shade.chroma_C to the customer's raw un-offset chromaAvg directly --
+// wrong scale, since real customer skin chroma runs far lower than the
+// shade population's (see the comment above CHROMA_RANGE_LOW's block).
+const CHROMA_HARD_BAND_SOFT_PCT = 0.05;
 const WARMTH_OFFSET = 5.5; // constant warmth nudge
 // Confidence %: every one of the (up to) 3 shown shades is labeled with
 // a confidence percentage that reflects the
@@ -2188,16 +2133,43 @@ const WARMTH_OFFSET = 5.5; // constant warmth nudge
 // CONFIDENCE_DECAY_TAU is the dist at which un-floored confidence has
 // decayed to ~37%, and CONFIDENCE_FLOOR_PCT keeps a small minimum so a
 // very poor fit still reads as "low confidence" rather than a bare,
-// slightly alarming "0%" next to a product. Loosened from an earlier,
-// tighter curve (TAU 10 / floor 10) -- this one holds higher percentages
-// further out before it starts dropping.
-//   dist  0    2    5    8    13   20   30
-//   pct  100   88   73   61   44   29   15 (~= floor)
+// slightly alarming "0%" next to a product.
+//
+// TAU updated 16 -> 30 (2026-09-11, per Nghi -- synced from the Shade
+// Atlas). shadeConfidencePct now takes bestShadeMatches' full weighted
+// dist (warmth + depth + chroma) instead of |depth delta| alone -- a
+// wider-ranging input than before -- so it needed the wider, empirically
+// re-tuned curve the Atlas had already validated against real candidate
+// pools (tau values 16/20/24/28/30/35/40 were compared; 30 gave the best
+// spread -- close/same-tier matches land high, escalated/mismatched
+// picks land low, without everything crowding the floor).
+//   dist  0    5    10   16   24   35   55
+//   pct  100   85   72   59   45   31   16 (~= floor)
 const CONFIDENCE_FLOOR_PCT = 15;
-const CONFIDENCE_DECAY_TAU = 16;
+const CONFIDENCE_DECAY_TAU = 30;
 function shadeConfidencePct(dist){
   const raw = 100 * Math.exp(-Math.max(0, dist) / CONFIDENCE_DECAY_TAU);
   return Math.max(CONFIDENCE_FLOOR_PCT, Math.min(100, Math.round(raw)));
+}
+
+// Love-icon display (2026-09-11, per Nghi -- synced from the Shade
+// Atlas, which already replaced its own raw % with this same icon
+// system): 1-5 icons instead of a percentage, floored at 1 so a shade
+// is never shown with zero love. Same glyph (🥰) for both filled and
+// empty states, differentiated only by CSS (.love-icons-empty fades +
+// grayscales it) -- matches the reference image this was built from.
+function loveIconCount(pct){
+  if(pct > 90) return 5;
+  if(pct > 80) return 4;
+  if(pct > 70) return 3;
+  if(pct > 60) return 2;
+  return 1;
+}
+const LOVE_ICON_FULL = '🥰';
+const LOVE_ICON_EMPTY = '🥰';
+function renderLoveIcons(pct){
+  const n = loveIconCount(pct);
+  return `<span class="shade-result-conf-icons" title="${pct}% fit" aria-label="${n} of 5">${LOVE_ICON_FULL.repeat(n)}<span class="love-icons-empty">${LOVE_ICON_EMPTY.repeat(5 - n)}</span></span>`;
 }
 
 function macMatchTarget(customerLab){
@@ -2206,11 +2178,21 @@ function macMatchTarget(customerLab){
   // L/C otherwise. Warmth (b*) is always skin-only in both tools.
   const depthAvg = customerLab.depthAvg != null ? customerLab.depthAvg : customerLab.L;
   const chromaAvg = customerLab.chromaAvg != null ? customerLab.chromaAvg : customerLab.C;
+  const rangeLow = chromaAvg + CHROMA_RANGE_LOW;
+  const rangeHigh = chromaAvg + CHROMA_RANGE_HIGH;
   return {
     L: depthAvg,
     b: customerLab.b + WARMTH_OFFSET,
-    rangeLow: chromaAvg + CHROMA_RANGE_LOW,
-    rangeHigh: chromaAvg + CHROMA_RANGE_HIGH,
+    rangeLow,
+    rangeHigh,
+    // Raw customer chroma (un-shifted) -- kept for reference/debugging,
+    // no longer used directly as the hard-floor comparison (see
+    // chromaHardFloor/chromaHardCeiling below).
+    chromaAvg,
+    // Hard candidacy band: rangeLow/rangeHigh each loosened by 5% so the
+    // cutoff isn't razor-sharp at the strict band edge.
+    chromaHardFloor: rangeLow * (1 - CHROMA_HARD_BAND_SOFT_PCT),
+    chromaHardCeiling: rangeHigh * (1 + CHROMA_HARD_BAND_SOFT_PCT),
   };
 }
 // Distance-to-band for chroma: 0 anywhere inside [rangeLow, rangeHigh]
@@ -2221,24 +2203,26 @@ function chromaBandDistance(chromaC, rangeLow, rangeHigh){
   if(chromaC > rangeHigh) return chromaC - rangeHigh;
   return 0;
 }
-// Depth gets extra pull in the overall fit ranking -- a shade closer to
-// the customer's own depth outranks one that's a better warmth/chroma
-// fit but further off on depth, even though depth-delta is what narrows
-// the pool to 10 candidates in bestShadeMatches below (a separate,
-// unweighted step). 1.5x was chosen by checking real candidate pools:
-// it's enough to visibly reorder the top matches toward closer-depth
-// shades (and lower their confidence % when depth is off) without
-// letting depth swamp warmth/chroma entirely the way a much higher
-// weight would. Applied consistently here and in shadeMismatchReason's
-// "worst axis" pick below, so the displayed reason always matches what's
-// actually driving the ranking/confidence.
+// Fit-distance weights (2026-09-11, per Nghi -- synced from the Shade
+// Atlas debug tool, which had been running this exact weighted-distance
+// model ahead of production). Warmth and depth are weighted equally;
+// chroma-band distance is unweighted (1x). Depth previously got a
+// standalone 1.5x bump here with warmth left at 1x -- that's now folded
+// into the shared WARMTH_RANK_WEIGHT/DEPTH_RANK_WEIGHT/CHROMA_RANK_WEIGHT
+// trio below, applied consistently in macDist, shadeMismatchReason's
+// "worst axis" pick, and bestShadeMatches' pick/rank/confidence -- so the
+// displayed reason always matches what's actually driving the
+// ranking/confidence. This dist is now the PRIMARY ranking key
+// throughout (not just a tie-break) -- see bestShadeMatches below.
+const WARMTH_RANK_WEIGHT = 1.5;
 const DEPTH_RANK_WEIGHT = 1.5;
+const CHROMA_RANK_WEIGHT = 1;
 function macDist(target, s){
   const chromaDist = chromaBandDistance(s.chroma_C, target.rangeLow, target.rangeHigh);
   return Math.sqrt(
+    (WARMTH_RANK_WEIGHT * (target.b - s.temperature_b))**2 +
     (DEPTH_RANK_WEIGHT * (target.L - s.lightness_L))**2 +
-    (target.b - s.temperature_b)**2 +
-    chromaDist**2
+    (CHROMA_RANK_WEIGHT * chromaDist)**2
   );
 }
 
@@ -2257,11 +2241,10 @@ function shadeMismatchReason(target, s){
   const chromaDist = chromaBandDistance(s.chroma_C, target.rangeLow, target.rangeHigh);
   const chromaSign = s.chroma_C < target.rangeLow ? -1 : (s.chroma_C > target.rangeHigh ? 1 : 0);
 
-  // Same DEPTH_RANK_WEIGHT applied here as in macDist, so "worst axis"
-  // reflects the same depth preference driving the ranking/confidence --
-  // a shade is called out for depth more readily than before, since
-  // depth now counts for more in what makes a shade fall short.
-  const absL = Math.abs(dL) * DEPTH_RANK_WEIGHT, absB = Math.abs(db), absC = chromaDist;
+  // Same weights applied here as in macDist, so "worst axis" reflects the
+  // same preference driving the ranking/confidence -- a shade is called
+  // out for whichever axis is actually costing it the most.
+  const absL = Math.abs(dL) * DEPTH_RANK_WEIGHT, absB = Math.abs(db) * WARMTH_RANK_WEIGHT, absC = chromaDist * CHROMA_RANK_WEIGHT;
   const worst = Math.max(absL, absB, absC);
   if(worst < MISMATCH_REASON_MIN_DELTA) return null;
 
@@ -2294,13 +2277,15 @@ function classifyShadeTemp(t){
   return "Warm";
 }
 // Warm/Cool family constraint: Cool and Warm shades are never both
-// allowed for the same customer -- that border is strict. Only the
-// two "-neutral" customer tiers blend into the adjacent pure side.
+// allowed for the same customer -- that border is strict. The two
+// "-neutral" customer tiers no longer blend into the adjacent pure
+// side either -- Cool-neutral and Warm-neutral customers both get
+// Neutral shades only, not Neutral+Cool or Neutral+Warm.
 const WARMTH_ALLOWED_TEMPS = {
   "Blue-cool":    ["Cool"],
   "Cool":         ["Cool"],
-  "Cool-neutral": ["Cool", "Neutral"],
-  "Warm-neutral": ["Warm", "Neutral"],
+  "Cool-neutral": ["Neutral"],
+  "Warm-neutral": ["Neutral"],
   "Warm":         ["Warm"],
   "Golden":       ["Warm"]
 };
@@ -2317,20 +2302,36 @@ function classifyDepthZone(L){
   if(L < DEPTH_ZONE_HIGH) return 'Medium';
   return 'Light';
 }
-// A customer only ever draws from her own depth zone plus whichever
-// zone(s) sit immediately next to it on the Deep-Medium-Light ladder --
-// Deep pairs with Medium, Light pairs with Medium, and Medium (sitting
-// between both) pairs with everything. This replaces the old hard
-// floor/ceiling gate: the categorical zone match here is intentionally
-// loose (it's just a coarse pre-filter), because the depth-delta ranking
-// right below narrows it back down to whatever's genuinely closest to
-// her own reading -- so being loose here can't let in a bad match, only
-// widen the pool the ranking step gets to choose from.
-const DEPTH_ZONE_NEIGHBORS = {
-  Deep:   ['Deep', 'Medium'],
-  Medium: ['Deep', 'Medium', 'Light'],
-  Light:  ['Medium', 'Light'],
-};
+
+// Boundary-adaptive depth-zone widening (2026-09-11, per Nghi -- synced
+// from the Shade Atlas). Every depth-zone boundary is "real" -- all 3
+// zones are distinct candidacy tiers, nothing collapses -- so a customer
+// within DEPTH_ZONE_BOUNDARY_MARGIN_PCT of DEPTH_ZONE_LOW or
+// DEPTH_ZONE_HIGH gets candidates from BOTH neighboring zones, not just
+// her own: a Light-to-Medium blend is filtered by Light + Medium
+// together, a Medium-to-Deep/Deep-to-Medium blend by Medium + Deep
+// together.
+const DEPTH_ZONE_BOUNDARY_MARGIN_PCT = 0.02;
+function depthZoneTiersNear(L){
+  const tiers = new Set([classifyDepthZone(L)]);
+  if(Math.abs(L - DEPTH_ZONE_LOW) <= DEPTH_ZONE_LOW * DEPTH_ZONE_BOUNDARY_MARGIN_PCT){
+    tiers.add('Deep'); tiers.add('Medium');
+  }
+  if(Math.abs(L - DEPTH_ZONE_HIGH) <= DEPTH_ZONE_HIGH * DEPTH_ZONE_BOUNDARY_MARGIN_PCT){
+    tiers.add('Medium'); tiers.add('Light');
+  }
+  return [...tiers];
+}
+
+// Season families, used only to decide a Neutral-tier customer's warmth
+// escalation direction (see bestShadeMatches below) -- Cool-leaning
+// seasons widen toward Cool first, warm-leaning seasons toward Warm
+// first. Same grouping the Shade Atlas approximates from raw readings;
+// here it's read straight off the customer's own measured season
+// family (result.family), which is more authoritative than an
+// approximation would be.
+const SEASON_COOL_FAMILIES = new Set(['Winter', 'Summer']);
+const SEASON_WARM_FAMILIES = new Set(['Spring', 'Autumn']);
 
 // A shade's own chroma tertile, on the same shade-population cut points
 // as the Atlas's CUTS.c (its own catalog-wide Muted/Balanced/Vivid
@@ -2348,49 +2349,131 @@ function classifyShadeChroma(chromaC){
   return 'Vivid';
 }
 
-// Picks the 3 best-fitting shades overall, following the same manual
-// process used to sanity-check this by hand:
-//   1. Warmth family (shade's own Cool/Neutral/Warm tertile allowed for
-//      this customer's descriptive undertone -- unchanged from before).
-//   2. Depth zone neighbors (shade's own Deep/Medium/Light tertile is
-//      the customer's own zone or an adjacent one).
-//   3. Shade chroma tertile matches the customer's own chroma_level by
-//      name (a blended customer label like "Muted-to-Balanced" allows
-//      either named tier).
-//   4. Of whatever survives, keep the 10 closest by depth alone (plain
-//      |L* difference|, no warmth/chroma involved at this step).
-//   5. Re-rank those 10 by overall fit quality (macDist, which still
-//      folds in the full continuous chroma-band distance and the
-//      depth-weighted ranking) and keep the top 3.
-// Each of the 3 gets its confidence % and mismatch reason exactly as
-// before. Nothing pads out to a fixed count -- if fewer than 3 shades
-// survive the filters, fewer than 3 are returned.
-function bestShadeMatches(customerLab, chromaLevel){
+// Picks the 3 best-fitting shades overall. Rewritten 2026-09-11 (per
+// Nghi -- synced from the Shade Atlas debug tool, which had been running
+// this exact model ahead of production). Two independent decisions, not
+// one combined branch:
+//   - Base candidacy rules (hard chroma band, darker-or-equal) are
+//     decided purely by depth zone, for every warmth tier alike -- and
+//     only for a PURE Deep reading (see nearDeepMediumBoundary below), a
+//     refinement over an earlier version that fired on whichever zone
+//     classifyDepthZone named nearest, even right at the boundary. Pure
+//     Deep is where the catalog runs thinnest once depth + chroma both
+//     narrow the pool, whatever her undertone -- so pure Deep gets hard
+//     band off + darker-or-equal only on (no lighter backfill). Medium,
+//     Light, and any Deep reading within DEPTH_ZONE_BOUNDARY_MARGIN_PCT
+//     of the Deep/Medium boundary all get the standard rules instead --
+//     hard band on, either side can win.
+//   - Warmth-pool start and escalation direction are decided purely by
+//     her own warmth tier, independent of depth zone: she always starts
+//     at just her own tier (WARMTH_ALLOWED_TEMPS[undertone][0]). Cool
+//     and Warm both widen toward Neutral first, then the remaining tier
+//     if still short (Cool -> Neutral -> Warm; Warm -> Neutral -> Cool).
+//     Neutral has no single natural direction, so her measured season
+//     family decides which side to try first (Cool for Winter/Summer,
+//     Warm for Spring/Autumn -- see SEASON_COOL_FAMILIES/
+//     SEASON_WARM_FAMILIES), then the remaining tier if still short.
+//   - Depth-zone candidacy also widens near either zone boundary
+//     (depthZoneTiersNear) regardless of which base ruleset is active --
+//     a Light-to-Medium blend pulls from Light + Medium together, a
+//     Medium-to-Deep/Deep-to-Medium blend from Medium + Deep together.
+//   - Chroma tertile is never loosened as part of any of this -- warmth
+//     escalation is the only shortage fallback. This fallback only ever
+//     fires when a customer's own candidacy pool actually comes up
+//     short; a customer who already gets 3 picks from her own tier
+//     alone never sees it widen.
+//   - Pick/rank rule: the 3 shades with the best overall fit quality win
+//     -- the warmth/depth/chroma weighted macDist, the same metric that
+//     drives confidencePct -- unless darker-or-equal-only is active, in
+//     which case shades lighter than her own target depth are excluded
+//     before ranking. |Depth delta| only breaks an exact dist tie. This
+//     keeps ranking and confidence in agreement -- the top-ranked shade
+//     always has the highest confidence too.
+// Nothing pads out beyond what the pool actually has -- if fewer than 3
+// shades survive, fewer than 3 are returned.
+function bestShadeMatches(customerLab, chromaLevel, contrastLevel, seasonFamily){
   const target = macMatchTarget(customerLab);
-  const allowedTemps = WARMTH_ALLOWED_TEMPS[classifyUndertoneDescriptive(customerLab.b)] || ["Cool", "Neutral", "Warm"];
-  const allowedDepthZones = DEPTH_ZONE_NEIGHBORS[classifyDepthZone(target.L)] || ['Deep', 'Medium', 'Light'];
+  const customerDepthZone = classifyDepthZone(target.L);
+  const depthTiers = depthZoneTiersNear(target.L);
+
+  const nearDeepMediumBoundary = Math.abs(target.L - DEPTH_ZONE_LOW) <= DEPTH_ZONE_LOW * DEPTH_ZONE_BOUNDARY_MARGIN_PCT;
+  const pureDeep = customerDepthZone === 'Deep' && !nearDeepMediumBoundary;
+  const hardBand = !pureDeep;
+  const darkerOnly = pureDeep;
+
+  const ownWarmthTier = (WARMTH_ALLOWED_TEMPS[classifyUndertoneDescriptive(customerLab.b)] || ['Neutral'])[0];
+  let warmthFallbackTiers;
+  if(ownWarmthTier === 'Warm') warmthFallbackTiers = ['Neutral', 'Cool'];
+  else if(ownWarmthTier === 'Cool') warmthFallbackTiers = ['Neutral', 'Warm'];
+  else { // Neutral -- season decides which side to try first
+    const first = SEASON_COOL_FAMILIES.has(seasonFamily) ? 'Cool' : SEASON_WARM_FAMILIES.has(seasonFamily) ? 'Warm' : null;
+    const second = first === 'Cool' ? 'Warm' : first === 'Warm' ? 'Cool' : null;
+    warmthFallbackTiers = [first, second].filter(Boolean);
+  }
+
   const allowedChromaLevels = (chromaLevel || '').includes('-to-') ? chromaLevel.split('-to-') : [chromaLevel];
 
-  const pool = MAC_SHADES.filter(s =>
-    allowedTemps.includes(classifyShadeTemp(s.temperature_b)) &&
-    allowedDepthZones.includes(classifyDepthZone(s.lightness_L)) &&
-    allowedChromaLevels.includes(classifyShadeChroma(s.chroma_C))
-  );
+  function passesFilters(s, warmthTiers){
+    if(!warmthTiers.includes(classifyShadeTemp(s.temperature_b))) return false;
+    if(!depthTiers.includes(classifyDepthZone(s.lightness_L))) return false;
+    if(!allowedChromaLevels.includes(classifyShadeChroma(s.chroma_C))) return false;
+    if(hardBand && !(s.chroma_C >= target.chromaHardFloor && s.chroma_C <= target.chromaHardCeiling)) return false;
+    return true;
+  }
+  function withDeltaAndDist(s){
+    return { ...s, depthDelta: target.L - s.lightness_L, dist: macDist(target, s) };
+  }
+  function byFitThenDelta(a, b){
+    return (a.dist - b.dist) || (Math.abs(a.depthDelta) - Math.abs(b.depthDelta));
+  }
 
-  const closestByDepth = pool
-    .map(s => ({ ...s, depthDelta: Math.abs(target.L - s.lightness_L) }))
-    .sort((a, b) => a.depthDelta - b.depthDelta)
-    .slice(0, 10);
+  let candidates = MAC_SHADES
+    .filter(s => passesFilters(s, [ownWarmthTier]))
+    .map(withDeltaAndDist)
+    .filter(s => !darkerOnly || s.depthDelta >= 0)
+    .sort(byFitThenDelta)
+    .slice(0, 3);
 
-  return closestByDepth
-    .map(s => ({ ...s, dist: macDist(target, s) }))
-    .sort((a, b) => a.dist - b.dist)
-    .slice(0, 3)
-    .map(s => ({
-      ...s,
-      confidencePct: shadeConfidencePct(s.dist),
-      mismatchReason: shadeMismatchReason(target, s),
-    }));
+  if(candidates.length < 3){
+    const pickedNames = new Set(candidates.map(s => s.name));
+    let widenedWarmth = [ownWarmthTier];
+    for(const nextTier of warmthFallbackTiers){
+      if(candidates.length >= 3) break;
+      if(!widenedWarmth.includes(nextTier)) widenedWarmth = [...widenedWarmth, nextTier];
+      let widened = MAC_SHADES
+        .filter(s => !pickedNames.has(s.name) && passesFilters(s, widenedWarmth))
+        .map(withDeltaAndDist)
+        .filter(s => !darkerOnly || s.depthDelta >= 0)
+        .sort(byFitThenDelta);
+      const fill = widened.slice(0, 3 - candidates.length);
+      fill.forEach(s => pickedNames.add(s.name));
+      candidates = candidates.concat(fill);
+    }
+  }
+
+  return candidates.map(s => ({
+    ...s,
+    confidencePct: shadeConfidencePct(s.dist),
+    mismatchReason: shadeMismatchReason(target, s),
+    // Carried along so renderShadeMatches/buildFullAnalysisData's own
+    // re-sorts can reproduce the right ordering without re-deriving the
+    // zone themselves -- see the pick-rule comment above this function.
+    customerDepthZone,
+  }));
+}
+
+// Shared re-sort helper for anything that displays bestShadeMatches's
+// picks (the on-page podium and the downloadable analysis card) -- both
+// need to reproduce its exact ordering: best overall fit (weighted
+// macDist) wins, |depth delta| only breaks an exact tie (2026-09-11,
+// reversed from an earlier nearest-|depth-delta|-first version, synced
+// from the Shade Atlas). The customerDepthZone field bestShadeMatches
+// stamps onto each pick isn't used for sorting, just carried through in
+// case a future caller needs it.
+function sortShadeMatches(matches){
+  return [...matches].sort((a, b) => {
+    return (a.dist - b.dist) || (Math.abs(a.depthDelta) - Math.abs(b.depthDelta));
+  });
 }
 
 
@@ -2922,7 +3005,7 @@ async function measureFaceFromPhoto(imgEl){
     // than being locked into whichever side of an arbitrary line the
     // raw number happened to land on. (5%/10% figures: provisional,
     // to be revisited.)
-    function classifyWithZones(score, lowerBoundary, upperBoundary, labels, zonePct5=0.05, zonePct10=0.10){
+    function classifyWithZones(score, lowerBoundary, upperBoundary, labels, zonePct5=0.05, zonePct10=0.10, splitMiddle=true){
       const lowerZone5 = lowerBoundary * zonePct5, lowerZone10 = lowerBoundary * zonePct10;
       const upperZone5 = upperBoundary * zonePct5, upperZone10 = upperBoundary * zonePct10;
       const distFromLower = score - lowerBoundary;
@@ -2938,7 +3021,19 @@ async function measureFaceFromPhoto(imgEl){
       }
       if(score < lowerBoundary) return labels[0];
       if(score > upperBoundary) return labels[2];
-      return labels[1];
+      // Solidly in the middle, outside either boundary's blend zone.
+      // For most callers (Depth, Contrast) this no longer returns a bare
+      // middle label -- it splits toward whichever boundary is closer
+      // (using the midpoint between the two boundaries), reusing the
+      // same "X-to-Y" naming the boundary-blend zones above already use.
+      // Chroma opts out (splitMiddle=false): its "Balanced" band is wide
+      // relative to the boundary zones, so splitting it here would widen
+      // bestShadeMatches's chroma-tier pool gate for nearly every
+      // mid-chroma customer -- reverted per explicit request, kept
+      // bare "Balanced" in the middle like before the Medium-split.
+      if(!splitMiddle) return labels[1];
+      const midpoint = (lowerBoundary + upperBoundary) / 2;
+      return score < midpoint ? `${labels[1]}-to-${labels[0]}` : `${labels[1]}-to-${labels[2]}`;
     }
 
     const skinLuminance = luminance(skinRgb);
@@ -3043,8 +3138,15 @@ async function measureFaceFromPhoto(imgEl){
     ];
     const avgChroma = (customerLab.C + irisLab.C + scleraLab.C) / 3;
     // Discrete Muted/Balanced/Vivid classification on raw C* (3-feature
-    // avg), same soft-zone convention as Depth/Contrast above.
-    const chromaLevel = classifyWithZones(avgChroma, 5, 19, ["Muted", "Balanced", "Vivid"], 0.01, 0.02);
+    // avg), same boundary-blend convention as Depth/Contrast above --
+    // but splitMiddle=false, so a comfortably mid-range reading stays
+    // plain "Balanced" instead of getting the Medium-split those two
+    // get. Reverted per explicit request: splitting it here was
+    // silently widening bestShadeMatches's chroma-tier candidate pool
+    // (Balanced's [5,19] band is wide relative to the boundary zones,
+    // so nearly every mid-chroma customer was getting bumped into a
+    // blended "Balanced-to-X" label and admitting a whole extra tier).
+    const chromaLevel = classifyWithZones(avgChroma, 5, 19, ["Muted", "Balanced", "Vivid"], 0.01, 0.02, false);
     const warmthClamped = clampTo(customerLab.b, WARMTH_MIN, WARMTH_MAX);
     const depthClamped = clampTo(depthScore, VALUE_MIN, VALUE_MAX);
     const chromaClamped = clampTo(avgChroma, CHROMA_MIN, CHROMA_MAX);
@@ -3101,6 +3203,139 @@ const loading2 = document.getElementById('loading2');
 const errorBox2 = document.getElementById('errorBox2');
 const pickCard = document.getElementById('pickCard');
 const shadePodium = document.getElementById('shadePodium');
+
+// ---------------------------------------------------------------------
+// Payment gating (PayPal) -- added 2026-09-12, per Nghi. Two one-time
+// tiers: $9.99 "season" (color-season analysis only), $12.99
+// "seasonShade" (season analysis + lipstick shade matching). Gated
+// BEFORE analyzeBtn's handler runs (see applyUnlockState/analyzeBtn
+// below), so the Claude vision call is never made for a visitor who
+// hasn't paid -- no API spend on non-payers.
+//
+// No backend exists for this site, so PayPal's own JS SDK does the
+// entire charge (createOrder/capture) -- no card data or secret key
+// ever touches this file, only the public, safe-to-embed Client ID.
+// The unlocked state is then just recorded in this browser's
+// localStorage. That is a real, known tradeoff: there is no server
+// here to independently verify a capture actually happened, so a
+// technically sophisticated visitor could forge the unlocked state via
+// devtools. For a ~$10-13 one-time consumer product this is the
+// standard, accepted level of protection (the same tradeoff as the
+// Gumroad/Lemon Squeezy client-side license-key approaches discussed
+// earlier) -- it stops casual reuse, not a determined attacker. If a
+// backend ever exists for this site, swap this for real server-side
+// order verification.
+// Test with PAYPAL_ENV = 'sandbox' first (fake money, fake buyer account)
+// before flipping this to 'live' for real customers. Nothing else in this
+// file needs to change to switch -- just this one flag, once both Client
+// IDs below are filled in.
+const PAYPAL_ENV = 'sandbox'; // 'sandbox' | 'live'
+const PAYPAL_CLIENT_ID_SANDBOX = 'AaV956UJu2dbvnye8nA7Nwh_SNV6KaC2c8kGliDwa9Xw6ZbnHXcMTfV9rQSELIpECuJ6Xk1UpdYqpYKL'; // Sandbox app's Client ID, from developer.paypal.com with the dashboard toggle set to Sandbox -- tied to your sb-p4hwc52858189@business.example.com test account
+const PAYPAL_CLIENT_ID_LIVE = 'PASTE_YOUR_PAYPAL_LIVE_CLIENT_ID_HERE'; // Live/"API Credentials" Client ID from developer.paypal.com (dashboard toggle set to Live), tied to your real Business account
+const PAYPAL_CLIENT_ID = PAYPAL_ENV === 'live' ? PAYPAL_CLIENT_ID_LIVE : PAYPAL_CLIENT_ID_SANDBOX;
+const PRICING = {
+  season:      { amount: '9.99',  label: 'Season Analysis' },
+  seasonShade: { amount: '12.99', label: 'Season + Shade Matching' },
+};
+const PURCHASE_STORAGE_KEY = 'ffbs_purchase';
+
+function getPurchase(){
+  try{
+    const raw = localStorage.getItem(PURCHASE_STORAGE_KEY);
+    if(!raw) return null;
+    const parsed = JSON.parse(raw);
+    return (parsed && PRICING[parsed.tier]) ? parsed : null;
+  } catch(e){ return null; }
+}
+
+function savePurchase(tier, order){
+  const record = {
+    tier,
+    orderId: order.id,
+    payerEmail: (order.payer && order.payer.email_address) || '',
+    amountUsd: PRICING[tier].amount,
+    purchasedAt: new Date().toISOString(),
+  };
+  try{ localStorage.setItem(PURCHASE_STORAGE_KEY, JSON.stringify(record)); } catch(e){
+    console.warn('[Purchase] Could not save unlock state locally', e);
+  }
+  // Best-effort record to the same live tracking sheet used for debug
+  // history/feedback -- this is NOT what grants access (that's the
+  // localStorage write above), just a paper trail so Nghi has a record
+  // to reconcile against her real PayPal dashboard.
+  sendToLiveSheet({
+    type: 'purchase',
+    tier,
+    order_id: record.orderId,
+    payer_email: record.payerEmail,
+    amount_usd: record.amountUsd,
+    purchased_at: record.purchasedAt,
+  });
+}
+
+const paywallCardEl = document.getElementById('paywallCard');
+
+// The upload/"Find My Season" stage is visible from the start -- the
+// paywall card only appears when a visitor who hasn't paid clicks
+// "Find My Season" (see analyzeBtn's click handler below). This just
+// clears the paywall back out once a purchase exists (e.g. right after
+// a successful payment, or on a later visit once already unlocked).
+function applyUnlockState(){
+  const purchase = getPurchase();
+  if(purchase){
+    if(paywallCardEl) paywallCardEl.classList.remove('show');
+  }
+}
+
+// PayPal's SDK is loaded dynamically (rather than a static <script> tag
+// in <head>) so PAYPAL_CLIENT_ID only has to be edited in the one place
+// above.
+function loadPayPalSdk(){
+  return new Promise((resolve, reject) => {
+    if(window.paypal){ resolve(window.paypal); return; }
+    const script = document.createElement('script');
+    script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(PAYPAL_CLIENT_ID)}&currency=USD&intent=capture`;
+    script.onload = () => resolve(window.paypal);
+    script.onerror = (e) => reject(e);
+    document.head.appendChild(script);
+  });
+}
+
+function renderPayPalButtons(paypalSdk){
+  Object.keys(PRICING).forEach(tier => {
+    const containerId = 'paypalBtn-' + tier;
+    const container = document.getElementById(containerId);
+    if(!container) return;
+    paypalSdk.Buttons({
+      style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'pay' },
+      createOrder: (data, actions) => actions.order.create({
+        purchase_units: [{
+          description: PRICING[tier].label,
+          amount: { value: PRICING[tier].amount, currency_code: 'USD' },
+        }],
+      }),
+      onApprove: (data, actions) => actions.order.capture().then(order => {
+        savePurchase(tier, order);
+        applyUnlockState();
+        // Auto-continue: they already clicked "Find My Season" once (that's
+        // what revealed this paywall) and their photo is still loaded, so
+        // re-trigger it now instead of making them click it a second time.
+        if(uploadedImage && !analyzeBtn.disabled) analyzeBtn.click();
+      }),
+      onError: (err) => {
+        console.error('[PayPal] Checkout error', err);
+        alert("Something went wrong starting the payment. Please try again, or refresh the page.");
+      },
+    }).render('#' + containerId);
+  });
+}
+
+applyUnlockState();
+if(!getPurchase()){
+  loadPayPalSdk()
+    .then(renderPayPalButtons)
+    .catch(e => console.error('[PayPal] SDK failed to load', e));
+}
 
 function handleImageFile(file){
   if (!file) return;
@@ -3197,6 +3432,15 @@ async function callClaude(system, userContent){
 
 analyzeBtn.addEventListener('click', async () => {
   if(!uploadedImage) return;
+  if(!getPurchase()){
+    // Not paid yet -- reveal the paywall now (this is the moment it
+    // first appears) instead of running the analysis.
+    if(paywallCardEl){
+      paywallCardEl.classList.add('show');
+      paywallCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    return;
+  }
   hideError(errorBox1);
   resultCard.classList.remove('show');
   loading1.classList.add('show');
@@ -3214,7 +3458,7 @@ analyzeBtn.addEventListener('click', async () => {
     const loading1Text = document.getElementById('loading1Text');
     for(let attempt = 1; attempt <= maxAttempts; attempt++){
       if(attempt > 1 && loading1Text){
-        loading1Text.textContent = `Still scanning — attempt ${attempt} of ${maxAttempts}...`;
+        loading1Text.textContent = `Still scanning — attempt ${attempt} of ${maxAttempts}...`;
       }
       measurements = await measureFaceFromPhoto(preview);
       if(measurements) break;
@@ -3226,7 +3470,7 @@ analyzeBtn.addEventListener('click', async () => {
       analyzeBtn.disabled = false;
       document.getElementById('seasonFamily').textContent = "";
       document.getElementById('seasonName').textContent = "Let's try that again";
-      document.getElementById('seasonDesc').textContent = "We couldn't get a clear, accurate reading from this photo after a few tries. This usually means the lighting is uneven, the face is partly turned or obscured, or the connection was too slow to load properly. Please try again with a clear, front-facing photo in bright, even natural light — or try again if your connection may have been slow.";
+      document.getElementById('seasonDesc').textContent = "We couldn't get a clear, accurate reading from this photo after a few tries. This usually means the lighting is uneven, the face is partly turned or obscured, or the connection was too slow to load properly. Please try again with a clear, front-facing photo in bright, even natural light — or try again if your connection may have been slow.";
       resultCard.classList.add('show');
       brandSection.style.display = 'none';
       return;
@@ -3261,8 +3505,8 @@ analyzeBtn.addEventListener('click', async () => {
       document.getElementById('seasonFamily').textContent = "";
       document.getElementById('seasonName').textContent = "Let's try that again";
       document.getElementById('seasonDesc').textContent = isOverexposed
-        ? "This photo looks overexposed — the lighting is too bright, which can throw off your reading. Please retake it in softer, even natural light (avoid direct sun or bright overhead light, and skip flash)."
-        : "This photo looks underexposed — it's too dark for an accurate reading. Please retake it somewhere brighter, ideally near a window with natural daylight.";
+        ? "This photo looks overexposed — the lighting is too bright, which can throw off your reading. Please retake it in softer, even natural light (avoid direct sun or bright overhead light, and skip flash)."
+        : "This photo looks underexposed — it's too dark for an accurate reading. Please retake it somewhere brighter, ideally near a window with natural daylight.";
       resultCard.classList.add('show');
       brandSection.style.display = 'none';
       return;
@@ -3381,6 +3625,15 @@ analyzeBtn.addEventListener('click', async () => {
 // any network failure, timeout, or ad-blocker interference just leaves
 // the location fields blank in the log row -- it can never block or
 // break the actual season-matching flow.
+// CUSTOMER_LOCATION_WAIT_MS (used by every caller below that races
+// customerLocationPromise) must stay >= CUSTOMER_LOCATION_FETCH_TIMEOUT_MS
+// -- it previously didn't (1500ms outer wait vs. this 3000ms inner
+// timeout), so any lookup that took 1.5-3s to answer was thrown away by
+// the outer race before the inner one even gave up, and location saved
+// blank even though the fetch would have succeeded. Fixed 2026-09-11,
+// per Nghi.
+const CUSTOMER_LOCATION_FETCH_TIMEOUT_MS = 3000;
+const CUSTOMER_LOCATION_WAIT_MS = 3200;
 let customerLocationPromise = null;
 function fetchCustomerLocation(){
   customerLocationPromise = (async () => {
@@ -3396,7 +3649,7 @@ function fetchCustomerLocation(){
     try{
       const data = await Promise.race([
         fetchPromise,
-        new Promise((_, reject) => setTimeout(() => reject(new Error('Location lookup timed out')), 3000)),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Location lookup timed out')), CUSTOMER_LOCATION_FETCH_TIMEOUT_MS)),
       ]);
       if(!data || data.success === false) return null;
       return {
@@ -3431,30 +3684,36 @@ async function saveDebugHistory(result){
       location = customerLocationPromise
         ? await Promise.race([
             customerLocationPromise,
-            new Promise(resolve => setTimeout(() => resolve(null), 1500)),
+            new Promise(resolve => setTimeout(() => resolve(null), CUSTOMER_LOCATION_WAIT_MS)),
           ])
         : null;
     } catch(e){ location = null; }
+    const locationStr = location ? [location.region, location.country].filter(Boolean).join(', ') : '';
+    // Column set below is the exact spec Nghi gave (2026-09-11) for the
+    // live tracking sheet -- flat r/g/b per feature instead of the old
+    // combined arrays (which wrote as "[object Object]"-style junk to a
+    // sheet cell), Lab-axis fields renamed to make clear which are raw
+    // CIELAB numbers (_lab_L / _lab_b / _lab_C suffixes) vs. descriptive
+    // labels, quant_too_close surfaced as too_close_flag (previously
+    // computed but never saved here), "season" renamed final_season to
+    // distinguish it from quant_best/quant_runner_up, and the four
+    // separate location_* columns collapsed into one combined column.
     const record = {
-      timestamp: new Date().toISOString(),
-      location_city: location ? location.city : '',
-      location_region: location ? location.region : '',
-      location_country: location ? location.country : '',
-      location_country_code: location ? location.country_code : '',
-      image_width: result.image_width, image_height: result.image_height, image_mime_type: result.image_mime_type,
-      skin_rgb: result.estimated_skin_rgb, skin_rgb_cheek: result.skin_rgb_cheek, skin_rgb_forehead: result.skin_rgb_forehead,
-      iris_rgb: result.estimated_iris_rgb, sclera_rgb: result.estimated_sclera_rgb, eyebrow_rgb: result.estimated_eyebrow_rgb,
-      skin_luminance: result.skin_luminance, iris_luminance: result.iris_luminance,
-      sclera_luminance: result.sclera_luminance, eyebrow_luminance: result.eyebrow_luminance,
-      g_minus_b: result.g_minus_b, undertone: result.undertone, undertone_descriptive: result.undertone_descriptive,
-      depth_score: result.depth_score, depth_level: result.depth_level,
-      lightness: result.lightness, darkness: result.darkness,
-      contrast_score: result.contrast_score, contrast_level: result.contrast_level,
-      skin_chroma: result.skin_chroma, iris_chroma: result.iris_chroma, sclera_chroma: result.sclera_chroma,
-      avg_chroma: result.avg_chroma, chroma_level: result.chroma_level,
+      skin_rgb_r: result.estimated_skin_rgb[0], skin_rgb_g: result.estimated_skin_rgb[1], skin_rgb_b: result.estimated_skin_rgb[2],
+      iris_rgb_r: result.estimated_iris_rgb[0], iris_rgb_g: result.estimated_iris_rgb[1], iris_rgb_b: result.estimated_iris_rgb[2],
+      sclera_rgb_r: result.estimated_sclera_rgb[0], sclera_rgb_g: result.estimated_sclera_rgb[1], sclera_rgb_b: result.estimated_sclera_rgb[2],
+      eyebrow_rgb_r: result.estimated_eyebrow_rgb[0], eyebrow_rgb_g: result.estimated_eyebrow_rgb[1], eyebrow_rgb_b: result.estimated_eyebrow_rgb[2],
+      skin_lab_b: result.lab_temperature_b,
+      undertone: result.undertone, undertone_descriptive: result.undertone_descriptive,
+      depth_score_lab_L: result.depth_score, depth_level: result.depth_level,
+      lightness_lab: result.lightness, darkness_lab: result.darkness,
+      contrast_score_lab: result.contrast_score, contrast_level: result.contrast_level,
+      avg_chroma_lab_C: result.avg_chroma, 'Chroma descriptive': result.chroma_level,
       quant_best: result.quant_best, quant_best_dist: result.quant_best_dist,
       quant_runner_up: result.quant_runner_up, quant_runner_up_dist: result.quant_runner_up_dist,
-      season: result.season, family: result.family
+      too_close_flag: result.quant_too_close,
+      final_season: result.season, family: result.family,
+      location: locationStr
     };
     const history = JSON.parse(localStorage.getItem('ffbs_debug_history') || '[]');
     history.push(record);
@@ -3526,7 +3785,7 @@ async function submitFeedback(){
     location = customerLocationPromise
       ? await Promise.race([
           customerLocationPromise,
-          new Promise(resolve => setTimeout(() => resolve(null), 1500)),
+          new Promise(resolve => setTimeout(() => resolve(null), CUSTOMER_LOCATION_WAIT_MS)),
         ])
       : null;
   } catch(e){ location = null; }
@@ -3750,19 +4009,19 @@ function renderConfidence(result){
     const [nameA, nameB] = (result.season || '').split('/');
     tier = 'split';
     label = 'Split match';
-    explain = `Your measured skin, eye, and eyebrow tones landed almost exactly between ${nameA || 'this season'} and ${nameB || 'a neighboring season'} — both are genuinely close fits, so we're matching your shades to ${result.shadeMatchSeason || 'the closer one'}.`;
+    explain = `Your measured skin, eye, and eyebrow tones landed almost exactly between ${nameA || 'this season'} and ${nameB || 'a neighboring season'} — both are genuinely close fits, so we're matching your shades to ${result.shadeMatchSeason || 'the closer one'}.`;
   } else if(result.isLowConfidence){
     tier = 'lower';
     label = 'Lower confidence';
-    explain = `Your coloring doesn't sit neatly inside any of the 16 seasons we measure against — ${result.season} is the closest match we found${pctText ? ` (a ${pctText} fit)` : ''}, so treat it as a solid starting point rather than an exact label.`;
+    explain = `Your coloring doesn't sit neatly inside any of the 16 seasons we measure against — ${result.season} is the closest match we found${pctText ? ` (a ${pctText} fit)` : ''}, so treat it as a solid starting point rather than an exact label.`;
   } else if(result.quant_best_dist < 2){
     tier = 'high';
     label = 'High confidence';
-    explain = `Your measured skin, eye, and eyebrow tones sit very close to ${result.season}'s typical range${pctText ? ` — a ${pctText} match` : ''}, clear and well-defined.`;
+    explain = `Your measured skin, eye, and eyebrow tones sit very close to ${result.season}'s typical range${pctText ? ` — a ${pctText} match` : ''}, clear and well-defined.`;
   } else {
     tier = 'good';
     label = 'Good confidence';
-    explain = `Your coloring fits ${result.season} well${pctText ? ` — a ${pctText} match` : ''}, just a little further from its typical center than a textbook example, but still confident.`;
+    explain = `Your coloring fits ${result.season} well${pctText ? ` — a ${pctText} match` : ''}, just a little further from its typical center than a textbook example, but still confident.`;
   }
 
   const pillText = pctText ? `${label} · ${pctText}` : label;
@@ -3777,7 +4036,7 @@ function renderSeasonResult(result){
   document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
   document.getElementById('seasonName').textContent = result.season;
   document.getElementById('seasonDesc').textContent = result.isCombinedSeason
-    ? `Your coloring sits genuinely between these two seasons — both fit about equally well. ${result.explanation || ''}`
+    ? `Your coloring sits genuinely between these two seasons — both fit about equally well. ${result.explanation || ''}`
     : result.explanation;
 
   renderConfidence(result);
@@ -3786,9 +4045,16 @@ function renderSeasonResult(result){
 
   resultCard.classList.add('show');
 
-  brandSection.style.display = 'block';
-  hideError(errorBox2);
-  showBestShadeMatches(result);
+  // Shade matching is the $12.99 "seasonShade" tier's extra feature --
+  // the $9.99 "season" tier stops at the season/color analysis above.
+  const purchase = getPurchase();
+  if(purchase && purchase.tier === 'seasonShade'){
+    brandSection.style.display = 'block';
+    hideError(errorBox2);
+    showBestShadeMatches(result);
+  } else {
+    brandSection.style.display = 'none';
+  }
 }
 
 // One "Why These Colors" dial row: a real stacked bar -- the matched
@@ -3860,7 +4126,7 @@ function renderPaletteDials(seasonName, result, centroid, deltas, hasRealDelta){
     `${seasonName}'s typical recipe, stacked with your own nudge, lands on your exact palette.`;
   document.getElementById('paletteDialsLegendSeason').textContent = seasonName;
   document.getElementById('paletteDialsFootnote').textContent =
-    `Light = base recipe, dark = your nudge — together they land the white dot at your exact position, shaping the 28 personalized colors below.`;
+    `Light = base recipe, dark = your nudge — together they land the white dot at your exact position, shaping the 28 personalized colors below.`;
   section.style.display = 'block';
 }
 
@@ -4231,10 +4497,15 @@ function buildFullAnalysisData(){
   ].filter(r => r.value != null && r.categoryText != null);
 
   // No more Subtle/Natural/Party tiers -- just the (up to) 3 best-fitting
-  // shades overall, already sorted by fit quality (see bestShadeMatches),
-  // labeled the same way the on-page podium labels them.
+  // shades overall, already sorted by fit quality (see bestShadeMatches
+  // and sortShadeMatches for the exact rule -- nearest |depth delta|
+  // wins for most customers, Deep-zone customers prefer darker shades
+  // first), labeled the same way the on-page podium labels them. Must
+  // stay in sync with renderShadeMatches's own re-sort -- both call the
+  // same sortShadeMatches helper so the downloaded card and the on-page
+  // podium always agree on order.
   const rankLabels = ['Best match', '2nd option', '3rd option'];
-  const shades = bestMatches.slice().sort((a, b) => a.dist - b.dist)
+  const shades = sortShadeMatches(bestMatches)
     .map((s, i) => ({ ...s, rankLabel: rankLabels[i] || `Option ${i + 1}` }));
 
   return { season: result.season, family: result.family, confidencePillText, pixelFeatures, cielabRows, shades };
@@ -4400,7 +4671,7 @@ function showBestShadeMatches(result){
   currentCustomerLab = computeCustomerLabFromResult(result);
   currentCustomerSkinHex = rgbToHex(result.estimated_skin_rgb[0], result.estimated_skin_rgb[1], result.estimated_skin_rgb[2]);
 
-  currentBestMatches = bestShadeMatches(currentCustomerLab, result.chroma_level);
+  currentBestMatches = bestShadeMatches(currentCustomerLab, result.chroma_level, result.contrast_level, result.family);
   renderShadeMatches(currentBestMatches);
 }
 
@@ -4461,7 +4732,7 @@ function medalBadgeSvg(rankNum, color, w, strokePx){
   const strokeW = (strokePx * 100 / w).toFixed(2);
   return `<svg class="medal-badge" width="${w}" height="${w}" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <circle cx="50" cy="50" r="46" fill="none" stroke="${color}" stroke-width="${strokeW}"/>
-    <text x="50" y="51" text-anchor="middle" dominant-baseline="central" font-family="'Playfair Display', serif" font-weight="700" font-size="46" fill="${color}">${rankNum}</text>
+    <text x="50" y="50" dy="0.35em" text-anchor="middle" font-family="'Playfair Display', serif" font-weight="700" font-size="46" fill="${color}">${rankNum}</text>
   </svg>`;
 }
 
@@ -4495,34 +4766,42 @@ function renderShadeMatches(matches){
   document.getElementById('pickBrandTag').textContent = "Lipstick shades matched from your color profile";
   document.getElementById('pickBrandName').textContent = shadeMatchSeasonName || '';
 
-  // Same undertone/depth/chroma readings already shown as pills up in
-  // the CIELAB Analysis section -- surfaced again here as "your filters"
-  // right before the 3 picks, so it's clear what narrowed the shade
-  // pool down before the results themselves land.
+  // Same undertone/depth/contrast/chroma readings already shown as pills
+  // up in the CIELAB Analysis section -- surfaced again here as "your
+  // filters" right before the 3 picks, so it's clear what shaped the
+  // results before they land. Contrast now belongs here alongside the
+  // others since it's no longer just informational -- it decides the
+  // pick rule in bestShadeMatches (deeper-only nearest-zero vs. nearest
+  // by absolute delta), same as depth/chroma decide the candidate pool.
   const pickFiltersEl = document.getElementById('pickFilters');
   if(pickFiltersEl){
     const r = currentSeasonResult || {};
+    // Contrast and Chroma get a small "Contrast"/"Chroma" prefix -- with
+    // 4 chips now wrapping 2-per-line, Contrast's Low/Medium/High scale
+    // sitting next to Depth's Deep/Medium/Light one is genuinely
+    // ambiguous without it. Undertone and Depth stay unlabeled -- their
+    // own values already read clearly on their own.
     const filterChips = [
-      r.undertone_descriptive,
-      r.depth_level,
-      r.chroma_level,
-    ].filter(Boolean);
-    pickFiltersEl.innerHTML = filterChips.map(text =>
-      `<span class="pick-filter-chip">${text}</span>`
+      { value: r.undertone_descriptive },
+      { value: r.depth_level },
+      { label: 'Contrast', value: r.contrast_level },
+      { label: 'Chroma', value: r.chroma_level },
+    ].filter(c => c.value);
+    pickFiltersEl.innerHTML = filterChips.map(c =>
+      `<span class="pick-filter-chip">${c.label ? `<span class="pick-filter-chip-label">${c.label} </span>` : ''}${c.value}</span>`
     ).join('');
   }
 
   shadePodium.innerHTML = '';
   if(matches.length === 0) return;
 
-  // Sort by actual fit quality first -- these are the (up to) 3 shades
-  // bestShadeMatches already picked as the closest overall fit: best
-  // match, 2nd option, and 3rd option. bestShadeMatches already returns
-  // them in this order, so this sort should be a no-op in practice, but
-  // it's the belt-and-suspenders guarantee that the spotlighted "best
-  // match" position is genuinely the closest fit among the 3, not just
-  // whichever one happens to be listed first.
-  const sorted = [...matches].sort((a,b) => a.dist - b.dist);
+  // Sort by the same criterion bestShadeMatches ranks by -- see
+  // sortShadeMatches. bestShadeMatches already returns them in this
+  // order, so this sort should be a no-op in practice, but it's the
+  // belt-and-suspenders guarantee that the spotlighted "best match"
+  // position is genuinely the right one, not just whichever one
+  // happens to be listed first.
+  const sorted = sortShadeMatches(matches);
   const rankLabels = ['1', '2', '3'];
 
   sorted.forEach((s, i) => {
@@ -4541,7 +4820,7 @@ function renderShadeMatches(matches){
       <div class="shade-result-info">
         <div class="shade-result-name">${s.name}</div>
         <div class="shade-result-conf-row">
-          <div class="shade-result-conf-track"><div class="shade-result-conf-fill" style="width:${s.confidencePct}%;"></div></div>
+          ${renderLoveIcons(s.confidencePct)}
           <div class="shade-result-conf-num">${s.confidencePct}% matching</div>
         </div>
         ${shortWhy ? `<div class="shade-result-why">${shortWhy}</div>` : ''}
