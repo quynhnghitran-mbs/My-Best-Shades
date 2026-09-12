@@ -293,6 +293,11 @@
   .paywall-note{
     margin-top:20px; font-size:11.5px; color:var(--muted);
   }
+  .paywall-sdk-error{
+    margin-top:16px; font-size:12.5px; color:var(--rose-deep); text-align:center;
+    padding:12px 14px; border:1px solid var(--rose-deep); border-radius:10px;
+    line-height:1.5; background:rgba(150,51,60,0.06);
+  }
 
   .season-tag{
     font-family:'Playfair Display', serif;
@@ -809,6 +814,7 @@
         <div class="paywall-tier-locked-note" id="colorCheckLockedNote">Get your Season Analysis (left) first — this check unlocks once you have a result.</div>
       </div>
     </div>
+    <div class="paywall-sdk-error" id="paypalSdkError" style="display:none;">Payment didn't load. If you opened this from an app like Facebook, Zalo, Messenger, or Instagram, try opening this page in Safari or Chrome instead, then refresh — some in-app browsers block PayPal. Otherwise, please refresh the page or try a different browser.</div>
     <div class="paywall-note">Payments are processed securely by PayPal — we never see or store your card details.</div>
   </div>
 
@@ -3684,6 +3690,20 @@ function loadPayPalSdk(){
   });
 }
 
+// Surfaces a visible message when the PayPal button never actually shows
+// up -- previously any failure here (script blocked, render() rejecting,
+// or PayPal silently deciding no funding source is eligible on this
+// device/browser) just logged to console and left an empty, seemingly-
+// broken paywall with no clue why. The most common real-world trigger
+// is an in-app browser (Facebook/Zalo/Messenger/Instagram) that blocks
+// the popup PayPal's button flow needs -- common on mobile, rare on
+// desktop, which is exactly the "works on desktop, gone on phone"
+// pattern this is built to explain.
+function showPaypalSdkError(){
+  const el = document.getElementById('paypalSdkError');
+  if(el) el.style.display = 'block';
+}
+
 function renderPayPalButtons(paypalSdk){
   Object.keys(PRICING).forEach(tier => {
     const containerId = 'paypalBtn-' + tier;
@@ -3709,7 +3729,10 @@ function renderPayPalButtons(paypalSdk){
         console.error('[PayPal] Checkout error', err);
         alert("Something went wrong starting the payment. Please try again, or refresh the page.");
       },
-    }).render('#' + containerId);
+    }).render('#' + containerId).catch(err => {
+      console.error('[PayPal] Button failed to render', tier, err);
+      showPaypalSdkError();
+    });
   });
 }
 
@@ -3736,7 +3759,10 @@ function renderColorCheckPayPalButton(paypalSdk){
       console.error('[PayPal] Checkout error', err);
       alert("Something went wrong starting the payment. Please try again, or refresh the page.");
     },
-  }).render('#paypalBtn-colorCheck');
+  }).render('#paypalBtn-colorCheck').catch(err => {
+    console.error('[PayPal] Color-check button failed to render', err);
+    showPaypalSdkError();
+  });
 }
 
 applyUnlockState();
@@ -3750,7 +3776,24 @@ if(!getPurchase() || (!getColorCheckPurchase() && getSeasonProfileForColorCheck(
       const btnSlot = document.getElementById('paypalBtn-colorCheck');
       if(btnSlot) btnSlot.dataset.rendered = 'true';
     }
-  }).catch(e => console.error('[PayPal] SDK failed to load', e));
+    // Belt-and-suspenders check for the silent-failure case: the SDK
+    // script loaded fine and render() didn't reject, but PayPal still
+    // decided nothing is eligible to show on this device/browser (this
+    // happens with no error at all -- it just renders an empty box).
+    // PayPal injects an iframe per button once it actually has something
+    // to show, so an empty slot after a few seconds means nothing ever
+    // rendered.
+    setTimeout(() => {
+      const slotsToCheck = ['paypalBtn-season', 'paypalBtn-seasonShade', 'paypalBtn-colorCheck']
+        .map(id => document.getElementById(id))
+        .filter(el => el && el.style.display !== 'none');
+      const anyEmpty = slotsToCheck.some(el => !el.querySelector('iframe'));
+      if(slotsToCheck.length && anyEmpty) showPaypalSdkError();
+    }, 5000);
+  }).catch(e => {
+    console.error('[PayPal] SDK failed to load', e);
+    showPaypalSdkError();
+  });
 }
 
 // ---------------------------------------------------------------------
