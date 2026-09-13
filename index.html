@@ -510,7 +510,7 @@
   .palette-swatch-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 8px;margin-bottom:4px;}
   .palette-chip{width:auto;text-align:center;}
   .palette-dot{
-    width:38px;height:38px;border-radius:50%;margin:0 auto 7px;
+    width:48px;height:48px;border-radius:50%;margin:0 auto 7px;
     border:3px solid #fff;box-shadow:0 3px 9px rgba(58,31,34,0.20);
   }
   .palette-chip .label{
@@ -525,6 +525,17 @@
     margin:10px 0 4px;
     padding-left:16px;text-indent:-16px;
   }
+  /* Bolded keywords inside the explanation-style captions (palette
+     guidance, pixel measurement, My Shade result, shade-match "why") --
+     these paragraphs got wordy, so the actionable phrase in each one
+     (what to lean into, what to avoid, the mismatch reason) is wrapped
+     in <strong> at the source and picks up the accent color here, so a
+     skim catches the takeaway without reading every sentence. Per Nghi
+     (2026-09-14). */
+  .palette-guidance strong, .match-explain strong{
+    color:var(--rose-deep);font-weight:700;
+  }
+  .shade-result-why strong{font-weight:700;font-style:normal;}
   .palette-guidance svg{text-indent:0;}
 
   /* flex-wrap:nowrap + equal flex share (via .multi, added in JS when
@@ -1026,7 +1037,7 @@
 
         <div class="analysis-subhead second">Jewelry</div>
         <div id="paletteJewelryMetals" class="jewelry-metals"></div>
-        <div id="paletteJewelryNote" class="jewelry-note"></div>
+        <div id="paletteJewelryNote" class="jewelry-note palette-guidance"></div>
 
         <div class="palette-download-row">
           <button class="btn ghost palette-download-btn" id="downloadStyleGuideBtn">Download Your Palette</button>
@@ -1185,28 +1196,28 @@ const SEASON_STYLE_GUIDE = {
       {name:"Golden Blonde", hex:"#E8C275"}, {name:"Strawberry Blonde", hex:"#E3A66F"},
       {name:"Light Honey Brown", hex:"#B3823F"}, {name:"Warm Caramel", hex:"#A5652E"}
     ],
-    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}], note:"Bright, polished gold suits you best — keep pieces light and warm rather than heavy or oxidized." }
+    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}], note:"<strong>Bright, polished gold</strong> suits you best — keep pieces <strong>light and warm</strong> rather than heavy or oxidized." }
   },
   "True Spring": {
     hair: [
       {name:"Golden Brown", hex:"#8A5A2B"}, {name:"Copper Red", hex:"#B5541A"},
       {name:"Honey Blonde", hex:"#D9A64E"}, {name:"Warm Chestnut", hex:"#6E3B22"}
     ],
-    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}], note:"Classic warm, polished gold — your go-to metal for everyday and statement pieces alike." }
+    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}], note:"<strong>Classic warm, polished gold</strong> — your go-to metal for everyday and statement pieces alike." }
   },
   "Bright Spring": {
     hair: [
       {name:"Rich Copper", hex:"#B5511F"}, {name:"Warm Chocolate with Copper", hex:"#5A3319"},
       {name:"Golden Brown", hex:"#8A5A2B"}, {name:"Deep Auburn", hex:"#6B2C1A"}
     ],
-    jewelry: { metals:[{name:"Bright Gold", hex:"#E5C158"}], note:"High-shine, saturated gold. You can also carry a little mixed metal as long as gold dominates." }
+    jewelry: { metals:[{name:"Bright Gold", hex:"#E5C158"}], note:"<strong>High-shine, saturated gold.</strong> You can also carry a little mixed metal as long as <strong>gold dominates</strong>." }
   },
   "Soft Spring": {
     hair: [
       {name:"Soft Honey Brown", hex:"#9C6E3E"}, {name:"Warm Ash-Beige Blonde", hex:"#C7A97A"},
       {name:"Light Caramel", hex:"#B98552"}, {name:"Soft Chestnut", hex:"#7A4B2E"}
     ],
-    jewelry: { metals:[{name:"Matte Gold", hex:"#C9A24B"}, {name:"Rose Gold", hex:"#B76E79"}], note:"Brushed, low-shine warm metals — avoid anything too bright or heavily polished." }
+    jewelry: { metals:[{name:"Matte Gold", hex:"#C9A24B"}, {name:"Rose Gold", hex:"#B76E79"}], note:"<strong>Brushed, low-shine warm metals</strong> — avoid anything too bright or heavily polished." }
   },
 
   "Light Summer": {
@@ -1214,28 +1225,28 @@ const SEASON_STYLE_GUIDE = {
       {name:"Ash Blonde", hex:"#C9BE9E"}, {name:"Cool Light Brown", hex:"#8C7460"},
       {name:"Soft Beige Blonde", hex:"#D2C09A"}, {name:"Light Ash Brown", hex:"#7C6A57"}
     ],
-    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}], note:"Soft, cool-toned silver. Keep it light and delicate rather than bold or heavy gold." }
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}], note:"<strong>Soft, cool-toned silver.</strong> Keep it <strong>light and delicate</strong> rather than bold or heavy gold." }
   },
   "True Summer": {
     hair: [
       {name:"Cool Ash Brown", hex:"#6B594A"}, {name:"Cool Medium Brown", hex:"#5A4738"},
       {name:"Taupe Brown", hex:"#7A6656"}, {name:"Soft Cool Blonde", hex:"#C4B594"}
     ],
-    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Cool, softly polished metals — your classic pairing for everyday and dressier looks." }
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"<strong>Cool, softly polished metals</strong> — your classic pairing for everyday and dressier looks." }
   },
   "Soft Summer": {
     hair: [
       {name:"Cool Taupe Brown", hex:"#6E5D50"}, {name:"Ashy Medium Brown", hex:"#665648"},
       {name:"Muted Cool Blonde", hex:"#B8A986"}, {name:"Soft Grey-Brown", hex:"#7D7266"}
     ],
-    jewelry: { metals:[{name:"Brushed Silver", hex:"#B8BABC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Muted, low-shine cool metals — nothing too bright or high-contrast against your soft coloring." }
+    jewelry: { metals:[{name:"Brushed Silver", hex:"#B8BABC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"<strong>Muted, low-shine cool metals</strong> — nothing too bright or high-contrast against your soft coloring." }
   },
   "Deep Soft Summer": {
     hair: [
       {name:"Deep Ash Brown", hex:"#4A3C33"}, {name:"Cool Espresso", hex:"#3A2C22"},
       {name:"Dark Cool Chestnut", hex:"#4E3222"}, {name:"Deep Taupe Brown", hex:"#5A4A3D"}
     ],
-    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Gunmetal", hex:"#4B4E52"}], note:"Cool, deeper-toned metals — silver and gunmetal read richer against your depth than pale silver alone." }
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Gunmetal", hex:"#4B4E52"}], note:"<strong>Cool, deeper-toned metals</strong> — silver and gunmetal read richer against your depth than pale silver alone." }
   },
 
   "Soft Autumn": {
@@ -1243,28 +1254,28 @@ const SEASON_STYLE_GUIDE = {
       {name:"Warm Chestnut Brown", hex:"#6B3E24"}, {name:"Soft Caramel", hex:"#9C6B36"},
       {name:"Golden Brown", hex:"#8A5A2B"}, {name:"Warm Ash Brown", hex:"#8A7256"}
     ],
-    jewelry: { metals:[{name:"Matte Gold", hex:"#C9A24B"}, {name:"Antique Gold", hex:"#B08D57"}], note:"Soft, brushed warm metals — antique or matte finishes suit you better than bright polish." }
+    jewelry: { metals:[{name:"Matte Gold", hex:"#C9A24B"}, {name:"Antique Gold", hex:"#B08D57"}], note:"<strong>Soft, brushed warm metals</strong> — antique or matte finishes suit you better than bright polish." }
   },
   "True Autumn": {
     hair: [
       {name:"Chestnut", hex:"#6E3B1F"}, {name:"Copper Auburn", hex:"#9C4A22"},
       {name:"Warm Chocolate Brown", hex:"#4A2E1C"}, {name:"Golden Copper", hex:"#A5622A"}
     ],
-    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}, {name:"Bronze", hex:"#8C5E3C"}], note:"Rich, warm metals with real depth — gold and bronze both read beautifully against your coloring." }
+    jewelry: { metals:[{name:"Gold", hex:"#D4AF6A"}, {name:"Bronze", hex:"#8C5E3C"}], note:"<strong>Rich, warm metals with real depth</strong> — gold and bronze both read beautifully against your coloring." }
   },
   "Deep Autumn": {
     hair: [
       {name:"Deep Auburn", hex:"#5E2718"}, {name:"Dark Chocolate Brown", hex:"#3A2415"},
       {name:"Rich Copper Brown", hex:"#6B3A1E"}, {name:"Espresso", hex:"#33221A"}
     ],
-    jewelry: { metals:[{name:"Antique Gold", hex:"#B08D57"}, {name:"Copper", hex:"#B5651D"}], note:"Deep, richly warm metals — bold gold or copper pieces hold their own against your depth and chroma." }
+    jewelry: { metals:[{name:"Antique Gold", hex:"#B08D57"}, {name:"Copper", hex:"#B5651D"}], note:"<strong>Deep, richly warm metals</strong> — bold gold or copper pieces hold their own against your depth and chroma." }
   },
   "Deep Soft Autumn": {
     hair: [
       {name:"Deep Warm Brunette", hex:"#43291B"}, {name:"Dark Chestnut", hex:"#4E2C1B"},
       {name:"Espresso Brown", hex:"#33221A"}, {name:"Warm Dark Cocoa", hex:"#3A2517"}
     ],
-    jewelry: { metals:[{name:"Matte Bronze", hex:"#8C5E3C"}, {name:"Antique Gold", hex:"#B08D57"}], note:"Muted, deep warm metals — brushed finishes suit your understated depth better than high shine." }
+    jewelry: { metals:[{name:"Matte Bronze", hex:"#8C5E3C"}, {name:"Antique Gold", hex:"#B08D57"}], note:"<strong>Muted, deep warm metals</strong> — brushed finishes suit your understated depth better than high shine." }
   },
 
   "Deep Winter": {
@@ -1272,28 +1283,28 @@ const SEASON_STYLE_GUIDE = {
       {name:"Jet Black", hex:"#16130F"}, {name:"Darkest Brown", hex:"#2A1F18"},
       {name:"Cool Espresso", hex:"#2E241F"}, {name:"Blue-Black", hex:"#12141C"}
     ],
-    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Cool, high-polish metals — silver and platinum hold up against your depth and saturation." }
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"<strong>Cool, high-polish metals</strong> — silver and platinum hold up against your depth and saturation." }
   },
   "True Winter": {
     hair: [
       {name:"Cool Black-Brown", hex:"#241E1A"}, {name:"Cool Dark Brown", hex:"#362A22"},
       {name:"Blue-Black", hex:"#12141C"}, {name:"Ash Dark Brown", hex:"#3E332B"}
     ],
-    jewelry: { metals:[{name:"Platinum", hex:"#E5E4E2"}, {name:"Silver", hex:"#C7C9CC"}], note:"Icy, high-shine cool metals — the classic jewel-tone-and-platinum pairing." }
+    jewelry: { metals:[{name:"Platinum", hex:"#E5E4E2"}, {name:"Silver", hex:"#C7C9CC"}], note:"<strong>Icy, high-shine cool metals</strong> — the classic jewel-tone-and-platinum pairing." }
   },
   "Bright Winter": {
     hair: [
       {name:"Blue-Black", hex:"#12141C"}, {name:"Cool Darkest Brown", hex:"#241C18"},
       {name:"Deep Cool Brunette", hex:"#2E2420"}, {name:"Ash Black-Brown", hex:"#2A241F"}
     ],
-    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Bright, high-polish cool metals to match your vividness — avoid anything brushed or muted." }
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"<strong>Bright, high-polish cool metals</strong> to match your vividness — avoid anything brushed or muted." }
   },
   "Soft Winter": {
     hair: [
       {name:"Cool Ash Brown", hex:"#5A4C42"}, {name:"Soft Black", hex:"#262626"},
       {name:"Dark Ash Brunette", hex:"#3E332C"}, {name:"Cool Medium Grey-Brown", hex:"#6B5F55"}
     ],
-    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"Cool, softly polished metals — striking against your contrast without competing with your muted coloring." }
+    jewelry: { metals:[{name:"Silver", hex:"#C7C9CC"}, {name:"Platinum", hex:"#E5E4E2"}], note:"<strong>Cool, softly polished metals</strong> — striking against your contrast without competing with your muted coloring." }
   }
 };
 
@@ -1827,32 +1838,32 @@ function buildAxisPhrases(result){
 
   const warmthPhrase = {
     'Blue-cool':    'cool, blue-based colors',
-    'Cool':         'cool colors',
-    'Cool-neutral': 'colors that lean just slightly cool, close to neutral',
-    'Warm-neutral': 'colors that lean just slightly warm, close to neutral',
-    'Warm':         'warm colors',
-    'Golden':       'warm, golden colors',
+    'Cool':         '<strong>cool</strong> colors',
+    'Cool-neutral': 'colors that lean <strong>just slightly cool</strong>, close to neutral',
+    'Warm-neutral': 'colors that lean <strong>just slightly warm</strong>, close to neutral',
+    'Warm':         '<strong>warm</strong> colors',
+    'Golden':       '<strong>warm, golden</strong> colors',
   }[undertone] || 'colors close to your own undertone';
 
   let chromaPhrase, chromaCaution;
   if (chroma.includes('Vivid')) {
-    chromaPhrase = 'clear, richly saturated';
-    chromaCaution = 'not too dull or grayed-down, which can flatten your natural vividness';
+    chromaPhrase = 'clear, <strong>richly saturated</strong>';
+    chromaCaution = '<strong>not too dull or grayed-down</strong>, which can flatten your natural vividness';
   } else if (chroma.includes('Muted')) {
-    chromaPhrase = 'soft, muted';
-    chromaCaution = 'not too bright or saturated, which can look harsh against your softer coloring';
+    chromaPhrase = '<strong>soft, muted</strong>';
+    chromaCaution = '<strong>not too bright or saturated</strong>, which can look harsh against your softer coloring';
   } else {
-    chromaPhrase = 'moderately saturated';
-    chromaCaution = 'not too vivid and not too muted -- right in the middle suits your balanced coloring best';
+    chromaPhrase = '<strong>moderately saturated</strong>';
+    chromaCaution = '<strong>not too vivid and not too muted</strong> -- right in the middle suits your balanced coloring best';
   }
 
   let depthCaution;
   if (depth.includes('Deep') && !depth.includes('Light')) {
-    depthCaution = 'avoid anything too pale, which tends to wash you out rather than brighten you';
+    depthCaution = '<strong>avoid anything too pale</strong>, which tends to wash you out rather than brighten you';
   } else if (depth.includes('Light') && !depth.includes('Deep')) {
-    depthCaution = 'avoid anything too dark, which can overwhelm your coloring rather than complement it';
+    depthCaution = '<strong>avoid anything too dark</strong>, which can overwhelm your coloring rather than complement it';
   } else {
-    depthCaution = 'avoid going too dark or too light -- either extreme reads as more contrast than you actually have';
+    depthCaution = '<strong>avoid going too dark or too light</strong> -- either extreme reads as more contrast than you actually have';
   }
 
   return { warmthPhrase, chromaPhrase, chromaCaution, depthCaution };
@@ -1873,16 +1884,16 @@ function guidanceFull(ax){
 // shared string with a swapped tail) so the two sections don't read as
 // copy-pasted off each other.
 function guidanceEyeliner(ax){
-  return `Stays within true neutrals -- black, brown, and charcoal -- not a colored liner; even these are nudged within ${ax.warmthPhrase} so the undertone still reads as yours. Depth doesn't limit these the way it does the rest of your palette: a thin liner line is an accent, not a wash of color, so even black won't overwhelm you the way an all-dark look could. The deepest one is your most versatile everyday pick; the lighter browns soften it when black feels like too much.`;
+  return `Stays within <strong>true neutrals -- black, brown, and charcoal</strong> -- not a colored liner; even these are nudged within ${ax.warmthPhrase} so the undertone still reads as yours. <strong>Depth doesn't limit these</strong> the way it does the rest of your palette: a thin liner line is an accent, not a wash of color, so even black won't overwhelm you the way an all-dark look could. The deepest one is your most versatile everyday pick; the lighter browns soften it when black feels like too much.`;
 }
 function guidanceMascara(ax){
-  return `Same everyday neutrals as your liner, minus the charcoal -- mascara really only comes in black, brown, or black-brown, nudged within ${ax.warmthPhrase} to match your own coloring. Like liner, depth doesn't limit these; a coat of mascara is too fine a line to overwhelm even the lightest coloring. Black is the classic go-to; brown softens the look for a more natural daytime lash.`;
+  return `Same everyday neutrals as your liner, minus the charcoal -- mascara really only comes in <strong>black, brown, or black-brown</strong>, nudged within ${ax.warmthPhrase} to match your own coloring. <strong>Depth doesn't limit these</strong>; a coat of mascara is too fine a line to overwhelm even the lightest coloring. Black is the classic go-to; brown softens the look for a more natural daytime lash.`;
 }
 function guidanceHair(ax){
   return `Your most natural hair sits within ${ax.warmthPhrase}, at a depth close to your own -- ${ax.depthCaution}.`;
 }
 function guidanceEyebrow(){
-  return `Keep your brow color in the same family as your hair, just a shade or two deeper -- that reads as the most natural look on you.`;
+  return `Keep your brow color in the <strong>same family as your hair</strong>, just a shade or two deeper -- that reads as the most natural look on you.`;
 }
 // Bronzer deliberately ignores the warmth axis (see generateBronzerSwatch)
 // so its guideline does too -- only depth genuinely varies it customer to
@@ -1891,16 +1902,16 @@ function guidanceBronzer(result){
   const depth = (result && result.depth_level) || '';
   let depthNote;
   if (depth.includes('Deep') && !depth.includes('Light')) {
-    depthNote = "with your deeper coloring, a richer, more pigmented bronzer will actually show up -- a too-light one can look chalky.";
+    depthNote = "<strong>a richer, more pigmented bronzer</strong> will actually show up -- a too-light one can look chalky.";
   } else if (depth.includes('Light') && !depth.includes('Deep')) {
-    depthNote = "with your lighter coloring, keep it soft -- a heavy, deep bronzer can look muddy rather than sun-kissed.";
+    depthNote = "<strong>keep it soft</strong> -- a heavy, deep bronzer can look muddy rather than sun-kissed.";
   } else {
-    depthNote = "a medium-depth bronzer like this one is the safest match -- not too light, not too heavy-handed.";
+    depthNote = "<strong>a medium-depth bronzer</strong> like this one is the safest match -- not too light, not too heavy-handed.";
   }
-  return `Bronzer leans warm on everyone, regardless of your own undertone -- it's meant to mimic sun-warmed skin, not follow your cool/warm palette. Just watch the depth: ${depthNote}`;
+  return `Bronzer <strong>leans warm on everyone</strong>, regardless of your own undertone -- it's meant to mimic sun-warmed skin, not follow your cool/warm palette. Just watch the depth: ${depthNote}`;
 }
 function guidanceHighlighter(){
-  return `Keep your highlighter this pale and this subtle -- anything deeper or more colorful stops reading as a natural glow and starts reading as a contour line.`;
+  return `Keep your highlighter <strong>this pale and this subtle</strong> -- anything deeper or more colorful stops reading as a natural glow and starts reading as a contour line.`;
 }
 
 // ---------------------------------------------------------------------
@@ -2888,16 +2899,16 @@ function shadeWhyExplanation(target, s){
 
   const axes = [
     { name: 'undertone', close: absB < MISMATCH_REASON_MIN_DELTA,
-      off: db > 0 ? 'a touch cooler than your undertone' : 'a touch warmer than your undertone' },
+      off: db > 0 ? 'a touch <strong>cooler</strong> than your undertone' : 'a touch <strong>warmer</strong> than your undertone' },
     { name: 'depth', close: absL < MISMATCH_REASON_MIN_DELTA,
-      off: dL > 0 ? 'a touch darker than your depth' : 'a touch lighter than your depth' },
+      off: dL > 0 ? 'a touch <strong>darker</strong> than your depth' : 'a touch <strong>lighter</strong> than your depth' },
     { name: 'intensity', close: absC < MISMATCH_REASON_MIN_DELTA,
-      off: s.chroma_C < target.rangeLow ? 'a touch softer than your ideal intensity' : 'a touch bolder than your ideal intensity' },
+      off: s.chroma_C < target.rangeLow ? 'a touch <strong>softer</strong> than your ideal intensity' : 'a touch <strong>bolder</strong> than your ideal intensity' },
   ];
   const matched = axes.filter(a => a.close).map(a => a.name);
   const off = axes.filter(a => !a.close).map(a => a.off);
 
-  if(off.length === 0) return 'Matches your undertone, depth, and intensity closely.';
+  if(off.length === 0) return 'Matches your <strong>undertone, depth, and intensity</strong> closely.';
   if(matched.length === 0){
     const offPart = off.join('; ');
     return offPart.charAt(0).toUpperCase() + offPart.slice(1) + '.';
@@ -4459,16 +4470,16 @@ function renderMyShadeResult(rgb, pct){
   let tier, label, explain;
   if(pct >= 80){
     tier = 'great'; label = 'Great match';
-    explain = "This is one of your best colors — it works with your natural warmth, depth, and chroma. Wear it with confidence.";
+    explain = "This is <strong>one of your best colors</strong> — it works with your natural warmth, depth, and chroma. Wear it with confidence.";
   } else if(pct >= 60){
     tier = 'good'; label = 'Good match';
-    explain = "This flatters you — a safe, wearable choice that sits comfortably with your natural coloring.";
+    explain = "This <strong>flatters you</strong> — a safe, wearable choice that sits comfortably with your natural coloring.";
   } else if(pct >= 40){
     tier = 'borderline'; label = 'Borderline';
-    explain = "Wearable, but not your strongest color — it may read a little flat, heavy, or washed-out against your natural coloring.";
+    explain = "<strong>Wearable, but not your strongest color</strong> — it may read a little flat, heavy, or washed-out against your natural coloring.";
   } else {
     tier = 'off'; label = 'Not your shade';
-    explain = "This color tends to fight your natural coloring rather than flatter it — it may wash you out or clash more than complement.";
+    explain = "This color <strong>tends to fight your natural coloring</strong> rather than flatter it — it may wash you out or clash more than complement.";
   }
   const pill = document.getElementById('myShadeResultPill');
   pill.className = 'match-pill ' + tier;
@@ -4979,7 +4990,7 @@ function buildMyShadeProfilePayload(){
     chroma_level: result.chroma_level,
   };
 }
-const LIVE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwoJWcfXrZb9vByyjdy6H2LspYayq_9q6vhuJhkOgGMBTN_kpthAdWzvVKiDHjqUbIKiw/exec';
+const LIVE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyGXCJW6XrRDig-EPLI4M458koWB3YuDnD-uYyqZxagV5kzQsZsvuHExtFrpyZx_Gd0Mg/exec';
 function sendToLiveSheet(record){
   try{
     fetch(LIVE_SHEET_URL, {
@@ -5198,7 +5209,7 @@ function renderColorAnalysis(result){
 
   const pixelExplainEl = document.getElementById('pixelMeasurementExplanation');
   if(pixelExplainEl){
-    pixelExplainEl.innerHTML = `${magnifierIcon()} These colors are sampled directly from your photo -- at the precise skin, iris, sclera, and eyebrow points our face mapping locates -- then averaged into one RGB reading per feature. Luminance (0-255) is how light or dark each reading is; together, these four readings are the raw input for every measurement below.`;
+    pixelExplainEl.innerHTML = `${magnifierIcon()} These colors are <strong>sampled directly from your photo</strong> -- at the precise skin, iris, sclera, and eyebrow points our face mapping locates -- then averaged into <strong>one RGB reading per feature</strong>. <strong>Luminance (0-255)</strong> is how light or dark each reading is; together, these four readings are the raw input for every measurement below.`;
   }
 
   // --- CIELAB Analysis: Warmth / Depth / Contrast (with its Lightness
@@ -5415,7 +5426,7 @@ function renderPaletteDials(seasonName, result, centroid, deltas, hasRealDelta){
   // page, tying these 3 numbers to everything below them.
   const dialsExplanationEl = document.getElementById('paletteDialsExplanation');
   if(dialsExplanationEl){
-    dialsExplanationEl.innerHTML = `${magnifierIcon()} These same three numbers -- your own warmth, depth, and chroma -- are what shape every color recommendation below, from clothing through lipstick, not just a generic ${seasonName} palette.`;
+    dialsExplanationEl.innerHTML = `${magnifierIcon()} These same three numbers -- <strong>your own warmth, depth, and chroma</strong> -- are what shape every color recommendation below, from clothing through lipstick, not just a generic ${seasonName} palette.`;
   }
   section.style.display = 'block';
 }
@@ -5501,7 +5512,7 @@ function renderStyleGuide(result){
       <div class="dot" style="background:${m.hex};"></div>
       <div class="name">${m.name}</div>
     </div>`).join('');
-  document.getElementById('paletteJewelryNote').textContent = guide.jewelry.note;
+  setGuidance('paletteJewelryNote', guide.jewelry.note);
 
   lastStyleGuideData = {
     seasonName, family: result.family, clothing, jewelry: guide.jewelry,
