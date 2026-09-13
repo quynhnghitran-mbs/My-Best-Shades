@@ -186,6 +186,22 @@
     display:none;
   }
   .pick-hint{font-size:12px;color:var(--muted);text-align:center;margin-top:-8px;}
+  .myshade-magnifier{
+    position:absolute;width:110px;height:110px;border-radius:50%;
+    border:3px solid #fff;box-shadow:0 0 0 1.5px var(--rose-deep), 0 6px 16px rgba(58,31,34,0.35);
+    pointer-events:none;display:none;z-index:5;
+    image-rendering:pixelated;image-rendering:crisp-edges;
+  }
+  .myshade-photo-row{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;}
+  .myshade-picked-row{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
+  .myshade-picked-swatch{
+    width:52px;height:52px;border-radius:50%;flex-shrink:0;
+    border:3px solid #fff;box-shadow:0 0 0 1.5px var(--line), 0 3px 9px rgba(58,31,34,0.20);
+  }
+  .myshade-picked-text{text-align:center;}
+  .myshade-picked-label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);}
+  .myshade-picked-hex{font-size:13.5px;font-weight:700;color:var(--text-light);letter-spacing:0.02em;}
+  .myshade-picked-confirm{font-size:12px;color:var(--muted);text-align:center;margin-top:0;text-wrap:pretty;}
   .result-swatch-row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:18px;}
   .result-swatch{
     width:56px;height:56px;border-radius:50%;
@@ -975,7 +991,7 @@
     <div class="palette-download-row">
       <button class="btn ghost palette-download-btn" id="downloadColorProfileBtn">Download Your Color Profile</button>
     </div>
-    <div class="jewelry-note" style="text-align:center;margin-top:-14px;">Handy to keep for My Shade / Not My Shade.</div>
+    <div class="jewelry-note" style="text-align:center;margin-top:8px;">Handy to keep for My Shade / Not My Shade.</div>
 
     <div id="styleGuideSection" style="display:none;">
       <div class="analysis-card">
@@ -1145,12 +1161,23 @@
     </div>
 
     <div class="upload-stage" id="myShadeUploadStage" style="display:none;">
-      <div class="swatch-preview pickable" id="myShadeSwatchPreviewBox">
-        <span class="placeholder" id="myShadeSwatchPlaceholder">Upload a clear, well-lit photo of the lipstick, blush, or outfit.</span>
-        <canvas id="myShadeSwatchCanvas" style="display:none;"></canvas>
-        <div class="pick-marker" id="myShadePickMarker"></div>
+      <div class="myshade-photo-row">
+        <div class="swatch-preview pickable" id="myShadeSwatchPreviewBox">
+          <span class="placeholder" id="myShadeSwatchPlaceholder">Upload a clear, well-lit photo of the lipstick, blush, or outfit.</span>
+          <canvas id="myShadeSwatchCanvas" style="display:none;"></canvas>
+          <div class="pick-marker" id="myShadePickMarker"></div>
+          <canvas class="myshade-magnifier" id="myShadeMagnifier" width="110" height="110"></canvas>
+        </div>
+        <div class="myshade-picked-row" id="myShadePickedRow" style="display:none;">
+          <div class="myshade-picked-swatch" id="myShadePickedSwatch"></div>
+          <div class="myshade-picked-text">
+            <div class="myshade-picked-label">Color picked</div>
+            <div class="myshade-picked-hex" id="myShadePickedHex"></div>
+          </div>
+        </div>
       </div>
       <div class="pick-hint" id="myShadePickHint" style="display:none;">Tap or click directly on the color to pick it — avoid shadows, glare, and skin in the shot.</div>
+      <div class="myshade-picked-confirm" id="myShadePickedConfirm" style="display:none;">Does this look right? Tap a different spot on the photo if not.</div>
 
       <div class="upload-choice-row">
         <label class="choice-btn" for="myShadeFileInputCamera">
@@ -4181,6 +4208,17 @@ if(!getPurchase() || !getColorCheckPurchase()){
 // pastel pink scores ~30% for the same profile) but should be
 // re-validated against real product photos with known good/bad fits
 // once Nghi has some, the same way the face-matching table was tuned.
+//
+// UPDATED 2026-09-13, per Nghi: this table is now only a FALLBACK, used
+// only when an uploaded profile predates lab_temperature_b/depth_score/
+// avg_chroma being embedded (see buildMyShadeProfilePayload above).
+// Whenever those raw numbers are present, scoreColorForProfile() below
+// builds the target from the customer's own measured warmth/depth/
+// chroma instead of this generic per-season archetype -- two people who
+// both land in "Soft Autumn" don't sit in the exact same spot inside
+// that season's band, and the item color should be scored against HER
+// spot, the same numbers already shown as "Your Filter" on the main
+// results page (lab_temperature_b, depth_score, avg_chroma).
 // ---------------------------------------------------------------------
 const SEASON_PALETTE_TARGET = {
   "Light Spring":     { warmth: 0.45, value: 0.75, chroma: 0.60 },
@@ -4214,8 +4252,24 @@ function myShadeItemAxes(rgb){
     lab,
   };
 }
-function scoreColorForSeason(rgb, seasonName){
-  const target = SEASON_PALETTE_TARGET[seasonName];
+// Builds the comparison target from the customer's OWN measured
+// numbers (same raw fields, same normalization myShadeItemAxes uses for
+// the picked item color) whenever the uploaded profile has them; falls
+// back to the generic per-season archetype only for an older profile
+// PNG downloaded before these were embedded.
+function myShadeProfileTarget(profile){
+  const hasRealNumbers = profile.lab_temperature_b != null && profile.depth_score != null && profile.avg_chroma != null;
+  if(hasRealNumbers){
+    return {
+      warmth: Math.max(-1, Math.min(1, profile.lab_temperature_b / 50)),
+      value: Math.max(0, Math.min(1, profile.depth_score / 100)),
+      chroma: Math.max(0, Math.min(1, profile.avg_chroma / 80)),
+    };
+  }
+  return SEASON_PALETTE_TARGET[profile.shadeMatchSeason] || null;
+}
+function scoreColorForProfile(rgb, profile){
+  const target = myShadeProfileTarget(profile);
   if(!target) return null;
   const axes = myShadeItemAxes(rgb);
   const dist = Math.sqrt(
@@ -4366,6 +4420,10 @@ const myShadeCheckBtn = document.getElementById('myShadeCheckBtn');
 const myShadeErrorBox = document.getElementById('myShadeErrorBox');
 const myShadeCheckLoading = document.getElementById('myShadeCheckLoading');
 const myShadeResultCard = document.getElementById('myShadeResultCard');
+const myShadeMagnifier = document.getElementById('myShadeMagnifier');
+const myShadeMagnifierCtx = myShadeMagnifier ? myShadeMagnifier.getContext('2d') : null;
+const MYSHADE_MAG_SIZE = 110; // displayed loupe diameter, px (matches the canvas element + CSS)
+const MYSHADE_MAG_SOURCE_SIZE = 26; // px of the source photo captured into the loupe -- ~4.2x zoom
 let myShadePickedRgb = null; // set once the customer taps/clicks a point on the item photo
 
 // Draws the uploaded item photo into the (small, on-screen-sized) pick
@@ -4386,6 +4444,10 @@ function myShadeHandleItemFile(file){
   myShadePickedRgb = null;
   myShadeCheckBtn.disabled = true;
   myShadePickMarker.style.display = 'none';
+  const pickedRowReset = document.getElementById('myShadePickedRow');
+  if(pickedRowReset) pickedRowReset.style.display = 'none';
+  const pickedConfirmReset = document.getElementById('myShadePickedConfirm');
+  if(pickedConfirmReset) pickedConfirmReset.style.display = 'none';
   const reader = new FileReader();
   reader.onload = (e) => {
     const img = new Image();
@@ -4443,22 +4505,104 @@ function myShadePickAt(clientX, clientY, commit){
   myShadePickMarker.style.top = localY + 'px';
   myShadePickMarker.style.background = hex;
   myShadePickMarker.style.display = 'block';
+  // Zoomed loupe (2026-09-13, per Nghi: hovering to pick should zoom in
+  // for a more precise pick) -- draws a magnified crop of the photo
+  // centered on the exact point under the cursor/finger, nearest-
+  // neighbor scaled (imageSmoothingEnabled off) so individual source
+  // pixels stay crisp instead of blurring into an average. Positioned
+  // above the pointer by default, flipped below if too close to the top
+  // of the preview box, and clamped so it never spills outside the box.
+  if(myShadeMagnifier && myShadeMagnifierCtx){
+    const half = MYSHADE_MAG_SOURCE_SIZE / 2;
+    myShadeMagnifierCtx.imageSmoothingEnabled = false;
+    myShadeMagnifierCtx.clearRect(0, 0, MYSHADE_MAG_SIZE, MYSHADE_MAG_SIZE);
+    myShadeMagnifierCtx.drawImage(
+      myShadeSwatchCanvas,
+      cx - half, cy - half, MYSHADE_MAG_SOURCE_SIZE, MYSHADE_MAG_SOURCE_SIZE,
+      0, 0, MYSHADE_MAG_SIZE, MYSHADE_MAG_SIZE
+    );
+    const mid = MYSHADE_MAG_SIZE / 2;
+    myShadeMagnifierCtx.strokeStyle = 'rgba(0,0,0,0.35)';
+    myShadeMagnifierCtx.lineWidth = 3;
+    myShadeMagnifierCtx.beginPath();
+    myShadeMagnifierCtx.moveTo(mid - 9, mid); myShadeMagnifierCtx.lineTo(mid + 9, mid);
+    myShadeMagnifierCtx.moveTo(mid, mid - 9); myShadeMagnifierCtx.lineTo(mid, mid + 9);
+    myShadeMagnifierCtx.stroke();
+    myShadeMagnifierCtx.strokeStyle = 'rgba(255,255,255,0.9)';
+    myShadeMagnifierCtx.lineWidth = 1.5;
+    myShadeMagnifierCtx.beginPath();
+    myShadeMagnifierCtx.moveTo(mid - 9, mid); myShadeMagnifierCtx.lineTo(mid + 9, mid);
+    myShadeMagnifierCtx.moveTo(mid, mid - 9); myShadeMagnifierCtx.lineTo(mid, mid + 9);
+    myShadeMagnifierCtx.stroke();
+
+    let magLeft = localX - MYSHADE_MAG_SIZE / 2;
+    let magTop = localY - MYSHADE_MAG_SIZE - 20;
+    if(magTop < 0) magTop = localY + 20; // flip below the pointer near the top edge
+    magLeft = Math.max(0, Math.min(rect.width - MYSHADE_MAG_SIZE, magLeft));
+    myShadeMagnifier.style.left = magLeft + 'px';
+    myShadeMagnifier.style.top = magTop + 'px';
+    myShadeMagnifier.style.display = 'block';
+  }
   if(commit){
     myShadePickedRgb = picked;
     myShadeCheckBtn.disabled = false;
+    const pickedRow = document.getElementById('myShadePickedRow');
+    const pickedSwatch = document.getElementById('myShadePickedSwatch');
+    const pickedHex = document.getElementById('myShadePickedHex');
+    const pickedConfirm = document.getElementById('myShadePickedConfirm');
+    if(pickedRow && pickedSwatch && pickedHex){
+      pickedSwatch.style.background = hex;
+      pickedHex.textContent = hex.toUpperCase();
+      pickedRow.style.display = 'flex';
+    }
+    if(pickedConfirm) pickedConfirm.style.display = 'block';
+    if(myShadePickHint) myShadePickHint.style.display = 'none'; // superseded by the confirm prompt above
+    // Leave the loupe up for a beat so the final pick is still visible
+    // at the moment of commit, then hide it -- the swatch+hex panel is
+    // the lasting record of what was picked after that.
+    if(myShadeMagnifier){
+      setTimeout(() => { myShadeMagnifier.style.display = 'none'; }, 700);
+    }
   }
 }
 if(myShadeSwatchCanvas){
-  // Live preview follows the cursor on desktop (mouse hover); a tap on
-  // mobile (which has no hover) goes straight to the 'click' commit below.
+  // Live preview follows the cursor on desktop (mouse hover), zooming
+  // in via the loupe above for a more precise pick; a touch-drag on
+  // mobile (which has no hover) gets the same live loupe preview via
+  // touchmove below, committing on lift (touchend).
   myShadeSwatchCanvas.addEventListener('mousemove', (e) => {
     if(myShadeSwatchCanvas.style.display === 'none') return;
     myShadePickAt(e.clientX, e.clientY, false);
+  });
+  myShadeSwatchCanvas.addEventListener('mouseleave', () => {
+    if(myShadeMagnifier) myShadeMagnifier.style.display = 'none';
   });
   myShadeSwatchCanvas.addEventListener('click', (e) => {
     if(myShadeSwatchCanvas.style.display === 'none') return;
     myShadePickAt(e.clientX, e.clientY, true);
   });
+  // preventDefault on all three keeps the page from scrolling while
+  // dragging a finger across the photo to find the right spot, and
+  // suppresses the synthetic 'click' that would otherwise double-fire
+  // after touchend (touchend already commits directly below).
+  myShadeSwatchCanvas.addEventListener('touchstart', (e) => {
+    if(myShadeSwatchCanvas.style.display === 'none') return;
+    e.preventDefault();
+    const t = e.touches[0];
+    if(t) myShadePickAt(t.clientX, t.clientY, false);
+  }, { passive: false });
+  myShadeSwatchCanvas.addEventListener('touchmove', (e) => {
+    if(myShadeSwatchCanvas.style.display === 'none') return;
+    e.preventDefault();
+    const t = e.touches[0];
+    if(t) myShadePickAt(t.clientX, t.clientY, false);
+  }, { passive: false });
+  myShadeSwatchCanvas.addEventListener('touchend', (e) => {
+    if(myShadeSwatchCanvas.style.display === 'none') return;
+    e.preventDefault();
+    const t = e.changedTouches[0];
+    if(t) myShadePickAt(t.clientX, t.clientY, true);
+  }, { passive: false });
 }
 
 function renderMyShadeResult(rgb, pct){
@@ -4505,7 +4649,7 @@ myShadeCheckBtn.addEventListener('click', () => {
 
   try{
     const rgb = myShadePickedRgb;
-    const scored = scoreColorForSeason(rgb, profile.shadeMatchSeason);
+    const scored = scoreColorForProfile(rgb, profile);
     if(!scored){
       showError(myShadeErrorBox, "We couldn't match your uploaded color profile — try downloading and uploading it again.");
       return;
@@ -4543,6 +4687,10 @@ document.getElementById('myShadeCheckAnotherBtn').addEventListener('click', () =
   myShadeSwatchPlaceholder.style.display = 'block';
   myShadePickMarker.style.display = 'none';
   myShadePickHint.style.display = 'none';
+  const pickedRowAnother = document.getElementById('myShadePickedRow');
+  if(pickedRowAnother) pickedRowAnother.style.display = 'none';
+  const pickedConfirmAnother = document.getElementById('myShadePickedConfirm');
+  if(pickedConfirmAnother) pickedConfirmAnother.style.display = 'none';
   myShadePickedRgb = null;
   myShadeCheckBtn.disabled = true;
   myShadeFileInputCamera.value = '';
@@ -4988,6 +5136,18 @@ function buildMyShadeProfilePayload(){
     depth_level: result.depth_level,
     contrast_level: result.contrast_level,
     chroma_level: result.chroma_level,
+    // Her own raw measured numbers (2026-09-13, per Nghi: the filter
+    // here should be the customer's own numbers, not a generic
+    // per-season archetype) -- same raw fields the "Your Filter" chips
+    // on the main results page already show (lab_temperature_b,
+    // depth_score, avg_chroma), so scoreColorForProfile() below can
+    // build her real target instead of looking one up by season name.
+    // Optional: an older downloaded profile PNG won't have these, and
+    // scoreColorForProfile() falls back to SEASON_PALETTE_TARGET when
+    // they're missing.
+    lab_temperature_b: result.lab_temperature_b,
+    depth_score: result.depth_score,
+    avg_chroma: result.avg_chroma,
   };
 }
 const LIVE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyGXCJW6XrRDig-EPLI4M458koWB3YuDnD-uYyqZxagV5kzQsZsvuHExtFrpyZx_Gd0Mg/exec';
