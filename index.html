@@ -648,12 +648,11 @@
   .palette-swatch-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 8px;margin-bottom:4px;}
   .palette-chip{width:auto;text-align:center;}
   .palette-dot{
-    width:48px;height:48px;border-radius:50%;margin:0 auto 7px;
+    width:60px;height:60px;border-radius:50%;margin:0 auto;
     border:3px solid #fff;box-shadow:0 3px 9px rgba(58,31,34,0.20);
   }
   .palette-chip .label{
-    font-size:10.5px;color:var(--text-light);font-weight:600;line-height:1.25;
-    text-wrap:pretty;
+    display:none;
   }
   /* Short "how to choose" guideline shown under each swatch row -- same
      quiet, small-print treatment as the jewelry note beneath it, so this
@@ -2103,51 +2102,165 @@ function generateHighlighterSwatch(seasonName, deltas){
 // per category below. Deliberately plain-English, no CIELAB terms --
 // this is customer-facing copy, not the technical analysis section.
 // ---------------------------------------------------------------------
+// Each axis value gets 4 independently-worded phrasings (not one phrase
+// reused with different sentence scaffolding around it) -- index 0-3 maps
+// to Clothing/Eyeshadow/Blush/Lipstick, per Nghi (2026-09-14): those four
+// captions must actually read as different write-ups of the same fact,
+// not the same clause copy-pasted under four headings. Every other caller
+// (Hair, Eyeliner, Mascara) just reads variant 0 via the singular fields
+// below, same as before.
 function buildAxisPhrases(result){
   const undertone = (result && result.undertone_descriptive) || '';
   const chroma = (result && result.chroma_level) || '';
   const depth = (result && result.depth_level) || '';
 
-  const warmthPhrase = {
-    'Blue-cool':    'cool, blue-based colors',
-    'Cool':         '<strong>cool</strong> colors',
-    'Cool-neutral': 'colors that lean <strong>just slightly cool</strong>, close to neutral',
-    'Warm-neutral': 'colors that lean <strong>just slightly warm</strong>, close to neutral',
-    'Warm':         '<strong>warm</strong> colors',
-    'Golden':       '<strong>warm, golden</strong> colors',
-  }[undertone] || 'colors close to your own undertone';
+  const warmthByUndertone = {
+    'Blue-cool': [
+      'cool, blue-based colors',
+      'colors built on a cool blue base',
+      'colors pulled toward the cool, blue end of the wheel',
+      'blue-leaning cool colors',
+    ],
+    'Cool': [
+      '<strong>cool</strong> colors',
+      'colors on the <strong>cool</strong> side',
+      '<strong>cool-toned</strong> shades',
+      'colors with a <strong>cool</strong> undertone',
+    ],
+    'Cool-neutral': [
+      'colors that lean <strong>just slightly cool</strong>, close to neutral',
+      'colors sitting <strong>just barely on the cool side</strong> of neutral',
+      'near-neutral colors with the <strong>faintest cool cast</strong>',
+      'colors that read <strong>neutral with a whisper of cool</strong>',
+    ],
+    'Warm-neutral': [
+      'colors that lean <strong>just slightly warm</strong>, close to neutral',
+      'colors sitting <strong>just barely on the warm side</strong> of neutral',
+      'near-neutral colors with the <strong>faintest warm cast</strong>',
+      'colors that read <strong>neutral with a whisper of warmth</strong>',
+    ],
+    'Warm': [
+      '<strong>warm</strong> colors',
+      'colors on the <strong>warm</strong> side',
+      '<strong>warm-toned</strong> shades',
+      'colors with a <strong>warm</strong> undertone',
+    ],
+    'Golden': [
+      '<strong>warm, golden</strong> colors',
+      'colors carrying a <strong>golden warmth</strong>',
+      '<strong>golden-warm</strong> shades',
+      'colors on the <strong>warm, golden</strong> end of the wheel',
+    ],
+  };
+  const warmthVariants = warmthByUndertone[undertone] || [
+    'colors close to your own undertone',
+    'colors that match your own undertone',
+    'colors staying true to your undertone',
+    'colors in line with your natural undertone',
+  ];
 
-  let chromaPhrase, chromaCaution;
+  let chromaPhraseVariants, chromaCautionVariants;
   if (chroma.includes('Vivid')) {
-    chromaPhrase = 'clear, <strong>richly saturated</strong>';
-    chromaCaution = '<strong>not too dull or grayed-down</strong>, which can flatten your natural vividness';
+    chromaPhraseVariants = [
+      'clear, <strong>richly saturated</strong>',
+      'bold and <strong>fully saturated</strong>',
+      '<strong>vivid, high-clarity</strong>',
+      'crisp and <strong>vibrant</strong>',
+    ];
+    chromaCautionVariants = [
+      '<strong>not too dull or grayed-down</strong>, which can flatten your natural vividness',
+      'steer clear of <strong>chalky or grayed-out</strong> versions -- they mute the vividness you naturally have',
+      'a <strong>dusty or dulled-down</strong> shade will undersell your natural brightness',
+      'skip anything <strong>too soft or desaturated</strong> -- it reads as flat against your vivid coloring',
+    ];
   } else if (chroma.includes('Muted')) {
-    chromaPhrase = '<strong>soft, muted</strong>';
-    chromaCaution = '<strong>not too bright or saturated</strong>, which can look harsh against your softer coloring';
+    chromaPhraseVariants = [
+      '<strong>soft, muted</strong>',
+      'gently <strong>toned-down</strong>',
+      '<strong>dusty, low-saturation</strong>',
+      'quietly <strong>subdued</strong>',
+    ];
+    chromaCautionVariants = [
+      '<strong>not too bright or saturated</strong>, which can look harsh against your softer coloring',
+      'a <strong>high-shine, punchy</strong> shade will fight your gentler coloring',
+      'steer clear of anything <strong>too vivid or electric</strong> -- it overpowers your softer palette',
+      'skip <strong>loud, saturated</strong> tones -- they clash rather than complement here',
+    ];
   } else {
-    chromaPhrase = '<strong>moderately saturated</strong>';
-    chromaCaution = '<strong>not too vivid and not too muted</strong> -- right in the middle suits your balanced coloring best';
+    chromaPhraseVariants = [
+      '<strong>moderately saturated</strong>',
+      'a <strong>balanced, mid-intensity</strong>',
+      'neither muted nor vivid -- a <strong>middle-of-the-road</strong>',
+      '<strong>evenly saturated</strong>',
+    ];
+    chromaCautionVariants = [
+      '<strong>not too vivid and not too muted</strong> -- right in the middle suits your balanced coloring best',
+      'both <strong>overly bright and overly dusty</strong> extremes read as off for you -- the middle ground is your sweet spot',
+      'your coloring is forgiving of neither a <strong>washed-out</strong> nor an <strong>overly electric</strong> shade -- stay centered',
+      'lean away from either extreme -- <strong>too saturated or too flat</strong> both miss your balanced coloring',
+    ];
   }
 
-  let depthCaution;
+  let depthCautionVariants;
   if (depth.includes('Deep') && !depth.includes('Light')) {
-    depthCaution = '<strong>avoid anything too pale</strong>, which tends to wash you out rather than brighten you';
+    depthCautionVariants = [
+      '<strong>avoid anything too pale</strong>, which tends to wash you out rather than brighten you',
+      'a shade that\'s <strong>too light</strong> will fade against you instead of flattering you',
+      'steer clear of <strong>pale, washed-out</strong> tones -- they disappear against your natural depth',
+      'skip the <strong>light end</strong> of the range -- it drains your coloring rather than lifting it',
+    ];
   } else if (depth.includes('Light') && !depth.includes('Deep')) {
-    depthCaution = '<strong>avoid anything too dark</strong>, which can overwhelm your coloring rather than complement it';
+    depthCautionVariants = [
+      '<strong>avoid anything too dark</strong>, which can overwhelm your coloring rather than complement it',
+      'a shade that\'s <strong>too deep</strong> will overpower your lighter coloring',
+      'steer clear of <strong>heavy, dark</strong> tones -- they swallow up your natural lightness',
+      'skip the <strong>deep end</strong> of the range -- it reads as too heavy against you',
+    ];
   } else {
-    depthCaution = '<strong>avoid going too dark or too light</strong> -- either extreme reads as more contrast than you actually have';
+    depthCautionVariants = [
+      '<strong>avoid going too dark or too light</strong> -- either extreme reads as more contrast than you actually have',
+      'staying away from <strong>both extremes</strong> -- too pale or too deep -- keeps the contrast natural on you',
+      'neither the <strong>lightest nor the darkest</strong> option suits you -- both overstate the contrast you actually have',
+      'skip either edge of the range -- <strong>too light or too dark</strong> both read as more contrast than you naturally show',
+    ];
   }
 
-  return { warmthPhrase, chromaPhrase, chromaCaution, depthCaution };
+  return {
+    warmthPhrase: warmthVariants[0],
+    chromaPhrase: chromaPhraseVariants[0],
+    chromaCaution: chromaCautionVariants[0],
+    depthCaution: depthCautionVariants[0],
+    warmthVariants, chromaPhraseVariants, chromaCautionVariants, depthCautionVariants,
+  };
 }
 
 // Full three-axis guideline -- for the categories that genuinely span a
-// wide color range (Clothing, Eyeshadow, Blush, Lipstick).
-function guidanceFull(ax){
-  return `Lean into ${ax.warmthPhrase}, in a ${ax.chromaPhrase} range -- ${ax.chromaCaution}. For depth, ${ax.depthCaution}.`;
+// wide color range (Clothing, Eyeshadow, Blush, Lipstick). All four reason
+// from the same three underlying facts (undertone/chroma/depth), but each
+// pulls its own wording out of the variant banks above AND gets its own
+// sentence shape (per Nghi, 2026-09-14), so the four captions read as four
+// independent write-ups of the same guidance rather than one paragraph
+// copy-pasted under four headings.
+function guidanceClothing(ax){
+  const w = ax.warmthVariants[0], cp = ax.chromaPhraseVariants[0], cc = ax.chromaCautionVariants[0], dc = ax.depthCautionVariants[0];
+  return `Lean into ${w} for the bulk of your wardrobe, in a ${cp} range -- ${cc}. For depth, ${dc}.`;
+}
+function guidanceEyeshadow(ax){
+  const w = ax.warmthVariants[1], cp = ax.chromaPhraseVariants[1], cc = ax.chromaCautionVariants[1], dc = ax.depthCautionVariants[1];
+  return `Your best eyeshadow shades stay within ${w}, kept ${cp} rather than the opposite end -- ${cc}. Depth-wise, ${dc}.`;
+}
+function guidanceBlush(ax){
+  const w = ax.warmthVariants[2], cp = ax.chromaPhraseVariants[2], cc = ax.chromaCautionVariants[2], dc = ax.depthCautionVariants[2];
+  return `Reach for blush in ${w}, ${cp} in intensity -- ${cc}. On depth, ${dc}.`;
+}
+function guidanceLipstick(ax){
+  const w = ax.warmthVariants[3], cp = ax.chromaPhraseVariants[3], cc = ax.chromaCautionVariants[3], dc = ax.depthCautionVariants[3];
+  const article = /^[aeiou]/i.test(cp.replace(/<[^>]+>/g, '')) ? 'an' : 'a';
+  return `The lipsticks that flatter you most fall within ${w}, at ${article} ${cp} intensity -- ${cc}. As for depth, ${dc}.`;
 }
 // Eyeliner and Mascara guidelines -- deliberately do NOT reason from the
-// customer's own chroma reading the way guidanceFull does, because these
+// customer's own chroma reading the way the clothing/eyeshadow/blush/
+// lipstick guidelines above do, because these
 // two categories no longer follow it (see NEUTRAL_LINER_WARM/COOL and
 // generateEyeMakeupPalettes above): both stay within true black/brown/
 // charcoal neutrals rather than a colorful hue family, per Nghi
@@ -6493,13 +6606,13 @@ function renderStyleGuide(result){
 
   const clothingRow = document.getElementById('paletteClothingRow');
   clothingRow.innerHTML = swatchRowHtml(clothing);
-  setGuidance('paletteClothingGuidance', guidanceFull(ax));
+  setGuidance('paletteClothingGuidance', guidanceClothing(ax));
   document.getElementById('paletteHairRow').innerHTML = swatchRowHtml(hair);
   setGuidance('paletteHairGuidance', guidanceHair(ax));
   document.getElementById('paletteEyebrowRow').innerHTML = swatchRowHtml(eyebrow);
   setGuidance('paletteEyebrowGuidance', guidanceEyebrow());
   document.getElementById('paletteEyeshadowRow').innerHTML = swatchRowHtml(eyeshadow);
-  setGuidance('paletteEyeshadowGuidance', guidanceFull(ax));
+  setGuidance('paletteEyeshadowGuidance', guidanceEyeshadow(ax));
   document.getElementById('paletteEyelinerRow').innerHTML = swatchRowHtml(eyeliner);
   setGuidance('paletteEyelinerGuidance', guidanceEyeliner(ax));
   document.getElementById('paletteMascaraRow').innerHTML = swatchRowHtml(mascara);
@@ -6509,9 +6622,9 @@ function renderStyleGuide(result){
   document.getElementById('paletteHighlighterRow').innerHTML = swatchRowHtml(highlighter);
   setGuidance('paletteHighlighterGuidance', guidanceHighlighter());
   document.getElementById('paletteBlushRow').innerHTML = swatchRowHtml(blush);
-  setGuidance('paletteBlushGuidance', guidanceFull(ax));
+  setGuidance('paletteBlushGuidance', guidanceBlush(ax));
   document.getElementById('paletteLipstickRow').innerHTML = swatchRowHtml(lipstick);
-  setGuidance('paletteLipstickGuidance', guidanceFull(ax));
+  setGuidance('paletteLipstickGuidance', guidanceLipstick(ax));
 
   const metalsRow = document.getElementById('paletteJewelryMetals');
   metalsRow.classList.toggle('multi', guide.jewelry.metals.length > 1);
