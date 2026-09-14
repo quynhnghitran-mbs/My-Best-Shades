@@ -370,8 +370,23 @@
      needs a way to pull their remaining balance back down on another.
      Collapsed behind a link by default so it doesn't compete with the
      main purchase buttons for most visitors, who have never bought
-     anything yet. */
-  .restore-checks-row{ text-align:center; margin-top:18px; }
+     anything yet.
+     UPDATED 2026-09-14, per Nghi ("there is no place to access my 10
+     pack that was already bought") -- moved from the bottom of the
+     paywall card to right under the head (see the HTML), and given its
+     own dashed callout box instead of a bare link, so a returning
+     customer sees it before three "pay again" tiers rather than having
+     to scroll past them to find a small gray line at the very end. */
+  .restore-checks-row{
+    text-align:center; margin:0 0 24px;
+    background:rgba(150,51,60,0.06); border:1px dashed var(--rose-deep);
+    border-radius:12px; padding:14px 16px;
+  }
+  .restore-checks-toggle{
+    color:var(--rose-deep); font-weight:700; font-size:13px;
+    text-decoration:none;
+  }
+  .restore-checks-toggle:hover{ text-decoration:underline; }
   .restore-checks-form{
     display:flex; flex-direction:column; align-items:center; gap:10px;
     margin-top:12px; max-width:320px; margin-left:auto; margin-right:auto;
@@ -976,6 +991,26 @@
       <div class="season-name" style="font-size:22px;">Choose your reading</div>
       <div class="season-desc">Each payment unlocks one reading — <strong>pay</strong>, then <strong>upload your photo</strong> for your personalized result.</div>
     </div>
+    <!-- MOVED 2026-09-14, per Nghi ("there is no place to access my 10
+         pack that was already bought") -- this used to sit at the very
+         bottom of the card, past all three pricing tiers, as a small
+         gray link easy to miss. A returning customer landing here via
+         "Already tested your season? Check My Shade / Not My Shade"
+         (goToColorCheck()'s fallback when this browser has no local
+         balance -- e.g. a different device than the one they paid on)
+         was being shown three "pay again" tiers before ever seeing the
+         one option that actually applied to them. Now it's the first
+         thing under the head, above the tiers, and styled as its own
+         callout instead of a plain link so it doesn't read as an
+         afterthought. -->
+    <div class="restore-checks-row" id="restoreChecksRow">
+      <button type="button" class="link-btn restore-checks-toggle" id="restoreChecksToggleBtn">Already bought checks? Restore them by email →</button>
+      <div class="restore-checks-form" id="restoreChecksForm" style="display:none;">
+        <input type="email" id="restoreChecksEmail" class="restore-checks-input" placeholder="Email you paid with" autocomplete="email">
+        <button type="button" class="btn ghost palette-download-btn" id="restoreChecksSubmitBtn">Restore My Checks</button>
+        <div class="restore-checks-msg" id="restoreChecksMsg"></div>
+      </div>
+    </div>
     <div class="paywall-tiers">
       <div class="paywall-tier">
         <div class="paywall-tier-name">Season Analysis</div>
@@ -1018,14 +1053,6 @@
     </div>
     <div class="paywall-sdk-error" id="paypalSdkError" style="display:none;">Payment didn't load. If you opened this from an app like Facebook, Zalo, Messenger, or Instagram, try opening this page in Safari or Chrome instead, then refresh — some in-app browsers block PayPal. Otherwise, please refresh the page or try a different browser.</div>
     <div class="paywall-note">Payments are processed securely by PayPal — we never see or store your card details.</div>
-    <div class="restore-checks-row" id="restoreChecksRow">
-      <button type="button" class="link-btn" id="restoreChecksToggleBtn">Already bought checks? Restore them by email →</button>
-      <div class="restore-checks-form" id="restoreChecksForm" style="display:none;">
-        <input type="email" id="restoreChecksEmail" class="restore-checks-input" placeholder="Email you paid with" autocomplete="email">
-        <button type="button" class="btn ghost palette-download-btn" id="restoreChecksSubmitBtn">Restore My Checks</button>
-        <div class="restore-checks-msg" id="restoreChecksMsg"></div>
-      </div>
-    </div>
   </div>
 
   <div class="mirror-stage" id="mirrorStage">
@@ -5354,6 +5381,24 @@ if(restoreChecksSubmitBtn){
             : `No checks found for that email.`;
           restoreChecksMsg.className = remaining > 0 ? 'restore-checks-msg success' : 'restore-checks-msg';
         }
+        // BUG FIX 2026-09-14, per Nghi ("can I get access to my shade
+        // not my shade when clicking..."): restoreColorCheckBalance()
+        // above already calls applyColorCheckUnlockState(), which -- on
+        // a successful restore -- hides this whole paywall card
+        // (removing .show) and reveals myShadeSection, in the SAME tick
+        // this .then() runs. That left the "Restored — you have N
+        // checks remaining" message above sitting inside a card that
+        // had just gone display:none, so the customer never actually
+        // saw it, and never got moved anywhere -- the page just sat at
+        // its old scroll position with no indication anything had
+        // happened, even though the balance genuinely had been
+        // restored and the section genuinely was unlocked underneath.
+        // Scrolling to the now-revealed section on success is the fix:
+        // landing there IS the confirmation.
+        if(remaining > 0){
+          const unlockedSection = document.getElementById('myShadeSection');
+          if(unlockedSection) unlockedSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
       } else {
         if(restoreChecksMsg){
           restoreChecksMsg.textContent = "Couldn't restore right now — please try again in a moment.";
@@ -6617,19 +6662,43 @@ if (downloadStyleGuideBtn) {
         new Promise(r => setTimeout(r, 400)),
       ]);
       const canvas = drawStyleGuideStoryCard(lastStyleGuideData);
-      canvas.toBlob(blob => {
+      const blob = await new Promise(resolve => canvas.toBlob(resolve));
+      const slug = lastStyleGuideData.seasonName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const filename = `find-my-best-shades-${slug}-palette.png`;
+      // Same fix as the Color Profile download above (2026-09-14, per
+      // Nghi) -- on a phone, <a download> can land the image somewhere
+      // the customer has to go hunting for and re-save, rather than
+      // actually saving it. Where the browser supports sharing a file,
+      // route through the native share sheet instead, so "Save Image" /
+      // "Save to Photos" there saves it directly in one tap. Falls back
+      // to the original <a download> wherever file sharing isn't
+      // supported (desktop, or a share attempt that genuinely fails).
+      let sharedDirectly = false;
+      if (typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {
+        const shareFile = new File([blob], filename, { type: 'image/png' });
+        if (navigator.canShare({ files: [shareFile] })) {
+          try {
+            await navigator.share({ files: [shareFile], title: 'Your Color Palette' });
+            sharedDirectly = true;
+          } catch (shareErr) {
+            // AbortError -- customer backed out of the share sheet on
+            // purpose; respect that instead of forcing a fallback download.
+            if (shareErr && shareErr.name === 'AbortError') sharedDirectly = true;
+          }
+        }
+      }
+      if (!sharedDirectly) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        const slug = lastStyleGuideData.seasonName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-        a.download = `find-my-best-shades-${slug}-palette.png`;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-        downloadStyleGuideBtn.textContent = originalLabel;
-        downloadStyleGuideBtn.disabled = false;
-      });
+      }
+      downloadStyleGuideBtn.textContent = originalLabel;
+      downloadStyleGuideBtn.disabled = false;
     } catch (err) {
       console.error('Story card download failed', err);
       downloadStyleGuideBtn.textContent = originalLabel;
@@ -6825,15 +6894,46 @@ if (downloadColorProfileBtn) {
           console.warn('[Color profile] Could not embed profile data in PNG', embedErr);
         }
       }
-      const url = URL.createObjectURL(outBlob);
-      const a = document.createElement('a');
-      a.href = url;
       const slug = (data.season || 'profile').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      a.download = `find-my-best-shades-${slug}-color-profile.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      const filename = `find-my-best-shades-${slug}-color-profile.png`;
+      // On a phone, the plain <a download> approach below often doesn't
+      // save the image where the customer expects -- it can land in a
+      // generic cache/Downloads spot, or just open in a new tab, leaving
+      // them to hunt for it and save it a second time (their long-press
+      // -> Save Image). Per Nghi ("can you make it downloading right
+      // after I click download button"): where the browser supports
+      // sharing a file (most mobile Safari/Chrome, via the Web Share
+      // API's file support), route through the native share sheet
+      // instead -- its "Save Image"/"Save to Photos" action saves
+      // directly in one tap, no hunting. Desktop browsers (and any
+      // mobile browser without file-share support) don't offer that
+      // sheet, so they keep the original <a download> behavior below.
+      let sharedDirectly = false;
+      if (typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {
+        const shareFile = new File([outBlob], filename, { type: 'image/png' });
+        if (navigator.canShare({ files: [shareFile] })) {
+          try {
+            await navigator.share({ files: [shareFile], title: 'Your Color Profile' });
+            sharedDirectly = true;
+          } catch (shareErr) {
+            // AbortError -- the customer opened the share sheet and
+            // backed out on purpose. Respect that; don't also force a
+            // fallback download they didn't ask for. Any OTHER error
+            // (share sheet unusable, etc.) falls through to <a download>.
+            if (shareErr && shareErr.name === 'AbortError') sharedDirectly = true;
+          }
+        }
+      }
+      if (!sharedDirectly) {
+        const url = URL.createObjectURL(outBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
     } catch (err) {
       console.error('Color profile download failed', err);
     } finally {
