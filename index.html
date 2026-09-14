@@ -183,6 +183,12 @@
   }
   .myshade-picked-text{text-align:center;}
   .myshade-picked-label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--muted);}
+  /* ADDED 2026-09-14, per Nghi: the picked-color panel now shows a live
+     "Previewing" swatch before any hover/click (see myShadeUpdatePickedPanel),
+     and only switches to this emphasized "Color Picked" styling once a real
+     tap/click commits a pick -- so the label itself, not just the value,
+     makes clear whether a color has actually been collected. */
+  .myshade-picked-label.picked{color:var(--rose-deep);font-weight:700;}
   .myshade-picked-hex{font-size:13.5px;font-weight:700;color:var(--text-light);letter-spacing:0.02em;}
   .myshade-picked-confirm{font-size:12px;color:var(--muted);text-align:center;margin-top:0;text-wrap:pretty;}
   .result-swatch-row{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:18px;}
@@ -303,6 +309,62 @@
     padding:12px 4px; border:1px dashed var(--line); border-radius:10px;
     line-height:1.5;
   }
+  /* The post-check 10-pack upsell (My Shade result card) -- added
+     2026-09-14, per Nghi. Deliberately echoes the paywall-tier look
+     (badge, bordered card) so it reads as "the same kind of offer,"
+     just surfaced at a different moment. See myShadeComboUpsell. */
+  .myshade-combo-upsell{
+    border:1.5px solid var(--rose-deep);
+    border-radius:16px;
+    padding:22px 20px 20px;
+    position:relative;
+    text-align:center;
+    margin-top:6px;
+  }
+  .myshade-combo-upsell-badge{
+    position:absolute; top:-11px; left:50%; transform:translateX(-50%);
+    background:var(--rose-deep); color:var(--card);
+    font-family:'Work Sans', sans-serif; font-weight:700;
+    font-size:10.5px; letter-spacing:0.05em; text-transform:uppercase;
+    padding:4px 12px; border-radius:100px; white-space:nowrap;
+  }
+  /* UPDATED 2026-09-14, per Nghi ("not appealing enough for this
+     design"): the upsell used to be a single plain sentence sitting
+     above a lot of empty space where the PayPal button renders --
+     replaced with an actual priced-tier layout (kicker, name, big
+     price + strikethrough "was" price, per-check math, checkmarked
+     features) so it reads as a real offer, matching the look of the
+     tier cards on the main paywall instead of a plain note. */
+  .myshade-combo-upsell-kicker{
+    font-size:12px; color:var(--muted); margin:6px 0 4px;
+  }
+  .myshade-combo-upsell-name{
+    font-family:'Playfair Display', serif; font-style:italic;
+    font-size:18px; color:var(--rose-deep); margin-bottom:8px;
+  }
+  .myshade-combo-upsell-price-row{
+    display:flex; align-items:baseline; justify-content:center; gap:9px;
+    margin-bottom:16px;
+  }
+  .myshade-combo-upsell-price{
+    font-family:'Work Sans', sans-serif; font-weight:700;
+    font-size:32px; color:var(--text-dark);
+  }
+  .myshade-combo-upsell-was{
+    font-size:15px; color:var(--muted); text-decoration:line-through;
+  }
+  .myshade-combo-upsell-features{
+    list-style:none; margin:0 auto 20px; padding:0;
+    text-align:left; max-width:240px;
+  }
+  .myshade-combo-upsell-features li{
+    font-size:13px; color:var(--text-light); margin-bottom:8px;
+    padding-left:18px; position:relative;
+  }
+  .myshade-combo-upsell-features li::before{
+    content:'✓'; position:absolute; left:0; color:var(--rose-deep); font-weight:700;
+  }
+  .myshade-combo-upsell-features strong{ color:var(--rose-deep); }
   /* "Restore my checks" -- added 2026-09-14, per Nghi, for the durable
      combo (10-pack) balance: a customer who bought checks on one device
      needs a way to pull their remaining balance back down on another.
@@ -327,13 +389,14 @@
   /* My Shade / Not My Shade's own balance readout, shown once the
      section is unlocked -- this section used to be "pay once, use
      once"; now it's a running balance (single checks and combo-pack
-     checks share one pool), so the customer needs to see how many are
-     left and an easy way to top up. */
-  .myshade-balance-row{
-    display:flex; align-items:center; justify-content:space-between;
-    gap:12px; margin:2px 0 14px; font-size:13px; color:var(--text-light);
-  }
-  .myshade-balance-row strong{ color:var(--rose-deep); }
+     checks share one pool). The top-of-section "You have N checks
+     remaining" / "Need more checks?" row that used to live here was
+     removed 2026-09-14, per Nghi ("we don't need these lines") -- the
+     remaining balance is no longer surfaced until it actually runs out,
+     at which point the My Shade result card's own upsell (see
+     myShadeComboUpsell) already says "You're out of checks" and gives a
+     direct, fully-priced way to buy more, making this earlier duplicate
+     redundant. */
   .paywall-note{
     margin-top:20px; font-size:11.5px; color:var(--muted);
   }
@@ -448,6 +511,13 @@
     color:var(--muted);margin:14px 0 8px;
   }
   .pick-filters{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:2px;}
+  /* The My Shade result's own three category chips (Warm/Medium Depth/
+     Balanced Chroma) sit centered under the centered % above them --
+     added 2026-09-14, per Nghi. The other two .pick-filters rows
+     (#pickFilters and #myShadeProfileChipRow) stay left-aligned under
+     their left-aligned "Your Filter" label, so this is scoped to just
+     this one row rather than changing the shared class. */
+  #myShadeResultCategory{justify-content:center;}
   /* justify-content:flex-start reads fine when all 3 chips fit one
      line (the common case, and the only case the layout is actually
      tuned for). If the rare double-blended-label combination still
@@ -564,8 +634,15 @@
      come from the AI's own explanation text (per the JSON schema prompt)
      rather than a hardcoded template, since that copy is freshly
      generated per customer -- everything else in this rule wraps
-     deterministic, developer-written text.*/
-  .palette-guidance strong, .match-explain strong, .season-desc strong{
+     deterministic, developer-written text.
+     UPDATED 2026-09-14, per Nghi: extended to every action-guideline
+     string on the page (intro copy, hints, confirmations, locked-tier
+     notes) -- "choose", "tap", "click", "hover", "upload" and similar
+     action words are wrapped in <strong> at the source throughout, not
+     just in the AI-generated / result-page copy above. */
+  .palette-guidance strong, .match-explain strong, .season-desc strong,
+  .sub strong, .mirror-hint strong, .placeholder strong, .pick-hint strong,
+  .myshade-picked-confirm strong, .paywall-tier-locked-note strong{
     color:var(--rose-deep);font-weight:700;
   }
   .shade-result-why strong{font-weight:700;font-style:normal;}
@@ -862,13 +939,13 @@
 <div class="wrap">
   <div class="eyebrow">You are my most beautiful queen</div>
   <h1>Find My Best Shades</h1>
-  <p class="sub">Upload a clear, well-lit selfie.<br>We'll figure out your color season and the lip shades that suit you best.</p>
+  <p class="sub"><strong>Upload</strong> a clear, well-lit selfie.<br>We'll figure out your color season and the lip shades that suit you best.</p>
 
   <div class="card paywall-card" id="paywallCard">
     <div class="paywall-head">
       <div class="season-tag">Find My Best Shades</div>
       <div class="season-name" style="font-size:22px;">Choose your reading</div>
-      <div class="season-desc">Each payment unlocks one reading — pay, then upload your photo for your personalized result.</div>
+      <div class="season-desc">Each payment unlocks one reading — <strong>pay</strong>, then <strong>upload your photo</strong> for your personalized result.</div>
     </div>
     <div class="paywall-tiers">
       <div class="paywall-tier">
@@ -900,20 +977,15 @@
           <li>A match percentage against your season</li>
         </ul>
         <div id="paypalBtn-colorCheck" class="paypal-btn-slot" style="display:none;"></div>
-        <div class="paywall-tier-locked-note" id="colorCheckLockedNote">After payment, you'll upload the "Your Color Profile" image from your Season Analysis to run each check.</div>
+        <div class="paywall-tier-locked-note" id="colorCheckLockedNote">After payment, you'll <strong>upload the "Your Color Profile" image</strong> from your Season Analysis to run each check.</div>
       </div>
-      <div class="paywall-tier">
-        <div class="paywall-tier-badge">Save 33%</div>
-        <div class="paywall-tier-name">10 Checks Combo</div>
-        <div class="paywall-tier-price">$19.99</div>
-        <ul class="paywall-tier-features">
-          <li>10 My Shade / Not My Shade checks</li>
-          <li>Use them anytime — they don't expire</li>
-          <li>Restorable by email on any device</li>
-        </ul>
-        <div id="paypalBtn-colorCheckCombo" class="paypal-btn-slot" style="display:none;"></div>
-        <div class="paywall-tier-locked-note" id="colorCheckComboLockedNote">Same as My Shade / Not My Shade, just 10 checks at once for less per check.</div>
-      </div>
+      <!-- The 10-pack combo tier is NOT shown here -- per Nghi
+           (2026-09-14): "don't show the paywall of $19.99 at the
+           beginning." A first-time customer only ever sees the single
+           $2.99 check on this paywall; the 10-pack is pitched once,
+           as a time-boxed upsell, right after their first check runs
+           out (see myShadeComboUpsell in the My Shade result card,
+           and updateMyShadeActionButtons() below). -->
     </div>
     <div class="paywall-sdk-error" id="paypalSdkError" style="display:none;">Payment didn't load. If you opened this from an app like Facebook, Zalo, Messenger, or Instagram, try opening this page in Safari or Chrome instead, then refresh — some in-app browsers block PayPal. Otherwise, please refresh the page or try a different browser.</div>
     <div class="paywall-note">Payments are processed securely by PayPal — we never see or store your card details.</div>
@@ -930,7 +1002,7 @@
   <div class="mirror-stage" id="mirrorStage">
     <div class="magic-mirror-wrap">
       <div class="mirror" id="mirrorLabel">
-        <span class="placeholder" id="placeholderText"><span class="mirror-line">Mirror, mirror<br>on the wall...</span><span class="mirror-hint">choose an option below</span></span>
+        <span class="placeholder" id="placeholderText"><span class="mirror-line">Mirror, mirror<br>on the wall...</span><span class="mirror-hint"><strong>choose an option</strong> below</span></span>
         <img id="preview" style="display:none;">
       </div>
       <svg class="mirror-frame-svg" viewBox="0 0 240 340" xmlns="http://www.w3.org/2000/svg">
@@ -1182,16 +1254,12 @@
        visit or a different person always has to upload their own. -->
   <div id="myShadeSection" style="display:none;">
     <div class="eyebrow" style="margin-top:8px;">My Shade / Not My Shade</div>
-    <div class="myshade-balance-row" id="myShadeBalanceRow">
-      <span id="myShadeBalanceText"></span>
-      <button type="button" class="link-btn" id="myShadeBuyMoreBtn">Need more checks?</button>
-    </div>
 
     <!-- Shown until a color profile has been uploaded THIS page load -->
     <div class="card" id="myShadeNoProfileCard">
       <div class="season-tag">One quick thing first</div>
       <div class="season-name" style="font-size:22px;">Upload your Color Profile</div>
-      <div class="season-desc">My Shade / Not My Shade compares a color against your own natural coloring — warmth, depth, and chroma. Upload the "Your Color Profile" image you downloaded after your Season Analysis to get started.</div>
+      <div class="season-desc">My Shade / Not My Shade compares a color against your own natural coloring — warmth, depth, and chroma. <strong>Upload the "Your Color Profile" image</strong> you downloaded after your Season Analysis to get started.</div>
       <label class="choice-btn" for="myShadeProfileFileInput" style="margin:4px auto 0;">
         <span class="choice-icon">🖼️</span> Upload Your Color Profile
       </label>
@@ -1212,20 +1280,20 @@
     <div class="upload-stage" id="myShadeUploadStage" style="display:none;">
       <div class="myshade-photo-row">
         <div class="swatch-preview pickable" id="myShadeSwatchPreviewBox">
-          <span class="placeholder" id="myShadeSwatchPlaceholder">Upload a clear, well-lit photo of the lipstick, blush, or outfit.</span>
+          <span class="placeholder" id="myShadeSwatchPlaceholder"><strong>Upload</strong> a clear, well-lit photo of the lipstick, blush, or outfit.</span>
           <canvas id="myShadeSwatchCanvas" style="display:none;"></canvas>
           <canvas class="myshade-magnifier" id="myShadeMagnifier" width="110" height="110"></canvas>
         </div>
         <div class="myshade-picked-row" id="myShadePickedRow" style="display:none;">
           <div class="myshade-picked-swatch" id="myShadePickedSwatch"></div>
           <div class="myshade-picked-text">
-            <div class="myshade-picked-label">Color picked</div>
+            <div class="myshade-picked-label" id="myShadePickedLabel">Previewing</div>
             <div class="myshade-picked-hex" id="myShadePickedHex"></div>
           </div>
         </div>
       </div>
-      <div class="pick-hint" id="myShadePickHint" style="display:none;">Tap or click directly on the color to pick it — avoid shadows, glare, and skin in the shot.</div>
-      <div class="myshade-picked-confirm" id="myShadePickedConfirm" style="display:none;">Does this look right? Tap a different spot on the photo if not.</div>
+      <div class="pick-hint" id="myShadePickHint" style="display:none;"><strong>Hover</strong> to preview, then <strong>tap or click</strong> directly on the color to pick it — avoid shadows, glare, and skin in the shot.</div>
+      <div class="myshade-picked-confirm" id="myShadePickedConfirm" style="display:none;">Does this look right? <strong>Tap a different spot</strong> on the photo if not.</div>
 
       <div class="upload-choice-row">
         <label class="choice-btn" for="myShadeFileInputCamera">
@@ -1249,9 +1317,30 @@
         <div class="result-swatch" id="myShadeResultSwatch"></div>
         <div class="match-pct" id="myShadeResultPct"></div>
       </div>
+      <div class="pick-filters" id="myShadeResultCategory" style="margin-bottom:12px;"></div>
       <div class="match-pill" id="myShadeResultPill"></div>
       <div class="match-explain" id="myShadeResultExplain"></div>
-      <button class="btn ghost" id="myShadeCheckAnotherBtn">Check Another Color</button>
+      <button class="btn ghost" id="myShadeCheckAnotherBtn" style="display:none;">Check Another Color</button>
+      <!-- Shown instead of "Check Another Color" the moment the customer
+           runs out of checks -- per Nghi (2026-09-14): pitch the 10-pack
+           right after they've just gotten real value from their first
+           check, rather than upfront on the paywall. See
+           updateMyShadeActionButtons() and grantColorCheckCredits(). -->
+      <div class="myshade-combo-upsell" id="myShadeComboUpsell" style="display:none;">
+        <div class="myshade-combo-upsell-badge">Save 33%</div>
+        <div class="myshade-combo-upsell-kicker">You're out of checks</div>
+        <div class="myshade-combo-upsell-name">10-Check Bundle</div>
+        <div class="myshade-combo-upsell-price-row">
+          <span class="myshade-combo-upsell-price">$19.99</span>
+          <span class="myshade-combo-upsell-was">$29.90</span>
+        </div>
+        <ul class="myshade-combo-upsell-features">
+          <li>Never pick a wrong shade again</li>
+          <li>10 more My Shade / Not My Shade checks</li>
+          <li><strong>No expiration</strong> — use them anytime</li>
+        </ul>
+        <div id="paypalBtn-colorCheckComboUpsell" class="paypal-btn-slot"></div>
+      </div>
 
       <div class="feedback-block" id="myShadeFeedbackBlock">
         <div id="myShadeFeedbackFormBlock">
@@ -4222,12 +4311,24 @@ function applyColorCheckUnlockState(){
     if(section) section.style.display = '';
     renderMyShadeProfileGate();
   }
-  const balanceText = document.getElementById('myShadeBalanceText');
-  if(balanceText){
-    balanceText.innerHTML = remaining > 0
-      ? `You have <strong>${remaining}</strong> check${remaining === 1 ? '' : 's'} remaining`
-      : `You're out of checks`;
-  }
+  updateMyShadeActionButtons();
+}
+
+// Decides whether the My Shade result card offers "Check Another Color"
+// or the 10-pack upsell instead -- per Nghi (2026-09-14): once a
+// customer runs out of checks, pitch the $19.99 10-pack right there
+// instead of sending them back to a generic paywall (which no longer
+// even lists it -- see the paywall-tiers comment above). A customer who
+// already has checks left (bought the combo, or just hasn't used up a
+// single check yet) keeps the normal button. Safe to call any time the
+// balance might have changed -- called from applyColorCheckUnlockState()
+// above, which already runs on every grant/consume/restore.
+function updateMyShadeActionButtons(){
+  const remaining = getColorCheckRemaining();
+  const checkAnotherBtn = document.getElementById('myShadeCheckAnotherBtn');
+  const comboUpsell = document.getElementById('myShadeComboUpsell');
+  if(checkAnotherBtn) checkAnotherBtn.style.display = remaining > 0 ? '' : 'none';
+  if(comboUpsell) comboUpsell.style.display = remaining > 0 ? 'none' : 'block';
 }
 
 // UPDATED 2026-09-12, per Nghi: this used to stay locked until a season
@@ -4238,29 +4339,21 @@ function applyColorCheckUnlockState(){
 // it hasn't already been bought. The note beneath it is now just
 // informational (no gating), telling the customer what they'll need
 // after paying.
-// Balance model means these buttons stay useful even after a purchase
-// -- unlike the one-shot season/shade tiers above, running out of
-// colorCheck credits and buying more (either tier) is a completely
-// normal thing to do, so both PayPal buttons are simply always shown
-// once rendered (no more "hide once already bought").
+// UPDATED 2026-09-14, per Nghi: the 10-pack combo button used to live
+// here too, gated the same way. It's been moved entirely to the My
+// Shade result card as a post-check upsell (see myShadeComboUpsell /
+// renderColorCheckComboPayPalButton) -- this paywall now only ever
+// offers the single $2.99 check.
 function refreshColorCheckTierGate(){
   const btnSlot = document.getElementById('paypalBtn-colorCheck');
-  const comboSlot = document.getElementById('paypalBtn-colorCheckCombo');
   const lockedNote = document.getElementById('colorCheckLockedNote');
-  const comboLockedNote = document.getElementById('colorCheckComboLockedNote');
   if(!btnSlot) return;
   if(!btnSlot.dataset.rendered && window.paypal){
     renderColorCheckPayPalButton(window.paypal);
     btnSlot.dataset.rendered = 'true';
   }
-  if(comboSlot && !comboSlot.dataset.rendered && window.paypal){
-    renderColorCheckComboPayPalButton(window.paypal);
-    comboSlot.dataset.rendered = 'true';
-  }
   btnSlot.style.display = '';
-  if(comboSlot) comboSlot.style.display = '';
   if(lockedNote) lockedNote.style.display = 'block';
-  if(comboLockedNote) comboLockedNote.style.display = 'block';
 }
 
 // PayPal's SDK is loaded dynamically (rather than a static <script> tag
@@ -4353,8 +4446,12 @@ function renderColorCheckPayPalButton(paypalSdk){
   });
 }
 
+// Renders into the post-check upsell slot inside the My Shade result
+// card (see myShadeComboUpsell above), not the main paywall -- per Nghi
+// (2026-09-14), the 10-pack is only ever pitched right after a customer
+// has used up their checks, not offered upfront.
 function renderColorCheckComboPayPalButton(paypalSdk){
-  const container = document.getElementById('paypalBtn-colorCheckCombo');
+  const container = document.getElementById('paypalBtn-colorCheckComboUpsell');
   if(!container) return;
   paypalSdk.Buttons({
     style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'pay' },
@@ -4366,15 +4463,17 @@ function renderColorCheckComboPayPalButton(paypalSdk){
     }),
     onApprove: (data, actions) => actions.order.capture().then(order => {
       grantColorCheckCredits(order, COLORCHECK_COMBO_PRICING.count, 'colorCheckCombo');
+      // applyColorCheckUnlockState() also refreshes the result-card
+      // buttons (updateMyShadeActionButtons()), so this immediately
+      // swaps the upsell back out for "Check Another Color" now that
+      // there are 10 fresh credits to use.
       applyColorCheckUnlockState();
-      const btn = document.getElementById('myShadeCheckBtn');
-      if(myShadePickedRgb && btn && !btn.disabled) btn.click();
     }),
     onError: (err) => {
       console.error('[PayPal] Checkout error', err);
       alert("Something went wrong starting the payment. Please try again, or refresh the page.");
     },
-  }).render('#paypalBtn-colorCheckCombo').catch(err => {
+  }).render('#paypalBtn-colorCheckComboUpsell').catch(err => {
     console.error('[PayPal] Combo color-check button failed to render', err);
     showPaypalSdkError();
   });
@@ -4393,8 +4492,8 @@ loadPayPalSdk().then(paypalSdk => {
   renderColorCheckComboPayPalButton(paypalSdk);
   const btnSlot = document.getElementById('paypalBtn-colorCheck');
   if(btnSlot) btnSlot.dataset.rendered = 'true';
-  const comboSlot = document.getElementById('paypalBtn-colorCheckCombo');
-  if(comboSlot) comboSlot.dataset.rendered = 'true';
+  const comboUpsellSlot = document.getElementById('paypalBtn-colorCheckComboUpsell');
+  if(comboUpsellSlot) comboUpsellSlot.dataset.rendered = 'true';
   // Belt-and-suspenders check for the silent-failure case: the SDK
   // script loaded fine and render() didn't reject, but PayPal still
   // decided nothing is eligible to show on this device/browser (this
@@ -4402,8 +4501,15 @@ loadPayPalSdk().then(paypalSdk => {
   // PayPal injects an iframe per button once it actually has something
   // to show, so an empty slot after a few seconds means nothing ever
   // rendered.
+  //
+  // paypalBtn-colorCheckComboUpsell is deliberately NOT in this list --
+  // it lives inside the My Shade result card, which stays hidden for
+  // most of a visit (until a first check actually runs out), so an
+  // empty slot there this early is expected, not a sign anything is
+  // broken. If the underlying SDK is genuinely broken, the buttons
+  // below (which are always attempted right away) already catch it.
   setTimeout(() => {
-    const slotsToCheck = ['paypalBtn-season', 'paypalBtn-seasonShade', 'paypalBtn-colorCheck', 'paypalBtn-colorCheckCombo']
+    const slotsToCheck = ['paypalBtn-season', 'paypalBtn-seasonShade', 'paypalBtn-colorCheck']
       .map(id => document.getElementById(id))
       .filter(el => el && el.style.display !== 'none');
     const anyEmpty = slotsToCheck.some(el => !el.querySelector('iframe'));
@@ -4491,6 +4597,29 @@ function myShadeItemAxes(rgb){
     lab,
   };
 }
+// The item's own color category -- Warm/Neutral/Cool, Light/Medium/Deep,
+// Muted/Balanced/Vivid -- shown next to the match % so a customer can
+// see AT A GLANCE what kind of color this is, not just how well it
+// scored. Per Nghi (2026-09-14): "show shade's category ... to support
+// the %."
+//
+// Deliberately reuses the same three classifiers the Shade Atlas already
+// uses to describe a PRODUCT's own color (classifyShadeTemp/
+// classifyDepthZone/classifyShadeChroma, all defined above near the
+// shade-matching logic) rather than the customer-facing classifyWith
+// Zones thresholds used for depth_level/chroma_level -- those are
+// calibrated to real face measurements (skin/iris/sclera), which isn't
+// what's being classified here. This keeps "Warm"/"Medium"/"Balanced"
+// meaning the same thing everywhere a shade's own color is described
+// (the Shade Atlas, the podium cards, and now here) instead of
+// introducing a fourth set of category cutoffs.
+function myShadeItemCategory(lab){
+  return {
+    warmth: classifyShadeTemp(lab.b),
+    depth: classifyDepthZone(lab.L),
+    chroma: classifyShadeChroma(lab.C),
+  };
+}
 // Builds the comparison target from the customer's OWN measured
 // numbers (same raw fields, same normalization myShadeItemAxes uses for
 // the picked item color) whenever the uploaded profile has them; falls
@@ -4572,6 +4701,30 @@ function myShadeAxisExplanation(axes, target, adjustedValue){
     character: `This color reads a little ${myShadeJoinWords(reads)} on you.`,
     guidance: `For a closer match, look for something a bit ${myShadeJoinWords(towards)}.`,
   };
+}
+
+// A purely positive line used in place of the axis critique above once
+// the match is good enough (pct >= 70 -- see renderMyShadeResult) -- per
+// Nghi (2026-09-14): "give some compliment rather than giving the
+// shade's minus and improvement." Deliberately doesn't reference the
+// axis gap at all, even though scoreColorForProfile's `dist` is
+// technically nonzero for anything under 100% -- at this score level
+// that gap isn't worth mentioning.
+//
+// UPDATED 2026-09-14, per Nghi's follow-up: after the compliment, steer
+// the customer toward more shades like this one -- "encourage the
+// customers to pick this category of shade (... stick with these warm -
+// neutral, pinky and muted colors like this...)". `cat` is the same
+// {warmth, depth, chroma} object the chip row under the % is built
+// from, so the sentence always names the exact category those chips
+// show, never a category computed separately that could drift from them.
+function myShadeComplimentLine(tier, cat){
+  const base = tier === 'great'
+    ? "A <strong>true standout</strong> for your coloring — wear it with total confidence."
+    : "A <strong>reliably flattering</strong> choice that sits comfortably within your best range.";
+  if(!cat) return base;
+  const phrase = `${cat.warmth.toLowerCase()}, ${cat.depth.toLowerCase()}-depth, ${cat.chroma.toLowerCase()}-chroma`;
+  return `${base} <strong>Stick with ${phrase} shades like this one</strong> — that's the range where you'll keep finding colors that flatter you.`;
 }
 
 // ---------------------------------------------------------------------
@@ -4774,6 +4927,18 @@ function myShadeHandleItemFile(file){
       myShadeSwatchCanvas.style.display = 'block';
       myShadeSwatchPlaceholder.style.display = 'none';
       myShadePickHint.style.display = 'block';
+      // Show a live preview swatch right away (sampled from the center of
+      // the photo) so the customer sees the picked-color panel BEFORE they
+      // hover or click at all -- added 2026-09-14, per Nghi ("show the live
+      // swatch sample before hovering"). This only ever shows the muted
+      // "Previewing" state (see myShadeUpdatePickedPanel) -- it never sets
+      // myShadePickedRgb or enables the Check button, so an actual tap/click
+      // on the real color is still required to commit a pick.
+      const centerPicked = myShadeSampleCanvasAt(dw / 2, dh / 2, 4);
+      if(centerPicked){
+        const centerHex = '#' + [centerPicked.r, centerPicked.g, centerPicked.b].map(v => v.toString(16).padStart(2,'0')).join('');
+        myShadeUpdatePickedPanel(centerHex, false);
+      }
     };
     img.onerror = () => showError(myShadeErrorBox, "Couldn't read that photo. Please try a different file.");
     img.src = e.target.result;
@@ -4803,6 +4968,28 @@ function myShadeSampleCanvasAt(cx, cy, radius){
   const rs = [], gs = [], bs = [];
   for(let i = 0; i < data.length; i += 4){ rs.push(data[i]); gs.push(data[i+1]); bs.push(data[i+2]); }
   return { r: Math.round(myShadeMedian(rs)), g: Math.round(myShadeMedian(gs)), b: Math.round(myShadeMedian(bs)) };
+}
+// Updates the picked-color swatch/hex/label panel. Runs on every hover,
+// drag, and click/tap -- not just on commit -- so the panel always shows
+// a live value. The label text/styling is what distinguishes an
+// uncommitted live preview from an actual committed pick (see the
+// 2026-09-14 note in myShadePickAt below for why this needed to be a
+// clearly-labeled dual state rather than either "always live" or
+// "commit-only").
+function myShadeUpdatePickedPanel(hex, commit){
+  const pickedRow = document.getElementById('myShadePickedRow');
+  const pickedSwatch = document.getElementById('myShadePickedSwatch');
+  const pickedHex = document.getElementById('myShadePickedHex');
+  const pickedLabel = document.getElementById('myShadePickedLabel');
+  if(pickedRow && pickedSwatch && pickedHex){
+    pickedSwatch.style.background = hex;
+    pickedHex.textContent = hex.toUpperCase();
+    pickedRow.style.display = 'flex';
+  }
+  if(pickedLabel){
+    pickedLabel.textContent = commit ? 'Color Picked' : 'Previewing';
+    pickedLabel.classList.toggle('picked', !!commit);
+  }
 }
 function myShadePickAt(clientX, clientY, commit){
   const rect = myShadeSwatchCanvas.getBoundingClientRect();
@@ -4854,27 +5041,23 @@ function myShadePickAt(clientX, clientY, commit){
     myShadeMagnifier.style.top = magTop + 'px';
     myShadeMagnifier.style.display = 'block';
   }
-  // The "Color Picked" swatch+hex readout below the photo only updates
-  // on an actual commit (click/tap), not on every hover position.
+  // The swatch+hex readout below the photo updates on EVERY call now --
+  // hover/drag included, not just commit -- but the label makes clear
+  // which kind of update it is ("Previewing" vs "Color Picked").
   //
-  // UPDATED 2026-09-14, per Nghi: this briefly updated live on every
-  // hover too (matching her "the color sample should be live during
-  // hovering" request), but that made it impossible to tell a real pick
-  // from just passing the cursor over the photo -- moving the mouse
-  // after clicking kept changing the "COLOR PICKED" readout, so it
-  // looked like nothing had actually been collected. The big magnifier
-  // loupe above already gives a live zoomed preview while aiming, so
-  // this panel is free to mean exactly what it says: it only appears
-  // and only changes once a color has actually been picked.
+  // UPDATED 2026-09-14, per Nghi ("show the live swatch sample before
+  // hovering"): an earlier version of this panel updated live on every
+  // hover with no label distinction, which made it impossible to tell a
+  // real pick from just passing the cursor over the photo -- moving the
+  // mouse after clicking kept changing the readout with no sign anything
+  // had actually been collected. Rather than go back to commit-only
+  // (which hides the live value the customer now expects to see before
+  // hovering), the fix is the label itself: it reads "Previewing" while
+  // just aiming and switches to an emphasized "Color Picked" only once a
+  // real tap/click commits -- and reverts to "Previewing" again the
+  // moment the customer moves off that commit to aim somewhere else.
+  myShadeUpdatePickedPanel(hex, commit);
   if(commit){
-    const pickedRow = document.getElementById('myShadePickedRow');
-    const pickedSwatch = document.getElementById('myShadePickedSwatch');
-    const pickedHex = document.getElementById('myShadePickedHex');
-    if(pickedRow && pickedSwatch && pickedHex){
-      pickedSwatch.style.background = hex;
-      pickedHex.textContent = hex.toUpperCase();
-      pickedRow.style.display = 'flex';
-    }
     myShadePickedRgb = picked;
     myShadeCheckBtn.disabled = false;
     const pickedConfirm = document.getElementById('myShadePickedConfirm');
@@ -4947,18 +5130,52 @@ function renderMyShadeResult(rgb, pct, scored){
     tier = 'off'; label = 'Not your shade';
     headline = "This color <strong>tends to fight your natural coloring</strong> rather than flatter it — it may wash you out or clash more than complement.";
   }
-  // WHY it scored this way (the item's warmth/depth/chroma relative to
-  // the customer's own measured coloring) plus, when there's a real gap,
-  // a concrete direction to look in instead -- per Nghi (2026-09-14).
+  // The item's own color category (Warm/Medium Depth/Balanced Chroma,
+  // etc.), computed once up front -- it supports the % via the chip row
+  // below AND feeds the "stick with this category" encouragement inside
+  // the compliment line above 70%, so both read off the same values.
+  const cat = (scored && scored.axes && scored.axes.lab) ? myShadeItemCategory(scored.axes.lab) : null;
+  // WHY it scored this way. Below 70%, that's the item's warmth/depth/
+  // chroma relative to the customer's own measured coloring, plus, when
+  // there's a real gap, a concrete direction to look in instead -- per
+  // Nghi (2026-09-14). AT OR ABOVE 70%, per Nghi (2026-09-14 follow-ups):
+  // skip that critique entirely, even when there's still some small
+  // measurable axis gap under the hood -- a score this high should read
+  // as a compliment, not a list of what's slightly off, plus (the second
+  // follow-up) an encouragement to seek out more shades in this same
+  // category. Threshold is inclusive of exactly 70% ("=70% is ok of
+  // complimenting").
   let explain = headline;
   if(scored && scored.axes && scored.target){
-    const { character, guidance } = myShadeAxisExplanation(scored.axes, scored.target, scored.exposureAdjustedValue);
-    explain += ` ${character}`;
-    if(guidance) explain += ` ${guidance}`;
+    if(pct >= 70){
+      explain += ` ${myShadeComplimentLine(tier, cat)}`;
+    } else {
+      const { character, guidance } = myShadeAxisExplanation(scored.axes, scored.target, scored.exposureAdjustedValue);
+      explain += ` ${character}`;
+      if(guidance) explain += ` ${guidance}`;
+    }
   }
   const pill = document.getElementById('myShadeResultPill');
   pill.className = 'match-pill ' + tier;
   pill.textContent = label;
+  // Render the category chips computed above -- shown right under the %
+  // per Nghi (2026-09-14), "show shade's category ... to support the %"
+  // so the percentage isn't floating there unexplained. Same chip
+  // styling as the "Your Filter" chips used elsewhere for the
+  // customer's own profile; centered under the % per Nghi (2026-09-14
+  // follow-up), see #myShadeResultCategory in the CSS.
+  const categoryEl = document.getElementById('myShadeResultCategory');
+  if(categoryEl){
+    if(cat){
+      categoryEl.innerHTML = [
+        cat.warmth,
+        `${cat.depth} Depth`,
+        `${cat.chroma} Chroma`,
+      ].map(c => `<span class="pick-filter-chip">${c}</span>`).join('');
+    } else {
+      categoryEl.innerHTML = '';
+    }
+  }
   document.getElementById('myShadeResultExplain').innerHTML = `${magnifierIcon()} ${explain}`;
   myShadeResultCard.classList.add('show');
   myShadeResultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -5108,14 +5325,6 @@ if(restoreChecksSubmitBtn){
     }).finally(() => { restoreChecksSubmitBtn.disabled = false; });
   });
 }
-const myShadeBuyMoreBtn = document.getElementById('myShadeBuyMoreBtn');
-if(myShadeBuyMoreBtn){
-  myShadeBuyMoreBtn.addEventListener('click', () => {
-    paywallCardEl.classList.add('show');
-    paywallCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  });
-}
-
 function handleImageFile(file){
   if (!file) return;
   const reader = new FileReader();
