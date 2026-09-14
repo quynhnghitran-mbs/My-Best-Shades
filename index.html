@@ -313,6 +313,37 @@
     padding:12px 4px; border:1px dashed var(--line); border-radius:10px;
     line-height:1.5;
   }
+  /* "Restore my checks" -- added 2026-09-14, per Nghi, for the durable
+     combo (10-pack) balance: a customer who bought checks on one device
+     needs a way to pull their remaining balance back down on another.
+     Collapsed behind a link by default so it doesn't compete with the
+     main purchase buttons for most visitors, who have never bought
+     anything yet. */
+  .restore-checks-row{ text-align:center; margin-top:18px; }
+  .restore-checks-form{
+    display:flex; flex-direction:column; align-items:center; gap:10px;
+    margin-top:12px; max-width:320px; margin-left:auto; margin-right:auto;
+  }
+  .restore-checks-input{
+    width:100%; box-sizing:border-box;
+    border:1px solid var(--line); border-radius:10px;
+    padding:10px 14px; font-family:'Work Sans', sans-serif; font-size:13.5px;
+    color:var(--text-light); background:rgba(255,255,255,0.5);
+  }
+  .restore-checks-input:focus{ outline:none; border-color:var(--rose-deep); }
+  .restore-checks-msg{ font-size:12.5px; color:var(--muted); min-height:16px; }
+  .restore-checks-msg.error{ color:var(--rose-deep); }
+  .restore-checks-msg.success{ color:var(--rose-deep); font-weight:600; }
+  /* My Shade / Not My Shade's own balance readout, shown once the
+     section is unlocked -- this section used to be "pay once, use
+     once"; now it's a running balance (single checks and combo-pack
+     checks share one pool), so the customer needs to see how many are
+     left and an easy way to top up. */
+  .myshade-balance-row{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; margin:2px 0 14px; font-size:13px; color:var(--text-light);
+  }
+  .myshade-balance-row strong{ color:var(--rose-deep); }
   .paywall-note{
     margin-top:20px; font-size:11.5px; color:var(--muted);
   }
@@ -342,7 +373,7 @@
     padding:4px 12px;border-radius:20px;white-space:nowrap;
     background:rgba(150,51,60,0.10);color:var(--rose-deep);
   }
-  .confidence-pill.lower, .confidence-pill.split{background:rgba(58,31,34,0.08);color:var(--muted);}
+  .confidence-pill.lower, .confidence-pill.split, .confidence-pill.borderline{background:rgba(58,31,34,0.08);color:var(--muted);}
   .confidence-bar-track{height:8px;border-radius:4px;background:rgba(58,31,34,0.08);overflow:hidden;margin:2px 0 10px;}
   .confidence-bar-fill{height:100%;border-radius:4px;background:linear-gradient(to right, #C9A8AE, var(--rose-deep));}
   .confidence-explain{font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:18px;text-wrap:pretty;}
@@ -534,13 +565,17 @@
     padding-left:16px;text-indent:-16px;
   }
   /* Bolded keywords inside the explanation-style captions (palette
-     guidance, pixel measurement, My Shade result, shade-match "why") --
-     these paragraphs got wordy, so the actionable phrase in each one
-     (what to lean into, what to avoid, the mismatch reason) is wrapped
-     in <strong> at the source and picks up the accent color here, so a
-     skim catches the takeaway without reading every sentence. Per Nghi
-     (2026-09-14). */
-  .palette-guidance strong, .match-explain strong{
+     guidance, pixel measurement, My Shade result, shade-match "why",
+     season description) -- these paragraphs got wordy, so the actionable
+     phrase in each one (what to lean into, what to avoid, the mismatch
+     reason) is wrapped in <strong> at the source and picks up the accent
+     color here, so a skim catches the takeaway without reading every
+     sentence. Per Nghi (2026-09-14). Season description's <strong> tags
+     come from the AI's own explanation text (per the JSON schema prompt)
+     rather than a hardcoded template, since that copy is freshly
+     generated per customer -- everything else in this rule wraps
+     deterministic, developer-written text.*/
+  .palette-guidance strong, .match-explain strong, .season-desc strong{
     color:var(--rose-deep);font-weight:700;
   }
   .shade-result-why strong{font-weight:700;font-style:normal;}
@@ -805,6 +840,13 @@
     text-align:center;font-family:'Playfair Display', serif;font-style:italic;
     font-size:14px;color:var(--rose-deep);padding:8px 0 2px;
   }
+  /* My Shade / Not My Shade's own feedback block -- added 2026-09-14,
+     per Nghi. This result can be reached on its own (a returning
+     customer who never re-runs the Season flow this session, via
+     "Already tested your season? Check My Shade"), so it never reaches
+     the shared #feedbackCard below the podium -- this gives it the same
+     rate-and-comment pattern, scoped to this one result. */
+  #myShadeFeedbackBlock{margin-top:20px;padding-top:18px;border-top:1px solid var(--line);}
 
   .loading{
     text-align:center;color:var(--muted);font-size:13.5px;
@@ -870,9 +912,29 @@
         <div id="paypalBtn-colorCheck" class="paypal-btn-slot" style="display:none;"></div>
         <div class="paywall-tier-locked-note" id="colorCheckLockedNote">After payment, you'll upload the "Your Color Profile" image from your Season Analysis to run each check.</div>
       </div>
+      <div class="paywall-tier">
+        <div class="paywall-tier-badge">Save 33%</div>
+        <div class="paywall-tier-name">10 Checks Combo</div>
+        <div class="paywall-tier-price">$19.99</div>
+        <ul class="paywall-tier-features">
+          <li>10 My Shade / Not My Shade checks</li>
+          <li>Use them anytime — they don't expire</li>
+          <li>Restorable by email on any device</li>
+        </ul>
+        <div id="paypalBtn-colorCheckCombo" class="paypal-btn-slot" style="display:none;"></div>
+        <div class="paywall-tier-locked-note" id="colorCheckComboLockedNote">Same as My Shade / Not My Shade, just 10 checks at once for less per check.</div>
+      </div>
     </div>
     <div class="paywall-sdk-error" id="paypalSdkError" style="display:none;">Payment didn't load. If you opened this from an app like Facebook, Zalo, Messenger, or Instagram, try opening this page in Safari or Chrome instead, then refresh — some in-app browsers block PayPal. Otherwise, please refresh the page or try a different browser.</div>
     <div class="paywall-note">Payments are processed securely by PayPal — we never see or store your card details.</div>
+    <div class="restore-checks-row" id="restoreChecksRow">
+      <button type="button" class="link-btn" id="restoreChecksToggleBtn">Already bought checks? Restore them by email →</button>
+      <div class="restore-checks-form" id="restoreChecksForm" style="display:none;">
+        <input type="email" id="restoreChecksEmail" class="restore-checks-input" placeholder="Email you paid with" autocomplete="email">
+        <button type="button" class="btn ghost palette-download-btn" id="restoreChecksSubmitBtn">Restore My Checks</button>
+        <div class="restore-checks-msg" id="restoreChecksMsg"></div>
+      </div>
+    </div>
   </div>
 
   <div class="mirror-stage" id="mirrorStage">
@@ -915,7 +977,7 @@
     <div class="loading" id="exposureScanIndicator" style="display:none;"><span class="dot"></span><span class="dot"></span><span class="dot"></span><br>Scanning exposure...</div>
     <button class="btn" id="analyzeBtn" disabled>Find My Season</button>
     <div class="myshade-entry-link">
-      <button class="link-btn" id="myShadeEntryBtn">Already tested your season? Check <span class="myshade-highlight">My Shade / Not My Shade</span> →</button>
+      <button class="link-btn" id="myShadeEntryBtn">Already tested your season?<br>Check <span class="myshade-highlight">My Shade / Not My Shade</span> →</button>
     </div>
     <div class="hint-columns">
       <div class="hint-col yes">
@@ -1130,6 +1192,10 @@
        visit or a different person always has to upload their own. -->
   <div id="myShadeSection" style="display:none;">
     <div class="eyebrow" style="margin-top:8px;">My Shade / Not My Shade</div>
+    <div class="myshade-balance-row" id="myShadeBalanceRow">
+      <span id="myShadeBalanceText"></span>
+      <button type="button" class="link-btn" id="myShadeBuyMoreBtn">Need more checks?</button>
+    </div>
 
     <!-- Shown until a color profile has been uploaded THIS page load -->
     <div class="card" id="myShadeNoProfileCard">
@@ -1197,6 +1263,24 @@
       <div class="match-pill" id="myShadeResultPill"></div>
       <div class="match-explain" id="myShadeResultExplain"></div>
       <button class="btn ghost" id="myShadeCheckAnotherBtn">Check Another Color</button>
+
+      <div class="feedback-block" id="myShadeFeedbackBlock">
+        <div id="myShadeFeedbackFormBlock">
+          <div class="feedback-label">How accurate was this check?</div>
+          <div class="star-rating" id="myShadeStarRating">
+            <button type="button" class="star-btn" data-rating-value="1" aria-label="1 star"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+            <button type="button" class="star-btn" data-rating-value="2" aria-label="2 stars"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+            <button type="button" class="star-btn" data-rating-value="3" aria-label="3 stars"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+            <button type="button" class="star-btn" data-rating-value="4" aria-label="4 stars"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+            <button type="button" class="star-btn" data-rating-value="5" aria-label="5 stars"><svg viewBox="0 0 24 24"><path d="M12 2.5 L14.7 8.9 L21.8 9.6 L16.5 14.3 L18 21.3 L12 17.7 L6 21.3 L7.5 14.3 L2.2 9.6 L9.3 8.9 Z" fill="none" stroke="var(--muted)" stroke-width="1.4"/></svg></button>
+          </div>
+          <textarea id="myShadeFeedbackComment" class="feedback-textarea" placeholder="Anything else you'd like to share? (optional)"></textarea>
+          <div class="palette-download-row">
+            <button class="btn ghost palette-download-btn" id="submitMyShadeFeedbackBtn">Submit Feedback</button>
+          </div>
+        </div>
+        <div class="feedback-thanks" id="myShadeFeedbackThanks" style="display:none;">Thank you for your feedback! 💌</div>
+      </div>
     </div>
   </div>
 </div>
@@ -2005,7 +2089,7 @@ Respond with ONLY a valid JSON object (no markdown fences, no extra text) in thi
   "darkness": the number (iris_luminance+eyebrow_luminance)/2 calculated in step 2,
   "contrast_score": the number lightness-darkness calculated in step 2,
   "contrast_level": "Low" | "Medium" | "High" | a blended label like "Low-to-Medium" if the score sits close to a boundary,
-  "explanation": "2-3 sentences, warm and friendly, explaining why this season fits based on what you observed in the photo — never mention RGB values, luminance, contrast score, the G-B calculation, or any numeric/technical detail here; keep it in plain, natural language a customer would enjoy reading",
+  "explanation": "2-3 sentences, warm and friendly, explaining why this season fits based on what you observed in the photo — never mention RGB values, luminance, contrast score, the G-B calculation, or any numeric/technical detail here; keep it in plain, natural language a customer would enjoy reading. Wrap the 2-4 most important descriptive words or short phrases (the specific coloring traits that drove this match — e.g. an undertone description, a depth/contrast descriptor, a standout feature) in <strong></strong> tags so they stand out at a skim; leave the connecting language around them as plain text, and do not use any other HTML or markdown formatting anywhere in this field",
   "runner_up": "the second-closest season name from the list above"
 }`;
 
@@ -2861,11 +2945,35 @@ function chromaBandDistance(chromaC, rangeLow, rangeHigh){
 const WARMTH_RANK_WEIGHT = 1.5;
 const DEPTH_RANK_WEIGHT = 1.5;
 const CHROMA_RANK_WEIGHT = 1;
+// The customer's own selfie can run a little under- or over-exposed
+// independent of her true depth, and that was found to swing "%
+// matching" on the 3 podium picks down into the 60s/70s even for
+// shades that were genuinely a good fit (2026-09-13, per Nghi -- "the
+// photo lightness affected the lipstick matched very much... we
+// shouldn't recommend like 70% 60% matching. I think we should have a
+// range adjusted for depth. if the photo seems a little underexposure,
+// we should add a little lightness for depth, to see if the matching %
+// would be raised or not, and vice versa. the best match recommendation
+// should be >85%"). This forgives up to MAC_DEPTH_EXPOSURE_TOLERANCE
+// points of the depth gap between the customer's target and a shade --
+// tried in whichever direction actually helps -- before it counts
+// toward distance/confidence/the "why" text. It does NOT touch the
+// depth-ZONE candidacy filter above (depthZoneTiersNear/passesFilters),
+// so exposure noise can soften the penalty on a shade already in the
+// running, but can't pull in a genuinely wrong-depth shade as a
+// candidate in the first place.
+const MAC_DEPTH_EXPOSURE_TOLERANCE = 8; // Lab L points out of 100 -- a starting number; tune against real test photos
+function depthGapAfterExposureTolerance(rawGap){
+  const abs = Math.abs(rawGap);
+  if(abs <= MAC_DEPTH_EXPOSURE_TOLERANCE) return 0;
+  return Math.sign(rawGap) * (abs - MAC_DEPTH_EXPOSURE_TOLERANCE);
+}
 function macDist(target, s){
   const chromaDist = chromaBandDistance(s.chroma_C, target.rangeLow, target.rangeHigh);
+  const depthGap = depthGapAfterExposureTolerance(target.L - s.lightness_L);
   return Math.sqrt(
     (WARMTH_RANK_WEIGHT * (target.b - s.temperature_b))**2 +
-    (DEPTH_RANK_WEIGHT * (target.L - s.lightness_L))**2 +
+    (DEPTH_RANK_WEIGHT * depthGap)**2 +
     (CHROMA_RANK_WEIGHT * chromaDist)**2
   );
 }
@@ -2880,15 +2988,18 @@ function macDist(target, s){
 // fit, consistent with confidence no longer being pinned to 100% for it.
 const MISMATCH_REASON_MIN_DELTA = 0.5;
 function shadeMismatchReason(target, s){
-  const dL = target.L - s.lightness_L; // >0: shade is darker than the customer's own depth
+  const dL = target.L - s.lightness_L; // >0: shade is darker than the customer's own depth (raw, for wording direction only)
   const db = target.b - s.temperature_b; // >0: shade reads cooler than the customer's ideal warmth
   const chromaDist = chromaBandDistance(s.chroma_C, target.rangeLow, target.rangeHigh);
   const chromaSign = s.chroma_C < target.rangeLow ? -1 : (s.chroma_C > target.rangeHigh ? 1 : 0);
 
-  // Same weights applied here as in macDist, so "worst axis" reflects the
-  // same preference driving the ranking/confidence -- a shade is called
-  // out for whichever axis is actually costing it the most.
-  const absL = Math.abs(dL) * DEPTH_RANK_WEIGHT, absB = Math.abs(db) * WARMTH_RANK_WEIGHT, absC = chromaDist * CHROMA_RANK_WEIGHT;
+  // Same weights AND the same exposure-tolerance-adjusted depth gap
+  // applied here as in macDist, so "worst axis" reflects the same
+  // preference actually driving the ranking/confidence -- a shade is
+  // called out for whichever axis is actually costing it the most, and
+  // a depth gap that's just plausible exposure noise no longer gets
+  // blamed at all.
+  const absL = Math.abs(depthGapAfterExposureTolerance(dL)) * DEPTH_RANK_WEIGHT, absB = Math.abs(db) * WARMTH_RANK_WEIGHT, absC = chromaDist * CHROMA_RANK_WEIGHT;
   const worst = Math.max(absL, absB, absC);
   if(worst < MISMATCH_REASON_MIN_DELTA) return null;
 
@@ -2911,10 +3022,10 @@ function shadeMismatchReason(target, s){
 // shadeMismatchReason, so the story here always agrees with what's
 // actually driving the ranking.
 function shadeWhyExplanation(target, s){
-  const dL = target.L - s.lightness_L;
+  const dL = target.L - s.lightness_L; // raw, for wording direction only
   const db = target.b - s.temperature_b;
   const chromaDist = chromaBandDistance(s.chroma_C, target.rangeLow, target.rangeHigh);
-  const absL = Math.abs(dL) * DEPTH_RANK_WEIGHT, absB = Math.abs(db) * WARMTH_RANK_WEIGHT, absC = chromaDist * CHROMA_RANK_WEIGHT;
+  const absL = Math.abs(depthGapAfterExposureTolerance(dL)) * DEPTH_RANK_WEIGHT, absB = Math.abs(db) * WARMTH_RANK_WEIGHT, absC = chromaDist * CHROMA_RANK_WEIGHT;
 
   const axes = [
     { name: 'undertone', close: absB < MISMATCH_REASON_MIN_DELTA,
@@ -3859,7 +3970,20 @@ async function measureFaceFromPhoto(imgEl){
       eyelid_rgb: eyelidRgb, eyelid_luminance: eyelidLuminance !== null ? Math.round(eyelidLuminance) : null,
       quant_best: quantScored[0].name, quant_best_dist: Math.round(quantScored[0].dist*100)/100,
       quant_runner_up: quantScored[1].name, quant_runner_up_dist: Math.round(quantScored[1].dist*100)/100,
-      quant_too_close: (quantScored[1].dist - quantScored[0].dist) < 0.15,
+      // (2026-09-14) Was a single hard cutoff (gap < 0.15 -> combined
+      // "X/Y" name, otherwise a clean single name) -- a customer at gap
+      // 0.16 got a fully confident single name while one at 0.14 got the
+      // full split-name treatment, even though they're essentially
+      // equally ambiguous. Replaced with a 3-tier soft zone, same
+      // boundary-blend spirit as classifyWithZones above: definitely
+      // tied (combined name, unchanged from before) / a soft borderline
+      // zone (single name, but noted as a close call) / confidently
+      // distinct (single name, no mention). Zone widths are a first
+      // pass, not re-derived from a real distribution the way the
+      // classifyWithZones boundaries were -- revisit if real traffic
+      // shows the borderline zone catching too much or too little.
+      quant_too_close: (quantScored[1].dist - quantScored[0].dist) < 0.10,
+      quant_borderline: (quantScored[1].dist - quantScored[0].dist) >= 0.10 && (quantScored[1].dist - quantScored[0].dist) < 0.25,
       quant_poor_fit: quantScored[0].dist >= 4
     };
   } catch(e){
@@ -3922,15 +4046,31 @@ const PRICING = {
 };
 const PURCHASE_STORAGE_KEY = 'ffbs_purchase';
 
-// My Shade / Not My Shade's $2.99 check is a separate product from the
-// two season tiers above, so it gets its OWN storage key and its own
-// get/save/consume functions (see below, near myShadeSection) rather
+// My Shade / Not My Shade's checks are a separate product from the two
+// season tiers above, so they get their OWN storage key and their own
+// get/grant/consume functions (see below, near myShadeSection) rather
 // than sharing PURCHASE_STORAGE_KEY -- otherwise buying a season tier
-// while an unused colorCheck credit was still sitting there (or vice
-// versa) would silently overwrite and lose it, since that key only
-// ever holds one pending purchase at a time.
-const COLORCHECK_PRICING = { amount: '2.99', label: 'My Shade / Not My Shade Check' };
-const COLORCHECK_PURCHASE_STORAGE_KEY = 'ffbs_colorcheck_purchase';
+// while an unused check balance was still sitting there (or vice versa)
+// would silently overwrite and lose it, since that key only ever holds
+// one thing at a time.
+//
+// UPDATED 2026-09-14, per Nghi: added a 10-pack "combo" tier alongside
+// the single $2.99 check, and switched from a one-shot "have they paid
+// y/n" flag to a real remaining-checks BALANCE (a single purchase and a
+// combo purchase both just add to the same pool). A balance worth
+// buying 10 of at once is also worth making durable: this browser's
+// localStorage is still the fast/local copy used for the actual gating
+// (unchanged risk profile from before -- see the PayPal comment above),
+// but every grant and consume is now also synced to a per-email ledger
+// on the live tracking sheet (see callLiveSheetAction() and
+// grantColorCheckCredits()/consumeOneColorCheck() below), and a
+// "Restore my checks" flow lets a customer pull their balance back down
+// on a different device or after clearing this one's storage. The
+// email comes for free from PayPal's own order response -- no separate
+// signup/login needed.
+const COLORCHECK_PRICING = { amount: '2.99', label: 'My Shade / Not My Shade Check', count: 1 };
+const COLORCHECK_COMBO_PRICING = { amount: '19.99', label: '10 My Shade / Not My Shade Checks', count: 10 }; // price is a placeholder -- change freely, this is a business decision, not a technical one
+const COLORCHECK_PURCHASE_STORAGE_KEY = 'ffbs_colorcheck_purchase'; // now holds { email, remaining, updatedAt } instead of a one-shot purchase record
 
 function getPurchase(){
   try{
@@ -3990,52 +4130,114 @@ function applyUnlockState(){
   }
 }
 
-function getColorCheckPurchase(){
+// Balance model (replaces the old one-shot purchase flag): the stored
+// record is { email, remaining, updatedAt }. The $2.99 single check and
+// the $19.99 10-pack just add to the same "remaining" pool -- there's
+// no separate tier to check anymore, only a count.
+function getColorCheckBalance(){
   try{
     const raw = localStorage.getItem(COLORCHECK_PURCHASE_STORAGE_KEY);
     if(!raw) return null;
     const parsed = JSON.parse(raw);
-    return (parsed && parsed.tier === 'colorCheck') ? parsed : null;
+    return (parsed && typeof parsed.remaining === 'number') ? parsed : null;
   } catch(e){ return null; }
 }
-function saveColorCheckPurchase(order){
+function getColorCheckRemaining(){
+  const balance = getColorCheckBalance();
+  return balance ? Math.max(0, balance.remaining) : 0;
+}
+function saveColorCheckBalance(email, remaining){
   const record = {
-    tier: 'colorCheck',
-    orderId: order.id,
-    payerEmail: (order.payer && order.payer.email_address) || '',
-    amountUsd: COLORCHECK_PRICING.amount,
-    purchasedAt: new Date().toISOString(),
+    email: email || (getColorCheckBalance() || {}).email || '',
+    remaining: Math.max(0, remaining),
+    updatedAt: new Date().toISOString(),
   };
   try{ localStorage.setItem(COLORCHECK_PURCHASE_STORAGE_KEY, JSON.stringify(record)); } catch(e){
-    console.warn('[Purchase] Could not save colorCheck unlock state locally', e);
+    console.warn('[Purchase] Could not save colorCheck balance locally', e);
   }
-  sendToLiveSheet({
-    type: 'purchase', tier: 'colorCheck', order_id: record.orderId,
-    payer_email: record.payerEmail, amount_usd: record.amountUsd, purchased_at: record.purchasedAt,
-  });
+  return record;
 }
-// One payment = one check, same "consume only after a real result is
-// delivered" rule as consumePurchase() above -- see myShadeCheckBtn's
-// handler.
-function consumeColorCheckPurchase(){
-  try{ localStorage.removeItem(COLORCHECK_PURCHASE_STORAGE_KEY); } catch(e){
-    console.warn('[Purchase] Could not clear used-up colorCheck purchase', e);
+
+// Called right after a successful PayPal capture for either the single
+// check or the 10-pack. Bumps the local balance immediately (so the
+// customer isn't blocked on a network round-trip to use what they just
+// paid for), fires the existing best-effort purchase log for Nghi's own
+// paper trail, then syncs the grant to the durable per-email ledger on
+// the live tracking sheet (see live_tracking_sheet.gs) so the same
+// balance can be restored on another device. If that sync fails, the
+// local optimistic bump is left in place -- worst case the ledger is
+// briefly behind what the customer can actually use locally, which errs
+// in the customer's favor rather than locking them out of something
+// they just paid for.
+function grantColorCheckCredits(order, count, tier){
+  const email = (order.payer && order.payer.email_address) || '';
+  const amountUsd = tier === 'colorCheckCombo' ? COLORCHECK_COMBO_PRICING.amount : COLORCHECK_PRICING.amount;
+  const optimisticRemaining = getColorCheckRemaining() + count;
+  saveColorCheckBalance(email, optimisticRemaining);
+  sendToLiveSheet({
+    type: 'purchase', tier, order_id: order.id,
+    payer_email: email, amount_usd: amountUsd, purchased_at: new Date().toISOString(),
+  });
+  if(email){
+    callLiveSheetAction({ type: 'grant_checks', email, count, order_id: order.id, amount_usd: amountUsd, tier })
+      .then(res => {
+        if(res && res.ok && typeof res.remaining === 'number') saveColorCheckBalance(email, res.remaining);
+        applyColorCheckUnlockState();
+      })
+      .catch(e => console.warn('[Live sheet] grant_checks sync failed -- keeping local optimistic balance', e));
   }
 }
 
+// One check used = one credit gone, same "consume only after a real
+// result is delivered" rule as consumePurchase() above -- see
+// myShadeCheckBtn's handler. Decrements locally right away and syncs
+// best-effort; a failed sync just leaves the ledger briefly ahead of
+// what's actually left, which self-corrects on the next grant/restore.
+function consumeOneColorCheck(){
+  const balance = getColorCheckBalance();
+  if(!balance) return;
+  const remaining = Math.max(0, balance.remaining - 1);
+  saveColorCheckBalance(balance.email, remaining);
+  if(balance.email){
+    callLiveSheetAction({ type: 'consume_check', email: balance.email })
+      .catch(e => console.warn('[Live sheet] consume_check sync failed', e));
+  }
+}
+
+// "Restore my checks" -- pulls the authoritative balance for an email
+// down from the live tracking sheet, for a customer on a new device or
+// who cleared this browser's storage. Overwrites (rather than adds to)
+// the local balance, since the server is the source of truth here.
+function restoreColorCheckBalance(email){
+  return callLiveSheetAction({ type: 'get_balance', email }).then(res => {
+    if(res && res.ok && typeof res.remaining === 'number'){
+      saveColorCheckBalance(email, res.remaining);
+      applyColorCheckUnlockState();
+    }
+    return res;
+  });
+}
+
 // Reveals the whole My Shade / Not My Shade section the first time a
-// colorCheck purchase is found (on load, or right after paying) -- per
-// Nghi, this section stays hidden until that specific tier is bought,
-// unlike the season flow's upload stage, which is visible from the
-// start. Once revealed it stays revealed for the rest of the visit
-// (paying again just refills the credit rather than re-hiding
-// anything).
+// colorCheck balance is found (on load, restore, or right after paying)
+// -- per Nghi, this section stays hidden until credits exist, unlike
+// the season flow's upload stage, which is visible from the start.
+// Nothing here ever hides the section back once it's shown, so it stays
+// revealed for the rest of the visit even if the balance later hits 0
+// (buying more, or restoring, just refills it).
 function applyColorCheckUnlockState(){
-  if(getColorCheckPurchase()){
+  const remaining = getColorCheckRemaining();
+  if(remaining > 0){
     if(paywallCardEl) paywallCardEl.classList.remove('show');
     const section = document.getElementById('myShadeSection');
     if(section) section.style.display = '';
     renderMyShadeProfileGate();
+  }
+  const balanceText = document.getElementById('myShadeBalanceText');
+  if(balanceText){
+    balanceText.innerHTML = remaining > 0
+      ? `You have <strong>${remaining}</strong> check${remaining === 1 ? '' : 's'} remaining`
+      : `You're out of checks`;
   }
 }
 
@@ -4047,18 +4249,29 @@ function applyColorCheckUnlockState(){
 // it hasn't already been bought. The note beneath it is now just
 // informational (no gating), telling the customer what they'll need
 // after paying.
+// Balance model means these buttons stay useful even after a purchase
+// -- unlike the one-shot season/shade tiers above, running out of
+// colorCheck credits and buying more (either tier) is a completely
+// normal thing to do, so both PayPal buttons are simply always shown
+// once rendered (no more "hide once already bought").
 function refreshColorCheckTierGate(){
   const btnSlot = document.getElementById('paypalBtn-colorCheck');
+  const comboSlot = document.getElementById('paypalBtn-colorCheckCombo');
   const lockedNote = document.getElementById('colorCheckLockedNote');
+  const comboLockedNote = document.getElementById('colorCheckComboLockedNote');
   if(!btnSlot) return;
   if(!btnSlot.dataset.rendered && window.paypal){
     renderColorCheckPayPalButton(window.paypal);
     btnSlot.dataset.rendered = 'true';
   }
-  if(!getColorCheckPurchase()){
-    btnSlot.style.display = '';
+  if(comboSlot && !comboSlot.dataset.rendered && window.paypal){
+    renderColorCheckComboPayPalButton(window.paypal);
+    comboSlot.dataset.rendered = 'true';
   }
+  btnSlot.style.display = '';
+  if(comboSlot) comboSlot.style.display = '';
   if(lockedNote) lockedNote.style.display = 'block';
+  if(comboLockedNote) comboLockedNote.style.display = 'block';
 }
 
 // PayPal's SDK is loaded dynamically (rather than a static <script> tag
@@ -4133,7 +4346,7 @@ function renderColorCheckPayPalButton(paypalSdk){
       }],
     }),
     onApprove: (data, actions) => actions.order.capture().then(order => {
-      saveColorCheckPurchase(order);
+      grantColorCheckCredits(order, COLORCHECK_PRICING.count, 'colorCheck');
       applyColorCheckUnlockState();
       // Auto-continue if they'd already picked a color on an item photo
       // before this paywall interrupted them (e.g. paying for a second
@@ -4151,36 +4364,66 @@ function renderColorCheckPayPalButton(paypalSdk){
   });
 }
 
-applyUnlockState();
-applyColorCheckUnlockState();
-refreshColorCheckTierGate();
-if(!getPurchase() || !getColorCheckPurchase()){
-  loadPayPalSdk().then(paypalSdk => {
-    if(!getPurchase()) renderPayPalButtons(paypalSdk);
-    if(!getColorCheckPurchase()){
-      renderColorCheckPayPalButton(paypalSdk);
-      const btnSlot = document.getElementById('paypalBtn-colorCheck');
-      if(btnSlot) btnSlot.dataset.rendered = 'true';
-    }
-    // Belt-and-suspenders check for the silent-failure case: the SDK
-    // script loaded fine and render() didn't reject, but PayPal still
-    // decided nothing is eligible to show on this device/browser (this
-    // happens with no error at all -- it just renders an empty box).
-    // PayPal injects an iframe per button once it actually has something
-    // to show, so an empty slot after a few seconds means nothing ever
-    // rendered.
-    setTimeout(() => {
-      const slotsToCheck = ['paypalBtn-season', 'paypalBtn-seasonShade', 'paypalBtn-colorCheck']
-        .map(id => document.getElementById(id))
-        .filter(el => el && el.style.display !== 'none');
-      const anyEmpty = slotsToCheck.some(el => !el.querySelector('iframe'));
-      if(slotsToCheck.length && anyEmpty) showPaypalSdkError();
-    }, 5000);
-  }).catch(e => {
-    console.error('[PayPal] SDK failed to load', e);
+function renderColorCheckComboPayPalButton(paypalSdk){
+  const container = document.getElementById('paypalBtn-colorCheckCombo');
+  if(!container) return;
+  paypalSdk.Buttons({
+    style: { layout: 'vertical', color: 'gold', shape: 'pill', label: 'pay' },
+    createOrder: (data, actions) => actions.order.create({
+      purchase_units: [{
+        description: COLORCHECK_COMBO_PRICING.label,
+        amount: { value: COLORCHECK_COMBO_PRICING.amount, currency_code: 'USD' },
+      }],
+    }),
+    onApprove: (data, actions) => actions.order.capture().then(order => {
+      grantColorCheckCredits(order, COLORCHECK_COMBO_PRICING.count, 'colorCheckCombo');
+      applyColorCheckUnlockState();
+      const btn = document.getElementById('myShadeCheckBtn');
+      if(myShadePickedRgb && btn && !btn.disabled) btn.click();
+    }),
+    onError: (err) => {
+      console.error('[PayPal] Checkout error', err);
+      alert("Something went wrong starting the payment. Please try again, or refresh the page.");
+    },
+  }).render('#paypalBtn-colorCheckCombo').catch(err => {
+    console.error('[PayPal] Combo color-check button failed to render', err);
     showPaypalSdkError();
   });
 }
+
+applyUnlockState();
+applyColorCheckUnlockState();
+refreshColorCheckTierGate();
+// colorCheck/colorCheckCombo are a top-up-able balance now (not a
+// one-shot unlock), so their PayPal buttons stay in play regardless of
+// whether the season/shade tiers above were already purchased -- the
+// SDK load below always runs, not just when something is still unpaid.
+loadPayPalSdk().then(paypalSdk => {
+  if(!getPurchase()) renderPayPalButtons(paypalSdk);
+  renderColorCheckPayPalButton(paypalSdk);
+  renderColorCheckComboPayPalButton(paypalSdk);
+  const btnSlot = document.getElementById('paypalBtn-colorCheck');
+  if(btnSlot) btnSlot.dataset.rendered = 'true';
+  const comboSlot = document.getElementById('paypalBtn-colorCheckCombo');
+  if(comboSlot) comboSlot.dataset.rendered = 'true';
+  // Belt-and-suspenders check for the silent-failure case: the SDK
+  // script loaded fine and render() didn't reject, but PayPal still
+  // decided nothing is eligible to show on this device/browser (this
+  // happens with no error at all -- it just renders an empty box).
+  // PayPal injects an iframe per button once it actually has something
+  // to show, so an empty slot after a few seconds means nothing ever
+  // rendered.
+  setTimeout(() => {
+    const slotsToCheck = ['paypalBtn-season', 'paypalBtn-seasonShade', 'paypalBtn-colorCheck', 'paypalBtn-colorCheckCombo']
+      .map(id => document.getElementById(id))
+      .filter(el => el && el.style.display !== 'none');
+    const anyEmpty = slotsToCheck.some(el => !el.querySelector('iframe'));
+    if(slotsToCheck.length && anyEmpty) showPaypalSdkError();
+  }, 5000);
+}).catch(e => {
+  console.error('[PayPal] SDK failed to load', e);
+  showPaypalSdkError();
+});
 
 // ---------------------------------------------------------------------
 // My Shade / Not My Shade -- added 2026-09-12, per Nghi. Lives in this
@@ -4232,6 +4475,21 @@ const SEASON_PALETTE_TARGET = {
 };
 const MYSHADE_W_WARMTH = 1.1, MYSHADE_W_VALUE = 0.7, MYSHADE_W_CHROMA = 1.0;
 const MYSHADE_DECAY_K = 0.7;
+// A photo of the item (not skin) can run a little under- or over-exposed
+// independent of the item's true color -- that skews the picked pixel's
+// Lab lightness without saying anything real about its depth, and depth
+// is the axis this actually hits, since warmth (Lab b) and chroma (Lab
+// C) don't shift with exposure the way lightness does. (2026-09-13, per
+// Nghi: lighting was tanking otherwise-good matches down to 60-70%,
+// which reads as a bad result to a paying customer -- "add a little
+// lightness for depth, to see if the matching % would be raised or not,
+// and vice versa.") So the depth axis is allowed to be nudged toward the
+// customer's own target within a bounded range before scoring, as if
+// correcting for a plausible amount of exposure error -- warmth and
+// chroma are never touched. This is bounded, not a free pass: a genuine
+// depth mismatch bigger than the tolerance still only gets partial
+// credit for the part exposure could plausibly explain.
+const MYSHADE_EXPOSURE_TOLERANCE = 0.12; // ~12 points of Lab L out of 100
 
 // rgbToLab/srgbToLinear are already defined above (used for the shade
 // database matching) -- reused as-is here, not duplicated.
@@ -4264,13 +4522,67 @@ function scoreColorForProfile(rgb, profile){
   const target = myShadeProfileTarget(profile);
   if(!target) return null;
   const axes = myShadeItemAxes(rgb);
+  // Best achievable depth term within the exposure-tolerance range.
+  // Closed form: the depth term is the only one this delta touches, so
+  // moving `value` as close to `target.value` as the tolerance allows
+  // always minimizes overall distance -- no need to brute-force a range
+  // of "what if the photo were a bit lighter/darker" attempts.
+  const valueGap = target.value - axes.value;
+  const valueDelta = Math.max(-MYSHADE_EXPOSURE_TOLERANCE, Math.min(MYSHADE_EXPOSURE_TOLERANCE, valueGap));
+  const adjustedValue = Math.max(0, Math.min(1, axes.value + valueDelta));
   const dist = Math.sqrt(
     (MYSHADE_W_WARMTH*(axes.warmth-target.warmth))**2 +
-    (MYSHADE_W_VALUE*(axes.value-target.value))**2 +
+    (MYSHADE_W_VALUE*(adjustedValue-target.value))**2 +
     (MYSHADE_W_CHROMA*(axes.chroma-target.chroma))**2
   );
   const pct = Math.max(15, Math.min(98, Math.round(100 * Math.exp(-dist/MYSHADE_DECAY_K))));
-  return { pct, dist, axes };
+  return { pct, dist, axes, exposureAdjustedValue: adjustedValue, target };
+}
+
+// Same "close enough to skip" idea as MISMATCH_REASON_MIN_DELTA (used
+// for the shade-podium "why" line), but scaled to My Shade's 0-1
+// normalized warmth/value/chroma axes rather than raw Lab units. Not
+// re-derived from real data -- a first pass, like MISMATCH_REASON_
+// MIN_DELTA originally was.
+const MYSHADE_AXIS_MIN_DELTA = 0.08;
+
+function myShadeJoinWords(arr){
+  if(arr.length === 1) return arr[0];
+  if(arr.length === 2) return `${arr[0]} and ${arr[1]}`;
+  return `${arr.slice(0, -1).join(', ')}, and ${arr[arr.length - 1]}`;
+}
+
+// Explains WHY a My Shade score landed where it did -- the item's
+// warmth/depth/chroma relative to the customer's OWN measured coloring
+// (scoreColorForProfile's `target`, adjusted for exposure tolerance the
+// same way the score itself is) -- and, when there's a real gap, a
+// concrete direction to look in instead. Mirrors shadeWhyExplanation's
+// per-axis approach for the shade podium's "why" line. Per Nghi
+// (2026-09-14): explain why a color scored low/high (e.g. "this color
+// seems quite vivid and cool on you") plus a brief guideline on which
+// nuance would suit the customer better (e.g. "choose something a
+// little warmer and deeper").
+function myShadeAxisExplanation(axes, target, adjustedValue){
+  const warmthGap = axes.warmth - target.warmth; // >0: item reads warmer than the customer's own coloring
+  const valueGap = adjustedValue - target.value;  // >0: item reads lighter than the customer's own depth
+  const chromaGap = axes.chroma - target.chroma;  // >0: item reads more vivid than the customer's own chroma
+
+  const axesInfo = [
+    { abs: Math.abs(warmthGap), read: warmthGap > 0 ? 'warm' : 'cool', towards: warmthGap > 0 ? 'cooler' : 'warmer' },
+    { abs: Math.abs(valueGap), read: valueGap > 0 ? 'light' : 'deep', towards: valueGap > 0 ? 'deeper' : 'lighter' },
+    { abs: Math.abs(chromaGap), read: chromaGap > 0 ? 'vivid' : 'muted', towards: chromaGap > 0 ? 'more muted' : 'richer, more saturated' },
+  ];
+  const off = axesInfo.filter(a => a.abs >= MYSHADE_AXIS_MIN_DELTA).sort((a, b) => b.abs - a.abs);
+
+  if(off.length === 0){
+    return { character: `This color sits very close to your own natural warmth, depth, and chroma.`, guidance: null };
+  }
+  const reads = off.map(a => `<strong>${a.read}</strong>`);
+  const towards = off.map(a => `<strong>${a.towards}</strong>`);
+  return {
+    character: `This color reads a little ${myShadeJoinWords(reads)} on you.`,
+    guidance: `For a closer match, look for something a bit ${myShadeJoinWords(towards)}.`,
+  };
 }
 
 // ---------------------------------------------------------------------
@@ -4436,6 +4748,7 @@ const myShadeMagnifierCtx = myShadeMagnifier ? myShadeMagnifier.getContext('2d')
 const MYSHADE_MAG_SIZE = 110; // displayed loupe diameter, px (matches the canvas element + CSS)
 const MYSHADE_MAG_SOURCE_SIZE = 26; // px of the source photo captured into the loupe -- ~4.2x zoom
 let myShadePickedRgb = null; // set once the customer taps/clicks a point on the item photo
+let lastMyShadeResult = null; // { hex, pct, tier } for the result currently shown -- feeds this section's own feedback block (submitMyShadeFeedback)
 
 // Draws the uploaded item photo into the (small, on-screen-sized) pick
 // canvas instead of extracting a color automatically -- per Nghi: a
@@ -4554,18 +4867,22 @@ function myShadePickAt(clientX, clientY, commit){
     myShadeMagnifier.style.top = magTop + 'px';
     myShadeMagnifier.style.display = 'block';
   }
+  // Swatch + hex readout now updates live on every hover/drag position,
+  // not just on commit -- per Nghi (2026-09-14): "the color sample
+  // should be live during hovering," so the customer sees what they're
+  // about to pick before tapping/clicking to lock it in.
+  const pickedRow = document.getElementById('myShadePickedRow');
+  const pickedSwatch = document.getElementById('myShadePickedSwatch');
+  const pickedHex = document.getElementById('myShadePickedHex');
+  if(pickedRow && pickedSwatch && pickedHex){
+    pickedSwatch.style.background = hex;
+    pickedHex.textContent = hex.toUpperCase();
+    pickedRow.style.display = 'flex';
+  }
   if(commit){
     myShadePickedRgb = picked;
     myShadeCheckBtn.disabled = false;
-    const pickedRow = document.getElementById('myShadePickedRow');
-    const pickedSwatch = document.getElementById('myShadePickedSwatch');
-    const pickedHex = document.getElementById('myShadePickedHex');
     const pickedConfirm = document.getElementById('myShadePickedConfirm');
-    if(pickedRow && pickedSwatch && pickedHex){
-      pickedSwatch.style.background = hex;
-      pickedHex.textContent = hex.toUpperCase();
-      pickedRow.style.display = 'flex';
-    }
     if(pickedConfirm) pickedConfirm.style.display = 'block';
     if(myShadePickHint) myShadePickHint.style.display = 'none'; // superseded by the confirm prompt above
     // Leave the loupe up for a beat so the final pick is still visible
@@ -4616,24 +4933,33 @@ if(myShadeSwatchCanvas){
   }, { passive: false });
 }
 
-function renderMyShadeResult(rgb, pct){
+function renderMyShadeResult(rgb, pct, scored){
   const hex = '#' + [rgb.r, rgb.g, rgb.b].map(v => v.toString(16).padStart(2,'0')).join('');
   document.getElementById('myShadeResultSwatch').style.background = hex;
   document.getElementById('myShadeResultPct').textContent = pct + '%';
 
-  let tier, label, explain;
-  if(pct >= 80){
+  let tier, label, headline;
+  if(pct > 85){
     tier = 'great'; label = 'Great match';
-    explain = "This is <strong>one of your best colors</strong> — it works with your natural warmth, depth, and chroma. Wear it with confidence.";
+    headline = "This is <strong>one of your best colors</strong> — it works with your natural warmth, depth, and chroma. Wear it with confidence.";
   } else if(pct >= 60){
     tier = 'good'; label = 'Good match';
-    explain = "This <strong>flatters you</strong> — a safe, wearable choice that sits comfortably with your natural coloring.";
+    headline = "This <strong>flatters you</strong> — a safe, wearable choice that sits comfortably with your natural coloring.";
   } else if(pct >= 40){
     tier = 'borderline'; label = 'Borderline';
-    explain = "<strong>Wearable, but not your strongest color</strong> — it may read a little flat, heavy, or washed-out against your natural coloring.";
+    headline = "<strong>Wearable, but not your strongest color</strong> — it may read a little flat, heavy, or washed-out against your natural coloring.";
   } else {
     tier = 'off'; label = 'Not your shade';
-    explain = "This color <strong>tends to fight your natural coloring</strong> rather than flatter it — it may wash you out or clash more than complement.";
+    headline = "This color <strong>tends to fight your natural coloring</strong> rather than flatter it — it may wash you out or clash more than complement.";
+  }
+  // WHY it scored this way (the item's warmth/depth/chroma relative to
+  // the customer's own measured coloring) plus, when there's a real gap,
+  // a concrete direction to look in instead -- per Nghi (2026-09-14).
+  let explain = headline;
+  if(scored && scored.axes && scored.target){
+    const { character, guidance } = myShadeAxisExplanation(scored.axes, scored.target, scored.exposureAdjustedValue);
+    explain += ` ${character}`;
+    if(guidance) explain += ` ${guidance}`;
   }
   const pill = document.getElementById('myShadeResultPill');
   pill.className = 'match-pill ' + tier;
@@ -4641,11 +4967,17 @@ function renderMyShadeResult(rgb, pct){
   document.getElementById('myShadeResultExplain').innerHTML = `${magnifierIcon()} ${explain}`;
   myShadeResultCard.classList.add('show');
   myShadeResultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Context for this section's own feedback block (submitMyShadeFeedback
+  // below) -- this result can be reached without ever running the main
+  // Season/shade flow this session, so it can't rely on currentSeasonResult
+  // / currentBestMatches the way the shared feedback card does.
+  lastMyShadeResult = { hex, pct, tier };
 }
 
 myShadeCheckBtn.addEventListener('click', () => {
   if(!myShadePickedRgb) return;
-  if(!getColorCheckPurchase()){
+  if(getColorCheckRemaining() <= 0){
     paywallCardEl.classList.add('show');
     paywallCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     return;
@@ -4664,13 +4996,14 @@ myShadeCheckBtn.addEventListener('click', () => {
       showError(myShadeErrorBox, "We couldn't match your uploaded color profile — try downloading and uploading it again.");
       return;
     }
-    renderMyShadeResult(rgb, scored.pct);
+    renderMyShadeResult(rgb, scored.pct, scored);
     sendToLiveSheet({
       type: 'colorcheck_result', season: profile.shadeMatchSeason,
       item_rgb_r: rgb.r, item_rgb_g: rgb.g, item_rgb_b: rgb.b,
       match_pct: scored.pct, checked_at: new Date().toISOString(),
     });
-    consumeColorCheckPurchase(); // they got their result -- this check is now used up
+    consumeOneColorCheck(); // they got their result -- this check is now used up
+    applyColorCheckUnlockState(); // refresh the remaining-checks display
   } catch(e){
     console.error('[Color check] Failed', e);
     showError(myShadeErrorBox, "Something went wrong scoring that color. Please try again.");
@@ -4681,13 +5014,12 @@ myShadeCheckBtn.addEventListener('click', () => {
 });
 
 document.getElementById('myShadeCheckAnotherBtn').addEventListener('click', () => {
-  // Re-gate immediately -- per Nghi, the $2.99 is for one check, and
-  // consumeColorCheckPurchase() above already used up the credit for
-  // the result just shown. Without this, "Check Another Color" let the
-  // customer go through a whole new upload-and-pick cycle before ever
-  // being told (at the old myShadeCheckBtn re-click) that they needed
-  // to pay again -- this catches it right away instead.
-  if(!getColorCheckPurchase()){
+  // Re-gate immediately -- consumeOneColorCheck() above already used up
+  // the credit for the result just shown. Without this, "Check Another
+  // Color" let the customer go through a whole new upload-and-pick
+  // cycle before ever being told (at the old myShadeCheckBtn re-click)
+  // that they were out of checks -- this catches it right away instead.
+  if(getColorCheckRemaining() <= 0){
     paywallCardEl.classList.add('show');
     paywallCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
     return;
@@ -4705,6 +5037,7 @@ document.getElementById('myShadeCheckAnotherBtn').addEventListener('click', () =
   myShadeCheckBtn.disabled = true;
   myShadeFileInputCamera.value = '';
   myShadeFileInputUpload.value = '';
+  resetMyShadeFeedbackBlock();
   document.getElementById('myShadeUploadStage').scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
 
@@ -4728,6 +5061,66 @@ const myShadeGoToSeasonBtn = document.getElementById('myShadeGoToSeasonBtn');
 if(myShadeGoToSeasonBtn) myShadeGoToSeasonBtn.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
+
+// "Restore my checks" -- toggles the email form open, then looks up the
+// durable per-email balance on the live tracking sheet and overwrites
+// this browser's local balance with it. A zero/unknown result is shown
+// as a plain "no checks found" message, not an error -- there's no way
+// to tell "never bought" from "already used them all" from here, and
+// both are a normal outcome for a real email.
+const restoreChecksToggleBtn = document.getElementById('restoreChecksToggleBtn');
+const restoreChecksForm = document.getElementById('restoreChecksForm');
+const restoreChecksEmail = document.getElementById('restoreChecksEmail');
+const restoreChecksSubmitBtn = document.getElementById('restoreChecksSubmitBtn');
+const restoreChecksMsg = document.getElementById('restoreChecksMsg');
+if(restoreChecksToggleBtn && restoreChecksForm){
+  restoreChecksToggleBtn.addEventListener('click', () => {
+    restoreChecksForm.style.display = restoreChecksForm.style.display === 'none' ? 'block' : 'none';
+  });
+}
+if(restoreChecksSubmitBtn){
+  restoreChecksSubmitBtn.addEventListener('click', () => {
+    const email = ((restoreChecksEmail && restoreChecksEmail.value) || '').trim();
+    if(restoreChecksMsg){ restoreChecksMsg.textContent = ''; restoreChecksMsg.className = 'restore-checks-msg'; }
+    if(!email){
+      if(restoreChecksMsg){
+        restoreChecksMsg.textContent = 'Enter the email you paid with.';
+        restoreChecksMsg.className = 'restore-checks-msg error';
+      }
+      return;
+    }
+    restoreChecksSubmitBtn.disabled = true;
+    restoreColorCheckBalance(email).then(res => {
+      if(res && res.ok){
+        const remaining = res.remaining || 0;
+        if(restoreChecksMsg){
+          restoreChecksMsg.textContent = remaining > 0
+            ? `Restored — you have ${remaining} check${remaining === 1 ? '' : 's'} remaining.`
+            : `No checks found for that email.`;
+          restoreChecksMsg.className = remaining > 0 ? 'restore-checks-msg success' : 'restore-checks-msg';
+        }
+      } else {
+        if(restoreChecksMsg){
+          restoreChecksMsg.textContent = "Couldn't restore right now — please try again in a moment.";
+          restoreChecksMsg.className = 'restore-checks-msg error';
+        }
+      }
+    }).catch(e => {
+      console.error('[Restore] Failed', e);
+      if(restoreChecksMsg){
+        restoreChecksMsg.textContent = "Couldn't restore right now — please try again in a moment.";
+        restoreChecksMsg.className = 'restore-checks-msg error';
+      }
+    }).finally(() => { restoreChecksSubmitBtn.disabled = false; });
+  });
+}
+const myShadeBuyMoreBtn = document.getElementById('myShadeBuyMoreBtn');
+if(myShadeBuyMoreBtn){
+  myShadeBuyMoreBtn.addEventListener('click', () => {
+    paywallCardEl.classList.add('show');
+    paywallCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
 
 function handleImageFile(file){
   if (!file) return;
@@ -4871,21 +5264,32 @@ analyzeBtn.addEventListener('click', async () => {
     // Exposure scan: flags extreme over/underexposure before showing
     // results, since bad exposure directly corrupts the pixel
     // measurements (an overexposed photo inflates luminance readings,
-    // which can throw off Contrast and season matching). Thresholds
-    // originally set well beyond the real customer population's own
-    // range (skin_lum 97.5-196.1, sclera_lum 119.4-233.6) -- verified
-    // to produce zero false positives against all 37 real,
-    // confirmed-correct customers -- then tightened (2026-09-13) to
-    // catch more of the milder overexposure/underexposure that was
-    // slipping through, trimming each margin by roughly a third to a
-    // half rather than pushing thresholds all the way down to the
-    // observed population edge. This still leaves real headroom above
-    // the highest confirmed-correct skin_lum/sclera_lum and below the
-    // lowest, so legitimate light-skinned or bright-eyed customers
-    // shouldn't get caught -- but this was NOT re-verified against the
-    // original 37-customer set (that data isn't available in this
-    // session), so keep an eye out for any legitimate photo getting
-    // flagged and loosen back up if one does.
+    // which can throw off Contrast and season matching).
+    //
+    // (2026-09-14) Replaced the original raw-RGB skin/sclera luminance
+    // check with a check on sclera CIELAB L* only. Reasoning: skin
+    // luminance varies a lot by customer, so a skin-based threshold has
+    // to leave wide headroom to avoid flagging naturally deep- or
+    // light-skinned customers -- and that same headroom is what let a
+    // real underexposed photo through undetected (skin RGB luminance
+    // only dropped ~139 vs a 149-189 range across the customer's other
+    // same-day photos, nowhere near the old <65 cutoff, even though it
+    // was underexposed enough to flip her season family). Sclera is a
+    // near-white, person-independent reference -- its L* should sit in
+    // a fairly tight band in good light regardless of who's being
+    // photographed -- and it's on the same CIELAB scale the season
+    // classifier itself runs on, unlike 0-255 RGB luminance. Checked
+    // against that same customer's 4 real photos: sclera L* was
+    // 65.8/75.1/74.4 for her 3 good photos vs 54.7 for the one that
+    // silently corrupted her season match -- clean separation, no
+    // overlap.
+    // Thresholds below (60 / 92) are a starting point from that single
+    // 4-photo sample, NOT validated against a real customer population
+    // the way the old thresholds were (that set showed sclera_lum
+    // 119.4-233.6 on the old raw-RGB scale across 37 confirmed-correct
+    // customers). Watch for false positives/negatives on real traffic
+    // and retune before trusting this at the old check's confidence
+    // level.
     // Shown as its own visible loading step (with a brief deliberate
     // pause, since the check itself is instantaneous) so customers can
     // see this scan actually happens, not just a silent instant check.
@@ -4894,10 +5298,9 @@ analyzeBtn.addEventListener('click', async () => {
     exposureScanIndicator.style.display = 'block';
     await new Promise(resolve => setTimeout(resolve, 500));
     exposureScanIndicator.style.display = 'none';
-    const skinLumCheck = luminance(measurements.skin_rgb);
-    const scleraLumCheck = luminance(measurements.sclera_rgb);
-    const isOverexposed = scleraLumCheck > 240 || skinLumCheck > 210;
-    const isUnderexposed = skinLumCheck < 65;
+    const scleraLumCheck = rgbToLab(measurements.sclera_rgb).L; // CIELAB L*, not raw RGB luminance
+    const isOverexposed = scleraLumCheck > 92;
+    const isUnderexposed = scleraLumCheck < 60;
     if(isOverexposed || isUnderexposed){
       loading1.classList.remove('show');
       analyzeBtn.disabled = false;
@@ -4993,6 +5396,11 @@ analyzeBtn.addEventListener('click', async () => {
         result.shadeMatchSeason = measurements.quant_best; // for shade/chart lookups, which need a single real season key -- the combined name is display-only
         result.family = seasonFamilyMap[measurements.quant_best] || result.family;
         result.isCombinedSeason = true;
+      } else if(measurements.quant_borderline){
+        result.season = measurements.quant_best;
+        result.shadeMatchSeason = measurements.quant_best;
+        result.family = seasonFamilyMap[measurements.quant_best] || result.family;
+        result.isBorderline = true;
       } else if(measurements.quant_poor_fit){
         result.season = measurements.quant_best;
         result.shadeMatchSeason = measurements.quant_best;
@@ -5175,6 +5583,28 @@ function sendToLiveSheet(record){
   }
 }
 
+// Balance actions (grant_checks / consume_check / get_balance -- see
+// grantColorCheckCredits()/consumeOneColorCheck()/restoreColorCheckBalance()
+// above) need to read back what the server did (the new remaining
+// count), unlike the fire-and-forget log-only records sendToLiveSheet
+// sends. So this uses a normal fetch() (mode: 'cors', the default)
+// instead of mode:'no-cors' -- which relies on Apps Script Web App
+// responses being readable cross-origin for a simple POST. That's the
+// normal behavior for a deployment with "Who has access: Anyone," but
+// there's no live deployment reachable from this sandboxed session to
+// confirm against, so the "Restore my checks" flow specifically needs a
+// real test once live_tracking_sheet.gs is deployed.
+function callLiveSheetAction(record){
+  return fetch(LIVE_SHEET_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain' }, // matches sendToLiveSheet -- avoids a preflight; Apps Script reads e.postData.contents as the raw string regardless of this header
+    body: JSON.stringify(record),
+  }).then(res => {
+    if(!res.ok) throw new Error('Live sheet action failed: ' + res.status);
+    return res.json();
+  });
+}
+
 // Post-results feedback: two 5-star ratings (season/color analysis,
 // shade matches) plus an optional free-text comment. Entirely
 // optional -- there's no validation gating the submit button, so a
@@ -5184,7 +5614,7 @@ function sendToLiveSheet(record){
 // posted to the same live tracking sheet as the measurement record,
 // tagged type:"feedback" so it's distinguishable there -- reuses
 // sendToLiveSheet/LIVE_SHEET_URL rather than a second endpoint.
-const feedbackRatingState = { season: 0, shade: 0 };
+const feedbackRatingState = { season: 0, shade: 0, myShade: 0 };
 function setupStarRating(containerId, stateKey){
   const container = document.getElementById(containerId);
   if(!container) return;
@@ -5263,6 +5693,76 @@ setupStarRating('shadeStarRating', 'shade');
 const submitFeedbackBtn = document.getElementById('submitFeedbackBtn');
 if(submitFeedbackBtn){
   submitFeedbackBtn.addEventListener('click', submitFeedback);
+}
+
+// My Shade / Not My Shade's own feedback -- same rate-and-comment
+// pattern as submitFeedback above, but scoped to just this result and
+// posted as its own record type ('myshade_feedback') since this section
+// is often reached without the Season/shade flow ever having run this
+// session (see lastMyShadeResult). Per Nghi (2026-09-14).
+async function submitMyShadeFeedback(){
+  const commentEl = document.getElementById('myShadeFeedbackComment');
+  const comment = commentEl ? commentEl.value.trim() : '';
+
+  let location = null;
+  try{
+    location = customerLocationPromise
+      ? await Promise.race([
+          customerLocationPromise,
+          new Promise(resolve => setTimeout(() => resolve(null), CUSTOMER_LOCATION_WAIT_MS)),
+        ])
+      : null;
+  } catch(e){ location = null; }
+
+  const record = {
+    type: 'myshade_feedback',
+    timestamp: new Date().toISOString(),
+    location_city: location ? location.city : '',
+    location_region: location ? location.region : '',
+    location_country: location ? location.country : '',
+    location_country_code: location ? location.country_code : '',
+    item_hex: lastMyShadeResult ? lastMyShadeResult.hex : '',
+    match_pct: lastMyShadeResult ? lastMyShadeResult.pct : null,
+    match_tier: lastMyShadeResult ? lastMyShadeResult.tier : '',
+    myshade_rating: feedbackRatingState.myShade || null,
+    comment: comment,
+  };
+
+  try{
+    const history = JSON.parse(localStorage.getItem('ffbs_feedback_history') || '[]');
+    history.push(record);
+    localStorage.setItem('ffbs_feedback_history', JSON.stringify(history));
+  } catch(e){
+    console.warn('[My Shade feedback] Local save failed', e);
+  }
+  sendToLiveSheet(record);
+
+  const formBlock = document.getElementById('myShadeFeedbackFormBlock');
+  const thanks = document.getElementById('myShadeFeedbackThanks');
+  if(formBlock) formBlock.style.display = 'none';
+  if(thanks) thanks.style.display = 'block';
+}
+
+setupStarRating('myShadeStarRating', 'myShade');
+const submitMyShadeFeedbackBtn = document.getElementById('submitMyShadeFeedbackBtn');
+if(submitMyShadeFeedbackBtn){
+  submitMyShadeFeedbackBtn.addEventListener('click', submitMyShadeFeedback);
+}
+// Called from the "Check Another Color" handler so a repeat check gets
+// its own fresh feedback form instead of showing the previous check's
+// stars/thanks message.
+function resetMyShadeFeedbackBlock(){
+  feedbackRatingState.myShade = 0;
+  document.querySelectorAll('#myShadeStarRating .star-btn path').forEach(path => {
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', 'var(--muted)');
+  });
+  const commentEl = document.getElementById('myShadeFeedbackComment');
+  if(commentEl) commentEl.value = '';
+  const formBlock = document.getElementById('myShadeFeedbackFormBlock');
+  const thanks = document.getElementById('myShadeFeedbackThanks');
+  if(formBlock) formBlock.style.display = '';
+  if(thanks) thanks.style.display = 'none';
 }
 // ---------------------------------------------------------------------
 // Detailed Seasonal Color Analysis (customer-facing) — replaces the old
@@ -5411,12 +5911,12 @@ function renderColorAnalysis(result){
   const darknessPct = Math.max(0, Math.min(100, (result.darkness / 100) * 100));
   html += `<div class="metric-subrow">
     <div class="sub">
-      <div class="sub-label">Lightness (skin &amp; sclera)</div>
+      <div class="sub-label">Lightness<br>(skin &amp; sclera)</div>
       <div class="sub-track"><div class="sub-fill" style="width:${lightnessPct}%;"></div></div>
       <div class="sub-value">${result.lightness}</div>
     </div>
     <div class="sub">
-      <div class="sub-label">Darkness (iris &amp; brow)</div>
+      <div class="sub-label">Darkness<br>(iris &amp; brow)</div>
       <div class="sub-track"><div class="sub-fill" style="width:${darknessPct}%;"></div></div>
       <div class="sub-value">${result.darkness}</div>
     </div>
@@ -5475,6 +5975,10 @@ function renderConfidence(result){
     tier = 'split';
     label = 'Split match';
     explain = `Your measured skin, eye, and eyebrow tones landed almost exactly between ${nameA || 'this season'} and ${nameB || 'a neighboring season'} — both are genuinely close fits, so we're matching your shades to ${result.shadeMatchSeason || 'the closer one'}.`;
+  } else if(result.isBorderline){
+    tier = 'borderline';
+    label = 'Close call';
+    explain = `Your coloring fits ${result.season} best${pctText ? ` (a ${pctText} match)` : ''}, but it's a fairly close call against ${result.runner_up || 'a neighboring season'} too — a solid pick, just not a clear-cut one.`;
   } else if(result.isLowConfidence){
     tier = 'lower';
     label = 'Lower confidence';
@@ -5500,9 +6004,11 @@ function renderSeasonResult(result){
   saveDebugHistory(result);
   document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
   document.getElementById('seasonName').textContent = result.season;
-  document.getElementById('seasonDesc').textContent = result.isCombinedSeason
+  document.getElementById('seasonDesc').innerHTML = result.isCombinedSeason
     ? `Your coloring sits genuinely between these two seasons — both fit about equally well. ${result.explanation || ''}`
-    : result.explanation;
+    : result.isBorderline
+      ? `${result.explanation || ''}${result.explanation ? ' ' : ''}It's a fairly close call against ${result.runner_up} too — a solid match, just not a slam dunk.`
+      : result.explanation;
 
   renderConfidence(result);
   renderColorAnalysis(result);
@@ -5948,6 +6454,7 @@ function buildColorProfileData(){
   const pctConfidence = quantDistToConfidencePercent(result.quant_best_dist);
   let confidenceLabel = 'Good confidence';
   if (result.isCombinedSeason) confidenceLabel = 'Split match';
+  else if (result.isBorderline) confidenceLabel = 'Close call';
   else if (result.isLowConfidence) confidenceLabel = 'Lower confidence';
   else if (result.quant_best_dist < 2) confidenceLabel = 'High confidence';
   const confidencePillText = pctConfidence != null ? `${confidenceLabel} · ${pctConfidence}%` : confidenceLabel;
