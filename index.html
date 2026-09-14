@@ -175,7 +175,23 @@
     pointer-events:none;display:none;z-index:5;
     image-rendering:pixelated;image-rendering:crisp-edges;
   }
-  .myshade-photo-row{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;}
+  /* FIXED 2026-09-14, per Nghi ("the photo kept smaller and smaller
+     when I clicked upload photo again and again") -- width:100% here is
+     load-bearing, not cosmetic. .upload-stage (this row's parent) is a
+     column flex container with align-items:center, so without an
+     explicit width this row shrink-to-fits its children instead of
+     filling .upload-stage's real width. .swatch-preview inside it uses
+     width:min(260px,100%), and that 100% was resolving against this
+     row's shrink-to-fit size -- which itself depends on the <canvas>'s
+     current raster width (myShadeHandleItemFile sizes the canvas to
+     box.clientWidth). That's a feedback loop: draw a photo -> canvas
+     gets some width -> row shrinks to fit that width -> box.clientWidth
+     reads smaller next time -> next photo gets drawn even smaller, and
+     so on every re-upload. width:100% pins this row to .upload-stage's
+     actual (canvas-independent) width, so .swatch-preview's 100% -- and
+     therefore box.clientWidth -- resolves to the same stable value on
+     every upload. */
+  .myshade-photo-row{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;width:100%;}
   .myshade-picked-row{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;}
   .myshade-picked-swatch{
     width:52px;height:52px;border-radius:50%;flex-shrink:0;
@@ -213,6 +229,14 @@
   .match-pill.off{background:rgba(58,31,34,0.06); color:var(--muted);}
   .match-explain{padding-left:16px;text-indent:-16px;}
   .match-explain svg{text-indent:0;}
+  /* "N checks remaining" under the My Shade result -- added 2026-09-14,
+     per Nghi ("show how many checks left after checking"). Deliberately
+     plain/muted (not a chip or badge) so it reads as a quiet status
+     note rather than competing with the result itself above it or the
+     "Check Another Color" button right below it. */
+  .myshade-checks-remaining{
+    font-size:12px; color:var(--muted); text-align:center; margin:2px 0 14px;
+  }
   .hint{font-size:12px;color:var(--muted);text-align:center;}
   .hint-columns{
     display:flex;gap:20px;justify-content:center;
@@ -1381,6 +1405,12 @@
       <div class="pick-filters" id="myShadeResultCategory" style="margin-bottom:12px;"></div>
       <div class="match-pill" id="myShadeResultPill"></div>
       <div class="match-explain" id="myShadeResultExplain"></div>
+      <!-- Shown after every check when the customer still has checks
+           left -- per Nghi (2026-09-14), "you should show how many
+           checks left after checking." Hidden when remaining hits 0
+           since the upsell's own "You're out of checks" kicker below
+           already says so. See updateMyShadeActionButtons(). -->
+      <div class="myshade-checks-remaining" id="myShadeChecksRemaining" style="display:none;"></div>
       <button class="btn ghost" id="myShadeCheckAnotherBtn" style="display:none;">Check Another Color</button>
       <!-- Shown instead of "Check Another Color" the moment the customer
            runs out of checks -- per Nghi (2026-09-14): pitch the 10-pack
@@ -4388,8 +4418,17 @@ function updateMyShadeActionButtons(){
   const remaining = getColorCheckRemaining();
   const checkAnotherBtn = document.getElementById('myShadeCheckAnotherBtn');
   const comboUpsell = document.getElementById('myShadeComboUpsell');
+  const checksRemainingEl = document.getElementById('myShadeChecksRemaining');
   if(checkAnotherBtn) checkAnotherBtn.style.display = remaining > 0 ? '' : 'none';
   if(comboUpsell) comboUpsell.style.display = remaining > 0 ? 'none' : 'block';
+  if(checksRemainingEl){
+    if(remaining > 0){
+      checksRemainingEl.textContent = `${remaining} check${remaining === 1 ? '' : 's'} remaining`;
+      checksRemainingEl.style.display = 'block';
+    } else {
+      checksRemainingEl.style.display = 'none';
+    }
+  }
 }
 
 // UPDATED 2026-09-12, per Nghi: this used to stay locked until a season
