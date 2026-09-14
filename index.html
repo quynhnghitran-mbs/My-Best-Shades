@@ -645,10 +645,16 @@
      a clean 4x7 block, on any card width -- not a flex-wrap that
      reflows to 3-per-row (10 rows, one orphan chip) depending on
      available space. */
-  .palette-swatch-row{display:grid;grid-template-columns:repeat(4,1fr);gap:18px 8px;margin-bottom:4px;}
-  .palette-chip{width:auto;text-align:center;}
+  .palette-swatch-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px 8px;margin-bottom:4px;}
+  .palette-chip{width:auto;min-width:0;text-align:center;}
+  /* max-width:100% + aspect-ratio (in place of a fixed height) lets the
+     ring shrink to whatever its grid column actually has on a narrow
+     phone instead of overflowing past the card's right edge -- 60px is
+     just the ceiling on any column with room for it. minmax(0,1fr) above
+     is the other half of this: without it the grid track itself refuses
+     to shrink below the ring's natural size in the first place. */
   .palette-dot{
-    width:60px;height:60px;border-radius:50%;margin:0 auto;
+    width:60px;max-width:100%;aspect-ratio:1;border-radius:50%;margin:0 auto;
     border:3px solid #fff;box-shadow:0 3px 9px rgba(58,31,34,0.20);
   }
   .palette-chip .label{
@@ -6721,12 +6727,20 @@ function drawStyleGuideStoryCard(data){
 
   const panelX = 60, panelY = 320, panelW = W - panelX * 2;
   const contentX = panelX + 55, contentW = panelW - 110;
-  const dotR = 37;
+  // Bigger ring, no name label underneath -- matches the on-page
+  // "Personalized Colors" swatches (per Nghi, 2026-09-14): this download
+  // used to draw each color's name under a smaller dot, but the on-page
+  // version dropped the names and enlarged the rings, so this card was
+  // left out of sync with what the customer actually sees on-screen.
+  // Row height shrinks to match since there's no wrapped name text to
+  // clear anymore.
+  const dotR = 46;
+  const clothingRowH = 132;
 
   const cols = 7;
   const clothingRows = Math.ceil(data.clothing.length / cols);
   const clothingTop = 470;
-  const clothingBottom = clothingTop + clothingRows * 152;
+  const clothingBottom = clothingTop + clothingRows * clothingRowH;
 
   const jewelryTop = clothingBottom + 70;
   const jewelryNoteLines = sgWrapText(mctx, data.jewelry.note, contentW, `400 17px ${SG_WORKSANS}`);
@@ -6768,12 +6782,8 @@ function drawStyleGuideStoryCard(data){
   data.clothing.forEach((c, i) => {
     const row = Math.floor(i / cols), col = i % cols;
     const cx = contentX + colW * col + colW / 2;
-    const cy = clothingTop + row * 152 + dotR;
+    const cy = clothingTop + row * clothingRowH + dotR;
     sgFillCircle(ctx, cx, cy, dotR, c.hex, '#ffffff', 5);
-    const lines = sgWrapText(ctx, c.name, colW - 6, `600 15px ${SG_WORKSANS}`);
-    lines.slice(0, 2).forEach((line, li) => {
-      sgText(ctx, line, cx, cy + dotR + 24 + li * 19, { font: `600 15px ${SG_WORKSANS}`, color: SG_THEME.textLight, align: 'center' });
-    });
   });
 
   // Jewelry section
