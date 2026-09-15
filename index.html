@@ -527,7 +527,7 @@
   .palette-category-label{
     display:inline-block;
     font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em;
-    color:#fff;font-weight:700;margin:26px 0 7px;
+    color:#fff;font-weight:700;margin:26px 0 14px;
     padding:4px 13px;border-radius:20px;background:var(--rose-deep);
   }
 
@@ -1006,6 +1006,51 @@
     display:none; margin-bottom:20px; line-height:1.5;
   }
   .error-box.show{display:block;}
+
+  /* Exit-intent nudge -- shown once if a customer tries to leave the page
+     (desktop: mouse toward the tab/URL bar; see the beforeunload handler
+     in JS for the closest thing to a mobile/tab-close equivalent) before
+     downloading her Color Profile & Palette. Per Nghi, 2026-09-15: the
+     download should feel like a must-do before leaving, and skipping it
+     should ask why rather than just letting her go silently. */
+  .exit-nudge-overlay{
+    position:fixed;inset:0;background:rgba(58,31,34,0.55);
+    display:none;align-items:center;justify-content:center;
+    padding:20px;z-index:1000;
+  }
+  .exit-nudge-overlay.show{display:flex;}
+  .exit-nudge-card{
+    background:var(--card);border-radius:20px;padding:30px 26px 26px;
+    max-width:380px;width:100%;position:relative;text-align:center;
+    box-shadow:0 20px 50px rgba(58,31,34,0.3);
+    animation: reveal 0.3s ease;
+  }
+  .exit-nudge-close{
+    position:absolute;top:10px;right:12px;background:none;border:none;
+    font-size:22px;line-height:1;color:var(--muted);cursor:pointer;padding:6px;
+  }
+  .exit-nudge-close:hover{color:var(--rose-deep);}
+  .exit-nudge-title{
+    font-family:'Playfair Display', serif;font-weight:600;font-size:19px;
+    color:var(--text-light);margin:4px 0 10px;text-wrap:pretty;
+  }
+  .exit-nudge-body{
+    font-size:13px;color:var(--muted);line-height:1.55;margin-bottom:18px;text-wrap:pretty;
+  }
+  .exit-nudge-body strong{color:var(--rose-deep);}
+  .exit-nudge-download-btn{width:100%;margin-bottom:20px;}
+  .exit-nudge-reason-label{font-size:11.5px;color:var(--muted);margin-bottom:10px;}
+  .exit-nudge-reasons{
+    display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;
+  }
+  .exit-reason-chip{
+    font-family:'Work Sans', sans-serif;font-size:11.5px;font-weight:600;
+    padding:7px 12px;border-radius:20px;
+    background:rgba(150,51,60,0.06);border:1px solid var(--line);
+    color:var(--text-light);cursor:pointer;transition:background 0.15s ease;
+  }
+  .exit-reason-chip:hover{background:rgba(150,51,60,0.14);}
+  .exit-nudge-skip{display:block;margin:0 auto;}
 </style>
 </head>
 <body>
@@ -1177,23 +1222,6 @@
       </div>
     </div>
 
-    <!-- Downloads just the season/CIELAB color profile (pixel measurement
-         + Warmth/Depth/Contrast/Chroma) as one image -- not the shade
-         matches, which the customer can always see on-screen but don't
-         need a takeaway image of. Works for every season-result customer
-         regardless of which tier she bought, since it only depends on
-         currentSeasonResult (set as soon as colorAnalysisSection is
-         visible), not the paid-tier-only currentBestMatches. Placed right
-         after the seasonal analysis (per Nghi, 2026-09-12) so it reads as
-         "save this result" rather than being buried after the palette.
-         The PNG also embeds the profile as a hidden tEXt chunk so this
-         same download doubles as the upload My Shade / Not My Shade now
-         asks for -- see embedProfileInPng()/MYSHADE_PROFILE_PNG_KEYWORD. -->
-    <div class="palette-download-row">
-      <button class="btn ghost palette-download-btn" id="downloadColorProfileBtn">Download Your Color Profile</button>
-    </div>
-    <div class="jewelry-note" style="text-align:center;margin-top:8px;">Handy to keep for My Shade / Not My Shade.</div>
-
     <div id="styleGuideSection" style="display:none;">
       <div class="analysis-card">
         <h3 class="analysis-title">Your Color Palette</h3>
@@ -1256,9 +1284,23 @@
         <div id="paletteJewelryMetals" class="jewelry-metals"></div>
         <div id="paletteJewelryNote" class="jewelry-note palette-guidance"></div>
 
+        <!-- One button downloads BOTH takeaway images -- the season/CIELAB
+             color profile card and this "Your Color Palette" story card --
+             saved as two separate PNGs (per Nghi, 2026-09-15: one button,
+             two photos, not one merged image). Placed after the full
+             Personalized Colors block (per Nghi, 2026-09-15) so it reads
+             as "save everything now that you've seen it," not a save
+             prompt before she's even looked at her palette. The
+             color-profile PNG also embeds the profile as a hidden tEXt
+             chunk so that half of the download doubles as the upload My
+             Shade / Not My Shade asks for -- see
+             embedProfileInPng()/MYSHADE_PROFILE_PNG_KEYWORD. Also the
+             target the exit-intent nudge below scrolls/points to when a
+             customer tries to leave without downloading yet. -->
         <div class="palette-download-row">
-          <button class="btn ghost palette-download-btn" id="downloadStyleGuideBtn">Download Your Palette</button>
+          <button class="btn ghost palette-download-btn" id="downloadBothBtn">Download Your Color Profile &amp; Palette</button>
         </div>
+        <div class="jewelry-note" style="text-align:center;margin-top:8px;">Handy to keep for My Shade / Not My Shade.</div>
       </div>
     </div>
 
@@ -1456,6 +1498,26 @@
         <div class="feedback-thanks" id="myShadeFeedbackThanks" style="display:none;">Thank you for your feedback! 💌</div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Exit-intent nudge (see JS near downloadBothBtn) -- asks a customer to
+     download her Color Profile & Palette before she leaves, and if she'd
+     rather not, asks why instead of just letting her go. -->
+<div class="exit-nudge-overlay" id="exitNudgeOverlay">
+  <div class="exit-nudge-card">
+    <button type="button" class="exit-nudge-close" id="exitNudgeCloseBtn" aria-label="Close">&times;</button>
+    <div class="exit-nudge-title">Don't leave without your results!</div>
+    <div class="exit-nudge-body">You haven't downloaded your <strong>Color Profile &amp; Palette</strong> yet -- you'll want these to remember your shades, and My Shade / Not My Shade needs the Color Profile photo to work.</div>
+    <button type="button" class="btn exit-nudge-download-btn" id="exitNudgeDownloadBtn">Download Now</button>
+    <div class="exit-nudge-reason-label">Not downloading? Quick reason helps us fix it:</div>
+    <div class="exit-nudge-reasons" id="exitNudgeReasons">
+      <button type="button" class="exit-reason-chip" data-reason="Don't find it helpful">Don't find it helpful</button>
+      <button type="button" class="exit-reason-chip" data-reason="Already saved a screenshot">Already saved a screenshot</button>
+      <button type="button" class="exit-reason-chip" data-reason="Download isn't working">Download isn't working</button>
+      <button type="button" class="exit-reason-chip" data-reason="Don't think it's right for me">Don't think it's right for me</button>
+    </div>
+    <button type="button" class="link-btn exit-nudge-skip" id="exitNudgeSkipBtn">No thanks, continue without downloading</button>
   </div>
 </div>
 
@@ -2275,10 +2337,10 @@ function guidanceLipstick(ax){
 // shared string with a swapped tail) so the two sections don't read as
 // copy-pasted off each other.
 function guidanceEyeliner(ax){
-  return `Stays within <strong>true neutrals -- black, brown, and charcoal</strong> -- not a colored liner; even these are nudged within ${ax.warmthPhrase} so the undertone still reads as yours. <strong>Depth doesn't limit these</strong> the way it does the rest of your palette: a thin liner line is an accent, not a wash of color, so even black won't overwhelm you the way an all-dark look could. The deepest one is your most versatile everyday pick; the lighter browns soften it when black feels like too much.`;
+  return `True neutrals only -- <strong>black, charcoal, and brown</strong> -- each tilted toward ${ax.warmthPhrase}. <strong>Black</strong> for maximum definition, <strong>charcoal</strong> as a softer everyday alternative, <strong>brown</strong> for the most natural line. <strong>Depth doesn't limit these</strong> -- a liner line is a thin accent, so even black stays wearable on the lightest coloring.`;
 }
 function guidanceMascara(ax){
-  return `Same everyday neutrals as your liner, minus the charcoal -- mascara really only comes in <strong>black, brown, or black-brown</strong>, nudged within ${ax.warmthPhrase} to match your own coloring. <strong>Depth doesn't limit these</strong>; a coat of mascara is too fine a line to overwhelm even the lightest coloring. Black is the classic go-to; brown softens the look for a more natural daytime lash.`;
+  return `True neutrals only -- <strong>black and brown</strong> -- each tilted toward ${ax.warmthPhrase}. <strong>Black</strong> is your everyday default for definition; <strong>brown</strong> is the softer, more natural pick for daytime. <strong>Depth doesn't limit these</strong> -- a coat of mascara is too fine to overwhelm even the lightest coloring.`;
 }
 function guidanceHair(ax){
   return `Your most natural hair sits within ${ax.warmthPhrase}, at a depth close to your own -- ${ax.depthCaution}.`;
@@ -4948,7 +5010,7 @@ function myShadeComplimentLine(tier, cat){
 
 // ---------------------------------------------------------------------
 // PNG tEXt chunk embed/extract -- lets the "Download Your Color
-// Profile" PNG (see drawColorProfileCard/downloadColorProfileBtn below)
+// Profile" PNG (see drawColorProfileCard/downloadBothBtn below)
 // double as the file customers upload here, instead of trusting
 // localStorage (which a second person on the same shared device would
 // otherwise silently inherit -- either a stale profile or an unused
@@ -5987,7 +6049,7 @@ async function saveDebugHistory(result){
 // profile summary card). UPDATED 2026-09-12, per Nghi: this used to be
 // written to localStorage right after every season result and read back
 // automatically -- now it's only ever produced at download time (see
-// downloadColorProfileBtn below), embedded into the color-profile PNG,
+// downloadBothBtn below), embedded into the color-profile PNG,
 // and read back only when the customer explicitly uploads that file to
 // My Shade / Not My Shade. Nothing here touches localStorage.
 // shadeMatchSeason is always a single real season name (never the
@@ -6809,65 +6871,9 @@ function drawStyleGuideStoryCard(data){
   return canvas;
 }
 
-const downloadStyleGuideBtn = document.getElementById('downloadStyleGuideBtn');
-if (downloadStyleGuideBtn) {
-  downloadStyleGuideBtn.addEventListener('click', async () => {
-    if (!lastStyleGuideData) return;
-    const originalLabel = downloadStyleGuideBtn.textContent;
-    downloadStyleGuideBtn.textContent = 'Preparing…';
-    downloadStyleGuideBtn.disabled = true;
-    try {
-      // Wait (briefly) for web fonts to be ready so the export picks up
-      // Playfair Display / Work Sans rather than a system fallback.
-      await Promise.race([
-        (document.fonts && document.fonts.ready) || Promise.resolve(),
-        new Promise(r => setTimeout(r, 400)),
-      ]);
-      const canvas = drawStyleGuideStoryCard(lastStyleGuideData);
-      const blob = await new Promise(resolve => canvas.toBlob(resolve));
-      const slug = lastStyleGuideData.seasonName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      const filename = `find-my-best-shades-${slug}-palette.png`;
-      // Same fix as the Color Profile download above (2026-09-14, per
-      // Nghi) -- on a phone, <a download> can land the image somewhere
-      // the customer has to go hunting for and re-save, rather than
-      // actually saving it. Where the browser supports sharing a file,
-      // route through the native share sheet instead, so "Save Image" /
-      // "Save to Photos" there saves it directly in one tap. Falls back
-      // to the original <a download> wherever file sharing isn't
-      // supported (desktop, or a share attempt that genuinely fails).
-      let sharedDirectly = false;
-      if (typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {
-        const shareFile = new File([blob], filename, { type: 'image/png' });
-        if (navigator.canShare({ files: [shareFile] })) {
-          try {
-            await navigator.share({ files: [shareFile], title: 'Your Color Palette' });
-            sharedDirectly = true;
-          } catch (shareErr) {
-            // AbortError -- customer backed out of the share sheet on
-            // purpose; respect that instead of forcing a fallback download.
-            if (shareErr && shareErr.name === 'AbortError') sharedDirectly = true;
-          }
-        }
-      }
-      if (!sharedDirectly) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-      }
-      downloadStyleGuideBtn.textContent = originalLabel;
-      downloadStyleGuideBtn.disabled = false;
-    } catch (err) {
-      console.error('Story card download failed', err);
-      downloadStyleGuideBtn.textContent = originalLabel;
-      downloadStyleGuideBtn.disabled = false;
-    }
-  });
-}
+// The story-card canvas builder (drawStyleGuideStoryCard) stays here;
+// its download is now triggered by the single combined button -- see
+// downloadBothBtn below.
 
 // ---------------------------------------------------------------------
 // "Download Your Color Profile" -- a single shareable PNG of just the
@@ -7022,86 +7028,224 @@ function drawColorProfileCard(data){
   return canvas;
 }
 
-const downloadColorProfileBtn = document.getElementById('downloadColorProfileBtn');
-if (downloadColorProfileBtn) {
-  downloadColorProfileBtn.addEventListener('click', async () => {
-    const data = buildColorProfileData();
-    if (!data) return;
-    const originalLabel = downloadColorProfileBtn.textContent;
-    downloadColorProfileBtn.textContent = 'Preparing…';
-    downloadColorProfileBtn.disabled = true;
+// One button, two separate photos (per Nghi, 2026-09-15) -- draws both
+// canvases and saves each as its own PNG rather than combining them into
+// a single image. Where the browser can share multiple files at once
+// (most mobile Safari/Chrome), both go out through one native share
+// sheet so "Save to Photos" drops both in one tap; everywhere else it
+// falls back to two separate <a download> triggers, spaced slightly so
+// the browser doesn't treat the second as an unsolicited auto-download.
+// hasDownloadedBoth/exitNudgeShown back the exit-intent nudge further
+// below -- true once she's actually gotten both photos, so the nudge
+// never fires again after that.
+let hasDownloadedBoth = false;
+let exitNudgeShown = false;
+// Prefer the modern Client Hints signal (navigator.userAgentData.mobile)
+// where it exists; every browser that supports it reports this
+// accurately. Otherwise fall back to a UA sniff for phones/tablets only
+// -- deliberately excludes plain "Mobile" false positives some desktop
+// UAs carry by checking for a real device token first.
+function isMobileDevice(){
+  if(navigator.userAgentData && typeof navigator.userAgentData.mobile === 'boolean'){
+    return navigator.userAgentData.mobile;
+  }
+  return /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+}
+function triggerFileDownload(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+const downloadBothBtn = document.getElementById('downloadBothBtn');
+if (downloadBothBtn) {
+  downloadBothBtn.addEventListener('click', async () => {
+    const profileData = buildColorProfileData();
+    if (!profileData || !lastStyleGuideData) return;
+    const originalLabel = downloadBothBtn.textContent;
+    downloadBothBtn.textContent = 'Preparing…';
+    downloadBothBtn.disabled = true;
     try {
+      // Wait (briefly) for web fonts to be ready so both exports pick up
+      // Playfair Display / Work Sans rather than a system fallback.
       await Promise.race([
         (document.fonts && document.fonts.ready) || Promise.resolve(),
         new Promise(r => setTimeout(r, 400)),
       ]);
-      const canvas = drawColorProfileCard(data);
-      const blob = await new Promise(resolve => canvas.toBlob(resolve));
-      // Quietly embed the season profile as a PNG metadata chunk (see
-      // embedProfileInPng() near MYSHADE_PROFILE_PNG_KEYWORD) so this
-      // same downloaded image is also what the customer uploads to My
-      // Shade / Not My Shade -- no visible change to the image itself.
-      let outBlob = blob;
+
+      // Color Profile PNG -- quietly embeds the season profile as a PNG
+      // metadata chunk (see embedProfileInPng() near
+      // MYSHADE_PROFILE_PNG_KEYWORD) so this half of the download also
+      // doubles as what the customer uploads to My Shade / Not My Shade
+      // -- no visible change to the image itself.
+      const profileCanvas = drawColorProfileCard(profileData);
+      const profileBlobRaw = await new Promise(resolve => profileCanvas.toBlob(resolve));
+      let profileBlob = profileBlobRaw;
       const profilePayload = buildMyShadeProfilePayload();
       if (profilePayload) {
         try {
-          const bytes = new Uint8Array(await blob.arrayBuffer());
+          const bytes = new Uint8Array(await profileBlobRaw.arrayBuffer());
           const embedded = embedProfileInPng(bytes, MYSHADE_PROFILE_PNG_KEYWORD, JSON.stringify(profilePayload));
-          outBlob = new Blob([embedded], { type: 'image/png' });
+          profileBlob = new Blob([embedded], { type: 'image/png' });
         } catch (embedErr) {
-          // Non-fatal -- worst case the download is still a normal,
+          // Non-fatal -- worst case that download is still a normal,
           // valid profile image, just not upload-ready for My Shade /
           // Not My Shade (the customer could retake the Season
           // Analysis and download again to get one that is).
           console.warn('[Color profile] Could not embed profile data in PNG', embedErr);
         }
       }
-      const slug = (data.season || 'profile').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      const filename = `find-my-best-shades-${slug}-color-profile.png`;
+      const profileSlug = (profileData.season || 'profile').toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const profileFilename = `find-my-best-shades-${profileSlug}-color-profile.png`;
+
+      // "Your Color Palette" story card PNG.
+      const paletteCanvas = drawStyleGuideStoryCard(lastStyleGuideData);
+      const paletteBlob = await new Promise(resolve => paletteCanvas.toBlob(resolve));
+      const paletteSlug = lastStyleGuideData.seasonName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const paletteFilename = `find-my-best-shades-${paletteSlug}-palette.png`;
+
       // On a phone, the plain <a download> approach below often doesn't
-      // save the image where the customer expects -- it can land in a
+      // save images where the customer expects -- they can land in a
       // generic cache/Downloads spot, or just open in a new tab, leaving
-      // them to hunt for it and save it a second time (their long-press
-      // -> Save Image). Per Nghi ("can you make it downloading right
-      // after I click download button"): where the browser supports
-      // sharing a file (most mobile Safari/Chrome, via the Web Share
-      // API's file support), route through the native share sheet
-      // instead -- its "Save Image"/"Save to Photos" action saves
-      // directly in one tap, no hunting. Desktop browsers (and any
-      // mobile browser without file-share support) don't offer that
-      // sheet, so they keep the original <a download> behavior below.
+      // her to hunt for them and save a second time (long-press -> Save
+      // Image). Per Nghi: where the browser supports sharing files
+      // (most mobile Safari/Chrome, via the Web Share API's file
+      // support), route through the native share sheet instead -- its
+      // "Save Image"/"Save to Photos" action saves them directly in one
+      // tap, no hunting, and takes multiple files in one call so both
+      // photos go out through a single share sheet.
+      // isMobileDevice() gates this to phones/tablets only (2026-09-15,
+      // per Nghi -- "too complicated" on desktop): Windows 11's Edge and
+      // Chrome also implement navigator.share/canShare for files, so
+      // without this check a desktop customer got the full OS share
+      // picker (Mail/WhatsApp/Nearby Sharing/etc.) instead of a plain
+      // download to her Downloads folder -- exactly the flow this whole
+      // share-sheet branch was meant to avoid, just aimed at the wrong
+      // platform.
       let sharedDirectly = false;
-      if (typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {
-        const shareFile = new File([outBlob], filename, { type: 'image/png' });
-        if (navigator.canShare({ files: [shareFile] })) {
+      if (isMobileDevice() && typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {
+        const profileFile = new File([profileBlob], profileFilename, { type: 'image/png' });
+        const paletteFile = new File([paletteBlob], paletteFilename, { type: 'image/png' });
+        if (navigator.canShare({ files: [profileFile, paletteFile] })) {
           try {
-            await navigator.share({ files: [shareFile], title: 'Your Color Profile' });
+            await navigator.share({ files: [profileFile, paletteFile], title: 'Your Color Profile & Palette' });
             sharedDirectly = true;
           } catch (shareErr) {
             // AbortError -- the customer opened the share sheet and
             // backed out on purpose. Respect that; don't also force a
-            // fallback download they didn't ask for. Any OTHER error
+            // fallback download she didn't ask for. Any OTHER error
             // (share sheet unusable, etc.) falls through to <a download>.
             if (shareErr && shareErr.name === 'AbortError') sharedDirectly = true;
           }
         }
       }
       if (!sharedDirectly) {
-        const url = URL.createObjectURL(outBlob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+        triggerFileDownload(profileBlob, profileFilename);
+        // A short gap between the two -- back-to-back programmatic
+        // downloads in the same tick are what trigger a browser's
+        // "multiple downloads blocked" prompt.
+        await new Promise(r => setTimeout(r, 350));
+        triggerFileDownload(paletteBlob, paletteFilename);
       }
+      // Both photos are out (shared or downloaded) -- clears the
+      // exit-intent nudge below so it never bothers a customer who's
+      // already done what it's asking for.
+      hasDownloadedBoth = true;
+      hideExitNudge();
     } catch (err) {
-      console.error('Color profile download failed', err);
+      console.error('Combined download failed', err);
     } finally {
-      downloadColorProfileBtn.textContent = originalLabel;
-      downloadColorProfileBtn.disabled = false;
+      downloadBothBtn.textContent = originalLabel;
+      downloadBothBtn.disabled = false;
     }
+  });
+}
+
+// Exit-intent nudge (per Nghi, 2026-09-15: downloading should feel like
+// a must-do before leaving, and skipping it should ask why). No web page
+// can truly force a download or block someone from leaving -- this is
+// the honest best-effort version of that: a one-time popup when the
+// browser signals she's about to leave, plus a native "leave site?"
+// confirmation as a backstop. It only ever fires once she actually has a
+// result on screen to download (resultCard.classList.contains('show')),
+// and never again once hasDownloadedBoth is true.
+const exitNudgeOverlay = document.getElementById('exitNudgeOverlay');
+const exitNudgeCloseBtn = document.getElementById('exitNudgeCloseBtn');
+const exitNudgeDownloadBtn = document.getElementById('exitNudgeDownloadBtn');
+const exitNudgeSkipBtn = document.getElementById('exitNudgeSkipBtn');
+const exitNudgeReasons = document.getElementById('exitNudgeReasons');
+
+function showExitNudge(){
+  if(exitNudgeShown || hasDownloadedBoth) return;
+  if(!resultCard || !resultCard.classList.contains('show')) return;
+  exitNudgeShown = true;
+  if(exitNudgeOverlay) exitNudgeOverlay.classList.add('show');
+}
+function hideExitNudge(){
+  if(exitNudgeOverlay) exitNudgeOverlay.classList.remove('show');
+}
+function submitExitReason(reason){
+  const shadeMatchSeasonName = currentSeasonResult && (currentSeasonResult.shadeMatchSeason || currentSeasonResult.season);
+  sendToLiveSheet({
+    type: 'download_skip_reason',
+    timestamp: new Date().toISOString(),
+    season: shadeMatchSeasonName || '',
+    reason: reason,
+  });
+}
+
+// Desktop-only exit intent: the mouse leaving out the top of the
+// viewport (toward the tab bar/URL bar/back button) with nowhere else
+// on the page to land is the standard signal a visitor is about to
+// navigate away or close the tab. There's no touch/mouse equivalent on
+// mobile, so beforeunload below is the fallback there.
+document.addEventListener('mouseout', (e) => {
+  if(e.clientY > 0) return;
+  if(e.relatedTarget) return;
+  showExitNudge();
+});
+
+// Backstop for however she actually leaves (tab close, back button,
+// typing a new URL) -- shows the browser's own native "leave site?"
+// confirmation. Its wording is fixed by the browser, not us, and mobile
+// browsers increasingly ignore it altogether, but it's the closest thing
+// a web page has to "you really haven't downloaded these yet."
+window.addEventListener('beforeunload', (e) => {
+  if(hasDownloadedBoth) return;
+  if(!resultCard || !resultCard.classList.contains('show')) return;
+  e.preventDefault();
+  e.returnValue = '';
+});
+
+if(exitNudgeCloseBtn) exitNudgeCloseBtn.addEventListener('click', hideExitNudge);
+if(exitNudgeOverlay){
+  exitNudgeOverlay.addEventListener('click', (e) => {
+    if(e.target === exitNudgeOverlay) hideExitNudge();
+  });
+}
+if(exitNudgeDownloadBtn){
+  exitNudgeDownloadBtn.addEventListener('click', () => {
+    hideExitNudge();
+    if(downloadBothBtn) downloadBothBtn.click();
+  });
+}
+if(exitNudgeReasons){
+  exitNudgeReasons.addEventListener('click', (e) => {
+    const chip = e.target.closest('.exit-reason-chip');
+    if(!chip) return;
+    submitExitReason(chip.dataset.reason || '');
+    hideExitNudge();
+  });
+}
+if(exitNudgeSkipBtn){
+  exitNudgeSkipBtn.addEventListener('click', () => {
+    submitExitReason('(skipped, no reason given)');
+    hideExitNudge();
   });
 }
 
