@@ -4906,13 +4906,28 @@ function myShadeItemCategory(lab){
 // the picked item color) whenever the uploaded profile has them; falls
 // back to the generic per-season archetype only for an older profile
 // PNG downloaded before these were embedded.
+//
+// FIXED 2026-09-15: this used to compare the item's raw warmth/chroma
+// straight against the customer's raw SKIN warmth/chroma -- but a good
+// lipstick is never the same color as skin, it's warmer and much more
+// saturated, which is exactly what macMatchTarget() (the podium's
+// target-builder, above) already accounts for via WARMTH_OFFSET and the
+// CHROMA_RANGE_LOW/HIGH band. Without that same adjustment here, a shade
+// that's a genuinely great podium pick -- warmer and more chromatic than
+// skin, by design -- read as a big miss on both axes in My Shade / Not
+// My Shade, because the target it was being measured against was
+// skin-colored, not lipstick-colored. That's what let the #1 podium
+// match (Brickthrough, 92%+) come back at only 55% here for the exact
+// same shade. Depth is untouched -- a lipstick matching the customer's
+// own depth is correct in both places, no offset needed there.
 function myShadeProfileTarget(profile){
   const hasRealNumbers = profile.lab_temperature_b != null && profile.depth_score != null && profile.avg_chroma != null;
   if(hasRealNumbers){
+    const chromaBandMid = (CHROMA_RANGE_LOW + CHROMA_RANGE_HIGH) / 2;
     return {
-      warmth: Math.max(-1, Math.min(1, profile.lab_temperature_b / 50)),
+      warmth: Math.max(-1, Math.min(1, (profile.lab_temperature_b + WARMTH_OFFSET) / 50)),
       value: Math.max(0, Math.min(1, profile.depth_score / 100)),
-      chroma: Math.max(0, Math.min(1, profile.avg_chroma / 80)),
+      chroma: Math.max(0, Math.min(1, (profile.avg_chroma + chromaBandMid) / 80)),
     };
   }
   return SEASON_PALETTE_TARGET[profile.shadeMatchSeason] || null;
