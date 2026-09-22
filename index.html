@@ -424,7 +424,7 @@
     padding:12px 4px; border:1px dashed var(--line); border-radius:10px;
     line-height:1.5;
   }
-  /* The post-check 10-pack upsell (My Shade result card) -- added
+  /* The post-check 5-pack upsell (My Shade result card) -- added
      2026-09-14, per Nghi. Deliberately echoes the paywall-tier look
      (badge, bordered card) so it reads as "the same kind of offer,"
      just surfaced at a different moment. See myShadeComboUpsell. */
@@ -481,7 +481,7 @@
   }
   .myshade-combo-upsell-features strong{ color:var(--rose-deep); }
   /* "Restore my checks" -- added 2026-09-14, per Nghi, for the durable
-     combo (10-pack) balance: a customer who bought checks on one device
+     combo (5-pack) balance: a customer who bought checks on one device
      needs a way to pull their remaining balance back down on another.
      Collapsed behind a link by default so it doesn't compete with the
      main purchase buttons for most visitors, who have never bought
@@ -1466,18 +1466,6 @@
   </div>
 
   <div class="card paywall-card" id="paywallCard">
-    <div class="paywall-name-gate" id="paywallNameGate">
-      <div class="paywall-name-gate-label">Before we get started — what should we call you?</div>
-      <div class="paywall-name-gate-row">
-        <input type="text" id="paywallNameInput" class="paywall-name-input" placeholder="Your first name" autocomplete="given-name" maxlength="40">
-        <button type="button" class="btn paywall-name-submit-btn" id="paywallNameSubmitBtn">Continue</button>
-      </div>
-      <button type="button" class="paywall-name-skip" id="paywallNameSkipBtn">Skip for now</button>
-    </div>
-    <div class="paywall-welcome" id="paywallWelcome" style="display:none;">
-      <span class="paywall-welcome-greeting" id="paywallWelcomeGreeting"></span>
-      <button type="button" class="paywall-name-edit-btn" id="paywallNameEditBtn">Not you? Change name</button>
-    </div>
     <div class="paywall-head">
       <div class="season-tag">Find My Best Shades</div>
       <div class="season-name" style="font-size:22px;">Choose the reading that's right for you</div>
@@ -1496,7 +1484,7 @@
          callout instead of a plain link so it doesn't read as an
          afterthought. -->
     <div class="restore-checks-row" id="restoreChecksRow">
-      <button type="button" class="link-btn restore-checks-toggle" id="restoreChecksToggleBtn">Already bought checks? Restore them by email →</button>
+      <button type="button" class="link-btn restore-checks-toggle" id="restoreChecksToggleBtn">Already bought My Shade/Not My Shade check pack? Restore them by email →</button>
       <div class="restore-checks-form" id="restoreChecksForm" style="display:none;">
         <input type="email" id="restoreChecksEmail" class="restore-checks-input" placeholder="Email you paid with" autocomplete="email">
         <button type="button" class="btn ghost palette-download-btn" id="restoreChecksSubmitBtn">Restore My Checks</button>
@@ -1504,16 +1492,6 @@
       </div>
     </div>
     <div class="paywall-tiers">
-      <div class="paywall-tier">
-        <div class="paywall-tier-name">Season Analysis</div>
-        <div class="paywall-tier-price">$12.99</div>
-        <ul class="paywall-tier-features">
-          <li>Your color season &amp; undertone</li>
-          <li>Depth, contrast &amp; chroma breakdown</li>
-          <li>A personalized style palette</li>
-        </ul>
-        <div id="paypalBtn-season" class="paypal-btn-slot"></div>
-      </div>
       <div class="paywall-tier featured">
         <div class="paywall-tier-badge">Most Popular</div>
         <div class="paywall-tier-name">Season + Shade Matching</div>
@@ -1530,15 +1508,25 @@
         <div class="paywall-tier-price">$2.99</div>
         <ul class="paywall-tier-features">
           <li>Check one lipstick, blush, or outfit color</li>
-          <li>Find up to 3 similar shades in our catalog</li>
+          <li>Find similar lipstick shades</li>
         </ul>
         <div id="paypalBtn-colorCheck" class="paypal-btn-slot" style="display:none;"></div>
         <div class="paywall-tier-locked-note" id="colorCheckLockedNote">After payment, you'll <strong>upload the "Your Color Profile" image</strong> from your Season Analysis to run each check.</div>
       </div>
-      <!-- The 10-pack combo tier is NOT shown here -- per Nghi
+      <div class="paywall-tier">
+        <div class="paywall-tier-name">Season Analysis</div>
+        <div class="paywall-tier-price">$12.99</div>
+        <ul class="paywall-tier-features">
+          <li>Your color season &amp; undertone</li>
+          <li>Depth, contrast &amp; chroma breakdown</li>
+          <li>A personalized style palette</li>
+        </ul>
+        <div id="paypalBtn-season" class="paypal-btn-slot"></div>
+      </div>
+      <!-- The 5-pack combo tier is NOT shown here -- per Nghi
            (2026-09-14): "don't show the paywall of $19.99 at the
            beginning." A first-time customer only ever sees the single
-           $2.99 check on this paywall; the 10-pack is pitched once,
+           $2.99 check on this paywall; the 5-pack is pitched once,
            as a time-boxed upsell, right after their first check runs
            out (see myShadeComboUpsell in the My Shade result card,
            and updateMyShadeActionButtons() below). -->
@@ -1759,7 +1747,7 @@
          upload the "Download Your Color Profile" PNG from above rather
          than reusing anything saved automatically. This just scrolls to
          that section's entry point rather than navigating anywhere. -->
-    <div class="myshade-cta">
+    <div class="myshade-cta" id="myShadeCtaBlock">
       <div class="myshade-cta-text">Got a lipstick, blush, or outfit color you're unsure about?</div>
       <button class="btn ghost" id="myShadeCtaBtn">Check My Shade / Not My Shade →</button>
     </div>
@@ -1940,7 +1928,7 @@
       <div class="myshade-checks-remaining" id="myShadeChecksRemaining" style="display:none;"></div>
       <button class="btn ghost" id="myShadeCheckAnotherBtn" style="display:none;">Check Another Color</button>
       <!-- Shown instead of "Check Another Color" the moment the customer
-           runs out of checks -- per Nghi (2026-09-14): pitch the 10-pack
+           runs out of checks -- per Nghi (2026-09-14): pitch the 5-pack
            right after they've just gotten real value from their first
            check, rather than upfront on the paywall. See
            updateMyShadeActionButtons() and grantColorCheckCredits(). -->
@@ -1955,7 +1943,7 @@
         <ul class="myshade-combo-upsell-features">
           <li>Never pick a wrong shade again</li>
           <li>5 more My Shade / Not My Shade checks</li>
-          <li>Find up to 3 similar shades in our catalog, every check</li>
+          <li>Find similar lipstick shades, every check</li>
           <li><strong>No expiration</strong> — use them anytime</li>
         </ul>
         <div id="paypalBtn-colorCheckComboUpsell" class="paypal-btn-slot"></div>
@@ -4561,7 +4549,7 @@ const PURCHASE_STORAGE_KEY = 'ffbs_purchase';
 // would silently overwrite and lose it, since that key only ever holds
 // one thing at a time.
 //
-// UPDATED 2026-09-14, per Nghi: added a 10-pack "combo" tier alongside
+// UPDATED 2026-09-14, per Nghi: added a 5-pack "combo" tier alongside
 // the single $2.99 check, and switched from a one-shot "have they paid
 // y/n" flag to a real remaining-checks BALANCE (a single purchase and a
 // combo purchase both just add to the same pool). A balance worth
@@ -4612,6 +4600,19 @@ function savePurchase(tier, order){
     amountUsd: PRICING[tier].amount,
     purchasedAt: new Date().toISOString(),
   };
+  // UPDATED 2026-09-22, per Nghi ("customer fills in her name in the
+  // paywall already, can we get her name there?"): PayPal's own capture
+  // response already includes the payer's first name (order.payer.name.
+  // given_name) for both a PayPal-account payment and a guest card
+  // payment, since it comes from her billing/account name -- so we no
+  // longer need to separately ask "what should we call you" before she
+  // pays. This silently seeds the same name storage the rest of the
+  // page's personalization (measuring-screen greeting, "This Is How
+  // These Colors Look On ___") already reads from. Only fills it in if
+  // we don't already have one, so it never overwrites a name from an
+  // earlier purchase/session.
+  const paypalGivenName = (order.payer && order.payer.name && order.payer.name.given_name || '').trim();
+  if(paypalGivenName && !getCustomerName()) setCustomerName(paypalGivenName.slice(0, 40));
   try{ localStorage.setItem(PURCHASE_STORAGE_KEY, JSON.stringify(record)); } catch(e){
     console.warn('[Purchase] Could not save unlock state locally', e);
   }
@@ -4657,83 +4658,11 @@ function personalizedGreeting(prefix, suffix){
   return `${prefix || ''}${name}${suffix || ''}`;
 }
 
-const paywallNameGateEl = document.getElementById('paywallNameGate');
-const paywallWelcomeEl = document.getElementById('paywallWelcome');
-const paywallNameInputEl = document.getElementById('paywallNameInput');
-const paywallWelcomeGreetingEl = document.getElementById('paywallWelcomeGreeting');
-
-function showWelcomeSession(name, opts){
-  if(paywallNameGateEl) paywallNameGateEl.style.display = 'none';
-  // Just a quiet "we got it" here -- the actual warm greeting (icon,
-  // big name, "explore the best version of you") now lives on the
-  // pre-measurement loading screen instead (see measureWelcomeGreetingEl
-  // below), per Nghi: it should land at the moment she's actually
-  // waiting on something, not while she's still deciding on a tier.
-  if(paywallWelcomeGreetingEl) paywallWelcomeGreetingEl.textContent = `Hi, ${name}! \u{1F44B}`;
-  if(paywallWelcomeEl){
-    // Re-trigger the fade/slide-in animation on a fresh submit (not on
-    // the silent page-load restore, which would replay it every visit).
-    if(!(opts && opts.silent)){
-      paywallWelcomeEl.style.animation = 'none';
-      void paywallWelcomeEl.offsetWidth; // force reflow so the animation restarts
-      paywallWelcomeEl.style.animation = '';
-    }
-    paywallWelcomeEl.style.display = 'block';
-  }
-}
-function showNameGate(prefillName){
-  if(paywallWelcomeEl) paywallWelcomeEl.style.display = 'none';
-  if(paywallNameGateEl) paywallNameGateEl.style.display = 'block';
-  if(paywallNameInputEl){
-    paywallNameInputEl.value = prefillName || '';
-    paywallNameInputEl.focus();
-  }
-}
-// Best-effort re-application of the name to spots that may already be
-// rendered by the time she submits it (normally she names herself on
-// the paywall, before any of these exist yet -- this just covers the
-// edge case of a page that's further along, e.g. a returning visitor
-// already mid-result). Only touches elements whose full text depends
-// on nothing but the name; season-desc's greeting is set fresh each
-// time renderSeasonResult runs and isn't reconstructed here.
-function refreshPersonalizedCopy(){
-  const name = getCustomerName();
-  const coyHeadingEl = document.getElementById('colorsOnYouHeading');
-  if(coyHeadingEl && coyHeadingEl.textContent.trim() !== ''){
-    coyHeadingEl.textContent = name
-      ? `This Is How These Colors Look On ${name}`
-      : 'This Is How These Colors Look On You';
-  }
-}
-function handleNameSubmit(){
-  const raw = (paywallNameInputEl && paywallNameInputEl.value || '').trim();
-  if(!raw) { if(paywallNameInputEl) paywallNameInputEl.focus(); return; }
-  // Keep it to a first name / short form -- also guards against someone
-  // pasting a full sentence into the field by accident.
-  const name = raw.slice(0, 40);
-  setCustomerName(name);
-  showWelcomeSession(name);
-  refreshPersonalizedCopy();
-}
-(function initNameGate(){
-  const submitBtn = document.getElementById('paywallNameSubmitBtn');
-  const skipBtn = document.getElementById('paywallNameSkipBtn');
-  const editBtn = document.getElementById('paywallNameEditBtn');
-  if(submitBtn) submitBtn.addEventListener('click', handleNameSubmit);
-  if(paywallNameInputEl) paywallNameInputEl.addEventListener('keydown', (e) => {
-    if(e.key === 'Enter'){ e.preventDefault(); handleNameSubmit(); }
-  });
-  if(skipBtn) skipBtn.addEventListener('click', () => {
-    if(paywallNameGateEl) paywallNameGateEl.style.display = 'none';
-  });
-  if(editBtn) editBtn.addEventListener('click', () => showNameGate(getCustomerName()));
-
-  // Returning visitor who already gave her name (earlier session, or
-  // earlier in this one) -- skip straight to the welcome banner, no
-  // re-animation, so it doesn't feel like a repeated first-time moment.
-  const existingName = getCustomerName();
-  if(existingName) showWelcomeSession(existingName, { silent: true });
-})();
+// UPDATED 2026-09-22, per Nghi: the separate "what should we call you"
+// step is gone (see savePurchase() above -- her first name now comes
+// straight from PayPal's own capture response). getCustomerName()/
+// setCustomerName() above are still what every personalized spot on the
+// page reads from and writes to.
 
 // The upload/"Find My Season" stage is visible from the start -- the
 // paywall card only appears when a visitor who hasn't paid clicks
@@ -4749,7 +4678,7 @@ function applyUnlockState(){
 
 // Balance model (replaces the old one-shot purchase flag): the stored
 // record is { email, remaining, updatedAt }. The $2.99 single check and
-// the $19.99 10-pack just add to the same "remaining" pool -- there's
+// the $19.99 5-pack just add to the same "remaining" pool -- there's
 // no separate tier to check anymore, only a count.
 function getColorCheckBalance(){
   try{
@@ -4776,7 +4705,7 @@ function saveColorCheckBalance(email, remaining){
 }
 
 // Called right after a successful PayPal capture for either the single
-// check or the 10-pack. Bumps the local balance immediately (so the
+// check or the 5-pack. Bumps the local balance immediately (so the
 // customer isn't blocked on a network round-trip to use what they just
 // paid for), fires the existing best-effort purchase log for Nghi's own
 // paper trail, then syncs the grant to the durable per-email ledger on
@@ -4868,8 +4797,8 @@ function revealMyShadeUploadStage(){
 }
 
 // Decides whether the My Shade result card offers "Check Another Color"
-// or the 10-pack upsell instead -- per Nghi (2026-09-14): once a
-// customer runs out of checks, pitch the $19.99 10-pack right there
+// or the 5-pack upsell instead -- per Nghi (2026-09-14): once a
+// customer runs out of checks, pitch the $19.99 5-pack right there
 // instead of sending them back to a generic paywall (which no longer
 // even lists it -- see the paywall-tiers comment above). A customer who
 // already has checks left (bought the combo, or just hasn't used up a
@@ -4901,7 +4830,7 @@ function updateMyShadeActionButtons(){
 // it hasn't already been bought. The note beneath it is now just
 // informational (no gating), telling the customer what they'll need
 // after paying.
-// UPDATED 2026-09-14, per Nghi: the 10-pack combo button used to live
+// UPDATED 2026-09-14, per Nghi: the 5-pack combo button used to live
 // here too, gated the same way. It's been moved entirely to the My
 // Shade result card as a post-check upsell (see myShadeComboUpsell /
 // renderColorCheckComboPayPalButton) -- this paywall now only ever
@@ -5010,7 +4939,7 @@ function renderColorCheckPayPalButton(paypalSdk){
 
 // Renders into the post-check upsell slot inside the My Shade result
 // card (see myShadeComboUpsell above), not the main paywall -- per Nghi
-// (2026-09-14), the 10-pack is only ever pitched right after a customer
+// (2026-09-14), the 5-pack is only ever pitched right after a customer
 // has used up their checks, not offered upfront.
 function renderColorCheckComboPayPalButton(paypalSdk){
   const container = document.getElementById('paypalBtn-colorCheckComboUpsell');
@@ -6148,6 +6077,10 @@ function handleScanFailure(reasonText){
   analyzeBtn.disabled = false;
   document.getElementById('seasonFamily').textContent = "";
   brandSection.style.display = 'none';
+  // Not relevant on a failed/unread photo -- there's no season yet to
+  // check a shade against. Restored in renderSeasonResult() on success.
+  const myShadeCtaBlockEl = document.getElementById('myShadeCtaBlock');
+  if(myShadeCtaBlockEl) myShadeCtaBlockEl.style.display = 'none';
 
   const failCount = bumpSeasonFailCount();
   const seasonNameEl = document.getElementById('seasonName');
@@ -6165,7 +6098,7 @@ function handleScanFailure(reasonText){
     clearSeasonFailCount(); // fresh streak if she (or someone else on this device) tries again later
   } else {
     seasonNameEl.textContent = "Let's try that again";
-    seasonDescEl.textContent = reasonText;
+    seasonDescEl.innerHTML = reasonText;
   }
   resultCard.classList.add('show');
   resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -6234,7 +6167,7 @@ analyzeBtn.addEventListener('click', async () => {
     if(loading1Text) loading1Text.textContent = 'Undertone, depth & contrast computing...';
 
     if(!measurements){
-      handleScanFailure("We couldn't get a clear, accurate reading from this photo after a few tries. This usually means the lighting is uneven, the face is partly turned or obscured, or the connection was too slow to load properly. Please try again with a clear, front-facing photo in bright, even natural light\u00a0\u2014 or try again if your connection may have been slow.");
+      handleScanFailure("We couldn't get a <strong>clear, accurate reading</strong> from this photo after a few tries. This usually means the lighting is uneven, the face is partly turned or obscured, or the connection was too slow to load properly. <strong>Please try again with a clear, front-facing photo in bright, even natural light</strong> \u2014 or try again if your connection may have been slow.");
       return;
     }
 
@@ -6282,8 +6215,8 @@ analyzeBtn.addEventListener('click', async () => {
     const isUnderexposed = scleraLumCheck < 60;
     if(isOverexposed || isUnderexposed){
       handleScanFailure(isOverexposed
-        ? "This photo looks overexposed\u00a0\u2014 the lighting is too bright, which can throw off your reading. Please retake it in softer, even natural light (avoid direct sun or bright overhead light, and skip flash)."
-        : "This photo looks underexposed\u00a0\u2014 it's too dark for an accurate reading. Please retake it somewhere brighter, ideally near a window with natural daylight.");
+        ? "This photo looks <strong>overexposed</strong> \u2014 the lighting is <strong>too bright</strong>, which can throw off your reading. <strong>Please retake it in softer, even natural light</strong> (avoid direct sun or bright overhead light, and skip flash)."
+        : "This photo looks <strong>underexposed</strong> \u2014 it's <strong>too dark</strong> for an accurate reading. <strong>Please retake it somewhere brighter</strong>, ideally near a window with natural daylight.");
       return;
     }
 
@@ -6971,7 +6904,9 @@ function renderConfidence(result){
   } else if(result.isBorderline){
     tier = 'borderline';
     label = 'Close call';
-    explain = `Your coloring fits ${result.season} best${pctText ? ` (a ${pctText} match)` : ''}, but it's a fairly close call against <strong>${result.runner_up || 'a neighboring season'}</strong> too — a solid pick, just not a clear-cut one.`;
+    const runnerUpPctForExplain = quantDistToConfidencePercent(result.quant_runner_up_dist);
+    const runnerUpPctTextForExplain = runnerUpPctForExplain != null ? ` (${runnerUpPctForExplain}%)` : '';
+    explain = `Your coloring fits ${result.season} best${pctText ? ` (a ${pctText} match)` : ''}, but it's a fairly close call against <strong>${result.runner_up || 'a neighboring season'}</strong>${runnerUpPctTextForExplain} too — a solid pick, just not a clear-cut one.`;
   } else if(result.isLowConfidence){
     tier = 'lower';
     label = 'Lower confidence';
@@ -6995,8 +6930,10 @@ function renderConfidence(result){
   // runner-up used to be mentioned only inside the explain sentence
   // below, easy to skim past; it now gets its own outlined pill right
   // next to the Close call pill itself).
+  const runnerUpPct = quantDistToConfidencePercent(result.quant_runner_up_dist);
+  const runnerUpPctText = runnerUpPct != null ? ` (${runnerUpPct}%)` : '';
   const runnerUpPill = (tier === 'borderline' && result.runner_up)
-    ? `<span class="runner-up-pill">Runner-up: ${result.runner_up}</span>`
+    ? `<span class="runner-up-pill">Runner-up: ${result.runner_up}${runnerUpPctText}</span>`
     : '';
   // What the percentage is actually made of, per Nghi ("explain 82%
   // meaning... similarity shared with the original season + your
@@ -7006,13 +6943,15 @@ function renderConfidence(result){
   // percentage to explain in the first place.
   const meaningSeasonName = result.shadeMatchSeason || result.season;
   const meaning = pctText
-    ? `<div class="confidence-meaning"><strong>What this ${pctText} means:</strong> it's made up of two things — how closely your measured tones share ${meaningSeasonName}'s overall archetype, plus your own individual nuance, the small variations within that season that are unique to you.</div>`
+    ? `<div class="confidence-meaning"><strong>What this ${pctText} means:</strong> it's made up of <strong>two things</strong> — how closely your measured tones share <strong>${meaningSeasonName}'s overall archetype</strong>, plus <strong>your own individual nuance</strong>, the small variations within that season that are unique to you.</div>`
     : '';
   el.innerHTML = `<div class="confidence-row"><span class="confidence-pill ${tier}">${pillText}</span>${runnerUpPill}</div>${bar}<div class="confidence-explain">${explain}</div>${meaning}`;
 }
 
 function renderSeasonResult(result){
   saveDebugHistory(result);
+  const myShadeCtaBlockEl = document.getElementById('myShadeCtaBlock');
+  if(myShadeCtaBlockEl) myShadeCtaBlockEl.style.display = '';
   document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
   document.getElementById('seasonName').textContent = result.season;
   const baseSeasonDesc = result.isCombinedSeason
