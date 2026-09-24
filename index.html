@@ -5640,9 +5640,44 @@ function myShadeProfileTarget(profile){
       warmth: Math.max(-1, Math.min(1, (profile.lab_temperature_b + WARMTH_OFFSET) / 50)),
       value: Math.max(0, Math.min(1, profile.depth_score / 100)),
       chroma: Math.max(0, Math.min(1, (profile.avg_chroma + chromaBandMid) / 80)),
+      // FIXED 2026-09-24, per Nghi ("the shade the web recommended me
+      // was ... 95% ... My Shade told me 72%. Why?"): the podium's own
+      // target (macMatchTarget, above) treats any chroma inside
+      // [chromaAvg+CHROMA_RANGE_LOW, chromaAvg+CHROMA_RANGE_HIGH] as an
+      // equally good fit (see chromaBandDistance) -- only chroma outside
+      // that whole band counts against a shade. My Shade used to collapse
+      // that band down to its single midpoint (`chroma` above) and score
+      // straight-line distance from THAT one point, so the same lighting/
+      // white-balance wobble a real swatch photo picks up (which the
+      // podium's clean catalog-hex comparison never has to deal with)
+      // got penalized here even when it would have landed safely inside
+      // the podium's own forgiving range. chromaLow/chromaHigh, in the
+      // same normalized 0-1 space myShadeItemAxes uses, let
+      // scoreColorForProfile apply that identical forgiveness band
+      // instead -- see myShadeChromaBandGap() just below.
+      chromaLow: Math.max(0, Math.min(1, (profile.avg_chroma + CHROMA_RANGE_LOW) / 80)),
+      chromaHigh: Math.max(0, Math.min(1, (profile.avg_chroma + CHROMA_RANGE_HIGH) / 80)),
     };
   }
+  // Older/fallback per-season archetype (SEASON_PALETTE_TARGET) has no
+  // measured band to draw from -- myShadeChromaBandGap() below falls back
+  // to plain point-distance whenever chromaLow/chromaHigh are absent, so
+  // this path's behavior is unchanged from before this fix.
   return SEASON_PALETTE_TARGET[profile.shadeMatchSeason] || null;
+}
+// Signed distance from the customer's own chroma BAND, not a single
+// point -- 0 anywhere inside [target.chromaLow, target.chromaHigh],
+// otherwise the (signed) distance to whichever edge was missed. Mirrors
+// the podium's chromaBandDistance() forgiveness in this module's 0-1
+// normalized axis space. Positive means the item reads more vivid than
+// the customer's own range; negative means more muted. Falls back to a
+// plain point-distance against `target.chroma` when no band is present
+// (the SEASON_PALETTE_TARGET fallback case -- see myShadeProfileTarget).
+function myShadeChromaBandGap(itemChroma, target){
+  if(target.chromaLow == null || target.chromaHigh == null) return itemChroma - target.chroma;
+  if(itemChroma < target.chromaLow) return itemChroma - target.chromaLow;
+  if(itemChroma > target.chromaHigh) return itemChroma - target.chromaHigh;
+  return 0;
 }
 function scoreColorForProfile(rgb, profile){
   const target = myShadeProfileTarget(profile);
@@ -5659,7 +5694,7 @@ function scoreColorForProfile(rgb, profile){
   const dist = Math.sqrt(
     (MYSHADE_W_WARMTH*(axes.warmth-target.warmth))**2 +
     (MYSHADE_W_VALUE*(adjustedValue-target.value))**2 +
-    (MYSHADE_W_CHROMA*(axes.chroma-target.chroma))**2
+    (MYSHADE_W_CHROMA*myShadeChromaBandGap(axes.chroma, target))**2
   );
   const pct = Math.max(15, Math.min(98, Math.round(100 * Math.exp(-dist/MYSHADE_DECAY_K))));
   return { pct, dist, axes, exposureAdjustedValue: adjustedValue, target };
@@ -5691,7 +5726,12 @@ function myShadeJoinWords(arr){
 function myShadeAxisExplanation(axes, target, adjustedValue){
   const warmthGap = axes.warmth - target.warmth; // >0: item reads warmer than the customer's own coloring
   const valueGap = adjustedValue - target.value;  // >0: item reads lighter than the customer's own depth
-  const chromaGap = axes.chroma - target.chroma;  // >0: item reads more vivid than the customer's own chroma
+  // Same band-aware gap scoreColorForProfile() uses (see
+  // myShadeChromaBandGap) -- 0 whenever the item's chroma already falls
+  // inside the customer's own chroma range, so this explanation never
+  // tells someone their chroma is "off" for a shade that actually scored
+  // a perfect chroma fit.
+  const chromaGap = myShadeChromaBandGap(axes.chroma, target);  // >0: item reads more vivid than the customer's own chroma range
 
   const axesInfo = [
     { abs: Math.abs(warmthGap), read: warmthGap > 0 ? 'warm' : 'cool', towards: warmthGap > 0 ? 'cooler' : 'warmer' },
@@ -5712,7 +5752,7 @@ function myShadeAxisExplanation(axes, target, adjustedValue){
 }
 
 // A purely positive line used in place of the axis critique above once
-// the match is good enough (pct >= 70 -- see renderMyShadeResult) -- per
+// the match is good enough (pct > 80 -- see renderMyShadeResult) -- per
 // Nghi (2026-09-14): "give some compliment rather than giving the
 // shade's minus and improvement." Deliberately doesn't reference the
 // axis gap at all, even though scoreColorForProfile's `dist` is
@@ -6199,19 +6239,20 @@ function renderMyShadeResult(rgb, pct, scored){
   // below AND feeds the "stick with this category" encouragement inside
   // the compliment line above 70%, so both read off the same values.
   const cat = (scored && scored.axes && scored.axes.lab) ? myShadeItemCategory(scored.axes.lab) : null;
-  // WHY it scored this way. Below 70%, that's the item's warmth/depth/
-  // chroma relative to the customer's own measured coloring, plus, when
-  // there's a real gap, a concrete direction to look in instead -- per
-  // Nghi (2026-09-14). AT OR ABOVE 70%, per Nghi (2026-09-14 follow-ups):
-  // skip that critique entirely, even when there's still some small
-  // measurable axis gap under the hood -- a score this high should read
-  // as a compliment, not a list of what's slightly off, plus (the second
-  // follow-up) an encouragement to seek out more shades in this same
-  // category. Threshold is inclusive of exactly 70% ("=70% is ok of
-  // complimenting").
+  // WHY it scored this way. AT OR BELOW 80%, that's the item's warmth/
+  // depth/chroma relative to the customer's own measured coloring, plus,
+  // when there's a real gap, a concrete direction to look in instead --
+  // per Nghi (2026-09-14). ABOVE 80%, per Nghi (2026-09-24: "only when %
+  // matching >80 should you not give correction" -- raised from the
+  // original >=70% cutoff): skip that critique entirely, even when
+  // there's still some small measurable axis gap under the hood -- a
+  // score this high should read as a compliment, not a list of what's
+  // slightly off, plus an encouragement to seek out more shades in this
+  // same category. Threshold is exclusive of exactly 80% -- a flat 80%
+  // still gets the critique, only pct > 80 skips it.
   let explain = headline;
   if(scored && scored.axes && scored.target){
-    if(pct >= 70){
+    if(pct > 80){
       explain += ` ${myShadeComplimentLine(tier, cat)}`;
     } else {
       const { character, guidance } = myShadeAxisExplanation(scored.axes, scored.target, scored.exposureAdjustedValue);
@@ -7595,17 +7636,34 @@ function renderConfidence(result){
 // was I just looking at" cache, not something that should follow her to
 // a brand new tab or a later day.
 function saveLastResultSnapshot(){
+  // FIXED 2026-09-24, per Nghi ("you forgot the 3 best shades. they are
+  // gone now"): this is called right after renderSeasonResult() but
+  // BEFORE consumePurchase() wipes PURCHASE_STORAGE_KEY (see the
+  // analyzeBtn handler -- "one payment = one analysis"), so getPurchase()
+  // here still sees the real purchase that unlocked shade matching for
+  // THIS result. Recording that now, separately from the live purchase
+  // record, is what lets restoreLastResultSnapshot() keep showing the
+  // shade podium later even though the one-time purchase credit itself
+  // is long since consumed by then -- without this flag, renderSeasonResult
+  // re-checks getPurchase() on restore, finds nothing, and silently hides
+  // brandSection, even though the season/color profile above it (which
+  // isn't gated on purchase) renders fine. This never re-unlocks shade
+  // matching for someone who didn't pay for it -- only for the exact
+  // result that was already paid for and rendered once.
+  const purchaseAtSaveTime = getPurchase();
+  const hadShadeAccess = !!(purchaseAtSaveTime && purchaseAtSaveTime.tier === 'seasonShade');
   try{
     sessionStorage.setItem(LAST_RESULT_SESSION_KEY, JSON.stringify({
       result: currentSeasonResult,
       photo: uploadedImage,
+      hadShadeAccess,
     }));
   } catch(e){
     // Most likely quota exceeded because the photo pushed it over --
     // fall back to the result text/palette alone so that much still
     // restores, even without the "Colors On You" photo wheel.
     try{
-      sessionStorage.setItem(LAST_RESULT_SESSION_KEY, JSON.stringify({ result: currentSeasonResult, photo: null }));
+      sessionStorage.setItem(LAST_RESULT_SESSION_KEY, JSON.stringify({ result: currentSeasonResult, photo: null, hadShadeAccess }));
     } catch(e2){
       console.warn('[Results] Could not snapshot last result', e2);
     }
@@ -7640,7 +7698,12 @@ async function restoreLastResultSnapshot(){
     // already logged the first time it was computed; re-running
     // saveDebugHistory() here would send a duplicate row to the live
     // tracking sheet for a reading that never actually happened again.
-    renderSeasonResult(saved.result, { skipDebugHistory: true });
+    // forceShadeAccess: saved.hadShadeAccess -- see saveLastResultSnapshot()
+    // -- the one-time purchase that unlocked shade matching for this
+    // result has already been consumed by now, so renderSeasonResult's
+    // own getPurchase() check would otherwise hide the shade podium on
+    // every restore even for a customer who legitimately paid for it.
+    renderSeasonResult(saved.result, { skipDebugHistory: true, forceShadeAccess: !!saved.hadShadeAccess });
   } catch(e){
     console.warn('[Results] Could not restore last result', e);
   }
@@ -7687,8 +7750,15 @@ function renderSeasonResult(result, opts){
 
   // Shade matching is the $15.99 "seasonShade" tier's extra feature --
   // the $12.99 "season" tier stops at the season/color analysis above.
+  // opts.forceShadeAccess (set by restoreLastResultSnapshot()) covers the
+  // one restore case where getPurchase() alone isn't enough: the one-time
+  // purchase that paid for THIS exact result has already been consumed
+  // (consumePurchase() runs right after the first render), so without the
+  // override every restore after a reload/back-navigation would wrongly
+  // hide the shade podium from someone who did pay for it.
   const purchase = getPurchase();
-  if(purchase && purchase.tier === 'seasonShade'){
+  const hasShadeAccess = (purchase && purchase.tier === 'seasonShade') || (opts && opts.forceShadeAccess);
+  if(hasShadeAccess){
     brandSection.style.display = 'block';
     hideError(errorBox2);
     // Hidden by default here; renderShadeMatches turns it back on, but
