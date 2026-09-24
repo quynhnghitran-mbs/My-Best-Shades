@@ -5097,8 +5097,16 @@ function askCustomerCallPref(firstName, lastName){
 // without every caller re-checking "do we actually have one" -- returns
 // '' when there's nothing to greet with, so `${personalizedGreeting()}`
 // degrades gracefully to the original ungreeted copy.
+// UPDATED 2026-09-24, per Nghi ("align the name for the whole page --
+// check if you call her Nghi the whole page"): was reading
+// getCustomerName() (always first name), so a customer who'd chosen to
+// be called by her LAST name got "Nghi's Detailed..." everywhere else
+// on the page but "Tran, here's your color story:" right here -- the
+// one spot that hadn't been switched over to the shared call-name
+// preference. Now uses getCustomerCallName() like every other named
+// heading, so this greeting always agrees with the rest of the page.
 function personalizedGreeting(prefix, suffix){
-  const name = getCustomerName();
+  const name = getCustomerCallName();
   if(!name) return '';
   return `${prefix || ''}${name}${suffix || ''}`;
 }
@@ -6800,7 +6808,13 @@ analyzeBtn.addEventListener('click', async () => {
   const measureWelcomeEl = document.getElementById('measureWelcome');
   const measureWelcomeGreetingEl = document.getElementById('measureWelcomeGreeting');
   if(measureWelcomeGreetingEl){
-    const measureName = getCustomerName();
+    // UPDATED 2026-09-24, per Nghi ("align the name for the whole page")
+    // -- was getCustomerName() (always first name), so a customer who'd
+    // just chosen "call me by my last name" one line above (see
+    // askCustomerCallPref() right above) still got greeted by her first
+    // name here. getCustomerCallName() honors that same choice, so this
+    // greeting matches every other named spot on the page.
+    const measureName = getCustomerCallName();
     measureWelcomeGreetingEl.textContent = measureName ? `Welcome, ${measureName}!` : 'Welcome!';
   }
   // ADDED 2026-09-24, per Nghi (the letter's "Date:" / "For:" header) --
