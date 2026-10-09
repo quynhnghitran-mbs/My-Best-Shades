@@ -7140,7 +7140,7 @@ function renderMyShadeProfileGate(){
   const chipRowEl = document.getElementById('myShadeProfileChipRow');
   if(numberChips.length){
     chipRowEl.innerHTML = numberChips.map(c =>
-      `<span class="pick-filter-chip"><span class="pick-filter-chip-label">${escapeHtml(c.label)} = </span><span class="pick-filter-chip-num">${escapeHtml(c.num)}</span></span>`
+      `<span class="pick-filter-chip"><span class="pick-filter-chip-label">${escapeHtml(c.label)} = </span><span class="pick-filter-chip-num">${escapeHtml(c.num)}</span><span class="pick-filter-chip-label"> \u00b7 ${escapeHtml(c.value)}</span></span>`
     ).join('');
   } else {
     const chips = [profile.undertone_descriptive, profile.depth_level, profile.contrast_level, profile.chroma_level].filter(Boolean);
@@ -10731,15 +10731,15 @@ function tryOnCrop(src){
       const meshTop = fb.y0 * H + 0.65 * bh;
       const chin = fb.y1 * H - 0.35 * bh;
       const neckEnd = chin + 0.30 * bh;
-      const top = meshTop - 0.30 * bh, bottom = neckEnd + 0.75 * bh; // rectangle ~ bottom third of the tile
+      const top = meshTop - 0.30 * bh; // colour rectangle = exactly the bottom 1/3 of the tile; face+neck fill the top 2/3
       const cx = (fb.x0 + fb.x1) / 2 * W;
-      let side = Math.min(bottom - top, W, H);
+      let side = Math.min((neckEnd - top) * 1.5, W, H);
       let sx = Math.max(0, Math.min(W - side, cx - side / 2));
-      let sy = Math.max(0, Math.min(H - side, top));
+      let sy = Math.max(0, Math.min(H - side, neckEnd - side * 2 / 3));
       const c = document.createElement('canvas');
       c.width = 400; c.height = 400;
       c.getContext('2d').drawImage(src.img, sx, sy, side, side, 0, 0, 400, 400);
-      const barTop = Math.max(0.55, Math.min(0.92, (neckEnd - sy) / side));
+      const barTop = 2 / 3;
       out = { url: c.toDataURL('image/jpeg', 0.9), barTop };
     } catch(e){ console.warn('[Try-on] crop failed', e); }
     if(tryOnCropCache.size > 12) tryOnCropCache.clear();
