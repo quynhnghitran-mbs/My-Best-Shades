@@ -878,6 +878,10 @@
   .myshade-season-cta-title{font-family:'Playfair Display',serif;font-weight:600;font-size:17px;color:var(--text-light);margin-bottom:6px;}
   .myshade-season-cta-text{font-size:12.5px;color:var(--muted);line-height:1.5;margin-bottom:14px;}
   .myshade-season-cta-text strong{color:var(--rose-deep);}
+  .color-suggest-loading{font-size:13px;color:var(--muted);margin:6px 0 4px;}
+  .color-suggest-row{display:flex;align-items:center;justify-content:center;gap:14px;margin:4px 0 18px;}
+  .color-suggest-swatch{width:64px;height:64px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--line),0 4px 12px rgba(58,31,34,0.18);}
+  .color-suggest-hex{font-family:'Playfair Display',serif;font-size:22px;color:var(--rose-deep);font-variant-numeric:tabular-nums;}
   .itemtype-modal-thumb{display:block;max-width:150px;max-height:150px;margin:0 auto 14px;border-radius:12px;border:1px solid var(--line);object-fit:contain;}
   #myShadeItemTypeModal .myshade-itemtype-row,#myShadeItemTypeModal .myshade-itemtype-picker{margin-top:0;font-size:14px;color:var(--text-light);}
   #myShadeItemTypeModal .myshade-action-row{flex-wrap:wrap;justify-content:center;}
@@ -1249,10 +1253,13 @@
   .shade-result-swatch{flex:none;position:relative;}
   /* Try-on tile -- 2026-10-08, per Nghi: her own face, zoomed in, with
      the shade attached underneath as a color bar. */
-  .tryon{display:flex;flex-direction:column;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 4px 14px rgba(58,31,34,0.16);flex:none;}
+  .tryon{position:relative;display:block;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 4px 14px rgba(58,31,34,0.16);flex:none;}
   .tryon img{display:block;width:100%;aspect-ratio:1/1;object-fit:cover;-webkit-user-drag:none;}
-  .tryon-bar{height:32px;display:flex;align-items:center;justify-content:center;padding:0 6px;font-size:10.5px;font-weight:600;letter-spacing:0.02em;text-align:center;line-height:1.15;}
-  .tryon.lg .tryon-bar{height:46px;font-size:12.5px;}
+  /* The color rectangle covers everything below the neck (shoulders and
+     down) -- 2026-10-08, per Nghi: "just a face, a neck and then a
+     rectangle". Its top edge (style top:%) comes from tryOnCrop(). */
+  .tryon-bar{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:flex-end;justify-content:center;padding:0 6px 8px;font-size:10.5px;font-weight:600;letter-spacing:0.02em;text-align:center;line-height:1.15;}
+  .tryon.lg .tryon-bar{font-size:12.5px;padding-bottom:12px;}
   .rank-1 .tryon{width:120px;} .rank-2 .tryon{width:100px;} .rank-3 .tryon{width:86px;}
   .tryon-zoom{display:flex;justify-content:center;margin:2px 0 10px;}
   .tryon-zoom .seg{display:inline-flex;padding:4px;border-radius:999px;background:rgba(150,51,60,0.07);gap:4px;}
@@ -2216,6 +2223,28 @@
 
         </div>
       </div>
+      <!-- Suggested color pop-up -- 2026-10-08, per Nghi. After the item
+           type is confirmed we read a color for her: lipstick on lips ->
+           median of the lip pixels; lipstick swatch on hand/arm -> mean of
+           the top-10% most saturated pixels; any other item -> median of the
+           middle of the photo. Thumbs up uses it, thumbs down = tap to pick.
+           Moved under <body> at load. -->
+      <div class="exit-nudge-overlay" id="myShadeColorSuggestModal" role="dialog" aria-modal="true" aria-labelledby="myShadeColorSuggestTitle">
+        <div class="exit-nudge-card">
+          <button type="button" class="exit-nudge-close" id="myShadeColorSuggestClose" aria-label="Close">&times;</button>
+          <div class="exit-nudge-title" id="myShadeColorSuggestTitle">Is this the color?</div>
+          <img class="itemtype-modal-thumb" id="myShadeColorSuggestThumb" alt="">
+          <div class="color-suggest-loading" id="myShadeColorSuggestLoading">Reading the color...</div>
+          <div class="color-suggest-row" id="myShadeColorSuggestRow" style="display:none;">
+            <div class="color-suggest-swatch" id="myShadeColorSuggestSwatch"></div>
+            <div class="color-suggest-hex" id="myShadeColorSuggestHex"></div>
+          </div>
+          <div class="itemtype-thumbs" id="myShadeColorSuggestThumbs" style="display:none;">
+            <button type="button" class="itemtype-thumb-btn up" id="myShadeColorSuggestYes" aria-label="Yes, use this color"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h3z"/><path d="M7 10l4.2-7.4a1.9 1.9 0 0 1 3.5 1.3L14 9h5.4a2 2 0 0 1 2 2.3l-1.3 7.6a2.5 2.5 0 0 1-2.5 2.1H7"/></svg></button>
+            <button type="button" class="itemtype-thumb-btn down" id="myShadeColorSuggestNo" aria-label="No, I'll pick it myself"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="transform:scaleY(-1);"><path d="M7 10v11H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h3z"/><path d="M7 10l4.2-7.4a1.9 1.9 0 0 1 3.5 1.3L14 9h5.4a2 2 0 0 1 2 2.3l-1.3 7.6a2.5 2.5 0 0 1-2.5 2.1H7"/></svg></button>
+          </div>
+        </div>
+      </div>
       <div class="upload-choice-row">
         <label class="choice-btn" for="myShadeFileInputCamera">
           <span class="choice-icon">📷</span> Take a Photo
@@ -2260,6 +2289,7 @@
            findSimilarShades()/renderSimilarShadeResults(). Reuses the
            exact shade-result-row markup/CSS from the Season + Shade
            Matching podium (renderShadeMatches) for a consistent look. -->
+      <div class="shade-tabs" id="myShadeSimilarTabs" role="tablist" style="display:none;"></div>
       <div class="tryon-compare" id="myShadeTryOnCompare"></div>
       <div class="shade-podium" id="myShadeSimilarGrid"></div>
       <!-- Shown after every check -- since My Shade / Not My Shade
@@ -2275,10 +2305,16 @@
       <!-- Season + lipstick upsell after a check -- added 2026-10-08, per
            Nghi. Hidden when she already has a season (a Color Profile PNG
            uploaded, or a season result on this page). -->
-      <div class="myshade-season-cta" id="myShadeSeasonCta" style="display:none;">
-        <div class="myshade-season-cta-title">Go further: find your season + best lipsticks</div>
-        <div class="myshade-season-cta-text">Get your <strong>color season</strong>, a full <strong>personal palette</strong>, and the <strong>lipsticks from MAC and drugstore brands</strong> that match you best.</div>
-        <button type="button" class="btn" id="myShadeSeasonCtaBtn">Find My Season + Lipstick Matches</button>
+      <!-- Now a pop-up (2026-10-08, per Nghi) -- opens once per visit, right
+           after the thank-you pop-up is closed. Moved under <body> at load. -->
+      <div class="exit-nudge-overlay" id="myShadeSeasonCta" role="dialog" aria-modal="true" aria-labelledby="myShadeSeasonCtaTitle">
+        <div class="exit-nudge-card">
+          <button type="button" class="exit-nudge-close" id="myShadeSeasonCtaClose" aria-label="Close">&times;</button>
+          <div class="exit-nudge-title" id="myShadeSeasonCtaTitle">Go further: find your season + best lipsticks</div>
+          <div class="exit-nudge-body">Get your <strong>color season</strong>, a full <strong>personal palette</strong>, and the <strong>lipsticks from MAC and drugstore brands</strong> that match you best.</div>
+          <button type="button" class="btn exit-nudge-download-btn" id="myShadeSeasonCtaBtn">Find My Season + Lipstick Matches</button>
+          <button type="button" class="link-btn exit-nudge-skip" id="myShadeSeasonCtaLater">Maybe later</button>
+        </div>
       </div>
 
       <div class="feedback-block" id="myShadeFeedbackBlock">
@@ -4056,7 +4092,44 @@ function shadeConfidencePct(dist){
 // these apart", not a loose approximation.
 //   deltaE  0    2.1  5    10   20   40
 //   pct    100   90   78   61   37   14
-const SIMILAR_SHADE_DECAY_TAU = 20;
+//
+// LOOSENED 2026-10-08, per Nghi ("I used mac smash swatch and you matched
+// with mac smash but with 78%"): a real photo of the SAME shade never
+// lands on the catalog hex exactly -- lighting/white balance alone moves
+// it ~3-6 units -- so the strict "just perceptible" scale above scored
+// genuine same-shade matches in the 70s. Two changes:
+//   1) distance is now CIEDE2000 (deltaE2000 below) instead of CIE76.
+//      CIE76 badly overstates differences between vivid reds/pinks
+//      (exactly where lipstick lives); DE2000 is the perceptual standard
+//      and also ranks the candidates more sensibly.
+//   2) tau 20 -> 45, so a photo-to-catalog gap of normal lighting size
+//      still reads as a strong match:
+//   deltaE00  0    2    5    8    12   20   30
+//   pct      100   96   89   84   77   64   51
+const SIMILAR_SHADE_DECAY_TAU = 45;
+// CIEDE2000 (Sharma, Wu & Dalal 2005), kL = kC = kH = 1.
+function deltaE2000(l1, l2){
+  const rad = Math.PI / 180, deg = 180 / Math.PI;
+  const C1 = Math.hypot(l1.a, l1.b), C2 = Math.hypot(l2.a, l2.b), Cm = (C1 + C2) / 2;
+  const G = 0.5 * (1 - Math.sqrt(Cm ** 7 / (Cm ** 7 + 25 ** 7)));
+  const a1 = (1 + G) * l1.a, a2 = (1 + G) * l2.a;
+  const C1p = Math.hypot(a1, l1.b), C2p = Math.hypot(a2, l2.b);
+  const h = (b, a) => { if(a === 0 && b === 0) return 0; const v = Math.atan2(b, a) * deg; return v < 0 ? v + 360 : v; };
+  const h1 = h(l1.b, a1), h2 = h(l2.b, a2);
+  const dL = l2.L - l1.L, dC = C2p - C1p;
+  let dh = 0;
+  if(C1p * C2p !== 0){ dh = h2 - h1; if(dh > 180) dh -= 360; else if(dh < -180) dh += 360; }
+  const dH = 2 * Math.sqrt(C1p * C2p) * Math.sin(dh / 2 * rad);
+  const Lm = (l1.L + l2.L) / 2, Cpm = (C1p + C2p) / 2;
+  let hm = h1 + h2;
+  if(C1p * C2p !== 0){ hm = Math.abs(h1 - h2) > 180 ? (h1 + h2 + (h1 + h2 < 360 ? 360 : -360)) / 2 : (h1 + h2) / 2; }
+  const T = 1 - 0.17 * Math.cos((hm - 30) * rad) + 0.24 * Math.cos(2 * hm * rad) + 0.32 * Math.cos((3 * hm + 6) * rad) - 0.20 * Math.cos((4 * hm - 63) * rad);
+  const dTheta = 30 * Math.exp(-(((hm - 275) / 25) ** 2));
+  const Rc = 2 * Math.sqrt(Cpm ** 7 / (Cpm ** 7 + 25 ** 7));
+  const Sl = 1 + 0.015 * (Lm - 50) ** 2 / Math.sqrt(20 + (Lm - 50) ** 2), Sc = 1 + 0.045 * Cpm, Sh = 1 + 0.015 * Cpm * T;
+  const Rt = -Math.sin(2 * dTheta * rad) * Rc;
+  return Math.sqrt((dL / Sl) ** 2 + (dC / Sc) ** 2 + (dH / Sh) ** 2 + Rt * (dC / Sc) * (dH / Sh));
+}
 function shadeSimilarityPct(deltaE){
   const raw = 100 * Math.exp(-Math.max(0, deltaE) / SIMILAR_SHADE_DECAY_TAU);
   return Math.max(0, Math.min(100, Math.round(raw)));
@@ -4083,12 +4156,14 @@ const SIMILAR_SHADE_CATALOG = CATALOG_SHADES.map(s => ({ ...s, lab: rgbToLab({ r
 // "not a must" just means: if the catalog ever had fewer than topN
 // shades, slice() below naturally returns fewer -- not that this
 // function itself trims a weak 3rd pick on purpose.
-function findSimilarShades(rgb, topN = 3){
+// `group` (2026-10-08, per Nghi -- MAC / Drugstore tabs): 'mac' or 'drug'
+// limits the search to that brand group; omitted = whole catalog.
+function findSimilarShades(rgb, topN = 3, group){
   const pickedLab = rgbToLab(rgb);
   return SIMILAR_SHADE_CATALOG
+    .filter(s => !group || (group === 'mac') === s.brand_line.startsWith('mac::'))
     .map(s => {
-      const dL = pickedLab.L - s.lab.L, da = pickedLab.a - s.lab.a, db = pickedLab.b - s.lab.b;
-      const deltaE = Math.sqrt(dL*dL + da*da + db*db);
+      const deltaE = deltaE2000(pickedLab, s.lab); // CIEDE2000 since 2026-10-08 -- see SIMILAR_SHADE_DECAY_TAU
       return { ...s, deltaE, confidencePct: shadeSimilarityPct(deltaE) };
     })
     .sort((a, b) => a.deltaE - b.deltaE)
@@ -5785,7 +5860,7 @@ function addColorCheckPassDays(fromIso){
 // than trusting the client's optimistic value -- see the grant_pass
 // action in the live tracking sheet script.
 function grantColorCheckPass(order){
-  const email = (order.payer && order.payer.email_address) || '';
+  const email = ((order.payer && order.payer.email_address) || '').trim().toLowerCase();
   // ADDED 2026-09-25, per Nghi (Q1: "did you implement How should we
   // call you pop-up for all tiers (season check, season+shade matching,
   // and my shade check)?") -- it wasn't, for this tier; this call is
@@ -5973,6 +6048,8 @@ function showThankYouPopup(context){
   function close(){
     overlay.classList.remove('show');
     closeBtn.removeEventListener('click', close);
+    // My Shade's season + lipstick pop-up waits for this one to close.
+    if(context === 'myshade' && typeof myShadeMaybeShowSeasonCta === 'function') myShadeMaybeShowSeasonCta();
   }
   closeBtn.addEventListener('click', close);
   overlay.classList.add('show');
@@ -6998,17 +7075,34 @@ async function myShadeHandleSelfieFile(file){
 if(myShadeSelfieInputCamera) myShadeSelfieInputCamera.addEventListener('change', (e) => myShadeHandleSelfieFile(e.target.files[0]));
 if(myShadeSelfieInputUpload) myShadeSelfieInputUpload.addEventListener('change', (e) => myShadeHandleSelfieFile(e.target.files[0]));
 
-// Season + lipstick upsell under a My Shade result (both modes) --
-// 2026-10-08, per Nghi. Skipped when she already has a season: a real
-// Color Profile PNG (not a selfie reading) or a season result on page.
+// Season + lipstick upsell after a My Shade result (both modes) --
+// 2026-10-08, per Nghi; a pop-up since the same day. Each result marks
+// it "pending" (unless she already has a season: a real Color Profile
+// PNG or a season result on the page); it then opens right after the
+// thank-you pop-up closes (see showThankYouPopup), at most once per visit.
+const myShadeSeasonCtaEl = document.getElementById('myShadeSeasonCta');
+if(myShadeSeasonCtaEl && myShadeSeasonCtaEl.parentElement !== document.body) document.body.appendChild(myShadeSeasonCtaEl);
+let myShadeSeasonCtaPending = false;
+let myShadeSeasonCtaShown = false;
 function myShadeUpdateSeasonCta(){
-  const el = document.getElementById('myShadeSeasonCta');
-  if(!el) return;
   const hasSeason = (myShadeUploadedProfile && myShadeUploadedProfile.source !== 'selfie') || !!currentSeasonResult;
-  el.style.display = hasSeason ? 'none' : 'block';
+  myShadeSeasonCtaPending = !hasSeason && !myShadeSeasonCtaShown;
 }
+function myShadeMaybeShowSeasonCta(){
+  if(!myShadeSeasonCtaPending || !myShadeSeasonCtaEl) return;
+  myShadeSeasonCtaPending = false;
+  myShadeSeasonCtaShown = true;
+  myShadeSeasonCtaEl.classList.add('show');
+}
+function myShadeCloseSeasonCta(){ if(myShadeSeasonCtaEl) myShadeSeasonCtaEl.classList.remove('show'); }
+['myShadeSeasonCtaClose', 'myShadeSeasonCtaLater'].forEach(id => {
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('click', myShadeCloseSeasonCta);
+});
+if(myShadeSeasonCtaEl) myShadeSeasonCtaEl.addEventListener('click', (e) => { if(e.target === myShadeSeasonCtaEl) myShadeCloseSeasonCta(); });
 const myShadeSeasonCtaBtn = document.getElementById('myShadeSeasonCtaBtn');
 if(myShadeSeasonCtaBtn) myShadeSeasonCtaBtn.addEventListener('click', () => {
+  myShadeCloseSeasonCta();
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
@@ -7308,6 +7402,8 @@ function myShadeApplyItemType(type, fromDetection){
   }
   if(picker) picker.style.display = 'none';
   myShadeRefreshActionButtons();
+  // Suggested color next (2026-10-08), unless she already tapped a color herself.
+  if(!myShadeManualPicked) myShadeSuggestColor();
 }
 // Shows the "We're guessing this is a X swatch -- is that right?" prompt
 // -- the FIRST thing shown after a photo is drawn (see
@@ -7379,12 +7475,133 @@ if(myShadeItemTypeConfirmNo){
 // (no algorithm guessing which part of the frame matters), and
 // getImageData() below only ever reads a tiny few-pixel neighborhood,
 // not the whole photo.
+
+// ---------------------------------------------------------------------
+// Suggested color -- added 2026-10-08, per Nghi ("recommend the hex first
+// for convenience, using our method"). Same methods used to build the
+// shade catalog: lipstick on lips -> median of the lip pixels (saturation
+// mask, crease/shine trimmed); lipstick swatch on hand/arm -> mean of the
+// 10% most saturated warm pixels; every other item -> median of the
+// middle of the photo. Shown in a pop-up with thumbs up/down; down falls
+// back to the existing tap-to-pick.
+// ---------------------------------------------------------------------
+let myShadeManualPicked = false;
+const myShadeColorSuggestModal = document.getElementById('myShadeColorSuggestModal');
+if(myShadeColorSuggestModal && myShadeColorSuggestModal.parentElement !== document.body) document.body.appendChild(myShadeColorSuggestModal);
+let myShadeSuggestedRgb = null;
+let myShadeSuggestToken = 0;
+const MYSHADE_LIP_OUTER = [61,146,91,181,84,17,314,405,321,375,291,409,270,269,267,0,37,39,40,185];
+const MYSHADE_LIP_INNER = [78,95,88,178,87,14,317,402,318,324,308,415,310,311,312,13,82,81,80,191];
+function myShadeCanvasPixels(x0, y0, w, h){
+  const d = myShadeSwatchCtx.getImageData(x0, y0, w, h).data, out = [];
+  for(let i = 0; i < d.length; i += 4) out.push([d[i], d[i+1], d[i+2]]);
+  return out;
+}
+const myShadeSat = p => { const mx = Math.max(p[0], p[1], p[2]), mn = Math.min(p[0], p[1], p[2]); return mx ? (mx - mn) / mx : 0; };
+function myShadeChannelMedian(P){
+  return [0, 1, 2].map(k => { const v = P.map(p => p[k]).sort((a, b) => a - b); return v[v.length >> 1]; });
+}
+// Hand/arm swatch: warm (R>B) pixels, not blown-out or black, top 10% by saturation, mean.
+function myShadeTop10Swatch(P){
+  let W = P.filter(p => p[0] > p[2] && Math.min(p[0], p[1], p[2]) < 235 && Math.max(p[0], p[1], p[2]) > 25);
+  if(W.length < 20) W = P;
+  W.sort((a, b) => myShadeSat(b) - myShadeSat(a));
+  const T = W.slice(0, Math.max(1, Math.floor(W.length * 0.1)));
+  return [0, 1, 2].map(k => Math.round(T.reduce((s, p) => s + p[k], 0) / T.length));
+}
+// Lips: saturated warm pixels (no skin/teeth/glare), then trim the darkest
+// 25% (creases) and brightest 15% (shine) before the median.
+function myShadeLipMedian(P){
+  let Q = P.filter(p => myShadeSat(p) > 0.35 && p[0] > p[2] && Math.max(p[0], p[1], p[2]) < 245);
+  if(Q.length < 30) Q = P;
+  const br = Q.map(p => (p[0] + p[1] + p[2]) / 3).sort((a, b) => a - b);
+  const lo = br[Math.floor(br.length * 0.25)], hi = br[Math.floor(br.length * 0.85)];
+  const R = Q.filter(p => { const b = (p[0] + p[1] + p[2]) / 3; return b >= lo && b <= hi; });
+  return myShadeChannelMedian(R.length ? R : Q);
+}
+async function myShadeFindLipPixels(){
+  try{
+    const landmarker = await Promise.race([loadFaceLandmarker(), new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 12000))]);
+    const res = landmarker.detect(myShadeSwatchCanvas);
+    if(!res || !res.faceLandmarks || !res.faceLandmarks.length) return null;
+    const lm = res.faceLandmarks[0], W = myShadeSwatchCanvas.width, H = myShadeSwatchCanvas.height;
+    const mask = document.createElement('canvas'); mask.width = W; mask.height = H;
+    const mctx = mask.getContext('2d');
+    const poly = (idx) => { mctx.beginPath(); idx.forEach((i, k) => { const x = lm[i].x * W, y = lm[i].y * H; if(k) mctx.lineTo(x, y); else mctx.moveTo(x, y); }); mctx.closePath(); mctx.fill(); };
+    mctx.fillStyle = '#000'; poly(MYSHADE_LIP_OUTER);
+    mctx.globalCompositeOperation = 'destination-out'; poly(MYSHADE_LIP_INNER);
+    const m = mctx.getImageData(0, 0, W, H).data, img = myShadeSwatchCtx.getImageData(0, 0, W, H).data, out = [];
+    for(let i = 0; i < m.length; i += 4) if(m[i+3] > 128) out.push([img[i], img[i+1], img[i+2]]);
+    return out.length >= 30 ? out : null;
+  } catch(e){ console.warn('[Suggest color] lip detection unavailable', e); return null; }
+}
+async function myShadeComputeSuggestion(itemType){
+  const W = myShadeSwatchCanvas.width, H = myShadeSwatchCanvas.height;
+  if(itemType === 'lipstick'){
+    const lips = await myShadeFindLipPixels();
+    if(lips) return { rgb: myShadeLipMedian(lips), source: 'lips' };
+    return { rgb: myShadeTop10Swatch(myShadeCanvasPixels(0, 0, W, H)), source: 'swatch' };
+  }
+  const x0 = Math.round(W * 0.25), y0 = Math.round(H * 0.25);
+  let P = myShadeCanvasPixels(x0, y0, Math.max(1, Math.round(W * 0.5)), Math.max(1, Math.round(H * 0.5)));
+  const Q = P.filter(p => Math.min(p[0], p[1], p[2]) < 240 && Math.max(p[0], p[1], p[2]) > 15);
+  return { rgb: myShadeChannelMedian(Q.length >= 20 ? Q : P), source: 'middle' };
+}
+function myShadeCloseColorSuggest(){ if(myShadeColorSuggestModal) myShadeColorSuggestModal.classList.remove('show'); }
+async function myShadeSuggestColor(){
+  if(!myShadeColorSuggestModal || !myShadeSwatchCanvas || myShadeSwatchCanvas.style.display === 'none' || !myShadeItemType) return;
+  const token = ++myShadeSuggestToken;
+  myShadeSuggestedRgb = null;
+  const thumb = document.getElementById('myShadeColorSuggestThumb');
+  if(thumb){ try{ thumb.src = myShadeSwatchCanvas.toDataURL('image/jpeg', 0.8); thumb.style.display = ''; } catch(e){ thumb.style.display = 'none'; } }
+  document.getElementById('myShadeColorSuggestLoading').style.display = '';
+  document.getElementById('myShadeColorSuggestRow').style.display = 'none';
+  document.getElementById('myShadeColorSuggestThumbs').style.display = 'none';
+  myShadeColorSuggestModal.classList.add('show');
+  let sug = null;
+  try{ sug = await myShadeComputeSuggestion(myShadeItemType); } catch(e){ console.warn('[Suggest color] failed', e); }
+  if(token !== myShadeSuggestToken) return; // a newer photo/type took over
+  if(!sug){ myShadeCloseColorSuggest(); return; }
+  const [r, g, b] = sug.rgb;
+  myShadeSuggestedRgb = { r, g, b };
+  const hex = '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+  document.getElementById('myShadeColorSuggestSwatch').style.background = hex;
+  document.getElementById('myShadeColorSuggestHex').textContent = hex;
+  document.getElementById('myShadeColorSuggestLoading').style.display = 'none';
+  document.getElementById('myShadeColorSuggestRow').style.display = 'flex';
+  document.getElementById('myShadeColorSuggestThumbs').style.display = 'flex';
+  myShadeUpdatePickedPanel(hex, false);
+}
+function myShadeRejectColorSuggest(){
+  myShadeSuggestToken++;
+  myShadeCloseColorSuggest();
+  if(!myShadePickedRgb && myShadePickHint) myShadePickHint.style.display = 'block';
+}
+const myShadeColorSuggestYes = document.getElementById('myShadeColorSuggestYes');
+if(myShadeColorSuggestYes) myShadeColorSuggestYes.addEventListener('click', () => {
+  if(!myShadeSuggestedRgb) return;
+  const c = myShadeSuggestedRgb;
+  myShadePickedRgb = { r: c.r, g: c.g, b: c.b };
+  myShadeUpdatePickedPanel('#' + [c.r, c.g, c.b].map(v => v.toString(16).padStart(2, '0')).join(''), true);
+  myShadeRefreshActionButtons();
+  const pickedConfirm = document.getElementById('myShadePickedConfirm');
+  if(pickedConfirm) pickedConfirm.style.display = 'block';
+  if(myShadePickHint) myShadePickHint.style.display = 'none';
+  myShadeCloseColorSuggest();
+});
+['myShadeColorSuggestNo', 'myShadeColorSuggestClose'].forEach(id => {
+  const el = document.getElementById(id);
+  if(el) el.addEventListener('click', myShadeRejectColorSuggest);
+});
+if(myShadeColorSuggestModal) myShadeColorSuggestModal.addEventListener('click', (e) => { if(e.target === myShadeColorSuggestModal) myShadeRejectColorSuggest(); });
+
 function myShadeHandleItemFile(file){
   if(!file || !myShadeSwatchCanvas || !myShadeSwatchCtx) return;
   hideError(myShadeErrorBox);
   myShadeResultCard.classList.remove('show');
   myShadePickedRgb = null;
   myShadeItemType = null; // fresh photo -- re-detect from scratch, see myShadeDetectItemType() below
+  myShadeManualPicked = false; myShadeSuggestToken++; myShadeCloseColorSuggest();
   myShadeHideItemTypeUI();
   setMyShadeCheckButtonsDisabled(true);
   const pickedRowReset = document.getElementById('myShadePickedRow');
@@ -7554,6 +7771,8 @@ function myShadePickAt(clientX, clientY, commit){
     myShadeUpdatePickedPanel(hex, commit);
   }
   if(commit){
+    myShadeManualPicked = true;
+    myShadeSuggestToken++; myShadeCloseColorSuggest();
     myShadePickedRgb = picked;
     myShadeRefreshActionButtons();
     const pickedConfirm = document.getElementById('myShadePickedConfirm');
@@ -7697,6 +7916,8 @@ function renderMyShadeResult(rgb, pct, scored){
   // check this session, so switching to profile mode doesn't show both.
   const gridElReset = document.getElementById('myShadeSimilarGrid');
   if(gridElReset) gridElReset.innerHTML = '';
+  const tabsElReset = document.getElementById('myShadeSimilarTabs');
+  if(tabsElReset){ tabsElReset.innerHTML = ''; tabsElReset.style.display = 'none'; }
 
   let tier, label, headline;
   if(pct > 85){
@@ -7780,8 +8001,16 @@ function renderMyShadeResult(rgb, pct, scored){
 // comment above it). Renders up to 3 catalog shades closest to the
 // picked color, reusing the shade-result-row markup/CSS from the
 // Season + Shade Matching podium.
-function renderSimilarShadeResults(rgb, matches){
+// MAC / Drugstore tabs (2026-10-08, per Nghi), same as the shade-matching
+// podium: each tab is its own closest 3 from that brand group.
+let myShadeSimilarTab = 'mac';
+let myShadeSimilarLast = null;
+function renderSimilarShadeResults(rgb, macMatches, drugMatches){
   const hex = '#' + [rgb.r, rgb.g, rgb.b].map(v => v.toString(16).padStart(2,'0')).join('');
+  myShadeSimilarLast = { rgb, macMatches: macMatches || [], drugMatches: drugMatches || [] };
+  if(!myShadeSimilarLast[myShadeSimilarTab === 'mac' ? 'macMatches' : 'drugMatches'].length){
+    myShadeSimilarTab = myShadeSimilarLast.macMatches.length ? 'mac' : 'drug';
+  }
   document.getElementById('myShadeResultSwatch').style.background = hex;
   // This mode has no %/pill/category verdict of its own (that's the
   // profile mode's, from renderMyShadeResult above) -- hide/clear
@@ -7797,7 +8026,41 @@ function renderSimilarShadeResults(rgb, matches){
   // no profile) -- 2026-10-08, per Nghi.
   renderMyShadeAxisBars(rgbToLab(rgb), null, myShadeItemType || 'lipstick', hex);
   myShadeUpdateSeasonCta();
+  renderSimilarShadeTab();
+
+  myShadeResultCard.classList.add('show');
+  myShadeResultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+// Renders the tab bar + everything that depends on the active tab
+// (try-on comparison, explanation line, ranked rows). Tab clicks call
+// this directly, so switching never re-scrolls the page.
+function renderSimilarShadeTab(){
+  if(!myShadeSimilarLast) return;
+  const { rgb, macMatches, drugMatches } = myShadeSimilarLast;
+  const hex = '#' + [rgb.r, rgb.g, rgb.b].map(v => v.toString(16).padStart(2,'0')).join('');
+  const tabsEl = document.getElementById('myShadeSimilarTabs');
+  if(tabsEl){
+    const tabs = [
+      { key: 'mac', label: 'MAC', sub: 'M·A·C' },
+      { key: 'drug', label: 'Drugstore', sub: "Revlon · L'Oréal · Maybelline" },
+    ];
+    tabsEl.innerHTML = tabs.map(t => `<button type="button" class="shade-tab${t.key === myShadeSimilarTab ? ' active' : ''}" role="tab" aria-selected="${t.key === myShadeSimilarTab}" data-tab="${t.key}">${t.label}<small>${t.sub}</small></button>`).join('');
+    tabsEl.style.display = 'flex';
+    tabsEl.querySelectorAll('.shade-tab').forEach(b => b.addEventListener('click', () => {
+      if(b.dataset.tab === myShadeSimilarTab) return;
+      myShadeSimilarTab = b.dataset.tab;
+      renderSimilarShadeTab();
+    }));
+  }
+  const matches = myShadeSimilarTab === 'mac' ? macMatches : drugMatches;
   renderMyShadeTryOn('similar', hex, matches);
+  if(!matches.length){
+    const explainEmpty = document.getElementById('myShadeResultExplain');
+    if(explainEmpty) explainEmpty.innerHTML = `${magnifierIcon()} No close shade in this group yet.`;
+    const gridEmpty = document.getElementById('myShadeSimilarGrid');
+    if(gridEmpty) gridEmpty.innerHTML = '';
+    return;
+  }
 
   // Wording no longer branches on a 90% bar (findSimilarShades doesn't
   // gate on one any more, per Nghi 2026-09-16) -- this is framed as
@@ -7850,9 +8113,6 @@ function renderSimilarShadeResults(rgb, matches){
       row.addEventListener('click', () => window.open(row.dataset.buyUrl, '_blank', 'noopener'));
     });
   }
-
-  myShadeResultCard.classList.add('show');
-  myShadeResultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   // Context for this section's own feedback block (submitMyShadeFeedback
   // below) -- pct/tier now describe the TOP similar-shade match (its own
@@ -7925,8 +8185,8 @@ myShadeCheckBtn.addEventListener('click', () => {
 // sell look like this one), regardless of whether a profile exists.
 if(myShadeFindSimilarBtn) myShadeFindSimilarBtn.addEventListener('click', () => {
   myShadeRunCheck('similar', (rgb) => {
-    const matches = findSimilarShades(rgb);
-    renderSimilarShadeResults(rgb, matches);
+    const matches = findSimilarShades(rgb); // whole catalog -- still what the live sheet logs
+    renderSimilarShadeResults(rgb, findSimilarShades(rgb, 3, 'mac'), findSimilarShades(rgb, 3, 'drug'));
     sendToLiveSheet({
       type: 'colorcheck_result', mode: 'similar',
       item_rgb_r: rgb.r, item_rgb_g: rgb.g, item_rgb_b: rgb.b,
@@ -8012,7 +8272,8 @@ if(restoreChecksToggleBtn && restoreChecksForm){
 }
 if(restoreChecksSubmitBtn){
   restoreChecksSubmitBtn.addEventListener('click', () => {
-    const email = ((restoreChecksEmail && restoreChecksEmail.value) || '').trim();
+    // Lower-cased (2026-10-08): PayPal can report the payer email with capitals, so grant and restore both normalise.
+    const email = ((restoreChecksEmail && restoreChecksEmail.value) || '').trim().toLowerCase();
     if(restoreChecksMsg){ restoreChecksMsg.textContent = ''; restoreChecksMsg.className = 'restore-checks-msg'; }
     if(!email){
       if(restoreChecksMsg){
@@ -8721,7 +8982,7 @@ function buildMyShadeProfilePayload(){
     avg_chroma: result.avg_chroma,
   };
 }
-const LIVE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbwoqSuXqVsktY7ju0PxVTP-w9776x2JBPO8TIf8ozTgO3lSDvABaTeyyvn-3Sp-zvLV/exec';
+const LIVE_SHEET_URL = 'https://script.google.com/macros/s/AKfycbyuo4Ubmt1ixVij2Pv8wYWeCy1C2hsuTbdZ2T810CW-eQy1RdP3s8mUtujKLCQJJRf9DQ/exec';
 function sendToLiveSheet(record){
   try{
     fetch(LIVE_SHEET_URL, {
@@ -10454,14 +10715,35 @@ function tryOnSource(pref){
   }
   return null;
 }
+// Frames hair-to-shoulders and reports where the neck ends, so the color
+// rectangle can start there. Works from face_box alone (the same box
+// cropFaceSquare uses): face_box = mesh top - 0.65 mesh-heights ... chin
+// + 0.35 mesh-heights, so mesh height bh = (y1-y0)/2, chin = y1 - 0.35bh.
+// Neck taken as ending ~0.30 bh below the chin; a little hair kept above.
 function tryOnCrop(src){
-  const box = tryOnZoom === 'lower' ? src.lower : src.face;
-  const key = src.img.src.slice(-64) + '|' + JSON.stringify(box);
+  const fb = src.face;
+  const key = src.img.src.slice(-64) + '|' + JSON.stringify(fb);
   if(!tryOnCropCache.has(key)){
-    let url = null;
-    try{ url = cropFaceSquare(src.img, box, 400); } catch(e){ console.warn('[Try-on] crop failed', e); }
+    let out = null;
+    try{
+      const W = src.img.naturalWidth, H = src.img.naturalHeight;
+      const bh = (fb.y1 - fb.y0) / 2 * H;
+      const meshTop = fb.y0 * H + 0.65 * bh;
+      const chin = fb.y1 * H - 0.35 * bh;
+      const neckEnd = chin + 0.30 * bh;
+      const top = meshTop - 0.30 * bh, bottom = neckEnd + 0.75 * bh; // rectangle ~ bottom third of the tile
+      const cx = (fb.x0 + fb.x1) / 2 * W;
+      let side = Math.min(bottom - top, W, H);
+      let sx = Math.max(0, Math.min(W - side, cx - side / 2));
+      let sy = Math.max(0, Math.min(H - side, top));
+      const c = document.createElement('canvas');
+      c.width = 400; c.height = 400;
+      c.getContext('2d').drawImage(src.img, sx, sy, side, side, 0, 0, 400, 400);
+      const barTop = Math.max(0.55, Math.min(0.92, (neckEnd - sy) / side));
+      out = { url: c.toDataURL('image/jpeg', 0.9), barTop };
+    } catch(e){ console.warn('[Try-on] crop failed', e); }
     if(tryOnCropCache.size > 12) tryOnCropCache.clear();
-    tryOnCropCache.set(key, url);
+    tryOnCropCache.set(key, out);
   }
   return tryOnCropCache.get(key);
 }
@@ -10470,9 +10752,9 @@ function tryOnTextColor(hex){
   return (0.299*r + 0.587*g + 0.114*b) > 150 ? '#3a1f22' : '#fff';
 }
 function tryOnTileHtml(src, hex, label, large, altName){
-  const url = tryOnCrop(src);
-  if(!url) return '';
-  return `<div class="tryon${large ? ' lg' : ''}"><img src="${url}" alt="Your face with ${escapeHtml(altName || label || 'this shade')}" draggable="false"><div class="tryon-bar" style="background:${hex};color:${tryOnTextColor(hex)};">${escapeHtml(label)}</div></div>`;
+  const c = tryOnCrop(src);
+  if(!c) return '';
+  return `<div class="tryon${large ? ' lg' : ''}"><img src="${c.url}" alt="Your face with ${escapeHtml(altName || label || 'this shade')}" draggable="false"><div class="tryon-bar" style="top:${(c.barTop * 100).toFixed(1)}%;background:${hex};color:${tryOnTextColor(hex)};">${escapeHtml(label)}</div></div>`;
 }
 function renderShadeMatches(macMatches, drugMatches){
   const shadeMatchSeasonName = currentSeasonResult && (currentSeasonResult.shadeMatchSeason || currentSeasonResult.season);
