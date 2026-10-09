@@ -70,7 +70,7 @@
     font-weight:600;
     font-size:clamp(28px,6vw,40px);
     text-align:center;
-    margin:0 0 12px;
+    margin:0 0 30px;
     color:var(--text-light);
   }
   .sub{
@@ -180,6 +180,9 @@
     background:linear-gradient(170deg,#f7dedb 0%,#ecc3bf 55%,#e3b0ad 100%);
     overflow:hidden;
   }
+  #mmZoom{position:absolute;inset:0;z-index:1;display:none;background-size:cover;background-position:50% 0;animation:mmkb 16s ease-in-out infinite alternate;}
+  .mirror.mm-zoomed #mmZoom{display:block;}
+  .mirror.mm-zoomed #preview{visibility:hidden;}
   .mirror img{object-position:50% 12%;animation:mmkb 16s ease-in-out infinite alternate;}
   @keyframes mmkb{from{transform:scale(1)}to{transform:scale(1.06)}}
   @media (prefers-reduced-motion:reduce){.mirror img{animation:none}}
@@ -189,9 +192,11 @@
   html:not([data-fmbs-mode="check"]):not([data-fmbs-mode="similar"]) #myShadeCtaBlock{display:none !important;}
   .mm-pick{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;justify-content:center;align-items:center;gap:18px;z-index:3;line-height:0;}
   /* once a photo is in the mirror, the icons tuck to the bottom so the face stays clear */
-  .mirror:has(#preview[style*="block"]) .mm-pick{top:auto;bottom:10px;gap:12px;}
-  .mirror:has(#preview[style*="block"]) .mm-ic{width:38px;height:38px;opacity:.9;}
-  .mirror:has(#preview[style*="block"]) .mm-ic svg{width:20px;height:20px;}
+  /* hidden once a photo is in; they return only if the photo fails a check (errorBox1 shown) so she can retake */
+  .mirror:has(#preview[style*="block"]) .mm-pick{display:none;}
+  body:has(#errorBox1.show) .mirror:has(#preview[style*="block"]) .mm-pick{display:flex;top:auto;bottom:10px;gap:12px;}
+  body:has(#errorBox1.show) .mirror:has(#preview[style*="block"]) .mm-ic{width:38px;height:38px;opacity:.9;}
+  body:has(#errorBox1.show) .mirror:has(#preview[style*="block"]) .mm-ic svg{width:20px;height:20px;}
   .mm-ic{width:46px;height:46px;border-radius:50%;background:rgba(253,245,243,.92);color:var(--rose-deep);display:flex;align-items:center;justify-content:center;cursor:pointer;
     box-shadow:0 2px 10px rgba(58,31,34,.22);transition:transform .15s ease,background .15s ease;-webkit-tap-highlight-color:transparent;}
   .mm-ic:hover{transform:scale(1.07);background:#fff;}
@@ -399,6 +404,7 @@
     font-size:12.5px;margin-bottom:5px;
   }
   .hint-col.no li{color:#8a7176;}
+  .hint-col.no li span{text-decoration:line-through;text-decoration-thickness:1.5px;}
   .hint-col.yes li{color:#96333c;}
   .hint-checkbox{flex-shrink:0;}
   .upload-choice-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
@@ -412,6 +418,11 @@
   }
   .choice-btn:hover{background:var(--rose-deep);color:var(--card);}
   .choice-icon{font-size:15px;}
+  .ic-btn{width:46px;height:46px;border-radius:50%;border:1.5px solid var(--rose-deep);background:rgba(253,245,243,.7);color:var(--rose-deep);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s ease;-webkit-tap-highlight-color:transparent;}
+  .ic-btn svg{width:24px;height:24px;}
+  .ps-icons{display:flex;margin-top:16px;}
+  .ic-btn:hover{background:var(--rose-deep);color:var(--card);}
+  .ic-btn.photo-locked{opacity:.45;pointer-events:none;cursor:not-allowed;}
 
   .card{
     background:var(--card);
@@ -1088,7 +1099,7 @@
     font-size:11.5px; color:var(--muted); text-align:center;
     margin:8px 0 18px; line-height:1.5;
   }
-  .shade-result-why strong{font-weight:700;font-style:normal;}
+  .shade-result-why strong{font-weight:700;font-style:normal;color:var(--rose-deep);}
   .palette-guidance svg{text-indent:0;}
 
   /* flex-wrap:nowrap + equal flex share (via .multi, added in JS when
@@ -1355,7 +1366,7 @@
   .rank-2 .shade-result-conf-num{font-size:12.5px;}
   .rank-3 .shade-result-conf-num{font-size:11.5px;}
 
-  .shade-result-why{font-family:'Playfair Display', serif;font-style:italic;color:var(--rose-deep);margin-top:6px;line-height:1.4;text-wrap:pretty;}
+  .shade-result-why{font-family:'Playfair Display', serif;font-style:italic;color:var(--muted);margin-top:6px;line-height:1.4;text-wrap:pretty;}
   .rank-1 .shade-result-why{font-size:13px;}
   .rank-2 .shade-result-why{font-size:12px;}
   .rank-3 .shade-result-why{font-size:11px;}
@@ -1682,11 +1693,11 @@
   @media (max-height:760px){.cv-wall{--cvw:clamp(200px,min(66vw,340px,calc((100vh - 360px)*.75)),340px);}}
   .cv-cover.cv-covered .cv-wall{filter:blur(7px) saturate(.9);opacity:.55;pointer-events:none;}
   .cv-eyebrow{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--rose-deep);font-weight:600;padding:0 16px;}
-  .cv-title{font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(30px,8vw,44px);margin:6px 0 16px;letter-spacing:.01em;color:var(--text-light);line-height:1.15;padding:0 16px;}
+  .cv-title{font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(30px,8vw,44px);margin:6px 0 30px;letter-spacing:.01em;color:var(--text-light);line-height:1.15;padding:0 16px;}
   .cv-sub{font-family:'Playfair Display',serif;font-style:italic;color:var(--muted);font-size:16px;margin-bottom:10px;}
   .cv-carousel{position:relative;}
   .cv-track{display:flex;gap:0;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;
-    padding:28px calc((100% - var(--cvw))/2) 26px;touch-action:pan-x pan-y;}
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(90deg,transparent,#000 14%,#000 86%,transparent);padding:28px calc((100% - var(--cvw))/2) 26px;touch-action:pan-x pan-y;}
   .cv-track::-webkit-scrollbar{display:none;}
   .cv-slide{all:unset;box-sizing:border-box;flex:0 0 var(--cvw);scroll-snap-align:center;cursor:pointer;position:relative;
     opacity:.4;transform:scale(.8);filter:saturate(.7);transition:opacity .9s ease,transform .9s ease,filter .9s ease;-webkit-tap-highlight-color:transparent;}
@@ -1874,7 +1885,7 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
           <li>Find other finishes &amp; brands for your favorite shade</li>
         </ul>
         <div id="paypalBtn-colorCheck" class="paypal-btn-slot" style="display:none;"></div>
-        <div class="paywall-tier-locked-note" id="colorCheckLockedNote">After payment, you'll <strong>upload the "Your Color Profile" image</strong> from your Season Analysis to run checks, as many times as you like for a year.</div>
+        <div class="paywall-tier-locked-note" id="colorCheckLockedNote">After payment, you'll upload a selfie and check as many colors as you like for a year.</div>
       </div>
       <div class="paywall-tier">
         <div class="paywall-tier-name">Season Analysis</div>
@@ -1914,26 +1925,18 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
 
     <div class="hint-columns">
       <div class="hint-col yes">
-        <div class="hint-col-header">
-          <svg viewBox="0 0 40 40" width="26" height="26"><path d="M6,20 L16,30 L34,8" stroke="#96333c" stroke-width="4.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-          <span>YES</span>
-        </div>
         <ul>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg><span>Natural light</span></li>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg><span>Eyes visible</span></li>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg><span>Face forward</span></li>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#96333c"/></svg><span>Hair off face</span></li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="13" height="13"><path d="M3,10.5 L8,15.5 L17,4.5" stroke="#96333c" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Natural light</span></li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="13" height="13"><path d="M3,10.5 L8,15.5 L17,4.5" stroke="#96333c" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Eyes visible</span></li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="13" height="13"><path d="M3,10.5 L8,15.5 L17,4.5" stroke="#96333c" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Face forward</span></li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="13" height="13"><path d="M3,10.5 L8,15.5 L17,4.5" stroke="#96333c" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Hair off face</span></li>
         </ul>
       </div>
       <div class="hint-col no">
-        <div class="hint-col-header">
-          <svg viewBox="0 0 40 40" width="26" height="26"><path d="M9,11 Q20,20 31,29 M31,11 Q20,20 9,29" stroke="#8a7176" stroke-width="4.5" fill="none" stroke-linecap="round"/></svg>
-          <span>NO</span>
-        </div>
         <ul>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#8a7176"/></svg><span>Filter</span></li>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#8a7176"/></svg><span>Makeup</span></li>
-          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="10" height="10"><rect x="2" y="2" width="16" height="16" fill="#8a7176"/></svg><span>Contact lenses</span></li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="12" height="12"><path d="M4.5,4.5 L15.5,15.5 M15.5,4.5 L4.5,15.5" stroke="#8a7176" stroke-width="1" fill="none" stroke-linecap="round"/></svg><span>Filter</span></li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="12" height="12"><path d="M4.5,4.5 L15.5,15.5 M15.5,4.5 L4.5,15.5" stroke="#8a7176" stroke-width="1" fill="none" stroke-linecap="round"/></svg><span>Makeup</span></li>
+          <li><svg class="hint-checkbox" viewBox="0 0 20 20" width="12" height="12"><path d="M4.5,4.5 L15.5,15.5 M15.5,4.5 L4.5,15.5" stroke="#8a7176" stroke-width="1" fill="none" stroke-linecap="round"/></svg><span>Contact lenses</span></li>
         </ul>
       </div>
     </div>
@@ -2072,7 +2075,7 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
              target the exit-intent nudge below scrolls/points to when a
              customer tries to leave without downloading yet. -->
         <div class="palette-download-row">
-          <button class="btn ghost palette-download-btn" id="downloadBothBtn">Download Your Color Profile &amp; Palette</button>
+          <button class="btn ghost palette-download-btn" id="downloadBothBtn">Download Your Palette</button>
         </div>
         <!-- FIXED 2026-09-15, per Nghi (a friend on Android couldn't
              download): the click handler below used to fail completely
@@ -2080,8 +2083,7 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
              reset itself -- so a customer had no idea anything had gone
              wrong. This surfaces it. -->
         <div class="error-box" id="downloadErrorBox" style="margin-top:10px;"></div>
-        <div class="jewelry-note" style="text-align:center;margin-top:8px;">Handy to keep for My Shade / Not My Shade.</div>
-      </div>
+              </div>
     </div>
 
     <!-- My Shade / Not My Shade lives in this same page (see
@@ -2191,24 +2193,15 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
       <div class="season-desc">Upload a <strong>selfie</strong> and we'll read your own <strong>warmth, depth, and chroma</strong> from it, right here on your device. <strong>Check My Shade</strong> then checks your pick against those numbers.</div>
       <div class="selfie-tips">Front-facing &middot; bright, even daylight &middot; no filter or heavy makeup &middot; eyes open</div>
       <div class="upload-choice-row" style="margin-top:12px;">
-        <label class="choice-btn" for="myShadeSelfieInputCamera"><span class="choice-icon">📷</span> Take a Selfie</label>
-        <label class="choice-btn" for="myShadeSelfieInputUpload"><span class="choice-icon">🖼️</span> Upload a Selfie</label>
+        <label class="ic-btn" for="myShadeSelfieInputCamera" title="Take a selfie" aria-label="Take a selfie"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.4-2.2h7.2L17 8.5h3a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.4" r="3.4"/></svg></label>
+        <label class="ic-btn" for="myShadeSelfieInputUpload" title="Upload a selfie" aria-label="Upload a selfie"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.6" cy="9.6" r="1.7"/><path d="m3.5 17 5-4.8 3.6 3.4 3-2.8 5.4 5"/></svg></label>
       </div>
       <input type="file" id="myShadeSelfieInputCamera" accept="image/*" capture="user" style="display:none;">
       <input type="file" id="myShadeSelfieInputUpload" accept="image/*" style="display:none;">
       <div class="loading" id="myShadeSelfieLoading"><span class="dot"></span><span class="dot"></span><span class="dot"></span><br><span id="myShadeSelfieLoadingText">Reading your coloring...</span></div>
       <div class="error-box" id="myShadeSelfieErrorBox"></div>
-      <div class="selfie-or">or, if you already took the Color Season Test</div>
-      <div class="myshade-profile-sample">
-        <img src="data:image/png;base64,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" alt="Example of the downloaded &quot;Your Color Profile&quot; image, showing the pixel measurement and CIELAB analysis for a sample season.">
-        <span class="myshade-profile-sample-badge">Example</span>
-      </div>
-      <div class="myshade-profile-sample-caption">Upload the <strong>Your Color Profile</strong> image you downloaded after your Season Analysis.</div>
-      <label class="choice-btn" for="myShadeProfileFileInput" style="margin:4px auto 0;">
-        <span class="choice-icon">🖼️</span> Upload Your Color Profile
-      </label>
-      <input type="file" id="myShadeProfileFileInput" accept="image/png" style="display:none;">
-      <div class="error-box" id="myShadeProfileErrorBox"></div>
+      <!-- Color Profile upload removed 2026-10-09, per Nghi; hidden stubs keep older code paths safe -->
+      <div style="display:none;"><input type="file" id="myShadeProfileFileInput" accept="image/png"><div class="error-box" id="myShadeProfileErrorBox"></div></div>
       <button class="link-btn" id="myShadeGoToSeasonBtn" style="margin-top:16px;">Want your season too? Take the Color Season Test</button>
     </div>
 
@@ -2226,7 +2219,7 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
       <button type="button" class="link-btn" id="myShadeChangeModeBtn" style="margin-bottom:14px;">← Choose a different option</button>
       <div class="myshade-photo-row">
         <div class="swatch-preview pickable" id="myShadeSwatchPreviewBox">
-          <span class="placeholder" id="myShadeSwatchPlaceholder"><strong>Upload</strong> a clear, well-lit photo of the item -- lipstick, blush, eyeshadow, foundation, nail polish, an outfit, jewelry, or a hair/eyebrow color.</span>
+          <span class="placeholder" id="myShadeSwatchPlaceholder"><strong>Upload</strong> a clear, well-lit photo of the item -- lipstick, blush, eyeshadow, foundation, nail polish, an outfit, jewelry, or a hair/eyebrow color.<span class="upload-choice-row ps-icons"><label class="ic-btn" for="myShadeFileInputCamera" title="Take a photo" aria-label="Take a photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.4-2.2h7.2L17 8.5h3a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.4" r="3.4"/></svg></label><label class="ic-btn" for="myShadeFileInputUpload" title="Upload a photo" aria-label="Upload a photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.6" cy="9.6" r="1.7"/><path d="m3.5 17 5-4.8 3.6 3.4 3-2.8 5.4 5"/></svg></label></span></span>
           <canvas id="myShadeSwatchCanvas" style="display:none;"></canvas>
           <canvas class="myshade-magnifier" id="myShadeMagnifier" width="110" height="110"></canvas>
         </div>
@@ -2328,14 +2321,6 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
           </div>
         </div>
       </div>
-      <div class="upload-choice-row">
-        <label class="choice-btn" for="myShadeFileInputCamera">
-          <span class="choice-icon">📷</span> Take a Photo
-        </label>
-        <label class="choice-btn" for="myShadeFileInputUpload">
-          <span class="choice-icon">🖼️</span> Upload Photo
-        </label>
-      </div>
       <input type="file" id="myShadeFileInputCamera" accept="image/*" capture="environment" style="display:none;">
       <input type="file" id="myShadeFileInputUpload" accept="image/*" style="display:none;">
 
@@ -2430,22 +2415,22 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
 </div>
 
 <!-- Exit-intent nudge (see JS near downloadBothBtn) -- asks a customer to
-     download her Color Profile & Palette before she leaves, and if she'd
+     download her Palette before she leaves, and if she'd
      rather not, asks why instead of just letting her go. -->
 <div class="exit-nudge-overlay" id="exitNudgeOverlay">
   <div class="exit-nudge-card">
     <button type="button" class="exit-nudge-close" id="exitNudgeCloseBtn" aria-label="Close">&times;</button>
-    <div class="exit-nudge-title">Don't leave without your results!</div>
-    <div class="exit-nudge-body">You haven't downloaded your <strong>Color Profile &amp; Palette</strong> yet -- you'll want these to remember your shades and colors.</div>
-    <button type="button" class="btn exit-nudge-download-btn" id="exitNudgeDownloadBtn">Download Now</button>
-    <div class="exit-nudge-reason-label">Not downloading? Quick reason helps us fix it:</div>
+    <div class="exit-nudge-title">Take your palette with you</div>
+    <div class="exit-nudge-body">Save your <strong>personalized colors and jewelry metals</strong> so your best shades are always in your pocket.</div>
+    <button type="button" class="btn exit-nudge-download-btn" id="exitNudgeDownloadBtn">Download My Palette</button>
+    <div class="exit-nudge-reason-label">Not now? Tell us why:</div>
     <div class="exit-nudge-reasons" id="exitNudgeReasons">
       <button type="button" class="exit-reason-chip" data-reason="Don't find it helpful">Don't find it helpful</button>
       <button type="button" class="exit-reason-chip" data-reason="Already saved a screenshot">Already saved a screenshot</button>
       <button type="button" class="exit-reason-chip" data-reason="Download isn't working">Download isn't working</button>
       <button type="button" class="exit-reason-chip" data-reason="Don't think it's right for me">Don't think it's right for me</button>
     </div>
-    <button type="button" class="link-btn exit-nudge-skip" id="exitNudgeSkipBtn">No thanks, continue without downloading</button>
+    <button type="button" class="link-btn exit-nudge-skip" id="exitNudgeSkipBtn">Continue without saving</button>
   </div>
 </div>
 
@@ -4836,12 +4821,35 @@ function luminance(rgb){
 // The four color reads shown in the mirror's rose rectangle (2026-10-09,
 // per Nghi) -- replaces the old Pixel Measurement block on the results page.
 function clearMirrorReads(){
+  { const z = document.getElementById('mmZoom'); if(z){ z.style.backgroundImage = ''; z.parentElement.classList.remove('mm-zoomed'); } }
   const r = document.getElementById('mmReads'), rd = document.getElementById('mmReady'), ph = document.getElementById('placeholderText');
   if(r){ r.style.display = 'none'; r.innerHTML = ''; }
   if(ph) ph.style.display = 'none';
   if(rd) rd.style.display = '';
 }
+/* Zoom the face into the mirror: face + neck fill the mirror (the top 2/3 of the frame), the rose rectangle is the lower 1/3.
+   Display-only -- #preview keeps the full photo, so every measurement and the try-on still use the original pixels. */
+function zoomMirrorFace(fb){
+  try{
+    const img = document.getElementById('preview'); if(!img || !fb || !img.naturalWidth) return;
+    const mir = img.parentElement; let z = document.getElementById('mmZoom');
+    if(!z){ z = document.createElement('div'); z.id = 'mmZoom'; mir.insertBefore(z, img); }
+    const mr = mir.getBoundingClientRect(); const asp = (mr.width && mr.height) ? mr.width / mr.height : 1;
+    const W = img.naturalWidth, H = img.naturalHeight;
+    const bh = (fb.y1 - fb.y0) / 2 * H, meshTop = fb.y0 * H + 0.65 * bh, chin = fb.y1 * H - 0.35 * bh;
+    const top = meshTop - 0.30 * bh, neckEnd = chin + 0.30 * bh, cx = (fb.x0 + fb.x1) / 2 * W;
+    let h = neckEnd - top, w = h * asp;
+    if(w > W){ w = W; h = w / asp; } if(h > H){ h = H; w = h * asp; }
+    const sx = Math.max(0, Math.min(W - w, cx - w / 2)), sy = top; // forehead on the frame's top edge, neck on the rectangle's edge
+    const cw = 640, ch = Math.round(640 / asp), c = document.createElement('canvas'); c.width = cw; c.height = ch;
+    const g = c.getContext('2d'); g.fillStyle = '#e9cbc7'; g.fillRect(0, 0, cw, ch);
+    { const k = ch / h, y0 = Math.max(sy, 0), y1 = Math.min(sy + h, H); if(y1 > y0) g.drawImage(img, sx, y0, w, y1 - y0, 0, (y0 - sy) * k, cw, (y1 - y0) * k); }
+    z.style.backgroundImage = `url(${c.toDataURL('image/jpeg', 0.92)})`;
+    mir.classList.add('mm-zoomed');
+  }catch(e){ console.warn('[Mirror zoom] skipped', e); }
+}
 function showMirrorReads(m){
+  if(m) zoomMirrorFace(m.face_box);
   const holder = document.getElementById('mmReads');
   if(!holder || !m) return;
   const pick = (a, b) => Array.isArray(a) ? a : (a && a.r !== undefined ? [a.r, a.g, a.b] : (Array.isArray(b) ? b : (b && b.r !== undefined ? [b.r, b.g, b.b] : null)));
@@ -9952,7 +9960,7 @@ function renderColorsOnYou(result, swatchSets){
     document.getElementById('colorsOnYouCarousel'),
     { img: preview, face: result.face_box },
     clothing.map(c => ({ hex: c.hex, label: '' })).concat(((swatchSets.jewelry && swatchSets.jewelry.metals) || []).map(m => ({ hex: m.hex, label: m.name, sub: 'Jewelry' }))),
-    { count: false }
+    { count: false, interval: 2000 }
   );
   if(!ok){ section.style.display = 'none'; return; }
   document.getElementById('colorsOnYouCaption').innerHTML =
@@ -10416,8 +10424,7 @@ const downloadBothBtn = document.getElementById('downloadBothBtn');
 const downloadErrorBox = document.getElementById('downloadErrorBox');
 if (downloadBothBtn) {
   downloadBothBtn.addEventListener('click', async () => {
-    const profileData = buildColorProfileData();
-    if (!profileData || !lastStyleGuideData) return;
+    if (!lastStyleGuideData) return;
     const originalLabel = downloadBothBtn.textContent;
     downloadBothBtn.textContent = 'Preparing…';
     downloadBothBtn.disabled = true;
@@ -10444,35 +10451,9 @@ if (downloadBothBtn) {
       // ignore <a download> on a blob: URL), nothing visibly happened at
       // all. Running both exports in parallel cuts this wait roughly in
       // half, well within reach of staying inside that window.
-      const profileCanvas = drawColorProfileCard(profileData);
+      // Palette only (Color Profile download removed 2026-10-09, per Nghi).
       const paletteCanvas = drawStyleGuideStoryCard(lastStyleGuideData);
-      const [profileBlobRaw, paletteBlob] = await Promise.all([
-        new Promise(resolve => profileCanvas.toBlob(resolve)),
-        new Promise(resolve => paletteCanvas.toBlob(resolve)),
-      ]);
-
-      // Color Profile PNG -- quietly embeds the season profile as a PNG
-      // metadata chunk (see embedProfileInPng() near
-      // MYSHADE_PROFILE_PNG_KEYWORD) so this half of the download also
-      // doubles as what the customer uploads to My Shade / Not My Shade
-      // -- no visible change to the image itself.
-      let profileBlob = profileBlobRaw;
-      const profilePayload = buildMyShadeProfilePayload();
-      if (profilePayload) {
-        try {
-          const bytes = new Uint8Array(await profileBlobRaw.arrayBuffer());
-          const embedded = embedProfileInPng(bytes, MYSHADE_PROFILE_PNG_KEYWORD, JSON.stringify(profilePayload));
-          profileBlob = new Blob([embedded], { type: 'image/png' });
-        } catch (embedErr) {
-          // Non-fatal -- worst case that download is still a normal,
-          // valid profile image, just not upload-ready for My Shade /
-          // Not My Shade (the customer could retake the Season
-          // Analysis and download again to get one that is).
-          console.warn('[Color profile] Could not embed profile data in PNG', embedErr);
-        }
-      }
-      const profileSlug = (profileData.season || 'profile').toLowerCase().replace(/[^a-z0-9]+/g, '-');
-      const profileFilename = `find-my-best-shades-${profileSlug}-color-profile.png`;
+      const paletteBlob = await new Promise(resolve => paletteCanvas.toBlob(resolve));
       const paletteSlug = lastStyleGuideData.seasonName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const paletteFilename = `find-my-best-shades-${paletteSlug}-palette.png`;
 
@@ -10496,27 +10477,17 @@ if (downloadBothBtn) {
       // platform.
       let sharedDirectly = false;
       if (isMobileDevice() && typeof navigator.share === 'function' && typeof navigator.canShare === 'function') {
-        const profileFile = new File([profileBlob], profileFilename, { type: 'image/png' });
         const paletteFile = new File([paletteBlob], paletteFilename, { type: 'image/png' });
-        if (navigator.canShare({ files: [profileFile, paletteFile] })) {
+        if (navigator.canShare({ files: [paletteFile] })) {
           try {
-            await navigator.share({ files: [profileFile, paletteFile], title: 'Your Color Profile & Palette' });
+            await navigator.share({ files: [paletteFile], title: 'Your Color Palette' });
             sharedDirectly = true;
           } catch (shareErr) {
-            // AbortError -- the customer opened the share sheet and
-            // backed out on purpose. Respect that; don't also force a
-            // fallback download she didn't ask for. Any OTHER error
-            // (share sheet unusable, etc.) falls through to <a download>.
             if (shareErr && shareErr.name === 'AbortError') sharedDirectly = true;
           }
         }
       }
       if (!sharedDirectly) {
-        triggerFileDownload(profileBlob, profileFilename);
-        // A short gap between the two -- back-to-back programmatic
-        // downloads in the same tick are what trigger a browser's
-        // "multiple downloads blocked" prompt.
-        await new Promise(r => setTimeout(r, 350));
         triggerFileDownload(paletteBlob, paletteFilename);
       }
       // Both photos are out (shared or downloaded) -- clears the
@@ -10861,10 +10832,12 @@ function tryOnCrop(src){
       const cx = (fb.x0 + fb.x1) / 2 * W;
       let side = Math.min((neckEnd - top) * 1.5, W, H);
       let sx = Math.max(0, Math.min(W - side, cx - side / 2));
-      let sy = Math.max(0, Math.min(H - side, neckEnd - side * 2 / 3));
+      let sy = neckEnd - side * 2 / 3; // not clamped: the neck always lands on the rectangle's edge (any area past the photo is filled)
       const c = document.createElement('canvas');
       c.width = 400; c.height = 400;
-      c.getContext('2d').drawImage(src.img, sx, sy, side, side, 0, 0, 400, 400);
+      const cx2 = c.getContext('2d'); cx2.fillStyle = '#e9cbc7'; cx2.fillRect(0, 0, 400, 400);
+      { const k = 400 / side, y0 = Math.max(sy, 0), y1 = Math.min(sy + side, H);
+        if(y1 > y0) cx2.drawImage(src.img, sx, y0, side, y1 - y0, 0, (y0 - sy) * k, 400, (y1 - y0) * k); }
       const barTop = 2 / 3;
       // Jewelry anchors (fractions of the crop): ears from the mesh's side edges,
       // neck from the mesh width -- approximate, for the swipe try-on's earrings/necklace.
@@ -10930,7 +10903,7 @@ function mountTryOnCarousel(host, src, items, opts){
     host._tocTimer = setInterval(() => {
       if(!box.isConnected){ clearInterval(host._tocTimer); host._tocTimer = null; return; }
       if(visible && !document.hidden) show(i + 1);
-    }, 4000);
+    }, opts.interval || 4000);
   }
   function user(step){ box.classList.add('swiped'); show(i + step); restart(); }
   let x0 = null, y0 = 0, moved = false;
@@ -11179,27 +11152,31 @@ restoreLastResultSnapshot();
     const t0 = performance.now(), ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2, 3)/2;
     (function step(now){
       const t = Math.min(1, (now - t0) / ms);
-      track.scrollLeft = from + d * ease(t);
+      track.scrollTo({ left: from + d * ease(t), behavior:'instant' });
       if(t < 1) glideRaf = requestAnimationFrame(step);
-      else track.style.scrollSnapType = '';
+      /* snap stays off after an auto glide (a browser re-snapping here can pull it back to the old slide); it returns on the next touch */
     })(t0);
   }
   function goTo(i, ms){
     i = Math.max(0, Math.min(slides.length-1, i));
     const s = slides[i];
-    glideTo(track.scrollLeft + (s.getBoundingClientRect().left - track.getBoundingClientRect().left) - (track.clientWidth - s.offsetWidth) / 2, ms || 900);
+    const sr = s.getBoundingClientRect(), tr = track.getBoundingClientRect();
+    glideTo(track.scrollLeft + (sr.left + sr.width/2) - (tr.left + tr.width/2), ms || 900);
   }
-  /* auto-slide every 2s; pauses while she touches/drags, resumes after a pause; loops back to the first */
+  /* auto-slide every 4s (1s glide, 1.5s on the loop back); pauses while she touches/drags, resumes after a pause; loops back to the first */
   let autoT = null, holdUntil = 0;
   function autoTick(){
     if(cover.style.display === 'none' || cover.classList.contains('cv-covered') || document.hidden) return;
     if(Date.now() < holdUntil) return;
-    goTo(cur >= slides.length - 1 ? 0 : cur + 1, cur >= slides.length - 1 ? 1300 : 900);
+    goTo(cur >= slides.length - 1 ? 0 : cur + 1, cur >= slides.length - 1 ? 1500 : 1000);
   }
-  autoT = setInterval(autoTick, 2000);
+  autoT = setInterval(autoTick, 4000);
   ['pointerdown','touchstart','wheel'].forEach(ev => track.addEventListener(ev, () => { holdUntil = Date.now() + 5000; carousel.classList.add('cv-swiped'); cancelAnimationFrame(glideRaf); track.style.scrollSnapType = ''; }, { passive:true }));
-  const io = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting && e.intersectionRatio > .6) setCur(+e.target.dataset.i); }), { root:track, threshold:[.6,.8] });
-  slides.forEach(x => io.observe(x)); setCur(0);
+  let nearRaf = 0;
+  function nearest(){ nearRaf = 0; const tr = track.getBoundingClientRect(), mid = tr.left + tr.width/2; let bi = 0, bd = 1e9;
+    slides.forEach((x,k) => { const r = x.getBoundingClientRect(), d = Math.abs(r.left + r.width/2 - mid); if(d < bd){ bd = d; bi = k; } }); setCur(bi); }
+  track.addEventListener('scroll', () => { if(!nearRaf) nearRaf = requestAnimationFrame(nearest); }, { passive:true });
+  setCur(0); nearest();
   dotsEl.addEventListener('click', e => { const b = e.target.closest('button'); if(b){ holdUntil = Date.now() + 5000; goTo(+b.dataset.i); } });
 
   /* one shared 4s beat: lipstick shades + rows of colors (and the clothing-color rectangle) change together */
