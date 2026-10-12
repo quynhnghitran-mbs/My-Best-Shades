@@ -1985,6 +1985,7 @@
   .tier-tabs{margin:2px 0 10px;}
   .tab-tryon{margin:4px 0 16px;}
   .step-tag{display:flex;align-items:center;gap:7px;margin:4px 0 10px;color:var(--rose-deep);}
+  #runnerSection > .step-tag, #drainSection > .step-tag{margin-top:30px;}
   .step-tag:empty{display:none;}
   .step-tag .st-ic{width:30px;height:30px;border-radius:50%;background:var(--rose-deep);color:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
   .step-tag .st-ic svg{width:17px;height:17px;}
@@ -1995,6 +1996,50 @@
   #pickCard{margin-top:0;}
   .end-zone{margin-top:18px;}
   .seasons-map{margin:2px 0 20px;}
+  .se{margin:18px 0 6px;padding:16px 12px 14px;border-radius:16px;background:var(--card);border:1px solid rgba(150,51,60,.14);text-align:center;}
+  .se-h{font-family:'Playfair Display',serif;font-size:19px;color:var(--text-light);margin-bottom:10px;}
+  .se-h2{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--rose-deep);margin:16px 0 8px;}
+  .se-flow{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+  .se-chip{font-size:12px;padding:3px 10px;border-radius:999px;background:rgba(150,51,60,.07);color:var(--text-light);font-weight:600;}
+  .se-chip.on{background:var(--rose-deep);color:#fff;}
+  .se-arr{color:var(--rose-deep);font-weight:700;}
+  .se-p{font-size:13px;line-height:1.5;color:var(--text-light);margin:0 4px 12px;}
+  .se-axes{display:flex;flex-direction:column;gap:8px;margin-bottom:16px;}
+  .se-ax-ic svg{width:22px;height:22px;}
+  .se-ax{display:grid;grid-template-columns:22px 58px 34px 1fr 34px;align-items:center;gap:6px;text-align:left;}
+  .se-ax-ic{color:var(--rose-deep);display:flex;}
+  .se-ax-ic svg{width:20px;height:20px;}
+  .se-ax b{font-size:12.5px;color:var(--text-light);}
+  .se-ax-end{font-size:11px;color:var(--muted);text-align:center;}
+  .se-ax i{display:block;height:10px;border-radius:999px;}
+  .se-map{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:6px;padding:22px 26px;border-radius:14px;background:linear-gradient(180deg,rgba(246,225,214,.55),rgba(60,36,32,.10));}
+  .se-lab{position:absolute;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+  .se-lab.t{top:4px;left:50%;transform:translateX(-50%);} .se-lab.b{bottom:4px;left:50%;transform:translateX(-50%);}
+  .se-lab.l{left:2px;top:50%;transform:translateY(-50%) rotate(-90deg);} .se-lab.r{right:2px;top:50%;transform:translateY(-50%) rotate(90deg);}
+  .se-q{position:relative;padding:8px 4px;border-radius:12px;background:rgba(255,255,255,.75);border:1px solid rgba(150,51,60,.12);}
+  .se-q.me{box-shadow:0 0 0 2px var(--rose-deep);animation:smPulse 2s ease-in-out infinite;}
+  .se-me{position:absolute;top:-9px;right:-6px;font-size:10px;padding:1px 8px;border-radius:999px;background:var(--rose-deep);color:#fff;}
+  .se-p strong{color:var(--rose-deep);}
+  .se-q-kw{display:flex;flex-wrap:wrap;justify-content:center;gap:3px;}
+  .se-q-kw strong{font-weight:700;color:var(--rose-deep);background:rgba(150,51,60,.08);padding:1px 6px;border-radius:999px;font-size:10.5px;}
+  .se-ax-end{font-weight:600;}
+  .se-q-h{display:flex;align-items:center;justify-content:center;gap:4px;color:var(--rose-deep);font-size:12.5px;}
+  .se-q-h svg{width:15px;height:15px;}
+  .se-q-sw{display:flex;justify-content:center;gap:4px;margin:6px 0 4px;}
+  .se-q-sw i{width:16px;height:16px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 1px 3px rgba(58,31,34,.18);}
+  .se-q-kw{font-size:10.5px;color:var(--text-light);}
+  .se-you{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none;z-index:2;}
+  .se-you i{width:16px;height:16px;border-radius:50%;background:var(--rose-deep);border:3px solid #fff;box-shadow:0 0 0 0 rgba(150,51,60,.5);animation:seYou 1.8s ease-out infinite;}
+  .se-you b{margin-top:2px;font-size:10px;padding:1px 7px;border-radius:999px;background:var(--rose-deep);color:#fff;}
+  @keyframes seYou{0%{box-shadow:0 0 0 0 rgba(150,51,60,.5)}100%{box-shadow:0 0 0 12px rgba(150,51,60,0)}}
+  @media (prefers-reduced-motion:reduce){.se-you i{animation:none;}}
+  .se-dec{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;}
+  .se-d{display:flex;flex-direction:column;align-items:center;gap:3px;}
+  .se-d i{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 2px 6px rgba(58,31,34,.16);}
+  .se-d b{font-size:11.5px;color:var(--text-light);}
+  .se-d span{font-size:10px;line-height:1.2;color:var(--muted);}
+  .se-d b{color:var(--rose-deep);}
+
   .sm-flow{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:12px;color:var(--rose-deep);}
   .sm-ic{width:30px;height:30px;display:flex;}
   .sm-ic svg{width:30px;height:30px;}
@@ -2002,6 +2047,26 @@
   .sm-flow b{font-family:'Playfair Display',serif;font-size:22px;}
   .sm-lab{font-size:12.5px;color:var(--text-light);white-space:nowrap;}
   .sm-you{white-space:nowrap;font-size:12px;font-weight:700;padding:3px 10px;border-radius:999px;background:var(--rose-deep);color:#fff;}
+  .sm-map .sm-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px;}
+  .sm-map .sm-tiles{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:4px;}
+  .sm-map .sm-fam{padding:7px 4px 5px;min-width:0;}
+  .sm-map .se-lab{font-size:9.5px;padding:1px 8px;border-radius:999px;color:#fff;letter-spacing:.08em;}
+  .sm-map .se-lab.t{top:3px;} .sm-map .se-lab.b{bottom:3px;}
+  .sm-map .se-lab.l{left:-9px;} .sm-map .se-lab.r{right:-9px;}
+  /* same colors as the Warmth / Depth bars and the family tags */
+  .sm-map .kw-warm{background:#e8946f;} .sm-map .kw-cool{background:#c98bb4;}
+  .sm-map .kw-light{background:#f6e1d6;color:#7a4a3c;box-shadow:inset 0 0 0 1px rgba(122,74,60,.4);} .sm-map .kw-deep{background:#3c2420;}
+  .sm-map{position:relative;margin-top:14px;padding:22px 18px;border-radius:16px;background:linear-gradient(180deg,rgba(246,225,214,.6),rgba(60,36,32,.12));}
+  .sm-kw{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;margin:-2px 0 7px;min-width:0;}
+  .sm-kw b{font-size:9px;font-weight:700;color:#fff;padding:1px 5px;border-radius:999px;}
+  /* same colors as the Warmth / Depth / Chroma bars */
+  .sm-kw .kw-warm{background:#e8946f;} .sm-kw .kw-cool{background:#c98bb4;}
+  .sm-kw .kw-light{background:#f6e1d6;color:#7a4a3c;box-shadow:inset 0 0 0 1px rgba(122,74,60,.4);} .sm-kw .kw-deep{background:#3c2420;}
+  .sm-kw .kw-muted{background:#a99091;} .sm-kw .kw-vivid{background:#e0234f;}
+  .se{margin:4px 0 0;}
+  .se-axes{margin-bottom:2px;}
+  .se.se-low{margin-top:14px;}
+  .se-low .se-h2{margin-top:0;}
   .sm-axes{display:flex;justify-content:space-around;font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:4px;}
   .sm-axes-v{display:none;}
   .sm-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
@@ -2069,7 +2134,8 @@
   .shop-tag{font-size:11px;font-weight:600;min-height:14px;line-height:14px;color:var(--muted);}
   .shop-opt.right .shop-tag{color:var(--rose-deep);}
   .shop-recall{display:flex;align-items:center;gap:8px;margin:10px 0;text-align:left;}
-  .shop-recall-k{flex:0 0 52px;font-size:12px;font-weight:600;color:var(--text-light);}
+  .shop-recall-k svg,.shop-scale-k svg{width:15px;height:15px;flex:0 0 auto;}
+  .shop-recall-k{display:flex;align-items:center;gap:3px;flex:0 0 70px;font-size:12px;font-weight:600;color:var(--text-light);}
   .shop-seg{flex:1;min-width:0;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
   .shop-recall[data-ax=warmth] .shop-seg{grid-template-columns:repeat(2,1fr);padding:0 12%;}
   .shop-seg-b{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;-webkit-tap-highlight-color:transparent;transition:opacity .2s ease;}
@@ -2095,7 +2161,7 @@
   .shop-scales{max-width:300px;margin:14px auto 2px;}
   .shop-scale{display:flex;align-items:center;gap:10px;margin:10px 0;transition:opacity .2s ease;}
   .shop-scale.quiet{opacity:.45;}
-  .shop-scale-k{flex:0 0 56px;text-align:left;font-size:12px;font-weight:600;color:var(--text-light);}
+  .shop-scale-k{display:flex;align-items:center;gap:3px;flex:0 0 70px;text-align:left;font-size:12px;font-weight:600;color:var(--text-light);}
   .shop-bar{position:relative;flex:1;height:10px;border-radius:999px;box-shadow:inset 0 0 0 1px rgba(58,31,34,.08);}
   .shop-mk{position:absolute;top:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid #fff;box-shadow:0 2px 6px rgba(58,31,34,.25);}
   .shop-mk.ok{background:var(--rose-deep);color:#fff;}
@@ -2217,6 +2283,12 @@
 
   body.scan-failed .fb-thumbs[data-fb="season"]{display:none;}
   #mirrorStage .magic-mirror-wrap{scroll-margin-top:12px;}
+  /* More room for content on phones (2026-10-12, per Nghi): slimmer side margins on the page and the nested cards */
+  @media (max-width:480px){
+    body{padding-left:14px !important;padding-right:14px !important;}
+    .card{padding-left:12px;padding-right:12px;}
+    .analysis-card{padding-left:10px;padding-right:10px;}
+  }
 </style>
 </head>
 <body>
@@ -10031,31 +10103,19 @@ function resetMyShadeFeedbackBlock(){
 // quant bar chart that used to sit below it was removed as redundant.
 const ANALYSIS_ROSE = '#96333c';
 
+// Axis icons -- one clean outline style everywhere (2026-10-12, per Nghi): Your Color Reading, the season
+// explainer, Practice before you shop and the quick review all use these same four.
 function iconThermometer(color){
-  return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none">
-    <rect x="9.6" y="3" width="4.8" height="12.5" rx="2.4" stroke="${color}" stroke-width="1.4"/>
-    <circle cx="12" cy="18.2" r="4" fill="${color}"/>
-    <rect x="10.6" y="8" width="2.8" height="9.2" fill="${color}"/>
-  </svg>`;
+  return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="${color}" stroke-width="1.7" stroke-linecap="round"><path d="M10 14.5 V4.5 a2 2 0 0 1 4 0 V14.5 a4 4 0 1 1 -4 0 Z"/><path d="M12 9 V16"/></svg>`;
 }
 function iconLayers(color){
-  return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none">
-    <path d="M12 3.5L21 8.5L12 13.5L3 8.5L12 3.5Z" fill="${color}"/>
-    <path d="M3 12.2L12 17.2L21 12.2" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
-    <path d="M3 16L12 21L21 16" stroke="${color}" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.35"/>
-  </svg>`;
+  return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="${color}" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round"><path d="M12 4 L21 9 L12 14 L3 9 Z"/><path d="M3 13 L12 18 L21 13"/></svg>`;
 }
 function iconContrastCircle(color){
-  return `<svg viewBox="0 0 24 24" width="22" height="22">
-    <circle cx="12" cy="12" r="8.5" fill="none" stroke="${color}" stroke-width="1.6"/>
-    <path d="M12 3.5A8.5 8.5 0 0 1 12 20.5Z" fill="${color}"/>
-  </svg>`;
+  return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="${color}" stroke-width="1.7"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5 A8.5 8.5 0 0 1 12 20.5 Z" fill="${color}" stroke="none"/></svg>`;
 }
 function iconDropletSmall(color){
-  return `<svg viewBox="0 0 24 24" width="22" height="22">
-    <path d="M12 3C12 3 5.5 11.2 5.5 15.6C5.5 19.13 8.41 22 12 22C15.59 22 18.5 19.13 18.5 15.6C18.5 11.2 12 3 12 3Z" fill="${color}"/>
-    <ellipse cx="9.7" cy="14.6" rx="1.5" ry="2.3" fill="#F5D5DE" opacity="0.85"/>
-  </svg>`;
+  return `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="${color}" stroke-width="1.7" stroke-linejoin="round"><path d="M12 3.5 C9 8 6.5 11 6.5 14.5 a5.5 5.5 0 0 0 11 0 C17.5 11 15 8 12 3.5 Z"/></svg>`;
 }
 
 // Small ring gauge showing a metric's own number, filled to value/max --
@@ -10096,7 +10156,7 @@ function metricRowHTML(opts){
         <span class="metric-name">${opts.name}</span>
         ${metricRingSVG(opts.value, max)}
       </div>
-      <div class="metric-track" style="background:linear-gradient(to right, ${opts.gradientFrom}, ${opts.gradientTo});">
+      <div class="metric-track" style="background:linear-gradient(to right, ${opts.gradientFrom}, ${opts.gradientMid ? opts.gradientMid + ', ' : ''}${opts.gradientTo});">
         ${ticks}
         <div class="metric-marker" style="left:${markerPct}%;"></div>
       </div>
@@ -10129,7 +10189,7 @@ function renderColorAnalysis(result){
     zones: [1.55, 10.85, 15.5, 20.15, 29.45],
     valueLabel: `Warmth = ${result.lab_temperature_b}`,
     categoryText: result.undertone_descriptive,
-    gradientFrom: '#C86B87', gradientTo: '#E0919E', poleLeft: 'Cool', poleRight: 'Warm'
+    gradientFrom: '#c98bb4', gradientMid: '#e6a0a0', gradientTo: '#e8946f', poleLeft: 'Cool', poleRight: 'Warm'
   });
 
   html += metricRowHTML({
@@ -10138,7 +10198,7 @@ function renderColorAnalysis(result){
     zones: [40.8, 53.3],
     valueLabel: `Depth = ${result.depth_score}`,
     categoryText: result.depth_level,
-    gradientFrom: '#7A2E3D', gradientTo: '#F5D5DE', poleLeft: 'Deep', poleRight: 'Light'
+    gradientFrom: '#3c2420', gradientMid: '#b8826a', gradientTo: '#f6e1d6', poleLeft: 'Deep', poleRight: 'Light'
   });
 
   const lightnessPct = Math.max(0, Math.min(100, (result.lightness / 100) * 100));
@@ -10170,7 +10230,7 @@ function renderColorAnalysis(result){
     zones: [5, 19],
     valueLabel: `Chroma = ${result.avg_chroma}`,
     categoryText: result.chroma_level,
-    gradientFrom: '#C9A8AE', gradientTo: '#D6336C', poleLeft: 'Muted', poleRight: 'Vivid'
+    gradientFrom: '#a99091', gradientMid: '#c46b78', gradientTo: '#e0234f', poleLeft: 'Muted', poleRight: 'Vivid'
   });
 
   metricsHolder.innerHTML = html;
@@ -10444,7 +10504,7 @@ function dialRowHTML(opts){
       <span class="dial-values">typical ${opts.typical.toFixed(1)} → yours ${opts.yours.toFixed(1)}</span>
     </div>
     <div class="dial-track">
-      <div class="dial-fill" style="background:linear-gradient(to right, ${opts.gradientFrom}, ${opts.gradientTo});">
+      <div class="dial-fill" style="background:linear-gradient(to right, ${opts.gradientFrom}, ${opts.gradientMid ? opts.gradientMid + ', ' : ''}${opts.gradientTo});">
         <div class="dial-seg-base" style="width:${typicalPct}%;"></div>
         <div class="dial-seg-nudge" style="left:${nudgeLeft}%;width:${nudgeWidth}%;"></div>
       </div>
@@ -10472,19 +10532,19 @@ function renderPaletteDials(seasonName, result, centroid, deltas, hasRealDelta){
       name: 'Warmth', max: 35,
       typical: centroid.b, yours: result.lab_temperature_b,
       poleLeft: 'Cool', poleRight: 'Warm',
-      gradientFrom: '#C86B87', gradientTo: '#E0919E',
+      gradientFrom: '#c98bb4', gradientMid: '#e6a0a0', gradientTo: '#e8946f',
     }) +
     dialRowHTML({
       name: 'Depth', max: 100,
       typical: centroid.depthL, yours: result.depth_score,
       poleLeft: 'Deep', poleRight: 'Light',
-      gradientFrom: '#7A2E3D', gradientTo: '#F5D5DE',
+      gradientFrom: '#3c2420', gradientMid: '#b8826a', gradientTo: '#f6e1d6',
     }) +
     dialRowHTML({
       name: 'Chroma', max: 40,
       typical: centroid.chromaC, yours: result.avg_chroma,
       poleLeft: 'Muted', poleRight: 'Vivid',
-      gradientFrom: '#C9A8AE', gradientTo: '#D6336C',
+      gradientFrom: '#a99091', gradientMid: '#c46b78', gradientTo: '#e0234f',
     });
   document.getElementById('paletteDialsSubtitle').innerHTML =
     `${seasonName}'s typical recipe, stacked with <strong>your own nudge</strong>, lands on <strong>your exact palette</strong>.`;
@@ -11007,7 +11067,7 @@ function faMeterRow(ctx, x, y, w, opts){
   sgText(ctx, opts.valueLabel, x + w, y + 18, { font: `400 15px ${SG_WORKSANS}`, color: SG_THEME.muted, align: 'right' });
   const trackY = y + 30, trackH = 16;
   const grad = ctx.createLinearGradient(x, 0, x + w, 0);
-  grad.addColorStop(0, opts.gradientFrom); grad.addColorStop(1, opts.gradientTo);
+  grad.addColorStop(0, opts.gradientFrom); if(opts.gradientMid) grad.addColorStop(0.5, opts.gradientMid); grad.addColorStop(1, opts.gradientTo);
   sgRoundRectPath(ctx, x, trackY, w, trackH, trackH / 2);
   ctx.fillStyle = grad; ctx.fill();
   (opts.zones || []).forEach(z => {
@@ -11050,16 +11110,16 @@ function buildColorProfileData(){
   const cielabRows = [
     { name: 'Warmth', value: result.lab_temperature_b, max: 35, zones: [1.55, 10.85, 15.5, 20.15, 29.45],
       valueLabel: `Warmth = ${result.lab_temperature_b}`, categoryText: result.undertone_descriptive,
-      gradientFrom: '#C86B87', gradientTo: '#E0919E', poleLeft: 'Cool', poleRight: 'Warm' },
+      gradientFrom: '#c98bb4', gradientMid: '#e6a0a0', gradientTo: '#e8946f', poleLeft: 'Cool', poleRight: 'Warm' },
     { name: 'Depth', value: result.depth_score, max: 100, zones: [40.8, 53.3],
       valueLabel: `Depth = ${result.depth_score}`, categoryText: result.depth_level,
-      gradientFrom: '#7A2E3D', gradientTo: '#F5D5DE', poleLeft: 'Deep', poleRight: 'Light' },
+      gradientFrom: '#3c2420', gradientMid: '#b8826a', gradientTo: '#f6e1d6', poleLeft: 'Deep', poleRight: 'Light' },
     { name: 'Contrast', value: result.contrast_score, max: 80, zones: [39.88, 53.73],
       valueLabel: `${result.lightness} − ${result.darkness} = ${result.contrast_score}`, categoryText: result.contrast_level,
       gradientFrom: '#F0D8DC', gradientTo: '#5C2430', poleLeft: 'Low', poleRight: 'High Contrast' },
     { name: 'Chroma', value: result.avg_chroma, max: 40, zones: [5, 19],
       valueLabel: `Chroma = ${result.avg_chroma}`, categoryText: result.chroma_level,
-      gradientFrom: '#C9A8AE', gradientTo: '#D6336C', poleLeft: 'Muted', poleRight: 'Vivid' },
+      gradientFrom: '#a99091', gradientMid: '#c46b78', gradientTo: '#e0234f', poleLeft: 'Muted', poleRight: 'Vivid' },
   ].filter(r => r.value != null && r.categoryText != null);
 
   return { season: result.season, family: result.family, confidencePillText, pixelFeatures, cielabRows };
@@ -12048,7 +12108,7 @@ function renderDrainSection(result){
   const pairs = drainPairs(result);
   if(!src || pairs.length < 2 || !mountCompareSlider(cmp, src, pairs, 'Yours', 'Drains you')){ sec.style.display = 'none'; return; }
   const { her, opp } = oppositeTiers(result);
-  cap.innerHTML = `${magnifierIcon()} <strong>Same hue, opposite tiers.</strong> You read <strong>${her.depth}, ${her.warmth}, ${her.chroma}</strong>. Each draining color is your own color moved to <strong>${opp.depth}, ${opp.warmth}, ${opp.chroma}</strong>. Drag the line, then tap the arrows for the next hue (${pairs.length} in all).`;
+  cap.innerHTML = `${magnifierIcon()} Same hue · <strong>${her.depth}, ${her.warmth}, ${her.chroma}</strong> → <strong>${opp.depth}, ${opp.warmth}, ${opp.chroma}</strong>`;
   sec.style.display = 'block';
 }
 
@@ -12405,6 +12465,22 @@ const SEASON_MAP = [
   ['Autumn', ['Soft Autumn', 'True Autumn', 'Deep Autumn', 'Deep Soft Autumn']],
   ['Winter', ['Bright Winter', 'True Winter', 'Deep Winter', 'Soft Winter']],
 ];
+// each family's name is colored with a rose/red/pink from one of its own seasons (readable on the light card)
+const FAM_SOURCE = { Spring: 'Bright Spring', Summer: 'True Summer', Autumn: 'Deep Autumn', Winter: 'Deep Winter' };
+function familyRose(fam){
+  try{
+    const pal = (generateClothingPalette(FAM_SOURCE[fam]) || []).map(c => { const l = rgbToLab(hexToRgb(c.hex)); return { hex: c.hex, L: l.L, C: Math.hypot(l.a, l.b), h: (Math.atan2(l.b, l.a) * 180 / Math.PI + 360) % 360 }; });
+    // Winter: a cool red (blue-based crimson), not a pink-rose
+    const rose = fam === 'Winter' ? pal.filter(c => c.h >= 12 && c.h <= 24 && c.C >= 30)
+      : pal.filter(c => (c.h >= 330 || c.h <= 40) && c.C >= 20);
+    const pick = arr => arr.sort((x, y) => Math.abs(x.L - 45) - Math.abs(y.L - 45) || y.C - x.C)[0];
+    const best = pick(rose.filter(c => c.L >= 30 && c.L <= 58)) || pick(rose);
+    if(!best) return null;
+    const l = rgbToLab(hexToRgb(best.hex));   // keep it dark enough to read as text
+    return l.L > 55 ? lchToHex(52, Math.hypot(l.a, l.b), best.h) : best.hex;
+  }catch(e){ return null; }
+}
+const FAM_KW = { Spring: ['Warm', 'Light', 'Vivid'], Summer: ['Cool', 'Light', 'Muted'], Autumn: ['Warm', 'Deep', 'Muted'], Winter: ['Cool', 'Deep', 'Vivid'] };
 const FAMILY_ICON = {
   Spring: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="2.4"/><path d="M12 9.6 C10 6 10.5 3.8 12 3.5 C13.5 3.8 14 6 12 9.6 Z M14.4 12 C18 10 20.2 10.5 20.5 12 C20.2 13.5 18 14 14.4 12 Z M12 14.4 C14 18 13.5 20.2 12 20.5 C10.5 20.2 10 18 12 14.4 Z M9.6 12 C6 14 3.8 13.5 3.5 12 C3.8 10.5 6 10 9.6 12 Z"/></svg>',
   Summer: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 3 V5 M12 19 V21 M3 12 H5 M19 12 H21 M5.6 5.6 L7 7 M17 17 L18.4 18.4 M5.6 18.4 L7 17 M17 7 L18.4 5.6"/></svg>',
@@ -12425,9 +12501,29 @@ function renderSeasonsMap(result){
         return `<path d="M${pt(R, a0)} A${R} ${R} 0 0 1 ${pt(R, a1)} L${pt(r, a1)} A${r} ${r} 0 0 0 ${pt(r, a0)} Z" fill="${c.hex}"/>`; }).join('')}</svg>`;
     }catch(e){ return ''; } };
   el.innerHTML = `<div class="sm-flow"><span class="sm-ic">${'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="10" r="6"/><circle cx="9.8" cy="9.4" r=".9" fill="currentColor"/><circle cx="14.2" cy="9.4" r=".9" fill="currentColor"/><path d="M10 12.6 C11.2 13.6 12.8 13.6 14 12.6"/><path d="M6 21 C6.8 17.8 9 16.5 12 16.5 C15 16.5 17.2 17.8 18 21"/></svg>'}</span><span class="sm-arrow">→</span><b>16</b><span class="sm-lab">color seasons</span><span class="sm-arrow">→</span><span class="sm-you">1 is you</span></div>
-    <div class="sm-axes"><span>Warm</span><span>Cool</span></div>
-    <div class="sm-grid">${SEASON_MAP.map(([fam, list]) => `<div class="sm-fam"><div class="sm-fam-h">${FAMILY_ICON[fam]}<span>${fam}</span></div><div class="sm-tiles">${list.map(n => `<div class="sm-tile${n === mine ? ' me' : ''}">${wheel(n)}<span>${n}</span>${n === mine ? '<b class="sm-me">You</b>' : ''}</div>`).join('')}</div></div>`).join('')}</div>
-    <div class="sm-axes-v"><span>Light</span><span>Deep</span></div>`;
+    ${seasonExplainHtml(result, 'top')}
+    <div class="sm-map"><span class="se-lab t kw-light">Light</span><span class="se-lab b kw-deep">Deep</span><span class="se-lab l kw-warm">Warm</span><span class="se-lab r kw-cool">Cool</span>
+    <div class="sm-grid">${SEASON_MAP.map(([fam, list]) => `<div class="sm-fam"><div class="sm-fam-h"${familyRose(fam) ? ` style="color:${familyRose(fam)}"` : ''}>${FAMILY_ICON[fam]}<span>${fam}</span></div><div class="sm-kw">${FAM_KW[fam].map(w => `<b class="kw-${w.toLowerCase()}">${w}</b>`).join('')}</div><div class="sm-tiles">${list.map(n => `<div class="sm-tile${n === mine ? ' me' : ''}">${wheel(n)}<span>${n}</span>${n === mine ? '<b class="sm-me">You</b>' : ''}</div>`).join('')}</div></div>`).join('')}</div></div>
+    ${seasonExplainHtml(result, 'decoder')}`;
+}
+// ---- WHAT'S A COLOR SEASON? (2026-10-12, per Nghi): a plain-language, visual primer under the 16 wheels ----
+function seasonExplainHtml(result, part){
+  const axis = (k, ic, a, b, grad) => `<div class="se-ax"><span class="se-ax-ic">${ic}</span><b>${k}</b><span class="se-ax-end">${a}</span><i style="background:linear-gradient(90deg,${grad})"></i><span class="se-ax-end">${b}</span></div>`;
+  if(part === 'decoder'){
+    const decode = [['Light', '#f3d6c8', 'lightest'], ['Deep', '#4a2a22', 'darkest'], ['Bright', '#e0234f', 'most vivid'], ['Soft', '#a99091', 'most muted'], ['True', '#c0603a', 'the classic look']];
+    return `<div class="se se-low"><div class="se-h2">The first word tells you what stands out most</div>
+      <div class="se-dec">${decode.map(([w, c, m]) => `<div class="se-d"><i style="background:${c}"></i><b>${w}</b><span>${m}</span></div>`).join('')}</div></div>`;
+  }
+  return `<div class="se">
+    <div class="se-h">What's a color season?</div>
+    <div class="se-flow"><span class="se-chip">Skin</span><span class="se-chip">Eyes</span><span class="se-chip">Brows</span><span class="se-arr">→</span><span class="se-chip on">Best colors</span></div>
+    <div class="se-p">Colors that <strong>match</strong> your natural coloring make you <strong>glow</strong>. Colors that <strong>fight</strong> it make you look <strong>tired</strong>. <strong>3 readings</strong> decide your season:</div>
+    <div class="se-axes">
+      ${axis('Warmth', iconThermometer(ANALYSIS_ROSE), 'Cool', 'Warm', '#c98bb4,#e6a0a0,#e8946f')}
+      ${axis('Depth', iconLayers(ANALYSIS_ROSE), 'Light', 'Deep', '#f6e1d6,#b8826a,#3c2420')}
+      ${axis('Chroma', iconDropletSmall(ANALYSIS_ROSE), 'Muted', 'Vivid', '#a99091,#c46b78,#e0234f')}
+    </div>
+  </div>`;
 }
 
 // ---- why this season and not the runner-up ----
@@ -12478,7 +12574,7 @@ function renderTierCompare(){
   if(!pairs.length || !mountCompareSlider(document.getElementById('runnerCompare'), src, pairs, `Your ${mine}`, others[0])){ sec.style.display = 'none'; return; }
   const fixed = { warmth: 'depth and chroma', depth: 'warmth and chroma', chroma: 'warmth and depth' }[tierAxis];
   const axisWord = { warmth: 'warmth', depth: 'depth', chroma: 'chroma' }[tierAxis];
-  document.getElementById('runnerCaption').innerHTML = `${magnifierIcon()} <strong>Same color, only the ${axisWord} changes</strong> (${fixed} stay the same). Left: your <strong>${mine}</strong>. Right: ${others.map(t => `<strong>${t}</strong>`).join(' or ')}. Drag the line, then tap the arrows for the next pair.`;
+  document.getElementById('runnerCaption').innerHTML = `${magnifierIcon()} Same color · only <strong>${axisWord[0].toUpperCase() + axisWord.slice(1)}</strong> changes`;
   sec.style.display = 'block';
 }
 function renderRunnerUpCompare(result){ tierResult = result; tierAxis = 'warmth'; syncTierTabs(); renderTierCompare(); }
@@ -12582,6 +12678,7 @@ function buildShopRounds(result){
   }
   return rounds;
 }
+const AXIS_ICON = ax => ({ warmth: iconThermometer, depth: iconLayers, chroma: iconDropletSmall }[ax])(ANALYSIS_ROSE);
 const SHOP_LABEL = { lipstick: 'Lipstick', clothing: 'Tops', blush: 'Blush', hair: 'Hair', jewelry: 'Jewelry' };
 const SHOP_TIERS = { depth: ['Light', 'Medium', 'Deep'], warmth: ['Cool', 'Warm'], chroma: ['Muted', 'Balanced', 'Vivid'] };
 const SHOP_POS = { Light: 12, Medium: 50, Deep: 88, Cool: 15, Warm: 85, Muted: 12, Balanced: 50, Vivid: 88 };
@@ -12595,9 +12692,9 @@ function shopSample(axis, tier, base){
 function shopScales(st, rd, missAxis){
   const base = rd.cat === 'jewelry' ? (lastStyleGuideData.lipstick && lastStyleGuideData.lipstick[0] ? lastStyleGuideData.lipstick[0].hex : '#b5505a') : rd.mine;
   return `<div class="shop-scales">${['depth', 'warmth', 'chroma'].map(ax => {
-    const tiers = SHOP_TIERS[ax], grad = tiers.map(t => shopSample(ax, t, base)).join(',');
+    const tiers = SHOP_TIERS[ax], grad = { depth: '#f6e1d6,#b8826a,#3c2420', warmth: '#c98bb4,#e6a0a0,#e8946f', chroma: '#a99091,#c46b78,#e0234f' }[ax];
     const miss = missAxis === ax ? `<b class="shop-mk no" style="left:${SHOP_POS[st.opp[ax]]}%">✕</b>` : '';
-    return `<div class="shop-scale${missAxis && missAxis !== ax ? ' quiet' : ''}"><span class="shop-scale-k">${ax[0].toUpperCase() + ax.slice(1)}</span>
+    return `<div class="shop-scale${missAxis && missAxis !== ax ? ' quiet' : ''}"><span class="shop-scale-k">${AXIS_ICON(ax)}${ax[0].toUpperCase() + ax.slice(1)}</span>
       <div class="shop-bar" style="background:linear-gradient(90deg,${grad})"><b class="shop-mk ok" style="left:${SHOP_POS[st.her[ax]]}%">✓</b>${miss}</div></div>`;
   }).join('')}</div>`;
 }
@@ -12621,7 +12718,7 @@ function drawOdd(){
   if(st.r === -1){
     const order = { depth: ['Light', 'Medium', 'Deep'], warmth: ['Warm', 'Cool'], chroma: ['Muted', 'Balanced', 'Vivid'] };
     box.innerHTML = `${shopHead()}<div class="odd-title">Which one is you?</div>
-      ${['depth', 'warmth', 'chroma'].map(ax => `<div class="shop-recall" data-ax="${ax}"><span class="shop-recall-k">${ax[0].toUpperCase() + ax.slice(1)}</span><div class="shop-seg">${order[ax].map(o => `<button type="button" class="shop-seg-b" data-v="${o}"><i style="background:${shopSample(ax, o, base)}"></i><span>${o}</span></button>`).join('')}${ax === 'depth' ? SHOP_HAND('depth') : ''}</div></div>`).join('')}
+      ${['depth', 'warmth', 'chroma'].map(ax => `<div class="shop-recall" data-ax="${ax}"><span class="shop-recall-k">${AXIS_ICON(ax)}${ax[0].toUpperCase() + ax.slice(1)}</span><div class="shop-seg">${order[ax].map(o => `<button type="button" class="shop-seg-b" data-v="${o}"><i style="background:${shopSample(ax, o, base)}"></i><span>${o}</span></button>`).join('')}${ax === 'depth' ? SHOP_HAND('depth') : ''}</div></div>`).join('')}
       <div class="odd-result"></div>`;
     return;
   }
@@ -12810,7 +12907,7 @@ function renderMsRecall(){
   const base = '#b5505a', ans = {};
   const order = { depth: ['Light', 'Medium', 'Deep'], warmth: ['Warm', 'Cool'], chroma: ['Muted', 'Balanced', 'Vivid'] };
   box.innerHTML = `<div class="odd-eyebrow">Quick review</div><div class="odd-title">Which one is you?</div>
-    ${['depth', 'warmth', 'chroma'].map(ax => `<div class="shop-recall" data-ax="${ax}"><span class="shop-recall-k">${ax[0].toUpperCase() + ax.slice(1)}</span><div class="shop-seg">${order[ax].map(o => `<button type="button" class="shop-seg-b" data-v="${o}"><i style="background:${shopSample(ax, o, base)}"></i><span>${o}</span></button>`).join('')}${ax === 'depth' ? SHOP_HAND('depth') : ''}</div></div>`).join('')}
+    ${['depth', 'warmth', 'chroma'].map(ax => `<div class="shop-recall" data-ax="${ax}"><span class="shop-recall-k">${AXIS_ICON(ax)}${ax[0].toUpperCase() + ax.slice(1)}</span><div class="shop-seg">${order[ax].map(o => `<button type="button" class="shop-seg-b" data-v="${o}"><i style="background:${shopSample(ax, o, base)}"></i><span>${o}</span></button>`).join('')}${ax === 'depth' ? SHOP_HAND('depth') : ''}</div></div>`).join('')}
     <div class="odd-result"></div>`;
   box.style.display = '';
   box.onclick = (e) => {
