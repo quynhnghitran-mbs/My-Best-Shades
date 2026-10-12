@@ -1855,12 +1855,35 @@
   .pw-badge{display:flex;align-items:center;gap:7px;width:fit-content;max-width:310px;text-align:left;line-height:1.4;margin:12px auto 0;font-size:12.5px;font-weight:600;color:var(--rose-deep);}
   .pw-badge svg{width:15px;height:15px;flex:0 0 auto;}
   /* 27: season reveal */
-  .season-reveal{all:unset;box-sizing:border-box;cursor:pointer;display:none;width:100%;text-align:center;padding:26px 16px;border-radius:16px;
-    background:linear-gradient(160deg,#f7dedb 0%,#ecc3bf 100%);border:1px solid rgba(150,51,60,.22);-webkit-tap-highlight-color:transparent;}
-  .season-reveal svg{width:30px;height:30px;fill:var(--rose-deep);display:block;margin:0 auto 8px;}
-  .season-reveal b{display:block;font-family:'Playfair Display',serif;font-weight:500;font-size:22px;color:var(--text-light);}
-  .season-reveal span{display:block;font-size:13px;color:var(--rose-deep);margin-top:4px;font-weight:600;letter-spacing:.04em;}
+  /* Season reveal as a present to unbox (2026-10-12, per Nghi) */
+  .season-reveal{all:unset;box-sizing:border-box;cursor:pointer;display:none;width:100%;text-align:center;padding:6px 8px 14px;border-radius:16px;-webkit-tap-highlight-color:transparent;}
   .season-reveal:focus-visible{outline:2px solid var(--rose-deep);outline-offset:3px;}
+  .season-reveal > b{display:block;font-family:'Playfair Display',serif;font-weight:500;font-size:22px;color:var(--text-light);margin-top:10px;}
+  .season-reveal .gb-sub{display:block;font-size:13px;color:var(--rose-deep);margin-top:2px;font-weight:600;letter-spacing:.04em;transition:opacity .2s;}
+  .gb-stage{position:relative;display:block;width:190px;height:190px;margin:0 auto;}
+  .gb-glow{position:absolute;left:50%;top:58%;width:230px;height:230px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,rgba(255,236,226,.95) 0%,rgba(246,200,200,.55) 38%,rgba(242,217,214,0) 70%);animation:gbBreathe 2.6s ease-in-out infinite;}
+  .gb-box{position:absolute;left:50%;bottom:6px;width:150px;transform:translateX(-50%);transform-origin:50% 100%;animation:gbWiggle 2.6s ease-in-out infinite;}
+  .gb-box svg{display:block;width:100%;height:auto;overflow:visible;}
+  .gb-lid{transform-origin:50% 100%;}
+  .gb-rays{position:absolute;left:50%;top:44%;width:260px;height:260px;transform:translate(-50%,-50%) scale(.4);opacity:0;pointer-events:none;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,240,230,.85) 0 8deg,rgba(255,240,230,0) 8deg 22deg);-webkit-mask:radial-gradient(circle,#000 18%,transparent 66%);mask:radial-gradient(circle,#000 18%,transparent 66%);}
+  .gb-hand{position:absolute;left:58%;top:62%;color:#fff;filter:drop-shadow(0 1px 4px rgba(58,31,34,.45));animation:gbTap 1.6s ease-in-out infinite;pointer-events:none;transition:opacity .2s;}
+  .gb-hand svg{width:40px;height:32px;transform:rotate(-90deg);display:block;}
+  .gb-burst i{position:absolute;left:50%;top:48%;opacity:0;pointer-events:none;}
+  .gb-burst i svg{width:100%;height:100%;display:block;}
+  @keyframes gbWiggle{0%,62%,100%{transform:translateX(-50%) rotate(0)}68%{transform:translateX(-50%) rotate(-4deg)}74%{transform:translateX(-50%) rotate(4deg)}80%{transform:translateX(-50%) rotate(-3deg)}86%{transform:translateX(-50%) rotate(2deg)}92%{transform:translateX(-50%) rotate(0)}}
+  @keyframes gbBreathe{0%,100%{opacity:.75;transform:translate(-50%,-50%) scale(.92)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.04)}}
+  @keyframes gbTap{0%,100%{transform:translate(0,0)}50%{transform:translate(-4px,-7px)}}
+  .season-reveal.open .gb-box{animation:none;}
+  .season-reveal.open .gb-lid{animation:gbLidOff .75s cubic-bezier(.3,1.4,.5,1) forwards;}
+  .season-reveal.open .gb-rays{animation:gbRays 1.4s ease-out .25s forwards;}
+  .season-reveal.open .gb-hand,.season-reveal.open .gb-sub{opacity:0;}
+  .season-reveal.open .gb-body{animation:gbSink .6s ease .55s forwards;}
+  .season-reveal.open .gb-burst i{animation:gbFly 1.1s ease-out forwards;animation-delay:var(--d);}
+  @keyframes gbLidOff{0%{transform:translate(0,0) rotate(0)}35%{transform:translate(0,-18px) rotate(-4deg)}100%{transform:translate(70px,-130px) rotate(38deg);opacity:0}}
+  @keyframes gbRays{0%{opacity:0;transform:translate(-50%,-50%) scale(.4) rotate(0)}35%{opacity:1}100%{opacity:0;transform:translate(-50%,-50%) scale(1.25) rotate(40deg)}}
+  @keyframes gbSink{to{opacity:0;transform:translateY(16px) scale(.92)}}
+  @keyframes gbFly{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.1) rotate(var(--r))}}
+  @media (prefers-reduced-motion:reduce){.gb-box,.gb-glow,.gb-hand{animation:none;}}
   #resultCard.sr-locked .season-reveal{display:block;}
   #resultCard.sr-locked > :not(.season-reveal){display:none !important;}
   #resultCard.sr-flip #seasonName{animation:srFlip .7s ease both;}
@@ -2000,6 +2023,9 @@
   .se-h{font-family:'Playfair Display',serif;font-size:19px;color:var(--text-light);margin-bottom:10px;}
   .se-h2{font-size:12px;font-weight:700;letter-spacing:.04em;color:var(--rose-deep);margin:16px 0 8px;}
   .se-flow{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;margin-bottom:10px;}
+  .se-fi{width:38px;height:38px;border-radius:50%;background:rgba(150,51,60,.07);display:inline-flex;align-items:center;justify-content:center;}
+  .se-fi svg{width:26px;height:26px;display:block;}
+  .se-plus{color:var(--rose-deep);font-weight:700;font-size:13px;opacity:.7;}
   .se-chip{font-size:12px;padding:3px 10px;border-radius:999px;background:rgba(150,51,60,.07);color:var(--text-light);font-weight:600;}
   .se-chip.on{background:var(--rose-deep);color:#fff;}
   .se-arr{color:var(--rose-deep);font-weight:700;}
@@ -2137,7 +2163,6 @@
   .shop-recall-k svg,.shop-scale-k svg{width:15px;height:15px;flex:0 0 auto;}
   .shop-recall-k{display:flex;align-items:center;gap:3px;flex:0 0 70px;font-size:12px;font-weight:600;color:var(--text-light);}
   .shop-seg{flex:1;min-width:0;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;}
-  .shop-recall[data-ax=warmth] .shop-seg{grid-template-columns:repeat(2,1fr);padding:0 12%;}
   .shop-seg-b{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;-webkit-tap-highlight-color:transparent;transition:opacity .2s ease;}
   .shop-seg-b i{display:block;width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 10px rgba(58,31,34,.16);transition:transform .2s ease,box-shadow .2s ease;}
   .shop-seg-b span{font-size:11px;color:var(--muted);}
@@ -2207,6 +2232,28 @@
   .ms-guess-b svg{width:34px;height:34px;}
   .ms-guess-b:focus-visible{outline:2px solid var(--rose-deep);outline-offset:2px;}
   .gn-chip svg{width:16px;height:16px;color:var(--rose-deep);margin-left:4px;}
+  .rq-card{max-width:380px;}
+  .rq-q{display:flex;align-items:center;justify-content:center;gap:8px;margin:2px 0 14px;}
+  .rq-q svg{width:24px;height:24px;}
+  .rq-opts{position:relative;display:grid;gap:8px;padding-bottom:20px;max-width:300px;margin:0 auto;}
+  .rq-opts.n2{grid-template-columns:1fr 1fr;padding-left:12%;padding-right:12%;}
+  .rq-opts.n3{grid-template-columns:repeat(3,1fr);}
+  .rq-o{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:5px;-webkit-tap-highlight-color:transparent;transition:opacity .2s;}
+  .rq-o i{width:46px;height:46px;border-radius:50%;border:3px solid #fff;box-shadow:0 3px 10px rgba(58,31,34,.18);transition:transform .2s,box-shadow .2s;}
+  .rq-o span{font-size:12.5px;color:var(--text-light);font-weight:600;}
+  .rq-o:focus-visible{outline:2px solid var(--rose-deep);outline-offset:3px;border-radius:10px;}
+  .rq-o.right i{box-shadow:0 0 0 3px var(--rose-deep),0 3px 10px rgba(58,31,34,.2);transform:scale(1.08);}
+  .rq-o.right span{color:var(--rose-deep);}
+  .rq-o.wrong{animation:oddShake .45s ease;opacity:.55;}
+  .rq-o.dim{opacity:.4;}
+  .rq-res{min-height:6px;}
+  .rq-bar{position:relative;height:12px;border-radius:999px;margin:16px 14px 4px;}
+  .rq-ends{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin:0 10px 12px;}
+  .rq-big{font-family:'Playfair Display',serif;font-size:30px;color:var(--rose-deep);margin:6px 0 10px;}
+  .rq-sum{display:flex;justify-content:center;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+  .rq-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px 4px 6px;border-radius:999px;background:rgba(150,51,60,.07);font-size:12.5px;font-weight:600;color:var(--text-light);}
+  .rq-chip svg{width:16px;height:16px;}
+  .rq-chip i{width:14px;height:14px;border-radius:50%;box-shadow:0 0 0 1px rgba(58,31,34,.15);}
   .gn-head{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--rose-deep);margin-bottom:6px;}
   .gn-head b{font-family:'Playfair Display',serif;font-size:15px;margin-left:4px;}
   .gn-rows{display:flex;flex-direction:column;gap:6px;align-items:center;}
@@ -2264,8 +2311,13 @@
   .res-nav{position:fixed;top:14px;left:68px;right:14px;z-index:850;display:none;justify-content:center;gap:2px;max-width:420px;margin:0 auto;
     background:rgba(253,245,243,.95);border:1px solid rgba(150,51,60,.2);border-radius:999px;padding:4px;box-shadow:0 6px 16px rgba(58,31,34,.14);backdrop-filter:blur(6px);}
   .res-nav.show{display:flex;}
-  .res-nav button{all:unset;cursor:pointer;flex:1 1 auto;text-align:center;font-size:12.5px;font-weight:600;color:var(--muted);padding:8px 6px;border-radius:999px;white-space:nowrap;}
-  .res-nav button.on{background:var(--rose-deep);color:var(--card);}
+  .res-nav{justify-content:space-between;}
+  .res-nav button{all:unset;cursor:pointer;position:relative;flex:0 0 auto;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--rose-deep);-webkit-tap-highlight-color:transparent;}
+  .res-nav .rn-ic{display:flex;}
+  .res-nav .rn-ic svg{width:19px;height:19px;}
+  .res-nav button b{position:absolute;top:-3px;right:-3px;min-width:15px;height:15px;border-radius:50%;background:var(--card);color:var(--rose-deep);border:1px solid rgba(150,51,60,.35);font-size:9px;line-height:13px;text-align:center;box-sizing:border-box;}
+  .res-nav button.on{background:var(--rose-deep);color:#fff;}
+  .res-nav button.on b{background:#fff;color:var(--rose-deep);border-color:var(--rose-deep);}
   .res-nav button:focus-visible{outline:2px solid var(--rose-deep);outline-offset:2px;}
   html.cv-lock .res-nav{display:none !important;}
   #resultCard, #styleGuideSection, #brandSection, .palette-download-row{scroll-margin-top:72px;}
@@ -2289,6 +2341,35 @@
     .card{padding-left:12px;padding-right:12px;}
     .analysis-card{padding-left:10px;padding-right:10px;}
   }
+  .pal-tabs .pal-tab-ic{display:inline-flex;align-items:center;justify-content:center;width:50px;height:40px;padding:0;flex:0 0 auto;}
+  .pal-tab-ic svg{width:25px;height:25px;display:block;}
+  #palTabs{justify-content:center;gap:8px;}
+  .pal-tab.active .hair-hl{stroke:var(--rose-deep);}
+  .sh-card{max-width:380px;}
+  .sh-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 6px;margin:12px 0 6px;}
+  .sh-b{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;-webkit-tap-highlight-color:transparent;}
+  .sh-ic{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(58,31,34,.16);transition:transform .2s;}
+  .sh-b[data-k=instagram] .sh-ic{border-radius:14px;}
+  .sh-ic svg{width:28px;height:28px;display:block;}
+  .sh-b:hover .sh-ic{transform:translateY(-2px);}
+  .sh-b:focus-visible .sh-ic{outline:2px solid var(--rose-deep);outline-offset:3px;}
+  .sh-l{font-size:11px;color:var(--text-light);font-weight:600;}
+  .sh-note{min-height:20px;font-size:12.5px;font-weight:700;color:var(--rose-deep);opacity:0;}
+  .sh-note.show{animation:voiceIn 2.8s ease forwards;}
+  .pal-tab-label{position:relative;height:20px;margin:-8px 0 8px;}
+  .pal-tab-label span{position:absolute;top:0;transform:translateX(-50%);font-size:11.5px;font-weight:700;color:var(--rose-deep);white-space:nowrap;}
+  .pal-tab-label span.pop{animation:palLab .35s ease;}
+  @keyframes palLab{from{opacity:0;transform:translate(-50%,-4px)}to{opacity:1;transform:translate(-50%,0)}}
+  .shop-seg-b span{line-height:1.15;text-align:center;}
+  .shop-recall .shop-seg-b i{width:30px;height:30px;}
+  .shop-recall{flex-direction:column;align-items:stretch;gap:5px;margin:12px 0;}
+  .shop-recall .shop-recall-k{flex:none;justify-content:flex-start;}
+  .shop-seg{gap:0;}
+  .shop-seg-b span{font-size:10.5px;}
+  .rq-opts.n4{grid-template-columns:repeat(4,1fr);max-width:320px;}
+  .rq-opts.n5{grid-template-columns:repeat(5,1fr);max-width:330px;gap:4px;}
+  .rq-opts.n4 .rq-o i,.rq-opts.n5 .rq-o i{width:38px;height:38px;}
+  .rq-o span{font-size:11px;line-height:1.15;text-align:center;}
 </style>
 </head>
 <body>
@@ -2325,12 +2406,7 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
 
 <button type="button" class="fmbs-home" id="fmbsHomeBtn" aria-label="Back to home" title="Home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 11.2 L12 4 L20.5 11.2"/><path d="M5.8 9.6 V19.5 H10 V14.5 H14 V19.5 H18.2 V9.6"/></svg></button>
 
-<nav class="res-nav" id="resNav" aria-label="Your results">
-  <button type="button" data-go="resultCard">Season</button>
-  <button type="button" data-go="styleGuideSection">Palette</button>
-  <button type="button" data-go="brandSection">Lipsticks</button>
-  <button type="button" data-go="downloadBothBtn">Save</button>
-</nav>
+<nav class="res-nav" id="resNav" aria-label="Your results"></nav>
 
 <div class="wrap">
   <div class="eyebrow">You are my most beautiful queen</div>
@@ -2510,7 +2586,7 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
   <div class="error-box" id="errorBox1"></div>
 
   <div class="card" id="resultCard">
-    <button type="button" class="season-reveal" id="seasonReveal"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 52 C 19 42, 7 32, 7 20 C 7 11, 14 5, 22 5 C 27 5, 30 8, 32 13 C 34 8, 37 5, 42 5 C 50 5, 57 11, 57 20 C 57 32, 45 42, 32 52 Z"/></svg><b>Your season is ready</b><span>Tap to reveal</span></button>
+    <button type="button" class="season-reveal" id="seasonReveal" aria-label="Your season is ready. Tap to unbox."><span class="gb-stage"><span class="gb-glow"></span><span class="gb-rays"></span><span class="gb-box"><svg viewBox="0 0 160 150" aria-hidden="true"><defs><linearGradient id="gbBody" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9727c"/><stop offset="1" stop-color="#a83d4a"/></linearGradient><linearGradient id="gbLid" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e48a92"/><stop offset="1" stop-color="#c2505c"/></linearGradient><linearGradient id="gbRib" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#f7e1d7"/><stop offset=".5" stop-color="#fff6f1"/><stop offset="1" stop-color="#ecc9bb"/></linearGradient></defs><g class="gb-body"><rect x="20" y="62" width="120" height="84" rx="8" fill="url(#gbBody)"/><rect x="20" y="62" width="120" height="10" fill="rgba(58,31,34,.18)"/><rect x="72" y="62" width="16" height="84" fill="url(#gbRib)"/><g fill="#fff" opacity=".22"><circle cx="36" cy="84" r="3"/><circle cx="54" cy="104" r="3"/><circle cx="36" cy="126" r="3"/><circle cx="106" cy="84" r="3"/><circle cx="124" cy="104" r="3"/><circle cx="106" cy="126" r="3"/><circle cx="54" cy="140" r="2.5"/><circle cx="124" cy="140" r="2.5"/></g></g><g class="gb-lid"><rect x="12" y="44" width="136" height="24" rx="6" fill="url(#gbLid)"/><rect x="72" y="44" width="16" height="24" fill="url(#gbRib)"/><path d="M80 44 C60 10 30 14 36 32 C41 46 64 48 80 44 Z" fill="#fff6f1" stroke="#ecc9bb" stroke-width="1.6"/><path d="M80 44 C100 10 130 14 124 32 C119 46 96 48 80 44 Z" fill="#fff6f1" stroke="#ecc9bb" stroke-width="1.6"/><path d="M78 42 C66 30 52 28 50 32" stroke="#ecc9bb" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M82 42 C94 30 108 28 110 32" stroke="#ecc9bb" stroke-width="1.4" fill="none" stroke-linecap="round"/><path d="M75 46 L62 66 L70 63 L74 71 L79 48 Z M85 46 L98 66 L90 63 L86 71 L81 48 Z" fill="#f7e1d7" stroke="#ecc9bb" stroke-width="1"/><ellipse cx="80" cy="43" rx="8" ry="7" fill="#fff6f1" stroke="#ecc9bb" stroke-width="1.6"/></g></svg></span><span class="gb-burst" id="gbBurst"></span><span class="gb-hand" aria-hidden="true"><svg viewBox="0 0 64 52" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12 H56 a4.2 4.2 0 0 1 0 8.4 H33"/><path d="M33 20.4 H47 a4.2 4.2 0 0 1 0 8.4 H33"/><path d="M33 28.8 H44 a4.2 4.2 0 0 1 0 8.4 H33"/><path d="M33 37.2 H41 a4.2 4.2 0 0 1 0 8.4 H29"/><path d="M20 12 C11 12 6 19 6.5 27 C7 35 12 42 20 45.5 L29 45.6"/><path d="M17 24 C14 28 16 34 22 35 L33 33"/></svg></span></span><b>Your season is ready</b><span class="gb-sub">Tap to unbox</span></button>
     <div class="season-tag" id="seasonFamily"></div>
     <div class="season-name" id="seasonName"></div>
     <div class="season-desc" id="seasonDesc"></div>
@@ -2527,6 +2603,7 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
 
         <div class="analysis-subhead">Your Color Reading</div>
         <div id="cielabMetrics"></div>
+        <div id="readingEnd" aria-hidden="true"></div>
       </div>
     </div>
 
@@ -2552,12 +2629,13 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
         <div class="palette-category-label" style="margin-top:22px;">Personalized Colors</div>
         <div class="heart-hint"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 52 C 19 42, 7 32, 7 20 C 7 11, 14 5, 22 5 C 27 5, 30 8, 32 13 C 34 8, 37 5, 42 5 C 50 5, 57 11, 57 20 C 57 32, 45 42, 32 52 Z"/></svg><span><strong>Love a color?</strong> Tap it to send hearts, as many times as you like. Your hearted colors go to My Favorites.</span></div>
         <div class="pal-tabs" id="palTabs" role="tablist">
-          <button type="button" class="pal-tab active" data-tab="clothing" role="tab" aria-selected="true">Clothing</button>
-          <button type="button" class="pal-tab" data-tab="lips" role="tab" aria-selected="false">Lips &amp; Cheeks</button>
-          <button type="button" class="pal-tab" data-tab="eyes" role="tab" aria-selected="false">Eyes</button>
-          <button type="button" class="pal-tab" data-tab="hair" role="tab" aria-selected="false">Hair &amp; Brows</button>
-          <button type="button" class="pal-tab" data-tab="jewelry" role="tab" aria-selected="false">Jewelry</button>
+          <button type="button" class="pal-tab pal-tab-ic active" data-tab="clothing" role="tab" aria-selected="true" aria-label="Clothing" title="Clothing"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5 L4 5.2 L1.5 9.5 L4.8 11.3 L6 9.8 V20.5 H18 V9.8 L19.2 11.3 L22.5 9.5 L20 5.2 L16 3.5 C15.3 5.3 13.9 6.2 12 6.2 C10.1 6.2 8.7 5.3 8 3.5 Z"/></svg></button>
+          <button type="button" class="pal-tab pal-tab-ic" data-tab="lips" role="tab" aria-selected="false" aria-label="Lips &amp; Cheeks" title="Lips & Cheeks"><svg viewBox="0 0 24 24" style="width:30px;height:30px" aria-hidden="true"><ellipse cx="5.4" cy="9.4" rx="3.7" ry="2.2" fill="#f07f86"/><ellipse cx="18.6" cy="9.4" rx="3.7" ry="2.2" fill="#f07f86"/><path d="M7.6 13.6 C9 18.4 15 18.4 16.4 13.6" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"/></svg></button>
+          <button type="button" class="pal-tab pal-tab-ic" data-tab="eyes" role="tab" aria-selected="false" aria-label="Eyes" title="Eyes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M2 12 C5 6.5 19 6.5 22 12 C19 17.5 5 17.5 2 12 Z"/><circle cx="12" cy="12" r="3.2"/></svg></button>
+          <button type="button" class="pal-tab pal-tab-ic" data-tab="hair" role="tab" aria-selected="false" aria-label="Hair &amp; Brows" title="Hair & Brows"><svg viewBox="0 0 24 24" style="width:30px;height:30px" aria-hidden="true"><path fill="currentColor" fill-rule="evenodd" stroke="none" d="M12 1.5 C7 1.5 5.2 5 5.2 9 C5.2 11.2 3.6 12.2 4.2 14.4 C4.7 16.2 2.9 17.2 3.5 19.4 C4 21.4 6.2 22.7 8.4 22.1 C9.3 21.8 9.6 21 9.2 20.3 C10 19.4 10.9 19 12 19 C13.1 19 14 19.4 14.8 20.3 C14.4 21 14.7 21.8 15.6 22.1 C17.8 22.7 20 21.4 20.5 19.4 C21.1 17.2 19.3 16.2 19.8 14.4 C20.4 12.2 18.8 11.2 18.8 9 C18.8 5 17 1.5 12 1.5 Z M12 5.6 C10 6 8.3 7.4 8.3 10.6 C8.3 13.8 9.7 16.4 12 17.6 C14.3 16.4 15.7 13.8 15.7 10.6 C15.7 7.4 14 6 12 5.6 Z"/><path class="hair-hl" d="M12 2.1 V5.5 M5.7 11.6 C5 13.6 6.3 15.1 5.3 17.1 C4.8 18.4 5.5 19.8 6.8 20.5 M18.3 11.6 C19 13.6 17.7 15.1 18.7 17.1 C19.2 18.4 18.5 19.8 17.2 20.5" stroke="var(--card)" stroke-width=".75" fill="none" stroke-linecap="round"/></svg></button>
+          <button type="button" class="pal-tab pal-tab-ic" data-tab="jewelry" role="tab" aria-selected="false" aria-label="Jewelry" title="Jewelry"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="15" r="6"/><path d="M9.5 6.5 L12 3.2 L14.5 6.5 L12 9 Z"/></svg></button>
         </div>
+        <div class="pal-tab-label" id="palTabLabel" aria-hidden="true"><span></span></div>
         <div id="palPanels">
           <div class="pal-panel active" data-panel="clothing" role="tabpanel">
             <div class="tab-tryon" id="tabTryOn-clothing"></div>
@@ -3056,6 +3134,14 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
      ("we don't need date and for ... here"). Sharing the same classes
      (rather than a parallel thank-you-prefixed copy of them) means a
      future style tweak to one letter updates both automatically. -->
+<div class="exit-nudge-overlay" id="readQuizOverlay" role="dialog" aria-modal="true" aria-label="Check your reading">
+  <div class="exit-nudge-card gp-card rq-card">
+    <button type="button" class="exit-nudge-close" id="readQuizClose" aria-label="Close">&times;</button>
+    <div class="gp-eyebrow">Check your reading</div>
+    <div id="readQuizBody"></div>
+  </div>
+</div>
+
 <div class="exit-nudge-overlay" id="guessOverlay" role="dialog" aria-modal="true" aria-labelledby="guessPopTitle">
   <div class="exit-nudge-card gp-card">
     <button type="button" class="exit-nudge-close" id="guessPopClose" aria-label="Close">&times;</button>
@@ -12067,8 +12153,10 @@ function oppositeTiers(result){
   const her = herTiers(result);
   const d = result && result.depth_score != null ? result.depth_score : 50;
   const c = result && result.avg_chroma != null ? result.avg_chroma : 12;
-  const depth = her.depth === 'Light' ? 'Deep' : her.depth === 'Deep' ? 'Light' : (d < 47 ? 'Light' : 'Deep');
-  const chroma = her.chroma === 'Muted' ? 'Vivid' : her.chroma === 'Vivid' ? 'Muted' : (c < 12 ? 'Vivid' : 'Muted');
+  // the opposite always sits outside her whole sub-tier (Medium-Deep -> Light, Muted-Balanced -> Vivid)
+  const hasD = t => isHerTier(her, 'depth', t), hasC = t => isHerTier(her, 'chroma', t);
+  const depth = hasD('Deep') ? 'Light' : hasD('Light') ? 'Deep' : (d < 47 ? 'Light' : 'Deep');
+  const chroma = hasC('Vivid') ? 'Muted' : hasC('Muted') ? 'Vivid' : (c < 12 ? 'Vivid' : 'Muted');
   return { her, opp: { warmth: her.warmth === 'Warm' ? 'Cool' : 'Warm', depth, chroma } };
 }
 function drainPairs(result){
@@ -12078,8 +12166,8 @@ function drainPairs(result){
   const seen = new Set(), mine = [];
   pools.forEach(list => list.forEach(c => { const hx = String(c.hex || '').toLowerCase(); if(!hx || seen.has(hx)) return; seen.add(hx);
     const lab = rgbToLab(hexToRgb(hx)); mine.push({ hex: hx, L: lab.L, C: Math.hypot(lab.a, lab.b), h: (Math.atan2(lab.b, lab.a) * 180 / Math.PI + 360) % 360 }); }));
-  const dL = TIER_DEPTH_L[opp.depth] - TIER_DEPTH_L[her.depth];
-  const kC = TIER_CHROMA_K[opp.chroma] / TIER_CHROMA_K[her.chroma];
+  const dL = TIER_DEPTH_L[opp.depth] - lblAvg(tierLabel(her, 'depth'), TIER_DEPTH_L);
+  const kC = TIER_CHROMA_K[opp.chroma] / lblAvg(tierLabel(her, 'chroma'), TIER_CHROMA_K);
   const warmNow = her.warmth === 'Warm';
   const pairs = [];
   HUE_FAMILIES.forEach(r => {
@@ -12108,7 +12196,7 @@ function renderDrainSection(result){
   const pairs = drainPairs(result);
   if(!src || pairs.length < 2 || !mountCompareSlider(cmp, src, pairs, 'Yours', 'Drains you')){ sec.style.display = 'none'; return; }
   const { her, opp } = oppositeTiers(result);
-  cap.innerHTML = `${magnifierIcon()} Same hue · <strong>${her.depth}, ${her.warmth}, ${her.chroma}</strong> → <strong>${opp.depth}, ${opp.warmth}, ${opp.chroma}</strong>`;
+  cap.innerHTML = `${magnifierIcon()} Same hue · <strong>${tierLabel(her, 'depth')}, ${tierLabel(her, 'warmth')}, ${tierLabel(her, 'chroma')}</strong> → <strong>${opp.depth}, ${opp.warmth}, ${opp.chroma}</strong>`;
   sec.style.display = 'block';
 }
 
@@ -12218,6 +12306,19 @@ document.addEventListener('click', (e) => {
 });
 renderVoice();
 
+
+// the selected palette tab's name, shown under its icon (2026-10-12, per Nghi)
+function syncPalTabLabel(){
+  const lab = document.getElementById('palTabLabel'), row = document.getElementById('palTabs');
+  const t = row && row.querySelector('.pal-tab.active'); if(!lab || !t) return;
+  const sp = lab.querySelector('span'); sp.textContent = t.getAttribute('title') || '';
+  const tr = t.getBoundingClientRect(), lr = lab.getBoundingClientRect();
+  const x = tr.left + tr.width / 2 - lr.left;
+  sp.style.left = x + 'px'; sp.classList.remove('pop'); void sp.offsetWidth; sp.classList.add('pop');
+}
+document.addEventListener('click', (e) => { if(e.target.closest('#palTabs .pal-tab')) setTimeout(syncPalTabLabel, 0); });
+window.addEventListener('resize', () => syncPalTabLabel());
+
 // 32: palette tabs (tap, or swipe the panel)
 (function wirePaletteTabs(){
   const tabs = [...document.querySelectorAll('#palTabs .pal-tab')], panels = [...document.querySelectorAll('#palPanels .pal-panel')];
@@ -12227,6 +12328,7 @@ renderVoice();
     tabs.forEach((t, j) => { t.classList.toggle('active', j === k); t.setAttribute('aria-selected', j === k ? 'true' : 'false'); });
     panels.forEach((p, j) => p.classList.toggle('active', j === k));
     tabs[k].scrollIntoView({ block: 'nearest', inline: 'center', behavior: 'smooth' });
+    setTimeout(syncPalTabLabel, 0);
   }
   tabs.forEach((t, j) => t.addEventListener('click', () => go(j)));
   let x0 = null, y0 = 0;
@@ -12239,11 +12341,24 @@ renderVoice();
   });
 })();
 
-// 31: sticky section bar
+// 31: sticky section bar -- the same numbered step icons as the step headers, no words (2026-10-12, per Nghi)
+function buildResNav(){
+  const nav = document.getElementById('resNav'); if(!nav) return;
+  const steps = classSteps();
+  const key = steps.map(x => x[0]).join(',');
+  if(nav.dataset.key === key) return;
+  nav.dataset.key = key;
+  nav.innerHTML = steps.map(([k, lab, go], i) => `<button type="button" data-step="${k}" data-go="${go}" aria-label="${i + 1}. ${lab}" title="${lab}"><span class="rn-ic">${STEP_ICON[k]}</span><b>${i + 1}</b></button>`).join('');
+}
 (function wireResultsNav(){
   const nav = document.getElementById('resNav'); if(!nav) return;
-  const btns = [...nav.querySelectorAll('button')];
-  btns.forEach(b => b.addEventListener('click', () => { const t = document.getElementById(b.dataset.go); if(t) t.scrollIntoView({ behavior: 'smooth', block: b.dataset.go === 'downloadBothBtn' ? 'center' : 'start' }); }));
+  const targetOf = b => { const tag = document.querySelector(`.step-tag[data-step="${b.dataset.step}"]`);
+    return (tag && tag.offsetParent) ? tag : document.getElementById(b.dataset.go); };
+  nav.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if(!b) return;
+    const t = targetOf(b); if(!t) return;
+    window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 76, behavior: 'smooth' });
+  });
   let raf = 0;
   function update(){
     raf = 0;
@@ -12251,42 +12366,107 @@ renderVoice();
     const on = document.body.classList.contains('season-shown') && rc && rc.classList.contains('show') && !rc.classList.contains('sr-locked') && rc.getBoundingClientRect().top < 90;
     nav.classList.toggle('show', !!on);
     if(!on) return;
-    const brand = document.getElementById('brandSection');
-    btns.forEach(b => { if(b.dataset.go === 'brandSection') b.style.display = (brand && brand.style.display !== 'none') ? '' : 'none'; });
+    buildResNav();
+    const btns = [...nav.querySelectorAll('button')];
     let cur = btns[0], best = -Infinity;
-    btns.forEach(b => { const t = document.getElementById(b.dataset.go); if(!t || b.style.display === 'none') return; const top = t.getBoundingClientRect().top; if(top < window.innerHeight * 0.4 && top > best){ best = top; cur = b; } });
+    btns.forEach(b => { const t = targetOf(b); if(!t || !t.offsetParent) return; const top = t.getBoundingClientRect().top; if(top < window.innerHeight * 0.4 && top > best){ best = top; cur = b; } });
     btns.forEach(b => b.classList.toggle('on', b === cur));
   }
   window.addEventListener('scroll', () => { if(!raf) raf = requestAnimationFrame(update); }, { passive: true });
   window.addEventListener('resize', () => { if(!raf) raf = requestAnimationFrame(update); });
 })();
 
-// 33: share the palette card (phones with a share sheet)
+// 33: share -- a share sheet with social icons (2026-10-12, per Nghi). Facebook, X, Pinterest and WhatsApp open their
+// share pages with the site link; Messenger opens the app on phones; Instagram and TikTok have no web share link, so they
+// share her palette image through the phone's share menu (or save it, with a note to post it). Copy link + More.
+const SHARE_ICONS = {
+  facebook: ['Facebook', '#1877F2', '<path d="M13.5 21 V13.2 H16.2 L16.6 10.1 H13.5 V8.2 C13.5 7.3 13.8 6.7 15 6.7 H16.7 V4 C16.4 4 15.4 3.9 14.3 3.9 C11.9 3.9 10.4 5.3 10.4 7.9 V10.1 H7.7 V13.2 H10.4 V21 Z" fill="#fff"/>'],
+  messenger: ['Messenger', 'linear-gradient(135deg,#0099FF,#A033FF 60%,#FF5280)', '<path d="M12 3.5 C7 3.5 3.5 7 3.5 11.4 C3.5 13.9 4.7 16 6.6 17.4 V20.5 L9.4 19 C10.2 19.2 11.1 19.3 12 19.3 C17 19.3 20.5 15.8 20.5 11.4 C20.5 7 17 3.5 12 3.5 Z" fill="#fff"/><path d="M6.8 13.8 L10.4 10 L12.3 11.9 L15.8 10 L12.2 13.8 L10.3 11.9 Z" fill="#7a3cff"/>'],
+  instagram: ['Instagram', 'linear-gradient(45deg,#F58529,#DD2A7B 55%,#8134AF)', '<rect x="4.5" y="4.5" width="15" height="15" rx="4.5" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="12" cy="12" r="3.5" fill="none" stroke="#fff" stroke-width="1.8"/><circle cx="16.4" cy="7.6" r="1.1" fill="#fff"/>'],
+  tiktok: ['TikTok', '#111', '<g transform="translate(.6 .4)"><path d="M14.5 4 C14.8 6.2 16.2 7.6 18.5 7.8 V10.4 C17 10.4 15.7 10 14.6 9.2 V14.6 C14.6 17.6 12.3 19.8 9.5 19.8 C6.8 19.8 4.8 17.7 4.8 15.1 C4.8 12.3 7.2 10.2 10 10.5 V13.2 C8.7 12.9 7.5 13.8 7.5 15.1 C7.5 16.3 8.4 17.2 9.6 17.2 C10.9 17.2 11.8 16.2 11.8 14.8 V4 Z" fill="#FE2C55"/></g><g transform="translate(-.6 -.4)"><path d="M14.5 4 C14.8 6.2 16.2 7.6 18.5 7.8 V10.4 C17 10.4 15.7 10 14.6 9.2 V14.6 C14.6 17.6 12.3 19.8 9.5 19.8 C6.8 19.8 4.8 17.7 4.8 15.1 C4.8 12.3 7.2 10.2 10 10.5 V13.2 C8.7 12.9 7.5 13.8 7.5 15.1 C7.5 16.3 8.4 17.2 9.6 17.2 C10.9 17.2 11.8 16.2 11.8 14.8 V4 Z" fill="#25F4EE"/></g><path d="M14.5 4 C14.8 6.2 16.2 7.6 18.5 7.8 V10.4 C17 10.4 15.7 10 14.6 9.2 V14.6 C14.6 17.6 12.3 19.8 9.5 19.8 C6.8 19.8 4.8 17.7 4.8 15.1 C4.8 12.3 7.2 10.2 10 10.5 V13.2 C8.7 12.9 7.5 13.8 7.5 15.1 C7.5 16.3 8.4 17.2 9.6 17.2 C10.9 17.2 11.8 16.2 11.8 14.8 V4 Z" fill="#fff"/>'],
+  whatsapp: ['WhatsApp', '#25D366', '<path d="M12 4 C7.6 4 4 7.5 4 11.9 C4 13.4 4.4 14.8 5.2 16 L4.2 19.8 L8.1 18.8 C9.3 19.5 10.6 19.8 12 19.8 C16.4 19.8 20 16.3 20 11.9 C20 7.5 16.4 4 12 4 Z" fill="none" stroke="#fff" stroke-width="1.7"/><path d="M9 8.6 C9 8.1 9.4 7.7 9.9 7.8 L10.8 9.7 L10.1 10.6 C10.6 11.8 11.6 12.8 12.9 13.3 L13.8 12.6 L15.7 13.5 C15.8 14 15.4 14.5 14.9 14.6 C11.7 15 8.6 11.9 9 8.6 Z" fill="#fff"/>'],
+  x: ['X', '#000', '<path d="M5.5 5 L18.5 19 M18.5 5 L5.5 19" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/>'],
+  pinterest: ['Pinterest', '#E60023', '<path d="M12.3 4 C8.1 4 6 6.9 6 9.4 C6 10.9 6.6 12.2 7.8 12.7 L8.2 11.9 C7.8 11.3 7.6 10.6 7.6 9.8 C7.6 7.5 9.3 5.5 12 5.5 C14.4 5.5 15.8 7 15.8 9 C15.8 11.6 14.6 13.8 12.9 13.8 C12 13.8 11.3 13 11.5 12.1 C11.8 11 12.3 9.8 12.3 9 C12.3 8.3 11.9 7.7 11.1 7.7 C10.2 7.7 9.4 8.7 9.4 10 C9.4 10.8 9.7 11.4 9.7 11.4 L8.6 16.2 C8.3 17.6 8.5 19.3 8.6 20.2 L9 20.3 C9.5 19.6 10.3 18.2 10.6 17.2 L11.2 14.8 C11.6 15.5 12.6 16 13.6 16 C16.6 16 18.4 13.3 18.4 9.7 C18.4 6.6 15.9 4 12.3 4 Z" fill="#fff"/>'],
+  copy: ['Copy link', '#96333c', '<path d="M10.2 13.8 L13.8 10.2 M9.4 15.8 L8.3 16.9 a2.8 2.8 0 0 1 -4 -4 L6.8 10.4 a2.8 2.8 0 0 1 4 0 M14.6 8.2 L15.7 7.1 a2.8 2.8 0 0 1 4 4 L17.2 13.6 a2.8 2.8 0 0 1 -4 0" fill="none" stroke="#fff" stroke-width="1.9" stroke-linecap="round"/>'],
+  more: ['More', '#d9a7ad', '<circle cx="6" cy="12" r="1.8" fill="#fff"/><circle cx="12" cy="12" r="1.8" fill="#fff"/><circle cx="18" cy="12" r="1.8" fill="#fff"/>'],
+};
+function shareUrl(){ return location.href.split('#')[0].split('?')[0]; }
+const SHARE_TEXT = 'My colors from Find My Best Shades';
+async function sharePaletteFile(){
+  const canvas = lastStyleGuideData ? drawStyleGuideStoryCard(lastStyleGuideData) : null;
+  const blob = canvas ? await new Promise(r => canvas.toBlob(r, 'image/png')) : null;
+  return blob ? new File([blob], 'my-color-palette.png', { type: 'image/png' }) : null;
+}
+function shareNote(msg){ const n = document.getElementById('shareNote'); if(!n) return; n.textContent = msg; n.classList.remove('show'); void n.offsetWidth; n.classList.add('show'); }
+async function doShare(k){
+  const url = shareUrl(), u = encodeURIComponent(url), t = encodeURIComponent(SHARE_TEXT);
+  const mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent || '');
+  const r = currentSeasonResult || {};
+  sendToLiveSheet({ type: 'share', timestamp: new Date().toISOString(), platform: k, season: r.shadeMatchSeason || r.season || '' });
+  const open = href => window.open(href, '_blank', 'noopener');
+  if(k === 'facebook') return open(`https://www.facebook.com/sharer/sharer.php?u=${u}`);
+  if(k === 'messenger') return mobile ? (location.href = `fb-messenger://share/?link=${u}`) : open(`https://www.facebook.com/sharer/sharer.php?u=${u}`);
+  if(k === 'whatsapp') return open(`https://wa.me/?text=${t}%20${u}`);
+  if(k === 'x') return open(`https://twitter.com/intent/tweet?text=${t}&url=${u}`);
+  if(k === 'pinterest') return open(`https://pinterest.com/pin/create/button/?url=${u}&description=${t}`);
+  if(k === 'copy'){ try{ await navigator.clipboard.writeText(url); shareNote('✓ Link copied'); }catch(e){ shareNote(url); } return; }
+  // Instagram, TikTok, More: share her palette image through the phone's own share menu
+  try{
+    const file = await sharePaletteFile();
+    if(file && navigator.canShare && navigator.canShare({ files: [file] })){ await navigator.share({ files: [file], title: 'My color palette', text: SHARE_TEXT }); return; }
+    if(k === 'more' && navigator.share){ await navigator.share({ title: 'My color palette', text: SHARE_TEXT, url }); return; }
+    if(file){ const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name; document.body.appendChild(a); a.click(); a.remove();
+      shareNote(k === 'more' ? '✓ Image saved' : `✓ Image saved · post it on ${SHARE_ICONS[k][0]}`); }
+  }catch(e){ if(!e || e.name !== 'AbortError') console.warn('[Share] failed', e); }
+}
+function openShareSheet(){
+  let ov = document.getElementById('shareOverlay');
+  if(!ov){
+    ov = document.createElement('div'); ov.className = 'exit-nudge-overlay'; ov.id = 'shareOverlay';
+    ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); ov.setAttribute('aria-label', 'Share');
+    const keys = Object.keys(SHARE_ICONS).filter(k => k !== 'more' || navigator.share);
+    ov.innerHTML = `<div class="exit-nudge-card sh-card"><button type="button" class="exit-nudge-close" id="shareClose" aria-label="Close">&times;</button>
+      <div class="gp-eyebrow">Share your colors</div>
+      <div class="sh-grid">${keys.map(k => { const [lab, bg, svg] = SHARE_ICONS[k]; return `<button type="button" class="sh-b" data-k="${k}" aria-label="${lab}"><span class="sh-ic" style="background:${bg}"><svg viewBox="0 0 24 24" aria-hidden="true">${svg}</svg></span><span class="sh-l">${lab}</span></button>`; }).join('')}</div>
+      <div class="sh-note" id="shareNote" aria-live="polite"></div></div>`;
+    document.body.appendChild(ov);
+    ov.addEventListener('click', (e) => {
+      if(e.target === ov || e.target.closest('#shareClose')){ ov.classList.remove('show'); return; }
+      const b = e.target.closest('.sh-b'); if(b) doShare(b.dataset.k);
+    });
+  }
+  ov.classList.add('show');
+}
 (function wireShare(){
   const b = document.getElementById('sharePaletteBtn'); if(!b) return;
-  if(!navigator.share) return;
   b.style.display = 'inline-block';
-  b.addEventListener('click', async () => {
-    try{
-      const canvas = lastStyleGuideData ? drawStyleGuideStoryCard(lastStyleGuideData) : null;
-      const blob = canvas ? await new Promise(r => canvas.toBlob(r, 'image/png')) : null;
-      const file = blob ? new File([blob], 'my-color-palette.png', { type: 'image/png' }) : null;
-      const data = { title: 'My color palette', text: 'My colors from Find My Best Shades', url: location.href.split('#')[0] };
-      if(file && navigator.canShare && navigator.canShare({ files: [file] })) await navigator.share({ files: [file], title: data.title, text: data.text });
-      else await navigator.share(data);
-    }catch(e){ if(!e || e.name !== 'AbortError') console.warn('[Share] failed', e); }
-  });
+  b.addEventListener('click', openShareSheet);
 })();
 
 // 27: tap-to-reveal season card
 (function wireSeasonReveal(){
   const btn = document.getElementById('seasonReveal'); if(!btn) return;
+  const burst = document.getElementById('gbBurst');
+  if(burst){
+    const HEART = '<svg viewBox="0 0 64 64"><path d="M32 52 C 19 42, 7 32, 7 20 C 7 11, 14 5, 22 5 C 27 5, 30 8, 32 13 C 34 8, 37 5, 42 5 C 50 5, 57 11, 57 20 C 57 32, 45 42, 32 52 Z" fill="currentColor"/></svg>';
+    const SPARK = '<svg viewBox="0 0 24 24"><path d="M12 1 L14 10 L23 12 L14 14 L12 23 L10 14 L1 12 L10 10 Z" fill="currentColor"/></svg>';
+    const tones = ['#96333c', '#c2505c', '#e07a86', '#f3b3b8', '#e8b04a'];
+    burst.innerHTML = Array.from({ length: 22 }, (_, i) => { const a = (i / 22) * Math.PI * 2 - Math.PI / 2, d = 70 + (i % 4) * 22, z = 10 + (i % 3) * 5;
+      return `<i style="--x:${(Math.cos(a) * d).toFixed(0)}px;--y:${(Math.sin(a) * d - 30).toFixed(0)}px;--r:${(i * 37) % 180}deg;--d:${(0.25 + (i % 5) * 0.04).toFixed(2)}s;color:${tones[i % tones.length]};width:${z}px;height:${z}px">${i % 3 ? HEART : SPARK}</i>`; }).join('');
+  }
   btn.addEventListener('click', () => {
+    if(btn.classList.contains('open')) return;
+    btn.classList.add('open');
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    setTimeout(revealSeason, reduce ? 150 : 1250);
+  });
+  function revealSeason(){
+    btn.classList.remove('open');
     const rc = document.getElementById('resultCard');
     rc.classList.remove('sr-locked'); document.body.classList.remove('sr-hold');
     if(currentSeasonResult) renderGuessNote(currentSeasonResult);
     rc.classList.add('sr-flip'); setTimeout(() => rc.classList.remove('sr-flip'), 1200);
-  });
+  }
 })();
 
 // Runs after every season result renders (fresh = a new reading, not a reload restore)
@@ -12299,6 +12479,7 @@ function fmbsAfterSeasonResult(result, fresh){
   const seasonName = result && (result.shadeMatchSeason || result.season);
   if(why) why.innerHTML = `Built from <strong>your own warmth, depth and chroma</strong>, not a generic ${escapeHtml(seasonName || '')} palette.`;
   renderShopRules(result);
+  setTimeout(syncPalTabLabel, 0);
   renderSeasonsMap(result);
   try{ localStorage.setItem('fmbs_tiers', JSON.stringify(Object.assign({ season: (result.shadeMatchSeason || result.season || '') }, herTiers(result)))); }catch(e){}
   placeEndZone();
@@ -12411,7 +12592,7 @@ function renderShopRules(result){
   const { her, opp } = oppositeTiers(result);
   const first = (list, k) => (list && list[k || 0] && list[k || 0].hex) || null;
   const bases = { clothing: first(data.clothing, 3) || first(data.clothing), lips: first(data.lipstick), eyes: first(data.eyeshadow, 1) || first(data.eyeshadow) };
-  const tierChips = (base, t) => ['depth', 'warmth', 'chroma'].map(ax => `<span class="rule-chip"><i style="background:${tierChipHex(base, ax, t[ax])}"></i>${t[ax]}</span>`).join('');
+  const tierChips = (base, t) => ['depth', 'warmth', 'chroma'].map(ax => `<span class="rule-chip"><i style="background:${tierChipHex(base, ax, t[ax])}"></i>${tierLabel(t, ax)}</span>`).join('');
   Object.entries(bases).forEach(([k, base]) => {
     const el = document.getElementById('rule-' + k); if(!el) return;
     el.innerHTML = base ? ruleRow(true, tierChips(base, her)) + ruleRow(false, tierChips(base, opp)) : '';
@@ -12420,7 +12601,7 @@ function renderShopRules(result){
   const hair = hairForDepth(data, her, 3), hairEl = document.getElementById('rule-hair');
   if(hairEl && hair.length){
     const icon = c => `<span class="rule-ic">${SHOP_ICON.hair(c)}</span>`;
-    hairEl.innerHTML = ruleRow(true, hair.map(icon).join('') + `<span class="rule-chip">${her.warmth} · ${her.depth}</span>`)
+    hairEl.innerHTML = ruleRow(true, hair.map(icon).join('') + `<span class="rule-chip">${tierLabel(her, 'warmth')} · ${tierLabel(her, 'depth')}</span>`)
       + ruleRow(false, hair.map(h => shopMiss(shopMiss(h, 'depth', her, opp), 'warmth', her, opp)).map(icon).join('') + `<span class="rule-chip">${opp.warmth} · ${opp.depth}</span>`);
   }
   // jewelry: her metals vs the metals from the other side of warm/cool
@@ -12428,7 +12609,7 @@ function renderShopRules(result){
   if(jEl && metals.length){
     const other = (her.warmth === 'Warm' ? COOL_METALS : WARM_METALS).filter(h => !metals.includes(h)).slice(0, 3);
     const ring = (c, i) => `<span class="rule-ic">${SHOP_ICON.jewelry(c, 'r' + i + c.slice(1))}</span>`;
-    jEl.innerHTML = ruleRow(true, metals.map(ring).join('') + `<span class="rule-chip">${her.warmth}</span>`) + ruleRow(false, other.map(ring).join('') + `<span class="rule-chip">${opp.warmth}</span>`);
+    jEl.innerHTML = ruleRow(true, metals.map(ring).join('') + `<span class="rule-chip">${tierLabel(her, 'warmth')}</span>`) + ruleRow(false, other.map(ring).join('') + `<span class="rule-chip">${opp.warmth}</span>`);
   }
 }
 
@@ -12445,6 +12626,7 @@ function renderStepTags(){
   });
 }
 function placeEndZone(){
+  try{ const nav = document.getElementById('resNav'); if(nav) nav.dataset.key = ''; }catch(e){}
   const end = document.getElementById('endZone'), home = document.getElementById('endZoneHome');
   const parts = ['practiceZone', 'saveZone'].map(id => document.getElementById(id)).filter(Boolean);
   const cta = document.getElementById('myShadeCtaBlock');
@@ -12507,6 +12689,19 @@ function renderSeasonsMap(result){
     ${seasonExplainHtml(result, 'decoder')}`;
 }
 // ---- WHAT'S A COLOR SEASON? (2026-10-12, per Nghi): a plain-language, visual primer under the 16 wheels ----
+// skin, eyes, brows as icons, each filled with her own measured color (2026-10-12, per Nghi)
+function seFeatureIcons(result){
+  const rgb = (arr, fb) => Array.isArray(arr) ? `rgb(${arr.map(v => Math.round(v)).join(',')})` : fb;
+  const skin = rgb(result && result.estimated_skin_rgb, '#e8bea6'), iris = rgb(result && result.estimated_iris_rgb, '#6b4a3a'), brow = rgb(result && result.estimated_eyebrow_rgb, '#5a3f33');
+  const ic = {
+    // skin: 3 overlapping circles -- fair, medium and deep skin tones
+    Skin: `<svg viewBox="1.2 7.6 29.6 16.8" style="width:32px;height:20px"><circle cx="9" cy="16" r="7.2" fill="#f7d7c0" stroke="#fff" stroke-width="1.2"/><circle cx="16" cy="16" r="7.2" fill="#d6a07a" stroke="#fff" stroke-width="1.2"/><circle cx="23" cy="16" r="7.2" fill="#8b5a3e" stroke="#fff" stroke-width="1.2"/></svg>`,
+    Eyes: `<svg viewBox="0 0 32 32"><path d="M3 16 C8 8.5 24 8.5 29 16 C24 23.5 8 23.5 3 16 Z" fill="#fff" stroke="#96333c" stroke-width="1.4"/><circle cx="16" cy="16" r="5.4" fill="${iris}"/><circle cx="16" cy="16" r="2.2" fill="#1d1414"/><circle cx="17.8" cy="14.2" r="1.1" fill="#fff"/></svg>`,
+    // brow: one tapered arch -- round at the inner end, thin at the tail
+    Brows: `<svg viewBox="2 58 196 60" style="width:36px;height:14px"><path d="M8 103 C6 93 18 87 38 81 C88 65 140 64 193 98 C150 82 102 79 62 90 C42 96 26 107 15 111 C10 112 8 108 8 103 Z" fill="${brow}"/></svg>`,
+  };
+  return Object.entries(ic).map(([k, svg]) => `<span class="se-fi" role="img" aria-label="${k}" title="${k}">${svg}</span>`).join('<span class="se-plus">+</span>');
+}
 function seasonExplainHtml(result, part){
   const axis = (k, ic, a, b, grad) => `<div class="se-ax"><span class="se-ax-ic">${ic}</span><b>${k}</b><span class="se-ax-end">${a}</span><i style="background:linear-gradient(90deg,${grad})"></i><span class="se-ax-end">${b}</span></div>`;
   if(part === 'decoder'){
@@ -12516,7 +12711,7 @@ function seasonExplainHtml(result, part){
   }
   return `<div class="se">
     <div class="se-h">What's a color season?</div>
-    <div class="se-flow"><span class="se-chip">Skin</span><span class="se-chip">Eyes</span><span class="se-chip">Brows</span><span class="se-arr">→</span><span class="se-chip on">Best colors</span></div>
+    <div class="se-flow">${seFeatureIcons(result)}<span class="se-arr">→</span><span class="se-chip on">Best colors</span></div>
     <div class="se-p">Colors that <strong>match</strong> your natural coloring make you <strong>glow</strong>. Colors that <strong>fight</strong> it make you look <strong>tired</strong>. <strong>3 readings</strong> decide your season:</div>
     <div class="se-axes">
       ${axis('Warmth', iconThermometer(ANALYSIS_ROSE), 'Cool', 'Warm', '#c98bb4,#e6a0a0,#e8946f')}
@@ -12535,24 +12730,50 @@ function seasonExplainHtml(result, part){
 //   Chroma: Muted | Balanced | Vivid (strength scaled, warmth + lightness kept)
 // Tier cut-offs are the same ones her reading uses (depth 40.8 / 53.3, chroma 5 / 19).
 let tierAxis = 'warmth', tierResult = null;
+// SUB-TIERS (2026-10-12, per Nghi): her tiers agree with her season. The season name sets the main tier
+// (Deep / Light seasons -> Deep / Light depth; Bright -> Vivid, Soft -> Muted chroma); her own reading label
+// (e.g. "Medium-to-Deep") adds the sub-tier, shown as "Medium-Deep". A Deep Autumn is never "Medium".
+const TIER_ORDER = { depth: ['Light', 'Medium', 'Deep'], chroma: ['Muted', 'Balanced', 'Vivid'], warmth: ['Cool', 'Warm'] };
+function tierFromReading(label, score, cuts, order){
+  const parts = String(label || '').split(/-to-|-/).map(t => t.trim()).filter(t => order.includes(t));
+  if(parts.length) return parts;
+  if(score == null) return [order[1]];
+  return [score < cuts[0] ? cuts[2] : score < cuts[1] ? order[1] : cuts[3]];
+}
 function herTiers(result){
   const name = (result && (result.shadeMatchSeason || result.season)) || '';
   const warm = name ? /spring|autumn/i.test(name)
     : (result && result.undertone_descriptive ? /warm/i.test(result.undertone_descriptive) : !!(result && result.lab_temperature_b >= 16));
-  const d = result && result.depth_score != null ? result.depth_score : 50;
-  const depth = d < 40.8 ? 'Deep' : d < 53.3 ? 'Medium' : 'Light';
-  const c = result && result.avg_chroma != null ? result.avg_chroma : 12;
-  const chroma = c < 5 ? 'Muted' : c < 19 ? 'Balanced' : 'Vivid';
-  return { warmth: warm ? 'Warm' : 'Cool', depth, chroma };
+  const pick = (ax, parts, nameTier) => {
+    const order = TIER_ORDER[ax];
+    const main = nameTier || parts[0];
+    let set = new Set(nameTier ? [nameTier] : [parts[0]]);
+    parts.forEach(t => { if(Math.abs(order.indexOf(t) - order.indexOf(main)) === 1) set.add(t); });
+    set = [...set].filter(t => Math.abs(order.indexOf(t) - order.indexOf(main)) <= 1).sort((x, y) => order.indexOf(x) - order.indexOf(y));
+    return { main, label: set.join('-') };
+  };
+  const dParts = tierFromReading(result && result.depth_level, result && result.depth_score, [40.8, 53.3, 'Deep', 'Light'], TIER_ORDER.depth);
+  const cParts = tierFromReading(result && result.chroma_level, result && result.avg_chroma, [5, 19, 'Muted', 'Vivid'], TIER_ORDER.chroma);
+  const nameDepth = /^deep/i.test(name) ? 'Deep' : /^light/i.test(name) ? 'Light' : null;
+  const nameChroma = /bright/i.test(name) ? 'Vivid' : /soft/i.test(name) ? 'Muted' : null;
+  const d = pick('depth', dParts, nameDepth), c = pick('chroma', cParts, nameChroma);
+  // warmth sub-tier: her season family sets Warm / Cool; a measured Warm-neutral or Cool-neutral undertone adds "-Neutral"
+  const w = warm ? 'Warm' : 'Cool';
+  const neutral = /neutral/i.test(String((result && result.undertone_descriptive) || ''));
+  return { warmth: w, depth: d.main, chroma: c.main, warmthLabel: neutral ? `${w}-Neutral` : w, depthLabel: d.label, chromaLabel: c.label };
 }
+function tierLabel(her, ax){ return (her && her[ax + 'Label']) || (her && her[ax]) || ''; }
+function tierParts(her, ax){ return tierLabel(her, ax).split('-'); }
+function isHerTier(her, ax, v){ return tierParts(her, ax).includes(v); }
+function lblAvg(lbl, table){ const p = String(lbl).split('-').filter(t => t in table); return p.length ? p.reduce((s, t) => s + table[t], 0) / p.length : 0; }
 const TIER_DEPTH_L = { Light: 78, Medium: 58, Deep: 36 };
 const TIER_CHROMA_K = { Muted: 0.35, Balanced: 0.75, Vivid: 1.35 };
 function shiftTier(hex, axis, from, to){
   const lab = rgbToLab(hexToRgb(hex));
   let L = lab.L, a = lab.a, b = lab.b;
   if(axis === 'warmth'){ b = -b; }
-  else if(axis === 'depth'){ L = Math.max(14, Math.min(92, L + (TIER_DEPTH_L[to] - TIER_DEPTH_L[from]))); }
-  else { const f = TIER_CHROMA_K[to] / TIER_CHROMA_K[from]; a *= f; b *= f; }
+  else if(axis === 'depth'){ L = Math.max(14, Math.min(92, L + (lblAvg(to, TIER_DEPTH_L) - lblAvg(from, TIER_DEPTH_L)))); }
+  else { const f = lblAvg(to, TIER_CHROMA_K) / lblAvg(from, TIER_CHROMA_K); a *= f; b *= f; }
   return lchToHex(L, Math.hypot(a, b), (Math.atan2(b, a) * 180 / Math.PI + 360) % 360);
 }
 function renderTierCompare(){
@@ -12562,7 +12783,7 @@ function renderTierCompare(){
   if(!result || !src || !data || !data.clothing || !data.clothing.length){ sec.style.display = 'none'; return; }
   const her = herTiers(result);
   const tiers = { warmth: ['Warm', 'Cool'], depth: ['Light', 'Medium', 'Deep'], chroma: ['Muted', 'Balanced', 'Vivid'] }[tierAxis];
-  const mine = her[tierAxis], others = tiers.filter(t => t !== mine);
+  const mine = tierLabel(her, tierAxis), others = tiers.filter(t => !isHerTier(her, tierAxis, t));
   // her colors that show the change clearly: mid lightness, some color; on her side of warm/cool for the warmth view
   const sideSign = her.warmth === 'Warm' ? 1 : -1;
   const pool = data.clothing.map(c => ({ c, lab: rgbToLab(hexToRgb(c.hex)) }))
@@ -12645,8 +12866,8 @@ const WARM_METALS = ['#D4AF6A', '#B5651D', '#8C5E3C', '#E5C158'], COOL_METALS = 
 // her color moved to the opposite tier of ONE reading; always far enough to see
 function shopMiss(hex, axis, her, opp){
   const lab = rgbToLab(hexToRgb(hex)); let L = lab.L, C = Math.hypot(lab.a, lab.b), h = (Math.atan2(lab.b, lab.a) * 180 / Math.PI + 360) % 360;
-  if(axis === 'depth'){ let d = TIER_DEPTH_L[opp.depth] - TIER_DEPTH_L[her.depth]; if(Math.abs(d) < 22) d = 22 * Math.sign(d || 1); L = Math.max(14, Math.min(92, L + d)); }
-  else if(axis === 'chroma'){ const k = TIER_CHROMA_K[opp.chroma] / TIER_CHROMA_K[her.chroma]; C = k > 1 ? Math.max(C * k, C + 28) : Math.min(C * k, C * 0.4); }
+  if(axis === 'depth'){ let d = TIER_DEPTH_L[opp.depth] - lblAvg(tierLabel(her, 'depth'), TIER_DEPTH_L); if(Math.abs(d) < 22) d = 22 * Math.sign(d || 1); L = Math.max(14, Math.min(92, L + d)); }
+  else if(axis === 'chroma'){ const k = TIER_CHROMA_K[opp.chroma] / lblAvg(tierLabel(her, 'chroma'), TIER_CHROMA_K); C = k > 1 ? Math.max(C * k, C + 28) : Math.min(C * k, C * 0.4); }
   else { const toward = hueDist((h + 1) % 360, 270) < hueDist(h, 270) ? 1 : -1; h = (h + (her.warmth === 'Warm' ? toward : -toward) * 38 + 360) % 360; C = Math.max(C, 22); }
   return lchToHex(L, C, h);
 }
@@ -12681,9 +12902,15 @@ function buildShopRounds(result){
 const AXIS_ICON = ax => ({ warmth: iconThermometer, depth: iconLayers, chroma: iconDropletSmall }[ax])(ANALYSIS_ROSE);
 const SHOP_LABEL = { lipstick: 'Lipstick', clothing: 'Tops', blush: 'Blush', hair: 'Hair', jewelry: 'Jewelry' };
 const SHOP_TIERS = { depth: ['Light', 'Medium', 'Deep'], warmth: ['Cool', 'Warm'], chroma: ['Muted', 'Balanced', 'Vivid'] };
-const SHOP_POS = { Light: 12, Medium: 50, Deep: 88, Cool: 15, Warm: 85, Muted: 12, Balanced: 50, Vivid: 88 };
+const SHOP_POS = { Light: 12, Medium: 50, Deep: 88, Cool: 15, Neutral: 50, Warm: 85, Muted: 12, Balanced: 50, Vivid: 88 };
 // sample circles for recall + the scale bars, built from one of her colors so they look like her palette
+// every answer choice, sub-tiers included (2026-10-12, per Nghi): she learns her exact reading
+const RECALL_OPTS = { depth: ['Light', 'Light-Medium', 'Medium', 'Medium-Deep', 'Deep'], warmth: ['Warm', 'Warm-Neutral', 'Cool-Neutral', 'Cool'], chroma: ['Muted', 'Muted-Balanced', 'Balanced', 'Balanced-Vivid', 'Vivid'] };
+function blendHex(hexes){ const c = hexes.map(h => hexToRgb(h)); const avg = k => Math.round(c.reduce((s, x) => s + x[k], 0) / c.length);
+  return '#' + ['r', 'g', 'b'].map(k => avg(k).toString(16).padStart(2, '0')).join(''); }
 function shopSample(axis, tier, base){
+  if(String(tier).includes('-')) return blendHex(String(tier).split('-').map(t => shopSample(axis, t, base)));
+  if(axis === 'warmth' && tier === 'Neutral') return '#dc9aa0';
   const lab = rgbToLab(hexToRgb(base)); const h = (Math.atan2(lab.b, lab.a) * 180 / Math.PI + 360) % 360;
   if(axis === 'depth') return lchToHex({ Light: 84, Medium: 58, Deep: 30 }[tier], 30, h);
   if(axis === 'chroma') return lchToHex(55, { Muted: 8, Balanced: 30, Vivid: 62 }[tier], 22);
@@ -12695,11 +12922,11 @@ function shopScales(st, rd, missAxis){
     const tiers = SHOP_TIERS[ax], grad = { depth: '#f6e1d6,#b8826a,#3c2420', warmth: '#c98bb4,#e6a0a0,#e8946f', chroma: '#a99091,#c46b78,#e0234f' }[ax];
     const miss = missAxis === ax ? `<b class="shop-mk no" style="left:${SHOP_POS[st.opp[ax]]}%">✕</b>` : '';
     return `<div class="shop-scale${missAxis && missAxis !== ax ? ' quiet' : ''}"><span class="shop-scale-k">${AXIS_ICON(ax)}${ax[0].toUpperCase() + ax.slice(1)}</span>
-      <div class="shop-bar" style="background:linear-gradient(90deg,${grad})"><b class="shop-mk ok" style="left:${SHOP_POS[st.her[ax]]}%">✓</b>${miss}</div></div>`;
+      <div class="shop-bar" style="background:linear-gradient(90deg,${grad})"><b class="shop-mk ok" style="left:${lblAvg(tierLabel(st.her, ax), SHOP_POS)}%">✓</b>${miss}</div></div>`;
   }).join('')}</div>`;
 }
 // a moving hand shows what to do: it glides across the choices and taps (same hand as the other hints)
-const SHOP_HAND_RANGE = { depth: ['17%', '83%'], warmth: ['36%', '64%'], chroma: ['17%', '83%'], row: ['12.5%', '87.5%'], pair: ['27%', '73%'] };
+const SHOP_HAND_RANGE = { depth: ['10%', '90%'], warmth: ['12.5%', '87.5%'], chroma: ['10%', '90%'], row: ['12.5%', '87.5%'], pair: ['27%', '73%'] };
 function SHOP_HAND(k){ const [a, b] = SHOP_HAND_RANGE[k]; return `<div class="shop-hand" style="--a:${a};--b:${b};${k === 'row' ? '--y:10px;' : '--y:16px;'}" aria-hidden="true">${TOC_HAND}</div>`; }
 function startOddGame(result){
   const box = document.getElementById('oddGame'); if(!box) return;
@@ -12716,9 +12943,8 @@ function drawOdd(){
   const box = document.getElementById('oddGame'); const st = shopState; if(!box || !st) return;
   const base = (lastStyleGuideData.lipstick && lastStyleGuideData.lipstick[0] && lastStyleGuideData.lipstick[0].hex) || '#b5505a';
   if(st.r === -1){
-    const order = { depth: ['Light', 'Medium', 'Deep'], warmth: ['Warm', 'Cool'], chroma: ['Muted', 'Balanced', 'Vivid'] };
     box.innerHTML = `${shopHead()}<div class="odd-title">Which one is you?</div>
-      ${['depth', 'warmth', 'chroma'].map(ax => `<div class="shop-recall" data-ax="${ax}"><span class="shop-recall-k">${AXIS_ICON(ax)}${ax[0].toUpperCase() + ax.slice(1)}</span><div class="shop-seg">${order[ax].map(o => `<button type="button" class="shop-seg-b" data-v="${o}"><i style="background:${shopSample(ax, o, base)}"></i><span>${o}</span></button>`).join('')}${ax === 'depth' ? SHOP_HAND('depth') : ''}</div></div>`).join('')}
+      ${['depth', 'warmth', 'chroma'].map(ax => `<div class="shop-recall" data-ax="${ax}"><span class="shop-recall-k">${AXIS_ICON(ax)}${ax[0].toUpperCase() + ax.slice(1)}</span><div class="shop-seg" style="grid-template-columns:repeat(${RECALL_OPTS[ax].length},1fr)">${RECALL_OPTS[ax].map(o => `<button type="button" class="shop-seg-b" data-v="${o}"><i style="background:${shopSample(ax, o, base)}"></i><span>${o.replace('-', '-<br>')}</span></button>`).join('')}${ax === 'depth' ? SHOP_HAND('depth') : ''}</div></div>`).join('')}
       <div class="odd-result"></div>`;
     return;
   }
@@ -12732,7 +12958,7 @@ function drawOdd(){
       <div class="odd-title">${st.score} of ${n}${st.score === n ? ' · Shop-ready!' : ''}</div>
       <div class="shop-cs">
         <div class="shop-cs-title">Your cheat sheet</div>
-        <div class="shop-cs-rule"><span class="ok">Pick</span>${st.her.depth} · ${st.her.warmth} · ${st.her.chroma}</div>
+        <div class="shop-cs-rule"><span class="ok">Pick</span>${tierLabel(st.her, 'depth')} · ${tierLabel(st.her, 'warmth')} · ${tierLabel(st.her, 'chroma')}</div>
         <div class="shop-cs-rule"><span class="no">Skip</span>${st.opp.depth} · ${st.opp.warmth} · ${st.opp.chroma}</div>
         ${row('lipstick', dots(data.lipstick, 5))}${row('clothing', dots(data.clothing, 6))}${row('blush', dots(data.blush, 4))}${row('hair', dots(data.hair, 4))}${row('jewelry', dots(data.jewelry && data.jewelry.metals, 3))}
       </div>
@@ -12753,14 +12979,14 @@ document.addEventListener('click', (e) => {
   const seg = e.target.closest('#oddGame .shop-seg-b');
   if(seg && st && st.r === -1){
     const rowEl = seg.closest('.shop-recall'), ax = rowEl.dataset.ax; if(ax in st.recall) return;
-    const right = st.her[ax]; st.recall[ax] = seg.dataset.v; if(seg.dataset.v === right) st.recallScore++;
+    const right = tierLabel(st.her, ax); st.recall[ax] = seg.dataset.v; if(seg.dataset.v === right) st.recallScore++;
     const hand = box.querySelector('.shop-hand'); if(hand) hand.remove();
     const nextRow = [...box.querySelectorAll('.shop-recall')].find(r => !(r.dataset.ax in st.recall));
     if(nextRow) nextRow.querySelector('.shop-seg').insertAdjacentHTML('beforeend', SHOP_HAND(nextRow.dataset.ax));
     rowEl.querySelectorAll('.shop-seg-b').forEach(b => { if(b.dataset.v === right) b.classList.add('right'); else if(b === seg) b.classList.add('wrong'); else b.classList.add('dim'); });
     if(Object.keys(st.recall).length === 3){
       const n = st.recallScore;
-      box.querySelector('.odd-result').innerHTML = `<div class="shop-big">${n} / 3 ${n === 3 ? '✓' : ''}</div><button type="button" class="btn odd-next" id="oddNext">Start shopping</button>`;
+      box.querySelector('.odd-result').innerHTML = `<div class="shop-big">${n} / 3 ${n === 3 ? '✓' : ''}</div><button type="button" class="btn odd-next" id="oddNext">Practice shopping</button>`;
       if(n === 3) floatHearts(box);
       sendToLiveSheet({ type: 'shop_recall', timestamp: new Date().toISOString(), season: (st.result.shadeMatchSeason || st.result.season || ''), recalled: n, depth: st.recall.depth, warmth: st.recall.warmth, chroma: st.recall.chroma });
     }
@@ -12905,9 +13131,8 @@ function renderMsRecall(){
   const her = myShadeUploadedProfile ? herTiers(myShadeUploadedProfile) : storedTiers();
   if(msRecallDone || myShadeMode === null || !her || !her.depth){ if(!msRecallDone) box.style.display = 'none'; return; }
   const base = '#b5505a', ans = {};
-  const order = { depth: ['Light', 'Medium', 'Deep'], warmth: ['Warm', 'Cool'], chroma: ['Muted', 'Balanced', 'Vivid'] };
   box.innerHTML = `<div class="odd-eyebrow">Quick review</div><div class="odd-title">Which one is you?</div>
-    ${['depth', 'warmth', 'chroma'].map(ax => `<div class="shop-recall" data-ax="${ax}"><span class="shop-recall-k">${AXIS_ICON(ax)}${ax[0].toUpperCase() + ax.slice(1)}</span><div class="shop-seg">${order[ax].map(o => `<button type="button" class="shop-seg-b" data-v="${o}"><i style="background:${shopSample(ax, o, base)}"></i><span>${o}</span></button>`).join('')}${ax === 'depth' ? SHOP_HAND('depth') : ''}</div></div>`).join('')}
+    ${['depth', 'warmth', 'chroma'].map(ax => `<div class="shop-recall" data-ax="${ax}"><span class="shop-recall-k">${AXIS_ICON(ax)}${ax[0].toUpperCase() + ax.slice(1)}</span><div class="shop-seg" style="grid-template-columns:repeat(${RECALL_OPTS[ax].length},1fr)">${RECALL_OPTS[ax].map(o => `<button type="button" class="shop-seg-b" data-v="${o}"><i style="background:${shopSample(ax, o, base)}"></i><span>${o.replace('-', '-<br>')}</span></button>`).join('')}${ax === 'depth' ? SHOP_HAND('depth') : ''}</div></div>`).join('')}
     <div class="odd-result"></div>`;
   box.style.display = '';
   box.onclick = (e) => {
@@ -12917,9 +13142,9 @@ function renderMsRecall(){
     const hand = box.querySelector('.shop-hand'); if(hand) hand.remove();
     const nextRow = [...box.querySelectorAll('.shop-recall')].find(r => !(r.dataset.ax in ans));
     if(nextRow) nextRow.querySelector('.shop-seg').insertAdjacentHTML('beforeend', SHOP_HAND(nextRow.dataset.ax));
-    rowEl.querySelectorAll('.shop-seg-b').forEach(b2 => { if(b2.dataset.v === her[ax]) b2.classList.add('right'); else if(b2 === seg) b2.classList.add('wrong'); else b2.classList.add('dim'); });
+    rowEl.querySelectorAll('.shop-seg-b').forEach(b2 => { if(b2.dataset.v === tierLabel(her, ax)) b2.classList.add('right'); else if(b2 === seg) b2.classList.add('wrong'); else b2.classList.add('dim'); });
     if(Object.keys(ans).length === 3){
-      const n = ['depth', 'warmth', 'chroma'].filter(k => ans[k] === her[k]).length;
+      const n = ['depth', 'warmth', 'chroma'].filter(k => ans[k] === tierLabel(her, k)).length;
       msRecallDone = true;
       box.querySelector('.odd-result').innerHTML = `<div class="shop-big">${n} / 3 ${n === 3 ? '✓' : ''}</div>`;
       if(n === 3) floatHearts(box);
@@ -12927,6 +13152,77 @@ function renderMsRecall(){
     }
   };
 }
+
+
+// ---- CHECK YOUR READING (2026-10-12, per Nghi): right after she reads Your Color Reading, a quick 3-tap pop-up
+// quiz makes sure she grasped it -- one reading per screen, then her bar with her spot, then a tiny summary ----
+const RQ_STEPS = [
+  { ax: 'warmth', q: 'Your warmth?', opts: RECALL_OPTS.warmth },
+  { ax: 'depth', q: 'Your depth?', opts: RECALL_OPTS.depth },
+  { ax: 'chroma', q: 'Your chroma?', opts: RECALL_OPTS.chroma },
+];
+const RQ_GRAD = { warmth: '#c98bb4,#e6a0a0,#e8946f', depth: '#f6e1d6,#b8826a,#3c2420', chroma: '#a99091,#c46b78,#e0234f' };
+const RQ_DOT_BASE = { Cool: '#c98bb4', Neutral: '#dc9aa0', Warm: '#e8946f', Light: '#f6e1d6', Medium: '#b8826a', Deep: '#3c2420', Muted: '#a99091', Balanced: '#c46b78', Vivid: '#e0234f' };
+const rqDot = v => blendHex(String(v).split('-').map(t => RQ_DOT_BASE[t] || '#c46b78'));
+let rqState = null;
+function rqKey(r){ return 'fmbs_rq_' + [(r.shadeMatchSeason || r.season || ''), r.lab_temperature_b, r.depth_score, r.avg_chroma].join('|'); }
+function openReadQuiz(){
+  const r = currentSeasonResult; const ov = document.getElementById('readQuizOverlay'); if(!r || !ov) return;
+  try{ if(sessionStorage.getItem(rqKey(r))) return; sessionStorage.setItem(rqKey(r), '1'); }catch(e){}
+  if(ov.parentElement !== document.body) document.body.appendChild(ov);
+  rqState = { her: herTiers(r), i: 0, right: 0, answered: false, picks: {} };
+  drawReadQuiz(); ov.classList.add('show');
+}
+function closeReadQuiz(){ const ov = document.getElementById('readQuizOverlay'); if(ov) ov.classList.remove('show'); }
+function drawReadQuiz(){
+  const st = rqState, body = document.getElementById('readQuizBody'); if(!st || !body) return;
+  const dots = `<div class="gp-dots">${RQ_STEPS.map((_, j) => `<b class="${j <= st.i ? 'on' : ''}"></b>`).join('')}</div>`;
+  if(st.i >= RQ_STEPS.length){
+    const n = st.right;
+    body.innerHTML = `<div class="rq-big">${n} / 3 ${n === 3 ? '✓' : ''}</div>
+      <div class="rq-sum">${RQ_STEPS.map(x => `<span class="rq-chip">${AXIS_ICON(x.ax)}<i style="background:${rqDot(tierLabel(st.her, x.ax))}"></i>${tierLabel(st.her, x.ax)}</span>`).join('')}</div>
+      <button type="button" class="btn" id="readQuizDone">Got it</button>`;
+    if(n === 3) floatHearts(body);
+    return;
+  }
+  const x = RQ_STEPS[st.i];
+  body.innerHTML = `<div class="gp-title rq-q">${AXIS_ICON(x.ax)}${x.q}</div>
+    <div class="rq-opts n${x.opts.length}">${x.opts.map(o => `<button type="button" class="rq-o" data-v="${o}"><i style="background:${rqDot(o)}"></i><span>${o.replace('-', '-<br>')}</span></button>`).join('')}${SHOP_HAND(x.opts.length === 4 ? 'warmth' : 'depth')}</div>
+    <div class="rq-res"></div>${dots}`;
+  st.answered = false;
+}
+document.addEventListener('click', (e) => {
+  if(e.target.closest('#readQuizClose') || e.target.closest('#readQuizDone') || e.target.id === 'readQuizOverlay'){ closeReadQuiz(); return; }
+  if(e.target.closest('#readQuizNext')){ rqState.i++; drawReadQuiz(); return; }
+  const o = e.target.closest('#readQuizBody .rq-o'); if(!o || !rqState || rqState.answered) return;
+  const st = rqState, x = RQ_STEPS[st.i], mine = tierLabel(st.her, x.ax), ok = o.dataset.v === mine;
+  st.answered = true; st.picks[x.ax] = o.dataset.v; if(ok) st.right++;
+  const body = document.getElementById('readQuizBody');
+  const hand = body.querySelector('.shop-hand'); if(hand) hand.remove();
+  body.querySelectorAll('.rq-o').forEach(b => b.classList.add(b.dataset.v === mine ? 'right' : (b === o ? 'wrong' : 'dim')));
+  const tiers = SHOP_TIERS[x.ax];
+  body.querySelector('.rq-res').innerHTML = `<div class="rq-bar" style="background:linear-gradient(90deg,${RQ_GRAD[x.ax]})"><b class="shop-mk ok" style="left:${lblAvg(tierLabel(st.her, x.ax), SHOP_POS)}%">✓</b>${ok ? '' : `<b class="shop-mk no" style="left:${lblAvg(o.dataset.v, SHOP_POS)}%">✕</b>`}</div>
+    <div class="rq-ends"><span>${x.ax === 'warmth' ? 'Cool' : tiers[0]}</span><span>${x.ax === 'warmth' ? 'Warm' : tiers[tiers.length - 1]}</span></div>
+    <button type="button" class="btn" id="readQuizNext">${st.i < RQ_STEPS.length - 1 ? 'Next' : 'Done'}</button>`;
+  if(ok) floatHearts(o);
+  if(st.i === RQ_STEPS.length - 1){
+    const r = currentSeasonResult || {};
+    sendToLiveSheet({ type: 'reading_quiz', timestamp: new Date().toISOString(), season: r.shadeMatchSeason || r.season || '', correct: st.right, warmth: st.picks.warmth, depth: st.picks.depth, chroma: st.picks.chroma });
+  }
+});
+// fires once she has scrolled past the end of Your Color Reading (and only when no other pop-up is open)
+(function watchReadingEnd(){
+  let raf = 0;
+  function check(){
+    raf = 0;
+    const end = document.getElementById('readingEnd'), rc = document.getElementById('resultCard');
+    if(!end || !currentSeasonResult || !end.offsetParent) return;
+    if(rc && rc.classList.contains('sr-locked')) return;
+    if(document.querySelector('.exit-nudge-overlay.show, .call-pref-overlay.show')) return;
+    if(end.getBoundingClientRect().top < window.innerHeight * 0.35) openReadQuiz();
+  }
+  window.addEventListener('scroll', () => { if(!raf) raf = requestAnimationFrame(check); }, { passive: true });
+})();
 
 // ---- love it or not? (Check My Shade / Find Similar Shades) ----
 function renderLoveOrNot(mode, hex, matches, pct){
