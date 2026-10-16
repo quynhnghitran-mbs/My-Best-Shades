@@ -2168,7 +2168,10 @@
   .shop-opt{position:relative;}
   .shop-opt.wrong{animation:oddShake .45s ease;border-color:var(--rose-deep);border-style:dashed;}
   .shop-opt.wrong::after{content:'✕';position:absolute;right:-6px;top:-6px;width:20px;height:20px;border-radius:50%;background:#fff;color:var(--rose-deep);border:1.5px solid var(--rose-deep);font-size:11px;font-weight:700;line-height:18px;text-align:center;box-sizing:border-box;}
-  .shop-opt.dim{opacity:.55;}
+  /* (2026-10-16, per Nghi) never fade the sample itself -- 55% opacity turned 'Too deep' hair into her own taupe on screen.
+     The unpicked cards step back with a flat card and a lighter label instead; the colors stay true. */
+  .shop-opt.dim{box-shadow:none;background:transparent;border-color:rgba(150,51,60,.10);}
+  .shop-opt.dim .shop-tag{opacity:.6;}
   .shop-tag{font-size:11px;font-weight:600;min-height:14px;line-height:14px;color:var(--muted);}
   .shop-opt.right .shop-tag{color:var(--rose-deep);}
   .shop-recall{display:flex;align-items:center;gap:8px;margin:10px 0;text-align:left;}
@@ -2182,8 +2185,9 @@
   .shop-seg-b:focus-visible{outline:2px solid var(--rose-deep);outline-offset:2px;border-radius:8px;}
   .shop-seg-b.right i{box-shadow:0 0 0 3px var(--rose-deep),0 3px 10px rgba(58,31,34,.2);transform:scale(1.08);}
   .shop-seg-b.right span{color:var(--rose-deep);font-weight:700;}
-  .shop-seg-b.wrong{animation:oddShake .45s ease;opacity:.55;}
-  .shop-seg-b.dim{opacity:.4;}
+  .shop-seg-b.wrong{animation:oddShake .45s ease;}
+  .shop-seg-b.wrong span{opacity:.55;}
+  .shop-seg-b.dim span{opacity:.4;} /* label only -- the sample circle keeps its true color (2026-10-16) */
   .shop-row,.shop-seg{position:relative;}
   .shop-hand{position:absolute;left:var(--a);bottom:var(--y,-4px);transform:translateX(-50%);color:var(--rose-deep);pointer-events:none;z-index:3;filter:drop-shadow(0 1px 3px rgba(253,245,243,.9));animation:shopHand 3.2s ease-in-out infinite;}
   .shop-hand svg{display:block;width:34px;height:28px;opacity:.85;animation:shopTap 1.6s ease-in-out infinite;}
