@@ -196,7 +196,7 @@
   html:not([data-fmbs-mode="check"]):not([data-fmbs-mode="similar"]) #myShadeSection{display:none !important;}
   /* (2026-10-15, per Nghi, report #7) practice belongs to the season reading -- never shown in Check My Shade / Find Similar */
   #paywallCard[data-plan="check"] .pw-t-read, #paywallCard:not([data-plan="check"]) .pw-t-pass{display:none;}
-  html[data-fmbs-mode="check"] #practiceZone, html[data-fmbs-mode="similar"] #practiceZone{display:none !important;}
+  html[data-fmbs-mode="check"] #practiceZone, html[data-fmbs-mode="similar"] #practiceZone, #msRecall{display:none !important;}
   .mm-pick{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;justify-content:center;align-items:center;gap:18px;z-index:3;line-height:0;}
   /* once a photo is in the mirror, the icons tuck to the bottom so the face stays clear */
   /* hidden once a photo is in; they return only if the photo fails a check (errorBox1 shown) so she can retake */
@@ -3438,7 +3438,9 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
 </script>
 
 <script type="module">
-const CHROMA_CUT_LOW = 13, CHROMA_CUT_HIGH = 20.8; // customer chroma tiers (see measureFaceFromPhoto)
+// (2026-10-16, per Nghi) chroma reading scale 10 / 19 (Muted below 10, Balanced-to-Muted 10-14.5, Balanced-to-Vivid 14.5-19, Vivid above 19);
+// chosen over 13 / 20.8 after a by-eye try-on check on 21 real photos (5/19 and 10/19 tied; 10/19 keeps the muted end tighter)
+const CHROMA_CUT_LOW = 10, CHROMA_CUT_HIGH = 19;
 
 // ---------------------------------------------------------------------
 // In-app browser detection -- ADDED 2026-09-15, per Nghi (a friend
@@ -5609,7 +5611,7 @@ function zoomMirrorFace(fb, animate){
     const mr = mir.getBoundingClientRect(); const asp = (mr.width && mr.height) ? mr.width / mr.height : 1;
     const W = img.naturalWidth, H = img.naturalHeight;
     const bh = (fb.y1 - fb.y0) / 2 * H, meshTop = fb.y0 * H + 0.65 * bh, chin = fb.y1 * H - 0.35 * bh;
-    const top = meshTop - 0.12 * bh, neckEnd = chin + 0.30 * bh, cx = (fb.x0 + fb.x1) / 2 * W;
+    const top = Math.max(meshTop, 0), neckEnd = chin + 0.30 * bh, cx = (fb.x0 + fb.x1) / 2 * W; // forehead on the top edge (2026-10-16)
     let h = neckEnd - top, w = h * asp;
     const sx = cx - w / 2, sy = top; // forehead on the frame's top edge, neck on the rectangle's edge
     const cw = 640, ch = Math.round(640 / asp), c = document.createElement('canvas'); c.width = cw; c.height = ch;
@@ -5866,16 +5868,11 @@ async function measureFaceFromPhoto(imgEl){
       ...sampleNeutralInRegion(rightInnerRing, MP_LANDMARKS.rightEyeInner, 1, 10, 7, 0.08, 0.24, 'right-inner')
     ];
 
-    // (2026-10-15, per Nghi, report #8) GUARD RAILS on the sclera scan above. Its strip is wide enough to land on
-    // lashes / lid shadow (a mid-gray "sclera" -> false "underexposed") or on skin (pink "sclera" -> chroma pushed
-    // to Vivid) when she smiles, squints, or her face is small in the frame. So we also read the white INSIDE each
-    // eye opening (the eyelid contour, minus the iris and the pink inner corner) and use it as a reference:
-    //   1. scan candidates with skin-like color (Lab C* > 14) or far darker than that reference (lash / shadow)
-    //      are dropped; a clean photo keeps every candidate, so its reading is unchanged;
-    //   2. if fewer than 4 survive, the inside-eye white is used instead;
-    //   3. the exposure check reads the cleaned value. When the inside-eye white had to stand in, it is put on the
-    //      scan's scale first (+8 L*: the scan reads ~8 L* brighter than the inside-eye white on photos where both
-    //      work); if the eyes are too narrow to read at all, the check doesn't call the photo dark on that basis.
+    // (2026-10-16, per Nghi -- "option 2") GENTLE eye-white fallback. The scan above is kept exactly as it was (every
+    // reading and the 60-92 exposure check are calibrated on it). Only when its result is clearly broken -- darker than
+    // L* 50, i.e. it landed on lashes or lid shadow (a smile, a squint) -- is it replaced by the brightest white inside the
+    // eye opening (eyelid contour, minus the iris and the pink inner corner). No offset is added: the exposure check then
+    // judges that white as it is, so a genuinely dark photo still fails.
     const EYE_OPENINGS = [[33,246,161,160,159,158,157,173,133,155,154,153,145,144,163,7], [263,466,388,387,386,385,384,398,362,382,381,380,374,373,390,249]];
     function insideEyeWhite(contour){
       const pts = contour.map(i => landmarks[i]).filter(Boolean).map(p => ({ x: p.x * w, y: p.y * h }));
@@ -5911,13 +5908,13 @@ async function measureFaceFromPhoto(imgEl){
       const rgb = averageRgb(top.map(t => t.smp));
       return { n: cands.length, rgb, L: rgbToLab(rgb).L };
     }
-    const eyeWhites = EYE_OPENINGS.map(insideEyeWhite).filter(e => e && e.rgb && e.n >= 8);
-    const eyeRef = eyeWhites.sort((a, b) => b.L - a.L)[0] || null;
-    const scleraScanKept = scleraSamples.filter(c => { const l = rgbToLab(c); return l.C <= 14 && (!eyeRef || l.L >= eyeRef.L - 15); });
-    let scleraSource = 'scan';
-    if(scleraScanKept.length >= 4){ scleraSamples.length = 0; scleraSamples.push(...scleraScanKept); }
-    else if(eyeRef){ scleraSamples.length = 0; scleraSamples.push(eyeRef.rgb); scleraSource = 'inside-eye'; }
-    else scleraSource = scleraSamples.length ? 'scan-unchecked' : 'none';
+    {
+      const scanAvg = averageRgb(scleraSamples);
+      if(scanAvg && rgbToLab(scanAvg).L < 50){
+        const whites = EYE_OPENINGS.map(insideEyeWhite).filter(e => e && e.rgb && e.n >= 8).sort((a, b) => b.L - a.L);
+        if(whites[0] && whites[0].L > rgbToLab(scanAvg).L){ scleraSamples.length = 0; scleraSamples.push(whites[0].rgb); }
+      }
+    }
 
     // EYEBROW: scans a 10x10 grid (100 candidates) across each brow's
     // bounding box (with a wider margin than before), keeping only
@@ -6122,11 +6119,6 @@ async function measureFaceFromPhoto(imgEl){
 
     const irisRgb = averageRgb(irisSamples);
     const scleraRgb = averageRgb(scleraSamples);
-    // exposure reading for the photo check (see the guard-rail note above); null = eyes too narrow to judge darkness
-    const scleraExposureL = !scleraRgb ? null
-      : scleraSource === 'inside-eye' ? rgbToLab(scleraRgb).L + 8
-      : scleraSource === 'scan-unchecked' ? null
-      : rgbToLab(scleraRgb).L;
     const eyebrowRgb = averageRgb(eyebrowSamples);
     const skinRgb = averageRgb(skinSamples);
     // Per-region breakdown, for diagnosing whether one region (e.g.
@@ -6335,9 +6327,7 @@ async function measureFaceFromPhoto(imgEl){
     // blended "Balanced-to-X" label and admitting a whole extra tier).
     // (2026-10-13, per Nghi) chroma now splits its middle like depth: Balanced-to-Muted / Balanced-to-Vivid, and the
     // lipstick + color matching use both tiers (bestShadeMatches / scoreColorForProfile split the label on "-to-")
-    // (2026-10-15, per Nghi, test report #1) cut-offs re-centred on the 16 season references: Muted < 13 (the four muted
-    // seasons sit at 11.9), Vivid > 20.8 (between the Autumns at 19.8 and the clear seasons at 21.8+). Old 5 / 19 left
-    // pure Muted unreachable and put the muted seasons on the 12 midpoint, so they flipped to Balanced-to-Vivid.
+    // chroma reading cut-offs: CHROMA_CUT_LOW / CHROMA_CUT_HIGH (10 / 19 since 2026-10-16, per Nghi -- see their definition)
     const chromaLevel = classifyWithZones(avgChroma, CHROMA_CUT_LOW, CHROMA_CUT_HIGH, ["Muted", "Balanced", "Vivid"], 0.01, 0.02, true);
     const warmthClamped = clampTo(customerLab.b, WARMTH_MIN, WARMTH_MAX);
     const depthClamped = clampTo(depthScore, VALUE_MIN, VALUE_MAX);
@@ -6386,7 +6376,6 @@ async function measureFaceFromPhoto(imgEl){
 
     return {
       skin_rgb: skinRgb, iris_rgb: irisRgb, sclera_rgb: scleraRgb, eyebrow_rgb: eyebrowRgb,
-      sclera_exposure_L: scleraExposureL, sclera_source: scleraSource,
       face_box: faceBox,
       lower_face_box: (() => { // try-on "Lower face" zoom (2026-10-08): nose tip (1) to chin (152), mouth corners (61/291) widened
         const nose = landmarks[1], chin = landmarks[152], mL = landmarks[61], mR = landmarks[291];
@@ -8203,8 +8192,7 @@ async function myShadeHandleSelfieFile(file){
     if(myShadeSelfieLoadingText) myShadeSelfieLoadingText.textContent = 'Scanning exposure...';
     await new Promise(r => setTimeout(r, 500));
     const scleraL = rgbToLab(m.sclera_rgb).L; // same check as the Season Analysis (analyzeBtn)
-    const exposureL = m.sclera_exposure_L !== undefined ? m.sclera_exposure_L : scleraL; // (report #8)
-    if(scleraL > 92 || (exposureL != null && exposureL < 60)){
+    if(scleraL > 92 || scleraL < 60){
       myShadeSelfieError( scleraL > 92
         ? "This photo looks <strong>overexposed</strong> — the lighting is <strong>too bright</strong>, which can throw off your reading. <strong>Please retake it in softer, even natural light</strong> (avoid direct sun or bright overhead light, and skip flash)."
         : "This photo looks <strong>underexposed</strong> — it's <strong>too dark</strong> for an accurate reading. <strong>Please retake it somewhere brighter</strong>, ideally near a window with natural daylight.");
@@ -9572,6 +9560,16 @@ function handleImageFile(file){
       preview.style.display = 'block';
       placeholderText.style.display = 'none';
       clearMirrorReads();
+      // (2026-10-16, per Nghi) zoom the mirror onto her face right after upload -- forehead on the top edge, neck on the
+      // rose rectangle's edge -- not only once the exposure scan runs; the raw photo let the rectangle cover her mouth
+      const thisUpload = uploadedImage;
+      (async () => {
+        try{
+          if(!preview.complete || !preview.naturalWidth) await preview.decode();
+          const m = await measureFaceFromPhoto(preview);
+          if(m && m.face_box && uploadedImage === thisUpload) zoomMirrorFace(m.face_box, true);
+        }catch(err){ /* no face found yet: the scan will try again */ }
+      })();
       analyzeBtn.disabled = false;
     };
     img.onerror = () => {
@@ -9789,7 +9787,7 @@ analyzeBtn.addEventListener('click', async () => {
     }
     if(loading1Text) loading1Text.textContent = 'Undertone, depth & contrast computing...';
     // (2026-10-12, per Nghi) zoom + crop onto her face as soon as it's found -- during the exposure scan, not after it
-    if(measurements && !cachedScan) zoomMirrorFace(measurements.face_box, true);
+    if(measurements && !cachedScan){ const mir = preview && preview.parentElement; zoomMirrorFace(measurements.face_box, !(mir && mir.classList.contains('mm-zoomed'))); } // already zoomed at upload: no second zoom-in
 
     if(!measurements){
       handleScanFailure("We couldn't get a <strong>clear, accurate reading</strong> from this photo after a few tries. This usually means the lighting is uneven, the face is partly turned or obscured, or the connection was too slow to load properly. <strong>Please try again with a clear, front-facing photo in bright, even natural light</strong> \u2014 or try again if your connection may have been slow.");
@@ -9836,10 +9834,8 @@ analyzeBtn.addEventListener('click', async () => {
       exposureScanIndicator.style.display = 'none';
     }
     const scleraLumCheck = rgbToLab(measurements.sclera_rgb).L; // CIELAB L*, not raw RGB luminance
-    // (report #8) the cleaned exposure reading; null = eyes too narrow to judge darkness (no "too dark" call then)
-    const exposureL = measurements.sclera_exposure_L !== undefined ? measurements.sclera_exposure_L : scleraLumCheck;
     const isOverexposed = scleraLumCheck > 92;
-    const isUnderexposed = exposureL != null && exposureL < 60;
+    const isUnderexposed = scleraLumCheck < 60;
     if(isOverexposed || isUnderexposed){
       handleScanFailure(isOverexposed
         ? "This photo looks <strong>overexposed</strong> \u2014 the lighting is <strong>too bright</strong>, which can throw off your reading. <strong>Please retake it in softer, even natural light</strong> (avoid direct sun or bright overhead light, and skip flash)."
@@ -10793,6 +10789,10 @@ async function restoreLastResultSnapshot(){
 }
 
 function renderSeasonResult(result, opts){
+  // (2026-10-16, per Nghi) a season reading always shows with its mirror -- her photo and the four reads. If the page was
+  // last left on Check My Shade / Find Similar Shades (whose mode hides the mirror), switch back to the season page.
+  try{ const hm = document.documentElement.getAttribute('data-fmbs-mode');
+    if(window.fmbsSetMode && (hm === 'check' || hm === 'similar')){ const pu = getPurchase(); window.fmbsSetMode(((opts && opts.forceShadeAccess) || (pu && pu.tier === 'seasonShade')) ? 'seasonShade' : 'season'); } }catch(e){}
   if(!opts || !opts.skipDebugHistory) saveDebugHistory(result);
   const myShadeCtaBlockEl = document.getElementById('myShadeCtaBlock');
   if(myShadeCtaBlockEl) myShadeCtaBlockEl.style.display = '';
@@ -12075,11 +12075,17 @@ function tryOnCrop(src){
       const meshTop = fb.y0 * H + 0.65 * bh;
       const chin = fb.y1 * H - 0.35 * bh;
       const neckEnd = chin + 0.30 * bh;
-      const top = meshTop - 0.12 * bh; // color rectangle = exactly the bottom 1/3 of the tile; face+neck fill the top 2/3
+      // (2026-10-16, per Nghi) forehead ON the frame's top edge (no hair/background band above it), neck on the color
+      // rectangle's edge; the rectangle = the bottom 1/3 of the tile. When the photo itself is cropped close (forehead or
+      // neck outside the photo), the frame stays inside the photo instead of padding it with pink margins -- as long as
+      // the rectangle still starts below the chin.
+      const top = Math.max(meshTop, 0);
       const cx = (fb.x0 + fb.x1) / 2 * W;
-      let side = (neckEnd - top) * 1.5; // whole face + neck always fit: forehead at the frame's top, neck on the rectangle's edge (past-the-photo areas are padded)
-      let sx = cx - side / 2;
-      let sy = neckEnd - side * 2 / 3; // not clamped: the neck always lands on the rectangle's edge (any area past the photo is filled)
+      const want = (Math.min(neckEnd, H) - top) * 1.5;
+      const minSide = (chin + 0.08 * bh - top) * 1.5;
+      let side = Math.max(minSide, Math.min(want, W));
+      let sx = Math.max(0, Math.min(W - side, cx - side / 2)); if(side > W) sx = cx - side / 2;
+      let sy = top;
       const c = document.createElement('canvas');
       c.width = 400; c.height = 400;
       const cx2 = c.getContext('2d'); cx2.fillStyle = '#e9cbc7'; cx2.fillRect(0, 0, 400, 400);
@@ -13524,6 +13530,8 @@ function storedTiers(){ try{ return JSON.parse(localStorage.getItem('fmbs_tiers'
 let msRecallDone = false;
 function renderMsRecall(){
   const box = document.getElementById('msRecall'); if(!box) return;
+  // (2026-10-16, per Nghi) no quick review in Check My Shade / Find Similar Shades -- practice belongs to the season reading
+  box.style.display = 'none'; box.innerHTML = ''; return;
   const her = myShadeUploadedProfile ? herTiers(myShadeUploadedProfile) : storedTiers();
   if(msRecallDone || myShadeMode === null || !her || !her.depth){ if(!msRecallDone) box.style.display = 'none'; return; }
   const base = '#b5505a', ans = {};
