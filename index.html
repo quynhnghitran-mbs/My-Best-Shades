@@ -5603,6 +5603,14 @@ function clearMirrorReads(){
 }
 /* Zoom the face into the mirror: face + neck fill the mirror (the top 2/3 of the frame), the rose rectangle is the lower 1/3.
    Display-only -- #preview keeps the full photo, so every measurement and the try-on still use the original pixels. */
+function faceBoxFromLandmarks(landmarks){
+  let minX = 1, maxX = 0, minY = 1, maxY = 0;
+  for(const lm of landmarks){ if(lm.x < minX) minX = lm.x; if(lm.x > maxX) maxX = lm.x; if(lm.y < minY) minY = lm.y; if(lm.y > maxY) maxY = lm.y; }
+  const boxW = maxX - minX, boxH = maxY - minY;
+  return { x0: minX - boxW * 0.30, x1: maxX + boxW * 0.30, y0: minY - boxH * 0.65, y1: maxY + boxH * 0.35 };
+}
+// warm the face model up in the background so the zoom lands the moment she uploads (2026-10-16)
+setTimeout(() => { try{ loadFaceLandmarker().catch(() => {}); }catch(e){} }, 1500);
 function zoomMirrorFace(fb, animate){
   try{
     const img = document.getElementById('preview'); if(!img || !fb || !img.naturalWidth) return;
@@ -7831,17 +7839,49 @@ function scoreColorForProfile(rgb, profile, itemType){
   let pct = Math.max(15, Math.min(98, Math.round(100 * Math.exp(-dist/MYSHADE_DECAY_K))));
   // (2026-10-15, per Nghi, report #7) her palette rules cap the score for lipstick-family items: a color outside
   // her range on 2+ axes can't be a "Good match" (max 69%), on 1 axis it can't be "Your shade" (max 79%)
-  const misses = myShadePaletteMisses(axes.lab, profile, itemType);
+  // (2026-10-16, per Nghi "A only") an axis counts as off when the dot sits outside the pink range the bars show
+  // by more than MYSHADE_BAND_MARGIN -- so the bars, the text and the score always agree
+  const misses = myShadeBandMisses(axes.lab, target, profile, itemType);
   if(misses != null){
     if(misses >= 2) pct = Math.min(pct, 69);
     else if(misses === 1) pct = Math.min(pct, 79);
   }
-  return { pct, dist, axes, exposureAdjustedValue: adjustedValue, target, itemChromaLabel, paletteMisses: misses, paletteReasons: misses ? (myShadePaletteMisses.last || []) : [] };
+  return { pct, dist, axes, exposureAdjustedValue: adjustedValue, target, itemChromaLabel, paletteMisses: misses, paletteReasons: misses ? (myShadeBandMisses.last || []) : [] };
 }
 
 // How many of her palette rules a lipstick-family item breaks: warmth on the other side of hers (Neutral never
 // counts), depth tier outside her depth tiers, chroma tier outside the lipstick tiers her reading allows (the same
 // tier names bestShadeMatches filters on; a pure Muted reading also allows Balanced). null = not judged.
+const MYSHADE_BAND_MARGIN = 2; // points (b*, L*, C*) outside the shown range before an axis counts as off
+function myShadeBandMisses(lab, target, profile, itemType){
+  myShadeBandMisses.last = [];
+  if(!lab || !target || !['lipstick', 'blush', 'eyeshadow', 'nailPolish', undefined, null].includes(itemType)) return null;
+  let her = null; try{ her = herTiers(profile); }catch(e){ her = null; }
+  const M = MYSHADE_BAND_MARGIN, reasons = [];
+  // the same three ranges renderMyShadeAxisBars() draws
+  if(target.warmth != null && !(her && her.warmthBoth)){
+    const t = target.warmth * 50, m = MYSHADE_AXIS_MIN_DELTA * 50;
+    if(lab.b < t - m - M) reasons.push({ read: 'cool', towards: 'warmer' });
+    else if(lab.b > t + m + M) reasons.push({ read: 'warm', towards: 'cooler' });
+  }
+  if(target.hasDepth && target.value != null){
+    const t = target.value * 100, m = MYSHADE_EXPOSURE_TOLERANCE * 100;
+    if(lab.L < t - m - M) reasons.push({ read: 'deep', towards: 'lighter' });
+    else if(lab.L > t + m + M) reasons.push({ read: 'light', towards: 'deeper' });
+  }
+  if(target.chromaMode === 'band'){
+    let lo = null, hi = null;
+    if(target.chromaLow != null && target.chromaHigh != null){ lo = target.chromaLow * 80; hi = target.chromaHigh * 80; }
+    else if(target.chroma != null){ lo = target.chroma * 80 - 4; hi = target.chroma * 80 + 4; }
+    if(lo != null){
+      if(lab.C < lo - M) reasons.push({ read: 'muted', towards: 'richer, more saturated' });
+      else if(lab.C > hi + M) reasons.push({ read: 'vivid', towards: 'more muted' });
+    }
+  }
+  myShadeBandMisses.last = reasons;
+  return reasons.length;
+}
+// (retired 2026-10-16 -- replaced by myShadeBandMisses above; kept for reference, no longer called)
 function myShadePaletteMisses(lab, profile, itemType){
   if(!lab || !profile || !['lipstick', 'blush', 'eyeshadow', 'nailPolish', undefined, null].includes(itemType)) return null;
   let her = null; try{ her = herTiers(profile); }catch(e){ return null; }
@@ -9566,8 +9606,12 @@ function handleImageFile(file){
       (async () => {
         try{
           if(!preview.complete || !preview.naturalWidth) await preview.decode();
-          const m = await measureFaceFromPhoto(preview);
-          if(m && m.face_box && uploadedImage === thisUpload) zoomMirrorFace(m.face_box, true);
+          // (2026-10-16, per Nghi "zoom straight away") landmarks only -- no color sampling -- so the zoom never waits on,
+          // or gets blocked by, the skin/eye reads; same face box as measureFaceFromPhoto()
+          const lmk = await loadFaceLandmarker();
+          if(uploadedImage !== thisUpload) return;
+          const res = lmk.detect(preview), lms = res && res.faceLandmarks && res.faceLandmarks[0];
+          if(lms && uploadedImage === thisUpload) zoomMirrorFace(faceBoxFromLandmarks(lms), true);
         }catch(err){ /* no face found yet: the scan will try again */ }
       })();
       analyzeBtn.disabled = false;
@@ -11079,7 +11123,12 @@ function renderColorsOnYou(result, swatchSets){
     host.innerHTML = '';
     if(!src || !items.length){ host.style.display = 'none'; return; }
     host.style.display = '';
-    const ok = mountTryOnCarousel(host, src, items, { count: false, fav: true, auto: false });
+    // (2026-10-16, per Nghi) colors change on their own first; the moment she taps a ring (or swipes), the auto change stops
+    // for good and the frame stays on what she picked. The ring of the color on her face is highlighted as it changes.
+    const panel = host.closest('.pal-panel');
+    const onShow = (it) => { if(!panel) return; const hx = String(it.hex).toLowerCase();
+      panel.querySelectorAll('.palette-chip').forEach(c => c.classList.toggle('on', String(c.dataset.hex).toLowerCase() === hx)); };
+    const ok = mountTryOnCarousel(host, src, items, { count: false, fav: true, auto: true, interval: 2500, stopOnUser: true, cue: false, onShow });
     if(!ok){ host.style.display = 'none'; return; }
   });
 }
@@ -12136,7 +12185,7 @@ function mountTryOnCarousel(host, src, items, opts){
   if(!crop) return false;
   const box = document.createElement('div');
   box.className = 'toc';
-  box.innerHTML = `<div class="tryon lg" role="group" aria-label="Swipe to try on the next color"><img src="${crop.url}" alt="Your face with the selected color" draggable="false"><div class="tryon-bar" style="top:${(crop.barTop * 100).toFixed(1)}%;"><span></span></div>${items.length > 1 && opts.auto !== false ? `<div class="toc-cue">${TOC_HAND}<span>swipe</span></div>` : ''}</div>${opts.count === false ? '' : '<div class="toc-count"></div>'}`;
+  box.innerHTML = `<div class="tryon lg" role="group" aria-label="Swipe to try on the next color"><img src="${crop.url}" alt="Your face with the selected color" draggable="false"><div class="tryon-bar" style="top:${(crop.barTop * 100).toFixed(1)}%;"><span></span></div>${items.length > 1 && opts.auto !== false && opts.cue !== false ? `<div class="toc-cue">${TOC_HAND}<span>swipe</span></div>` : ''}</div>${opts.count === false ? '' : '<div class="toc-count"></div>'}`;
   host.appendChild(box);
   let favBtn = null, nopeBtnC = null;
   const lipKind = opts.fav === 'lipstick';
@@ -12171,16 +12220,19 @@ function mountTryOnCarousel(host, src, items, opts){
     else { lab.classList.add('out'); fadeT = setTimeout(setText, 380); }
     if(cnt) cnt.textContent = items.length > 1 ? `${i + 1} / ${items.length}` : '';
     syncFavBtn();
+    if(opts.onShow) try{ opts.onShow(it); }catch(e){}
   }
+  let autoStopped = false;
+  function stopAuto(){ autoStopped = true; if(host._tocTimer){ clearInterval(host._tocTimer); host._tocTimer = null; } }
   function restart(){
     if(host._tocTimer) clearInterval(host._tocTimer);
-    if(items.length < 2 || opts.auto === false) return;
+    if(items.length < 2 || opts.auto === false || autoStopped) return;
     host._tocTimer = setInterval(() => {
       if(!box.isConnected){ clearInterval(host._tocTimer); host._tocTimer = null; return; }
       if(visible && !document.hidden) show(i + 1);
     }, opts.interval || 4000);
   }
-  function user(step){ box.classList.add('swiped'); show(i + step); restart(); }
+  function user(step){ box.classList.add('swiped'); if(opts.stopOnUser) stopAuto(); show(i + step); restart(); }
   let x0 = null, y0 = 0, moved = false;
   tile.addEventListener('pointerdown', e => { if(e.target.closest('.tryon-rail')){ x0 = null; return; } x0 = e.clientX; y0 = e.clientY; moved = false; });
   tile.addEventListener('pointermove', e => { if(x0 !== null && Math.abs(e.clientX - x0) > 8) moved = true; });
@@ -12197,7 +12249,7 @@ function mountTryOnCarousel(host, src, items, opts){
     new IntersectionObserver(es => { visible = es[0].isIntersecting; }, { threshold: 0.2 }).observe(box);
   }
   // jump straight to a color (palette rings call this)
-  host._tocShow = (hex) => { const k = items.findIndex(it => String(it.hex).toLowerCase() === String(hex).toLowerCase()); if(k >= 0){ box.classList.add('swiped'); show(k); } return k >= 0; };
+  host._tocShow = (hex) => { const k = items.findIndex(it => String(it.hex).toLowerCase() === String(hex).toLowerCase()); if(k >= 0){ box.classList.add('swiped'); if(opts.stopOnUser) stopAuto(); show(k); } return k >= 0; };
   host._tocItems = items;
   show(0, true);
   restart();
