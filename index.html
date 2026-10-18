@@ -2024,6 +2024,36 @@
   .lon-count{font-size:12px;color:var(--muted);margin-top:8px;}
   .lon-verdict{margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(150,51,60,.06);font-size:13.5px;line-height:1.55;color:var(--text-light);}
   .lon-verdict strong{color:var(--rose-deep);}
+  .lon-cmp{position:relative;touch-action:pan-y;}
+  .lon-cmp-r{position:absolute;right:0;bottom:0;pointer-events:none;}
+  .lon-cmp-line{position:absolute;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 0 1px rgba(58,31,34,.15);transform:translateX(-1px);pointer-events:none;}
+  .lon-cmp-knob{position:absolute;width:28px;height:28px;margin:-14px 0 0 -14px;font-size:15px !important;border-radius:50%;background:#fff;color:var(--rose-deep);display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 12px rgba(58,31,34,.25);pointer-events:none;z-index:3;}
+  .lon-cmp-tag{position:absolute;max-width:46%;font-size:13px;font-weight:600;line-height:1.25;pointer-events:none;z-index:2;}
+  .lon-cmp-tag.l{left:12px;text-align:left;} .lon-cmp-tag.r{right:12px;text-align:right;}
+  .lon-cmp-in{position:absolute;left:0;right:0;bottom:0;width:100%;opacity:0;cursor:ew-resize;margin:0;z-index:4;}
+  /* a hand glides along the bar until she drags once (same hand as the other hints) */
+  .lon-cmp-hand{position:absolute;left:38%;transform:translateX(-50%);color:#fdf5f3;pointer-events:none;z-index:3;filter:drop-shadow(0 1px 5px rgba(58,31,34,.5));animation:cmpHand 2.6s ease-in-out infinite;}
+  .lon-cmp-hand svg{display:block;width:32px;height:26px;opacity:.92;}
+  .cmp-used .lon-cmp-hand{display:none;}
+  @media (prefers-reduced-motion:reduce){.lon-cmp-hand{animation:none;}}
+  .lon-lov-nav{display:inline-flex;align-items:center;gap:14px;font-weight:600;color:var(--rose-deep);}
+  .lon-lov-b{all:unset;cursor:pointer;width:30px;height:30px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:20px;line-height:1;color:var(--rose-deep);background:var(--card);box-shadow:0 2px 8px rgba(58,31,34,.15);}
+  .lon-loved{margin-top:12px;display:flex;flex-direction:column;gap:8px;}
+  .lon-selfie{margin:0 0 16px;padding:14px 12px;border-radius:16px;background:rgba(150,51,60,.06);border:1px dashed rgba(150,51,60,.3);text-align:center;}
+  .lon-selfie-t{font-family:'Playfair Display',serif;font-size:18px;color:var(--text-light);}
+  .lon-selfie-t strong{color:var(--rose-deep);}
+  .lon-selfie-b{display:flex;gap:12px;justify-content:center;margin:10px 0 6px;}
+  .lon-selfie-m{font-size:12.5px;color:var(--muted);}
+  .lon-selfie-m.err{color:var(--rose-deep);font-weight:600;}
+  .lon-loved-h{display:flex;align-items:center;gap:6px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--rose-deep);}
+  .lon-loved-h svg{width:15px;height:15px;fill:var(--rose-deep);}
+  .lon-loved-i{all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:12px;background:var(--card);border:1px solid rgba(150,51,60,.14);-webkit-tap-highlight-color:transparent;}
+  .lon-loved-i.on{border-color:var(--rose-deep);box-shadow:0 0 0 1.5px var(--rose-deep);}
+  .lon-loved-i i{flex:0 0 30px;height:30px;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 6px rgba(58,31,34,.18);}
+  .lon-loved-i span{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25;text-align:left;}
+  .lon-loved-i b{font-size:13.5px;color:var(--text-light);}
+  .lon-loved-i small{font-size:11.5px;color:var(--muted);}
+  .lon-loved-i em{font-style:normal;font-weight:700;font-size:13px;color:var(--rose-deep);}
   /* guess pop-up (while the free face scan runs, before the paywall) */
   .gp-card{max-width:400px;}
   .gp-eyebrow{font-size:12px;letter-spacing:.06em;line-height:1.4;padding:0 18px;color:var(--rose-deep);font-weight:600;margin-bottom:6px;}
@@ -9423,7 +9453,7 @@ function renderSimilarShadeTab(){
             <div class="shade-result-name">${s.name}</div>
             <div class="shade-result-conf-row">
               ${renderLoveIcons(s.confidencePct)}
-              <div class="shade-result-conf-num">${s.confidencePct}% match</div>
+              <div class="shade-result-conf-num">${s.confidencePct}% similar to your color</div>
             </div>
             ${(parts.brand || parts.line) ? `<div class="shade-result-meta-line">${brandLineDisplay(parts)}</div>` : ''}
             ${s.finish ? `<div class="shade-result-meta-line with-icon">${sparkleIcon()} ${s.finish}</div>` : ''}
@@ -13808,6 +13838,35 @@ document.addEventListener('click', (e) => {
 })();
 
 // ---- love it or not? (Check My Shade / Find Similar Shades) ----
+// (2026-10-18, per Nghi) Find Similar Shades: she can add her own selfie to see every shade on her face.
+// Same in-browser reading as Check My Shade's selfie (face found + exposure check); it also becomes her Check My Shade profile.
+const LON_CAM = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.4-2.2h7.2L17 8.5h3a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.4" r="3.4"/></svg>';
+const LON_GAL = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.6" cy="9.6" r="1.7"/><path d="m3.5 17 5-4.8 3.6 3.4 3-2.8 5.4 5"/></svg>';
+async function lonAddSelfie(file, msgEl){
+  if(!file) return;
+  const say = (t, err) => { if(msgEl){ msgEl.innerHTML = t; msgEl.classList.toggle('err', !!err); } };
+  say('Finding your face…');
+  try{
+    let img; try{ img = await myShadeLoadImageFile(file); }catch(e){ say("Couldn't read that photo. Please try another one.", true); return; }
+    let m = null; for(let k = 0; k < 3 && !m; k++) m = await measureFaceFromPhoto(img);
+    if(!m){ say('We can’t find your face. Try a clear, front-facing selfie.', true); return; }
+    const L = rgbToLab(m.sclera_rgb).L;
+    if(L > 92 || L < 60){ say(L > 92 ? 'This photo is <strong>too bright</strong>. Try softer, even daylight.' : 'This photo is <strong>too dark</strong>. Try somewhere brighter, near a window.', true); return; }
+    myShadeSelfieImg = img;
+    myShadeSelfieBoxes = { face: m.face_box, lower: m.lower_face_box };
+    myShadeUploadedProfile = {
+      source: 'selfie',
+      lab_temperature_b: m.lab_temperature_b, undertone_descriptive: m.undertone_descriptive,
+      depth_score: m.depth_score, depth_level: m.depth_level,
+      contrast_score: m.contrast_score, contrast_level: m.contrast_level,
+      avg_chroma: m.avg_chroma, chroma_level: m.chroma_level,
+    };
+    try{ renderMyShadeProfileGate(); }catch(e){}
+    const last = myShadeSimilarLast;
+    if(last && last.rgb) renderSimilarShadeResults(last.rgb, last.macMatches, last.drugMatches);
+    const box = document.getElementById('loveOrNot'); if(box) box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }catch(e){ console.warn('[Find Similar selfie]', e); say('Something went wrong. Please try another photo.', true); }
+}
 function renderLoveOrNot(mode, hex, matches, pct){
   const box = document.getElementById('loveOrNot'); if(!box) return;
   const src = tryOnSource('myshade');
@@ -13822,22 +13881,42 @@ function renderLoveOrNot(mode, hex, matches, pct){
   if(!cards.length){ box.style.display = 'none'; return; }
   if(mode === 'check' && src){ const one = document.getElementById('myShadeTryOn'); if(one) one.innerHTML = ''; } // the swipe card is her try-on now
   const loved = [], passed = [];
-  let i = 0;
-  box.innerHTML = `<div class="lon-title">${mode === 'check' ? 'Would you wear it?' : 'Love it or not?'}</div>
+  let i = 0, keepCard = null;
+  const selfieAsk = (mode !== 'check' && !src) ? `<div class="lon-selfie"><div class="lon-selfie-t">See these shades <strong>on you</strong></div><div class="lon-selfie-b"><label class="ic-btn" title="Take a selfie" aria-label="Take a selfie">${LON_CAM}<input type="file" accept="image/*" capture="user" hidden></label><label class="ic-btn" title="Upload a selfie" aria-label="Upload a selfie">${LON_GAL}<input type="file" accept="image/*" hidden></label></div><div class="lon-selfie-m">Add a selfie: front-facing, in daylight</div></div>` : '';
+  box.innerHTML = `${selfieAsk}<div class="lon-title">${mode === 'check' ? 'Would you wear it?' : 'Love it or not?'}</div>
     <div class="lon-guide">${'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 6 L9 12 L15 18"/></svg>'}<span>Swipe left: not for me · Swipe right: love it</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6 L15 12 L9 18"/></svg></div>
     <div class="lon-stage"></div>
     <div class="lon-btns"><button type="button" class="lon-btn no" aria-label="Not for me">${ICON_X}</button><button type="button" class="lon-btn yes" aria-label="Love it">${ICON_HEART}</button></div>
     <div class="lon-count"></div><div class="lon-verdict" style="display:none;"></div>`;
   const stage = box.querySelector('.lon-stage'), count = box.querySelector('.lon-count'), verdict = box.querySelector('.lon-verdict'), btns = box.querySelector('.lon-btns');
+  box.querySelectorAll('.lon-selfie input[type=file]').forEach(inp => inp.addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; lonAddSelfie(f, box.querySelector('.lon-selfie-m')); }));
   // (2026-10-17, per Nghi) Find Similar Shades: every sample is split in two -- her color on the left, the similar shade
   // on the right -- so she compares them side by side instead of from memory
   const half = (h, txt, side) => `<div class="lon-half ${side}" style="background:${h};color:${tryOnTextColor(h)}"><span>${txt}</span></div>`;
   function splitHtml(c){
     // (2026-10-17, per Nghi) the % sits inside the sample: how similar it is to her color (+ how well it suits her, when we have her reading)
-    const pctTxt = (c.sim != null ? `<b class="lon-pct">${c.sim}% similar</b>` : '') + (c.pct != null ? `<small class="lon-pct2">${c.pct}% match for you</small>` : '');
-    const halves = half(hex, 'Your color', 'l') + half(c.hex, `${pctTxt}${escapeHtml(c.label)}`, 'r');
-    if(src){ const cr = tryOnCrop(src); if(cr) return `<div class="tryon lg"><img src="${cr.url}" alt="Your face with your color and ${escapeHtml(c.label)}" draggable="false"><div class="tryon-bar lon-split" style="top:${(cr.barTop * 100).toFixed(1)}%;">${halves}</div></div>`; }
+    // (2026-10-18, per Nghi) short: "Red Rock (640) · 92%" (similarity to her color)
+    const halves = half(hex, 'Your color', 'l') + half(c.hex, `${escapeHtml(c.label)}${c.sim != null ? ` · ${c.sim}%` : ''}`, 'r');
+    if(src){
+      // (2026-10-18, per Nghi) on her photo: % MATCH for her (not % similar) + a ↔ she drags across the color bar to compare
+      const cr = tryOnCrop(src);
+      if(cr){
+        const top = (cr.barTop * 100).toFixed(1), right = `${escapeHtml(c.label)}${c.pct != null ? ` · ${c.pct}% match` : (c.sim != null ? ` · ${c.sim}%` : '')}`;
+        return `<div class="tryon lg lon-cmp"><img src="${cr.url}" alt="Your face with your color and ${escapeHtml(c.label)}" draggable="false">
+          <div class="tryon-bar" style="top:${top}%;background:${hex};"></div>
+          <div class="lon-cmp-r" style="top:${top}%;left:50%;background:${c.hex};"></div>
+          <div class="lon-cmp-line" style="left:50%;top:${top}%;"></div><div class="lon-cmp-knob" style="left:50%;top:${(cr.barTop * 100 + (100 - cr.barTop * 100) * 0.52).toFixed(1)}%;">↔</div><div class="lon-cmp-hand" aria-hidden="true" style="top:calc(${(cr.barTop * 100 + (100 - cr.barTop * 100) * 0.52).toFixed(1)}% + 10px);">${TOC_HAND}</div>
+          <span class="lon-cmp-tag l" style="top:calc(${top}% + 12px);color:${tryOnTextColor(hex)}">Your color</span><span class="lon-cmp-tag r" style="top:calc(${top}% + 12px);color:${tryOnTextColor(c.hex)}">${right}</span>
+          <input class="lon-cmp-in" type="range" min="0" max="100" value="50" aria-label="Drag to compare" style="top:${top}%;height:${(100 - cr.barTop * 100).toFixed(1)}%;"></div>`;
+      }
+    }
     return `<div class="lon-sw lon-split">${halves}</div>`;
+  }
+  function wireCmp(card){
+    const inp = card && card.querySelector('.lon-cmp-in'); if(!inp) return;
+    const r = card.querySelector('.lon-cmp-r'), ln = card.querySelector('.lon-cmp-line'), kn = card.querySelector('.lon-cmp-knob');
+    inp.addEventListener('input', () => { card.classList.add('cmp-used'); const v = inp.value + '%'; r.style.left = v; ln.style.left = v; kn.style.left = v; });
+    ['pointerdown', 'pointermove', 'pointerup'].forEach(t => inp.addEventListener(t, e => e.stopPropagation())); // dragging compares; it never swipes the card
   }
   function cardHtml(c){
     if(mode === 'similar' && hex) return `<div class="lon-card"><span class="lon-stamp yes">LOVE IT</span><span class="lon-stamp no">NOT FOR ME</span>${splitHtml(c)}</div>`;
@@ -13849,8 +13928,29 @@ function renderLoveOrNot(mode, hex, matches, pct){
       // (2026-10-15, per Nghi) the try-on frame stays after she decides: her color in Check My Shade, or in Find
       // Similar Shades the best-matching shade she loved (else the closest shade), stamped with her choice
       const scoredLoved = loved.filter(c => c.pct != null).sort((a, b) => b.pct - a.pct);
-      const keep = mode === 'check' ? cards[0] : (scoredLoved[0] || loved[0] || cards[0]);
+      const keep = mode === 'check' ? cards[0] : (scoredLoved[0] || loved[0] || cards[0]); keepCard = keep;
       const wasLoved = loved.includes(keep);
+      if(mode !== 'check'){
+        // (2026-10-18, per Nghi) Find Similar Shades: only her LOVED shades stay -- swipe (or tap) through them;
+        // the ones she passed on are hidden. None loved: no card, just the note below.
+        btns.style.display = 'none'; const gd0 = box.querySelector('.lon-guide'); if(gd0) gd0.style.display = 'none';
+        const list = loved.slice().sort((a, b) => ((b.pct ?? -1) - (a.pct ?? -1)) || ((b.sim ?? 0) - (a.sim ?? 0)));
+        if(!list.length){ stage.innerHTML = ''; count.textContent = ''; finish(); return; }
+        let j = 0;
+        const showLoved = () => {
+          stage.innerHTML = cardHtml(list[j]);
+          const kc = stage.querySelector('.lon-card');
+          if(kc){ kc.classList.add('lon-done', 'lon-loved-card'); const st = kc.querySelector('.lon-stamp.yes'); if(st) st.style.opacity = 1; wireCmp(kc); }
+          count.innerHTML = list.length > 1 ? `<span class="lon-lov-nav"><button type="button" class="lon-lov-b" data-d="-1" aria-label="Previous loved shade">‹</button>Loved ${j + 1} of ${list.length}<button type="button" class="lon-lov-b" data-d="1" aria-label="Next loved shade">›</button></span>` : 'Your loved shade';
+          if(kc && list.length > 1){
+            let x0 = null;
+            kc.addEventListener('pointerdown', e => { x0 = e.clientX; });
+            kc.addEventListener('pointerup', e => { if(x0 === null) return; const dx = e.clientX - x0; x0 = null; if(Math.abs(dx) > 30){ j = (j + (dx < 0 ? 1 : -1) + list.length) % list.length; showLoved(); } else { j = (j + 1) % list.length; showLoved(); } });
+          }
+        };
+        count.onclick = e => { const bt = e.target.closest('.lon-lov-b'); if(!bt) return; j = (j + (+bt.dataset.d) + list.length) % list.length; showLoved(); };
+        showLoved(); finish(); return;
+      }
       stage.innerHTML = cardHtml(keep);
       const kc = stage.querySelector('.lon-card');
       if(kc){ kc.classList.add('lon-done'); const st = kc.querySelector(wasLoved ? '.lon-stamp.yes' : '.lon-stamp.no'); if(st) st.style.opacity = 1; }
@@ -13858,7 +13958,7 @@ function renderLoveOrNot(mode, hex, matches, pct){
     }
     stage.innerHTML = cardHtml(cards[i]);
     count.textContent = cards.length > 1 ? `${i + 1} of ${cards.length}` : '';
-    wire(stage.querySelector('.lon-card'));
+    wire(stage.querySelector('.lon-card')); wireCmp(stage.querySelector('.lon-card'));
   }
   function decide(love){
     const c = cards[i], card = stage.querySelector('.lon-card');
@@ -13890,7 +13990,7 @@ function renderLoveOrNot(mode, hex, matches, pct){
       const scored = loved.filter(c => c.pct != null).sort((a, b) => b.pct - a.pct);
       msg = !loved.length ? `None of these felt like you. Try another color, or check one with <strong>Check My Shade / Not My Shade</strong>.`
         : scored.length ? `You loved <strong>${loved.length}</strong>. The best one for your coloring: <strong>${escapeHtml(scored[0].label)}</strong>, a <strong>${scored[0].pct}% match</strong>.`
-        : `You loved <strong>${loved.length}</strong>: ${loved.map(c => `<strong>${escapeHtml(c.label)}</strong>`).join(', ')}. Add a selfie in Check My Shade to see which suits you best.`;
+        : `You loved <strong>${loved.length}</strong>: ${loved.map(c => `<strong>${escapeHtml(c.label)}</strong>`).join(', ')}. Add a selfie above to see which suits you best.`;
     }
     verdict.innerHTML = msg; verdict.style.display = '';
   }
