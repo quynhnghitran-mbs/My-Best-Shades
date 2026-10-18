@@ -209,6 +209,9 @@
   .mm-ic:hover{transform:scale(1.07);background:#fff;}
   .mm-ic svg{width:24px;height:24px;}
   .mm-ic.photo-locked{opacity:.45;pointer-events:none;cursor:not-allowed;}
+  /* (2026-10-17, per Nghi) wrong photo? the camera/gallery icons stay on the photo until she presses Find My Season /
+     Find My Season & Best Lipsticks; only then do they go away (body.photo-committed) */
+  body:not(.photo-committed):not(.season-shown):not(.scan-failed) .mirror:has(#preview[style*="block"]) .mm-pick{display:flex;}
   .mm-rect{position:absolute;left:0;right:0;bottom:0;height:33.4%;background:#c4616f;color:#fdf5f3;
     display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;line-height:1.3;padding:0 10px;}
   .mm-rect .placeholder,.mm-rect .mm-ready{display:block;color:#fdf5f3;font-size:inherit;padding:0;}
@@ -415,6 +418,8 @@
   .hint-col.yes li{color:#96333c;}
   .hint-checkbox{flex-shrink:0;}
   .upload-choice-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .ms-reupload{position:absolute;left:0;right:0;top:0;bottom:0;display:flex;align-items:center;justify-content:center;gap:12px;z-index:3;pointer-events:none;} /* centered, per Nghi 2026-10-18 */
+  .ms-reupload .ic-btn{pointer-events:auto;background:rgba(253,245,243,.92);}
   .choice-btn{
     display:flex;align-items:center;gap:7px;
     padding:11px 20px;border-radius:100px;
@@ -1982,6 +1987,14 @@
   .lon-card.lon-done{animation:lonBack .35s ease both;}
   @keyframes lonBack{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
   .lon-sw{aspect-ratio:1/1;display:flex;align-items:flex-end;justify-content:center;padding-bottom:16px;font-weight:600;font-size:14px;}
+  .lon-split{display:flex !important;align-items:stretch !important;justify-content:stretch !important;padding:0 !important;}
+  .lon-half{flex:1 1 50%;display:flex;align-items:flex-end;justify-content:center;padding:0 8px 16px;text-align:center;font-weight:600;font-size:13px;line-height:1.25;min-width:0;}
+  .lon-half.l{border-right:2px solid rgba(255,255,255,.85);}
+  .lon-half span{display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .lon-pct{font-family:'Playfair Display',Georgia,serif;font-size:22px;font-weight:700;line-height:1.1;}
+  .lon-pct2{font-size:11.5px;font-weight:600;opacity:.9;margin-bottom:2px;}
+  .tryon-bar.lon-split .lon-pct{font-size:19px;}
+  .tryon-bar.lon-split .lon-half{padding-bottom:12px;}
   .lon-stamp{position:absolute;top:18px;padding:5px 12px;border-radius:10px;font-weight:700;font-size:14px;letter-spacing:.08em;opacity:0;transition:opacity .15s ease;pointer-events:none;z-index:3;}
   .lon-stamp.yes{left:16px;color:var(--rose-deep);border:2px solid var(--rose-deep);background:rgba(253,245,243,.9);transform:rotate(-12deg);}
   .lon-stamp.no{right:16px;color:var(--muted);border:2px solid var(--muted);background:rgba(253,245,243,.9);transform:rotate(12deg);}
@@ -2967,6 +2980,9 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
           <span class="placeholder" id="myShadeSwatchPlaceholder"><strong>Upload</strong> a clear, well-lit photo of the item: lipstick, blush, makeup, nail polish, clothing, jewelry or hair color.<span class="upload-choice-row ps-icons"><label class="ic-btn" for="myShadeFileInputCamera" title="Take a photo" aria-label="Take a photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.4-2.2h7.2L17 8.5h3a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.4" r="3.4"/></svg></label><label class="ic-btn" for="myShadeFileInputUpload" title="Upload a photo" aria-label="Upload a photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.6" cy="9.6" r="1.7"/><path d="m3.5 17 5-4.8 3.6 3.4 3-2.8 5.4 5"/></svg></label></span></span>
           <canvas id="myShadeSwatchCanvas" style="display:none;"></canvas>
           <canvas class="myshade-magnifier" id="myShadeMagnifier" width="110" height="110"></canvas>
+          <!-- (2026-10-18, per Nghi) the same two buttons stay inside the frame after the photo is in, until she presses
+               Check My Shade / Find Similar Shades; centered like before the upload (per Nghi) -->
+          <div class="ms-reupload" id="myShadeReupload" style="display:none;"><label class="ic-btn" for="myShadeFileInputCamera" title="Take another photo" aria-label="Take another photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8.5h3l1.4-2.2h7.2L17 8.5h3a1 1 0 0 1 1 1V18a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5a1 1 0 0 1 1-1Z"/><circle cx="12" cy="13.4" r="3.4"/></svg></label><label class="ic-btn" for="myShadeFileInputUpload" title="Upload another photo" aria-label="Upload another photo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2"/><circle cx="8.6" cy="9.6" r="1.7"/><path d="m3.5 17 5-4.8 3.6 3.4 3-2.8 5.4 5"/></svg></label></div>
         </div>
         <div class="myshade-picked-row" id="myShadePickedRow" style="display:none;">
           <div class="myshade-picked-swatch" id="myShadePickedSwatch"></div>
@@ -5597,6 +5613,7 @@ function luminance(rgb){
 // The four color reads shown in the mirror's rose rectangle (2026-10-09,
 // per Nghi) -- replaces the old Pixel Measurement block on the results page.
 function clearMirrorReads(){
+  document.body.classList.remove('photo-committed'); // a new photo isn't committed until she presses Find ... again
   document.body.classList.remove('season-shown'); // a new photo: the upload tips + Find My Season button come back
   if(document.body.classList.contains('scan-failed')){ document.body.classList.remove('scan-failed'); const rc = document.getElementById('resultCard'); if(rc) rc.classList.remove('show'); } // a new photo clears the old failure message
   { zoomMirrorFace._url = null; const z = document.getElementById('mmZoom'); if(z){ z.style.backgroundImage = ''; z.parentElement.classList.remove('mm-zoomed'); } }
@@ -7084,6 +7101,9 @@ function showWelcomeBackPopup(){
   const similarBtn = document.getElementById('welcomeBackSimilarBtn');
   const skipBtn = document.getElementById('welcomeBackSkipBtn');
   if(!overlay || !profileBtn || !similarBtn || !skipBtn) return;
+  // (2026-10-17, per Nghi) she already chose Check My Shade or Find Similar Shades before paying/restoring --
+  // don't ask again, take her straight back to the one she picked
+  if(myShadeMode === 'profile' || myShadeMode === 'similar'){ pickMyShadeMode(myShadeMode); return; }
   if(titleEl) titleEl.textContent = personalizedGreeting('Welcome back, ', '!') || 'Welcome back!';
   function close(){
     overlay.classList.remove('show');
@@ -8311,8 +8331,7 @@ if(myShadeSeasonCtaEl) myShadeSeasonCtaEl.addEventListener('click', (e) => { if(
 const myShadeSeasonCtaBtn = document.getElementById('myShadeSeasonCtaBtn');
 if(myShadeSeasonCtaBtn) myShadeSeasonCtaBtn.addEventListener('click', () => {
   myShadeCloseSeasonCta();
-  if(window.fmbsSetMode) window.fmbsSetMode('season');
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  goToSeasonFeature('seasonShade'); // the pop-up sells "Find My Season & Best Lipsticks" -- the $15.99 plan
 });
 
 // Toggles myShadeNoProfileCard vs myShadeProfileSummaryCard -- called
@@ -8833,6 +8852,7 @@ function myShadeHandleItemFile(file){
       myShadeSwatchCanvas.style.display = 'block';
       myShadeSwatchPlaceholder.style.display = 'none';
       myShadePickHint.style.display = 'block';
+      { const ru = document.getElementById('myShadeReupload'); if(ru) ru.style.display = ''; }
       // Show a live preview swatch right away (sampled from the center of
       // the photo) so the customer sees the picked-color panel BEFORE they
       // hover or click at all -- added 2026-09-14, per Nghi ("show the live
@@ -8859,8 +8879,8 @@ function myShadeHandleItemFile(file){
   reader.onerror = () => showError(myShadeErrorBox, "Couldn't read that photo. Please try a different file.");
   reader.readAsDataURL(file);
 }
-if(myShadeFileInputCamera) myShadeFileInputCamera.addEventListener('change', (e) => myShadeHandleItemFile(e.target.files[0]));
-if(myShadeFileInputUpload) myShadeFileInputUpload.addEventListener('change', (e) => myShadeHandleItemFile(e.target.files[0]));
+if(myShadeFileInputCamera) myShadeFileInputCamera.addEventListener('change', (e) => { myShadeHandleItemFile(e.target.files[0]); e.target.value = ''; });
+if(myShadeFileInputUpload) myShadeFileInputUpload.addEventListener('change', (e) => { myShadeHandleItemFile(e.target.files[0]); e.target.value = ''; });
 
 function myShadeMedian(arr){
   const sorted = [...arr].sort((a,b) => a-b);
@@ -9358,6 +9378,7 @@ function myShadeRunCheck(action, runFn){
     return;
   }
   myShadeLastAction = action;
+  { const ru = document.getElementById('myShadeReupload'); if(ru) ru.style.display = 'none'; } // she pressed Check / Find: photo committed
   hideError(myShadeErrorBox);
   myShadeCheckLoading.classList.add('show');
   setMyShadeCheckButtonsDisabled(true);
@@ -9479,10 +9500,15 @@ if(myShadeCtaSimilarBtn) myShadeCtaSimilarBtn.addEventListener('click', () => {
   pickMyShadeMode('similar');
 });
 const myShadeGoToSeasonBtn = document.getElementById('myShadeGoToSeasonBtn');
-if(myShadeGoToSeasonBtn) myShadeGoToSeasonBtn.addEventListener('click', () => {
-  if(window.fmbsSetMode) window.fmbsSetMode('season');
+// (2026-10-17, per Nghi) switching from Check My Shade / Find Similar to a season reading also switches the
+// paywall's plan -- it was left on 'check', so the season upsell still asked for the $9.99 pass
+function goToSeasonFeature(key){
+  if(window.fmbsSetMode) window.fmbsSetMode(key);
+  const pw = document.getElementById('paywallCard'); if(pw) pw.dataset.plan = key;
+  const ab = document.getElementById('analyzeBtn'); if(ab) ab.textContent = key === 'seasonShade' ? 'Find My Season & Best Lipsticks' : 'Find My Season';
   window.scrollTo({ top: 0, behavior: 'smooth' });
-});
+}
+if(myShadeGoToSeasonBtn) myShadeGoToSeasonBtn.addEventListener('click', () => goToSeasonFeature('season'));
 
 // "Restore my checks" -- toggles the email form open, then looks up the
 // durable per-email balance on the live tracking sheet and overwrites
@@ -9638,8 +9664,8 @@ function handleImageFile(file){
   reader.readAsDataURL(file);
 }
 
-fileInputCamera.addEventListener('change', (e) => handleImageFile(e.target.files[0]));
-fileInputUpload.addEventListener('change', (e) => handleImageFile(e.target.files[0]));
+fileInputCamera.addEventListener('change', (e) => { handleImageFile(e.target.files[0]); e.target.value = ''; });
+fileInputUpload.addEventListener('change', (e) => { handleImageFile(e.target.files[0]); e.target.value = ''; });
 
 function showError(box, msg){
   box.textContent = msg;
@@ -9741,6 +9767,7 @@ function clearSeasonFailCount(){
 // so she still understands what went wrong on top of why we're
 // refunding her.
 function handleScanFailure(reasonText){
+  document.body.classList.remove('photo-committed');
   document.body.classList.add('scan-failed'); // brings the camera/gallery icons back in the mirror so she can retake
   stopThisOrThat();
   closeGuessPop();
@@ -9810,6 +9837,7 @@ function setPhotoLock(locked){
 
 analyzeBtn.addEventListener('click', async () => {
   if(!uploadedImage) return;
+  document.body.classList.add('photo-committed'); // she's happy with this photo: the re-upload icons go away
   const cachedScan = !!(preflightCache && preflightCache.img === uploadedImage);
   hideError(errorBox1);
   resultCard.classList.remove('show');
@@ -13694,7 +13722,7 @@ function renderLoveOrNot(mode, hex, matches, pct){
     : (matches || []).slice(0, 6).map(m => {
         let p = null;
         try{ if(prof){ const sc = scoreColorForProfile(hexToRgb(m.hex), prof, 'lipstick'); p = sc ? sc.pct : null; } }catch(e){ p = null; }
-        return { hex: m.hex, label: tocTitleCase(m.name), sub: brandDisplayNameSafe((splitBrandLine(m.brand_line) || {}).brand || ''), pct: p };
+        return { hex: m.hex, label: tocTitleCase(m.name), sub: brandDisplayNameSafe((splitBrandLine(m.brand_line) || {}).brand || ''), pct: p, sim: m.confidencePct };
       });
   if(!cards.length){ box.style.display = 'none'; return; }
   if(mode === 'check' && src){ const one = document.getElementById('myShadeTryOn'); if(one) one.innerHTML = ''; } // the swipe card is her try-on now
@@ -13706,7 +13734,18 @@ function renderLoveOrNot(mode, hex, matches, pct){
     <div class="lon-btns"><button type="button" class="lon-btn no" aria-label="Not for me">${ICON_X}</button><button type="button" class="lon-btn yes" aria-label="Love it">${ICON_HEART}</button></div>
     <div class="lon-count"></div><div class="lon-verdict" style="display:none;"></div>`;
   const stage = box.querySelector('.lon-stage'), count = box.querySelector('.lon-count'), verdict = box.querySelector('.lon-verdict'), btns = box.querySelector('.lon-btns');
+  // (2026-10-17, per Nghi) Find Similar Shades: every sample is split in two -- her color on the left, the similar shade
+  // on the right -- so she compares them side by side instead of from memory
+  const half = (h, txt, side) => `<div class="lon-half ${side}" style="background:${h};color:${tryOnTextColor(h)}"><span>${txt}</span></div>`;
+  function splitHtml(c){
+    // (2026-10-17, per Nghi) the % sits inside the sample: how similar it is to her color (+ how well it suits her, when we have her reading)
+    const pctTxt = (c.sim != null ? `<b class="lon-pct">${c.sim}% similar</b>` : '') + (c.pct != null ? `<small class="lon-pct2">${c.pct}% match for you</small>` : '');
+    const halves = half(hex, 'Your color', 'l') + half(c.hex, `${pctTxt}${escapeHtml(c.label)}`, 'r');
+    if(src){ const cr = tryOnCrop(src); if(cr) return `<div class="tryon lg"><img src="${cr.url}" alt="Your face with your color and ${escapeHtml(c.label)}" draggable="false"><div class="tryon-bar lon-split" style="top:${(cr.barTop * 100).toFixed(1)}%;">${halves}</div></div>`; }
+    return `<div class="lon-sw lon-split">${halves}</div>`;
+  }
   function cardHtml(c){
+    if(mode === 'similar' && hex) return `<div class="lon-card"><span class="lon-stamp yes">LOVE IT</span><span class="lon-stamp no">NOT FOR ME</span>${splitHtml(c)}</div>`;
     const face = src ? tryOnTileHtml(src, c.hex, c.label + (c.sub ? '' : ''), true, c.label) : `<div class="lon-sw" style="background:${c.hex};color:${tryOnTextColor(c.hex)}">${escapeHtml(c.label)}</div>`;
     return `<div class="lon-card"><span class="lon-stamp yes">LOVE IT</span><span class="lon-stamp no">NOT FOR ME</span>${face}</div>`;
   }
