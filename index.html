@@ -491,6 +491,9 @@
     font-size:12px; color:var(--muted); font-weight:600;
     margin-bottom:14px;
   }
+  .pw-was{ font-weight:500; font-size:0.62em; color:var(--muted); text-decoration-thickness:1.5px; margin-right:4px; }
+  .pw-launch{ color:var(--rose-deep); }
+  /* Phones: the season pair stacks (bundle, then season right under it) -- PayPal buttons need at least 200px each, so two can't fit across. */
   .paywall-tier-features{
     list-style:none; margin:0 0 18px; padding:0; flex:1;
   }
@@ -1811,10 +1814,10 @@
 
   /* PAYWALL FOCUS (2026-10-09, per Nghi): once she picks a feature on the cover, the payment step shows only that feature's reading,
      with a small link to see the others. Plan keys: seasonShade | check | season. */
-  #paywallCard[data-plan="seasonShade"] .paywall-tier:not([data-plan="seasonShade"]),
-  #paywallCard[data-plan="check"] .paywall-tier:not([data-plan="check"]),
-  #paywallCard[data-plan="season"] .paywall-tier:not([data-plan="season"]){display:none;}
-  #paywallCard[data-plan="seasonShade"] .paywall-tier-badge{display:none;}
+  /* 2026-10-18, per Nghi: the two season tiers always sit side by side for comparison (only the $9.99 pass is hidden). */
+  #paywallCard[data-plan="seasonShade"] .paywall-tier[data-plan="check"],
+  #paywallCard[data-plan="season"] .paywall-tier[data-plan="check"],
+  #paywallCard[data-plan="check"] .paywall-tier:not([data-plan="check"]){display:none;}
   .paywall-seeall{display:none;margin:12px auto 0;}
   #paywallCard[data-plan] .paywall-seeall{display:block;}
 
@@ -2575,7 +2578,9 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
       <div class="paywall-tier featured">
         <div class="paywall-tier-badge">Most Popular</div>
         <div class="paywall-tier-name">Find My Season &amp; Best Lipsticks</div>
-        <div class="paywall-tier-price">$15.99</div>
+        <!-- LAUNCH PRICE (2026-10-18, per Nghi): $15.99 shown crossed out, charged $12.99 -- same as Find My Season, so the bundle reads as the better deal. -->
+        <div class="paywall-tier-price"><s class="pw-was">$15.99</s> $12.99</div>
+        <div class="paywall-tier-subprice pw-launch">Launch price · same as season only</div>
         <ul class="paywall-tier-features">
           <li><strong>Hair, makeup, dress, even shoes, all in your colors.</strong> They see ease; you know your palette</li>
           <li><strong>Glowing from day to night.</strong> Colors that light you up, never wash you out</li>
@@ -2584,6 +2589,17 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
           <li><strong>Perfectly imperfect, beautifully you.</strong> Meet your best version at ease</li>
         </ul>
         <div id="paypalBtn-seasonShade" class="paypal-btn-slot"></div>
+      </div>
+      <div class="paywall-tier">
+        <div class="paywall-tier-name">Find My Season</div>
+        <div class="paywall-tier-price">$12.99</div>
+        <ul class="paywall-tier-features">
+          <li><strong>Stop guessing, start glowing.</strong> Your season, 1 of 16, read from your own skin, eyes and brows</li>
+          <li><strong>Your personal palette.</strong> Hair, makeup, outfits and jewelry that light you up</li>
+          <li><strong>Shop with clarity.</strong> Know what to reach for, and what to walk past</li>
+          <li><strong>Your natural beauty, finally understood.</strong> Confident in every color you wear</li>
+        </ul>
+        <div id="paypalBtn-season" class="paypal-btn-slot"></div>
       </div>
       <!-- UPDATED 2026-09-25, per Nghi ("we will charge $9.99 for a
            whole year check (no matter times). we won't need $2.99 and
@@ -2606,17 +2622,6 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
         </ul>
         <div id="paypalBtn-colorCheck" class="paypal-btn-slot" style="display:none;"></div>
         <div class="paywall-tier-locked-note" id="colorCheckLockedNote">One payment, no subscription. Check as many colors as you like for a year.</div>
-      </div>
-      <div class="paywall-tier">
-        <div class="paywall-tier-name">Find My Season</div>
-        <div class="paywall-tier-price">$12.99</div>
-        <ul class="paywall-tier-features">
-          <li><strong>Stop guessing, start glowing.</strong> Your season, 1 of 16, read from your own skin, eyes and brows</li>
-          <li><strong>Your personal palette.</strong> Hair, makeup, outfits and jewelry that light you up</li>
-          <li><strong>Shop with clarity.</strong> Know what to reach for, and what to walk past</li>
-          <li><strong>Your natural beauty, finally understood.</strong> Confident in every color you wear</li>
-        </ul>
-        <div id="paypalBtn-season" class="paypal-btn-slot"></div>
       </div>
     </div>
     <button type="button" class="link-btn paywall-seeall" id="paywallSeeAllBtn">See the other readings</button>
@@ -6593,13 +6598,13 @@ const shadePodium = document.getElementById('shadePodium');
 // before flipping this to 'live' for real customers. Nothing else in this
 // file needs to change to switch -- just this one flag, once both Client
 // IDs below are filled in.
-const PAYPAL_ENV = 'sandbox'; // 'sandbox' | 'live'
+const PAYPAL_ENV = 'live'; // 'sandbox' | 'live' -- switched to live 2026-10-18, per Nghi
 const PAYPAL_CLIENT_ID_SANDBOX = 'AaV956UJu2dbvnye8nA7Nwh_SNV6KaC2c8kGliDwa9Xw6ZbnHXcMTfV9rQSELIpECuJ6Xk1UpdYqpYKL'; // Sandbox app's Client ID, from developer.paypal.com with the dashboard toggle set to Sandbox -- tied to your sb-p4hwc52858189@business.example.com test account
-const PAYPAL_CLIENT_ID_LIVE = 'PASTE_YOUR_PAYPAL_LIVE_CLIENT_ID_HERE'; // Live/"API Credentials" Client ID from developer.paypal.com (dashboard toggle set to Live), tied to your real Business account
+const PAYPAL_CLIENT_ID_LIVE = 'BAAJjuhrzVCy9wBy2mlT0x4_ADZEiEXY4fpSSxwLmHMbZ_QsgoKaJIaYSSEaq_7_ofZjyH0yykMYTsHR9o'; // Live/"API Credentials" Client ID from developer.paypal.com (dashboard toggle set to Live), tied to your real Business account
 const PAYPAL_CLIENT_ID = PAYPAL_ENV === 'live' ? PAYPAL_CLIENT_ID_LIVE : PAYPAL_CLIENT_ID_SANDBOX;
 const PRICING = {
   season:      { amount: '12.99', label: 'Find My Season' },
-  seasonShade: { amount: '15.99', label: 'Find My Season & Best Lipsticks' },
+  seasonShade: { amount: '12.99', label: 'Find My Season & Best Lipsticks' }, // launch price (was 15.99), 2026-10-18 per Nghi
 };
 const PURCHASE_STORAGE_KEY = 'ffbs_purchase';
 
@@ -6678,7 +6683,35 @@ function signPayload(payload){
   return hash.toString(36);
 }
 
+// OWNER MODE (2026-10-18, per Nghi): free full access on Nghi's own devices, for filming.
+// Open the site once with ?owner=<secret word> on each browser/device -> that browser stays
+// unlocked (all readings, no PayPal, nothing consumed, nothing logged as a sale).
+// ?owner=off turns it off. Only a hash of the word lives here, not the word itself.
+const OWNER_WORD_HASH = '4dtaqd';
+const OWNER_STORAGE_KEY = 'fmbs_owner';
+(function ownerModeFromUrl(){
+  try{
+    const u = new URL(location.href);
+    const w = u.searchParams.get('owner');
+    if(w === null) return;
+    if(w === 'off') localStorage.removeItem(OWNER_STORAGE_KEY);
+    else if(signPayload({ ownerWord: w }) === OWNER_WORD_HASH) localStorage.setItem(OWNER_STORAGE_KEY, signPayload({ owner: true }));
+    u.searchParams.delete('owner');
+    history.replaceState(null, '', u.pathname + u.search + u.hash);
+  } catch(e){}
+})();
+function isOwner(){
+  try{ return localStorage.getItem(OWNER_STORAGE_KEY) === signPayload({ owner: true }); } catch(e){ return false; }
+}
+function ownerPlanTier(){
+  // Follow the reading she picked, so "Find My Season" films as the season-only result.
+  const pw = document.getElementById('paywallCard');
+  const plan = (pw && pw.dataset.plan) || document.documentElement.getAttribute('data-fmbs-mode');
+  return plan === 'season' ? 'season' : 'seasonShade';
+}
+
 function getPurchase(){
+  if(isOwner()) return { tier: ownerPlanTier(), orderId: 'owner', payerEmail: '', amountUsd: '0', owner: true };
   try{
     const raw = localStorage.getItem(PURCHASE_STORAGE_KEY);
     if(!raw) return null;
@@ -6699,6 +6732,7 @@ function getPurchase(){
 // payment time -- so the credit survives a bad photo / failed read and
 // only gets used up once they've gotten something for it.
 function consumePurchase(){
+  if(isOwner()) return; // owner mode: nothing to use up
   try{ localStorage.removeItem(PURCHASE_STORAGE_KEY); } catch(e){
     console.warn('[Purchase] Could not clear used-up purchase', e);
   }
@@ -6970,6 +7004,7 @@ function applyUnlockState(){
 // { email, expiresAt, updatedAt }: access is a simple active/expired
 // gate on expiresAt, no count to decrement.
 function getColorCheckBalance(){
+  if(isOwner()) return { email: '', expiresAt: '2099-12-31T00:00:00.000Z', owner: true };
   try{
     const raw = localStorage.getItem(COLORCHECK_PURCHASE_STORAGE_KEY);
     if(!raw) return null;
@@ -8445,7 +8480,7 @@ if(myShadeSeasonCtaEl) myShadeSeasonCtaEl.addEventListener('click', (e) => { if(
 const myShadeSeasonCtaBtn = document.getElementById('myShadeSeasonCtaBtn');
 if(myShadeSeasonCtaBtn) myShadeSeasonCtaBtn.addEventListener('click', () => {
   myShadeCloseSeasonCta();
-  goToSeasonFeature('seasonShade'); // the pop-up sells "Find My Season & Best Lipsticks" -- the $15.99 plan
+  goToSeasonFeature('seasonShade'); // the pop-up sells "Find My Season & Best Lipsticks" -- $12.99 launch price (was $15.99)
 });
 
 // Toggles myShadeNoProfileCard vs myShadeProfileSummaryCard -- called
@@ -14001,7 +14036,7 @@ function renderLoveOrNot(mode, hex, matches, pct){
 /* PAYWALL FOCUS wiring (see the #paywallCard[data-plan] CSS) */
 (function paywallPlans(){
   const tiers = document.querySelectorAll('#paywallCard .paywall-tier');
-  ['seasonShade','check','season'].forEach((k,i) => { if(tiers[i]) tiers[i].setAttribute('data-plan', k); });
+  ['seasonShade','season','check'].forEach((k,i) => { if(tiers[i]) tiers[i].setAttribute('data-plan', k); });
   const more = document.getElementById('paywallSeeAllBtn');
   // Find My Season button label follows the chosen reading (also after a reload)
   const mode = document.documentElement.getAttribute('data-fmbs-mode');
