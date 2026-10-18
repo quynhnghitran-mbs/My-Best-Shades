@@ -1737,6 +1737,23 @@
   .cv-hook{position:absolute;top:-4px;width:9px;height:9px;border-radius:50%;border:1.6px solid rgba(150,51,60,.75);background:var(--card);transform:translateX(-50%);pointer-events:none;z-index:2;}
   .cv-hook.l{left:24%;} .cv-hook.r{left:76%;}
   .cv-pair .cv-cue{display:none;}
+  .cv-frame{position:relative;}
+  /* ONE SHEET FOLDED IN TWO (2026-10-18, per Nghi): Check My Shade + Find Similar Shades are the two pages of one paper */
+  .cv-slide[data-k="my_shade"]{transform-origin:100% 50%;}
+  .cv-slide[data-k="similar"]{transform-origin:0 50%;}
+  .cv-slide.cv-spread-on{opacity:1;transform:scale(1.07);filter:none;z-index:2;}
+  .cv-slide[data-k="my_shade"] .cv-frame{border-right:0;border-radius:3px 0 0 3px;padding-right:0;box-shadow:-4px 0 0 0 var(--card),0 -4px 0 0 var(--card),0 4px 0 0 var(--card),-5px 0 0 0 rgba(150,51,60,.22),0 16px 30px rgba(58,31,34,.18);}
+  .cv-slide[data-k="similar"] .cv-frame{border-left:0;border-radius:0 3px 3px 0;padding-left:0;box-shadow:4px 0 0 0 var(--card),0 -4px 0 0 var(--card),0 4px 0 0 var(--card),5px 0 0 0 rgba(150,51,60,.22),0 16px 30px rgba(58,31,34,.18);}
+  .cv-slide[data-k="my_shade"] .cv-mat{border-right:0;}
+  .cv-slide[data-k="similar"] .cv-mat{border-left:0;}
+  /* the fold: a soft valley shadow on both sides of the spine */
+  .cv-slide[data-k="my_shade"] .cv-mat,.cv-slide[data-k="similar"] .cv-mat{position:relative;}
+  .cv-slide[data-k="my_shade"] .cv-mat::after,.cv-slide[data-k="similar"] .cv-mat::after{content:'';position:absolute;top:0;bottom:0;width:18%;pointer-events:none;}
+  .cv-slide[data-k="my_shade"] .cv-mat::after{right:0;background:linear-gradient(90deg,rgba(58,31,34,0),rgba(58,31,34,.10) 70%,rgba(58,31,34,.22));}
+  .cv-slide[data-k="similar"] .cv-mat::after{left:0;background:linear-gradient(270deg,rgba(58,31,34,0),rgba(58,31,34,.08) 70%,rgba(58,31,34,.18));}
+  .cv-halfheart{position:absolute;top:50%;width:26px;height:52px;transform:translateY(-50%);z-index:3;pointer-events:none;filter:drop-shadow(0 3px 6px rgba(58,31,34,.28));}
+  .cv-halfheart.r{right:0;} .cv-halfheart.l{left:0;}
+  .cv-halfheart svg{width:100%;height:100%;display:block;overflow:hidden;}
   
   .cv-cap b{display:block;font-family:'Playfair Display',serif;font-weight:600;font-size:21px;color:var(--text-light);}
   .cv-cap span{display:block;font-size:12.5px;color:var(--muted);margin-top:3px;}
@@ -3168,6 +3185,18 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
   </div>
 </div>
 
+<!-- Home = fresh start (2026-10-18, per Nghi): warns first when there are results on the page -->
+<div class="exit-nudge-overlay" id="homeResetOverlay" role="dialog" aria-modal="true" aria-labelledby="homeResetTitle">
+  <div class="exit-nudge-card">
+    <button type="button" class="exit-nudge-close" id="homeResetClose" aria-label="Close">&times;</button>
+    <div class="exit-nudge-title" id="homeResetTitle">Start over?</div>
+    <div class="exit-nudge-body">Going home clears this page. <strong>Your results won't be saved</strong> — download them first if you'd like to keep them.</div>
+    <button type="button" class="btn exit-nudge-download-btn" id="homeResetDownload">Download my results first</button>
+    <button type="button" class="btn ghost" id="homeResetGo" style="margin-top:10px;width:100%;">Start over</button>
+    <button type="button" class="link-btn exit-nudge-skip" id="homeResetStay">Stay here</button>
+  </div>
+</div>
+
 <div class="call-pref-overlay" id="callPrefOverlay">
   <div class="call-pref-card">
     <div class="call-pref-title">How should we call you?</div>
@@ -4346,7 +4375,7 @@ function generateHighlighterSwatch(seasonName, deltas, result){
 // (Hair, Eyeliner, Mascara) just reads variant 0 via the singular fields
 // below, same as before.
 function buildAxisPhrases(result){
-  const undertone = (result && result.undertone_descriptive) || '';
+  const undertone = warmthDisplay(result);
   // a blended label ("Balanced-to-Vivid") is led by the side her score is on -- the first word
   const chroma = String((result && result.chroma_level) || '').split('-to-')[0];
   const depth = (result && result.depth_level) || '';
@@ -4363,6 +4392,12 @@ function buildAxisPhrases(result){
       'colors on the <strong>cool</strong> side',
       '<strong>cool-toned</strong> shades',
       'colors with a <strong>cool</strong> undertone',
+    ],
+    'Neutral': [
+      'colors that sit <strong>right at neutral</strong>, warm or cool both work',
+      '<strong>neutral</strong> colors, neither clearly warm nor cool',
+      'colors balanced <strong>between warm and cool</strong>',
+      'near-neutral colors, <strong>warm or cool</strong> alike',
     ],
     'Cool-neutral': [
       'colors that lean <strong>just slightly cool</strong>, close to neutral',
@@ -5187,6 +5222,12 @@ function shadeWhyExplanation(target, s){
 // (duplicated here at top level since the other copy is nested inside
 // the photo-analysis handler and not reachable from these matching
 // functions). Original wider boundaries -- see that copy's comments.
+// (2026-10-18, per Nghi) NEUTRAL SOFT ZONE: within ±1.0 of the cool-neutral / warm-neutral line (15.5) her warmth reads
+// "Neutral · suits warm & cool" -- no avoid side on warmth anywhere. The stored undertone_descriptive keeps its side
+// label (Cool-neutral / Warm-neutral) for lipstick matching; only what she's shown and the rules change.
+const WARMTH_NEUTRAL_LINE = 15.5, WARMTH_NEUTRAL_ZONE = 1.0;
+function inWarmthNeutralZone(b){ return b != null && isFinite(b) && Math.abs(b - WARMTH_NEUTRAL_LINE) <= WARMTH_NEUTRAL_ZONE; }
+function warmthDisplay(r){ return r && inWarmthNeutralZone(r.lab_temperature_b) ? 'Neutral' : ((r && r.undertone_descriptive) || ''); }
 function classifyUndertoneDescriptive(labB){
   if(labB <= 1.55) return "Blue-cool";
   if(labB < 10.85) return "Cool";
@@ -6382,6 +6423,19 @@ async function measureFaceFromPhoto(imgEl){
         (CONTRAST_WEIGHT*(contrastClamped-refCs))**2
       )
     })).sort((a, b) => a.dist - b.dist);
+    // (2026-10-18, per Nghi) CLOSE CALL ACROSS FAMILIES -> WARMTH DECIDES. When the top two seasons are within 10% of
+    // each other and one is warm (Spring/Autumn) while the other is cool (Summer/Winter), her own warmth reading picks:
+    // Warm / Warm-neutral / Golden -> the warm-family season, Cool / Cool-neutral / Blue-cool -> the cool-family one.
+    // Percentages stay honest (the reading says the two were nearly tied and that warmth decided).
+    let warmthTiebreak = false;
+    {
+      const WARM_FAM = f => f === 'Spring' || f === 'Autumn';
+      const [q0, q1] = quantScored;
+      if(q0 && q1 && WARM_FAM(q0.fam) !== WARM_FAM(q1.fam) && q1.dist <= q0.dist * 1.10 && Math.abs(customerLab.b - 15.5) > 1.0){ // neutral zone: no lean
+        const leansWarm = ['Warm-neutral', 'Warm', 'Golden'].includes(undertoneDescriptive);
+        if(WARM_FAM(q1.fam) === leansWarm){ quantScored[0] = q1; quantScored[1] = q0; warmthTiebreak = true; }
+      }
+    }
 
     // Face-only crop box, for "This Is How These Colors Look On You"
     // (renderColorsOnYou/cropFaceSquare below) -- added 2026-09-17, per
@@ -6453,8 +6507,10 @@ async function measureFaceFromPhoto(imgEl){
       // pass, not re-derived from a real distribution the way the
       // classifyWithZones boundaries were -- revisit if real traffic
       // shows the borderline zone catching too much or too little.
-      quant_too_close: (quantScored[1].dist - quantScored[0].dist) < 0.10,
-      quant_borderline: (quantScored[1].dist - quantScored[0].dist) >= 0.10 && (quantScored[1].dist - quantScored[0].dist) < 0.25,
+      quant_warmth_tiebreak: warmthTiebreak,
+      // a warmth tie-break is always a single-name close call (never the combined "X/Y" name)
+      quant_too_close: !warmthTiebreak && Math.abs(quantScored[1].dist - quantScored[0].dist) < 0.10,
+      quant_borderline: warmthTiebreak || ((quantScored[1].dist - quantScored[0].dist) >= 0.10 && (quantScored[1].dist - quantScored[0].dist) < 0.25),
       quant_poor_fit: quantScored[0].dist >= 4
     };
   } catch(e){
@@ -6744,6 +6800,20 @@ function capturePaypalNameFromOrder(order){
 // next to the functions further down the file, that early call would hit
 // it while still in its temporal dead zone and throw a ReferenceError.
 const LAST_RESULT_SESSION_KEY = 'ffbs_last_result_v1';
+// Home button bridge (2026-10-18): the cover script asks what's on the page and clears the saved results on a fresh start.
+// Purchases / passes and her name are NOT touched -- only this visit's results and progress.
+window.fmbsPageState = () => {
+  const rc = document.getElementById('myShadeResultCard');
+  return {
+    season: !!currentSeasonResult,
+    check: !!(rc && rc.classList.contains('show')),
+    photo: !!uploadedImage || !!(typeof myShadeSelfieImg !== 'undefined' && myShadeSelfieImg) || !!(typeof myShadePickedRgb !== 'undefined' && myShadePickedRgb),
+  };
+};
+window.fmbsClearSavedResults = () => {
+  try{ ['fmbs_mode', 'fmbs_guess', 'fmbs_thanked', 'fmbs_cover_done'].forEach(k => sessionStorage.removeItem(k)); sessionStorage.removeItem(LAST_RESULT_SESSION_KEY); }catch(e){}
+  try{ localStorage.removeItem('fmbs_tiers'); }catch(e){}
+};
 const CUSTOMER_CALL_PREF_STORAGE_KEY = 'ffbs_customer_call_pref'; // 'first' | 'last'
 function getCustomerCallPref(){
   try{
@@ -7832,8 +7902,11 @@ function myShadeLabelChromaGap(itemLabC, customerChromaLevels, classifierFn){
 // this refactor; only the new item types exercise a genuinely new
 // combination of terms.
 function scoreColorForProfile(rgb, profile, itemType){
-  const target = myShadeProfileTarget(profile, itemType);
+  let target = myShadeProfileTarget(profile, itemType);
   if(!target) return null;
+  // (2026-10-18, per Nghi) "suits warm & cool" (neutral soft zone, or a neutral reading on the other side from her season):
+  // warmth is open both ways in Check My Shade too -- no warmth penalty, no "go warmer/cooler" advice
+  try{ if(target.warmth != null && herTiers(profile).warmthBoth) target = { ...target, warmthOpen: true }; }catch(e){}
   const axes = myShadeItemAxes(rgb, itemType);
 
   // Depth/value term -- see MYSHADE_EXPOSURE_TOLERANCE above for why the
@@ -7867,7 +7940,7 @@ function scoreColorForProfile(rgb, profile, itemType){
   // defaults above; chroma plays no part in this item type's match.
 
   const dist = Math.sqrt(
-    (MYSHADE_W_WARMTH*(axes.warmth-target.warmth))**2 +
+    (target.warmthOpen ? 0 : MYSHADE_W_WARMTH*(axes.warmth-target.warmth))**2 +
     valueTerm**2 +
     chromaTerm**2
   );
@@ -7975,7 +8048,7 @@ function myShadeJoinWords(arr){
 function myShadeAxisExplanation(axes, target, adjustedValue){
   const warmthGap = axes.warmth - target.warmth; // >0: item reads warmer than the customer's own coloring
   const axesInfo = [
-    { abs: Math.abs(warmthGap), read: warmthGap > 0 ? 'warm' : 'cool', towards: warmthGap > 0 ? 'cooler' : 'warmer' },
+    { abs: target.warmthOpen ? 0 : Math.abs(warmthGap), read: warmthGap > 0 ? 'warm' : 'cool', towards: warmthGap > 0 ? 'cooler' : 'warmer' },
   ];
 
   if(target.hasDepth){
@@ -8066,7 +8139,7 @@ function myShadeComplimentLine(tier, cat){
   // a deep Taupe at 84% must not tell a Medium reader to stick with deep colors
   let her = null; try{ her = myShadeUploadedProfile ? herTiers(myShadeUploadedProfile) : null; }catch(e){ her = null; }
   if(her && her.depthLabel && her.chromaLabel){
-    const phrase = `${String(tierLabel(her, 'warmth')).toLowerCase()}, ${String(her.depthLabel).toLowerCase()}-depth, ${String(her.chromaLabel).toLowerCase()}-chroma`;
+    const phrase = `${her.warmthBoth ? 'warm or cool' : String(tierLabel(her, 'warmth')).toLowerCase()}, ${String(her.depthLabel).toLowerCase()}-depth, ${String(her.chromaLabel).toLowerCase()}-chroma`;
     return `${base} <strong>Stick with ${phrase} colors</strong> — that's your range, where you'll keep finding colors that flatter you.`;
   }
   if(!cat) return base;
@@ -8368,7 +8441,7 @@ function renderMyShadeProfileGate(){
   // a profile PNG downloaded before these numbers were embedded (see
   // buildMyShadeProfilePayload above).
   const numberChips = [
-    { label: 'Warmth', value: profile.undertone_descriptive, num: profile.lab_temperature_b },
+    { label: 'Warmth', value: warmthDisplay(profile), num: profile.lab_temperature_b },
     { label: 'Depth', value: profile.depth_level, num: profile.depth_score },
     { label: 'Contrast', value: profile.contrast_level, num: profile.contrast_score },
     { label: 'Chroma', value: profile.chroma_level, num: profile.avg_chroma },
@@ -8383,7 +8456,7 @@ function renderMyShadeProfileGate(){
       `<span class="pick-filter-chip"><span class="pick-filter-chip-label">${escapeHtml(c.label)} = </span><span class="pick-filter-chip-num">${escapeHtml(c.num)}</span><span class="pick-filter-chip-label"> \u00b7 ${escapeHtml(c.value)}</span></span>`
     ).join('');
   } else {
-    const chips = [profile.undertone_descriptive, profile.depth_level, profile.contrast_level, profile.chroma_level].filter(Boolean);
+    const chips = [warmthDisplay(profile), profile.depth_level, profile.contrast_level, profile.chroma_level].filter(Boolean);
     chipRowEl.innerHTML = chips.map(c => `<span class="pick-filter-chip">${escapeHtml(c)}</span>`).join('');
   }
 }
@@ -9110,7 +9183,9 @@ function renderMyShadeAxisBars(lab, target, itemType, hex){
     const zones = axisZonesFromClassifier(a.fn, a.lo, a.hi);
     let band = null, note = '', onLabels = null;
     if(target){
-      if(a.key === 'warmth' && target.warmth != null){
+      if(a.key === 'warmth' && target.warmthOpen){
+        band = { from: a.lo, to: a.hi, txt: 'you suit warm & cool' };
+      } else if(a.key === 'warmth' && target.warmth != null){
         const t = target.warmth * 50, m = MYSHADE_AXIS_MIN_DELTA * 50;
         band = { from: t - m, to: t + m, txt: `your target ${t.toFixed(1)}` };
       } else if(a.key === 'depth'){
@@ -10076,6 +10151,7 @@ analyzeBtn.addEventListener('click', async () => {
       result.quant_best_dist = measurements.quant_best_dist;
       result.quant_runner_up = measurements.quant_runner_up;
       result.quant_runner_up_dist = measurements.quant_runner_up_dist;
+      result.quant_warmth_tiebreak = !!measurements.quant_warmth_tiebreak;
       result.quant_too_close = measurements.quant_too_close;
       result.quant_poor_fit = measurements.quant_poor_fit;
       result.lab_temperature_b = measurements.lab_temperature_b;
@@ -10661,7 +10737,7 @@ function renderColorAnalysis(result){
     value: result.lab_temperature_b, max: 35,
     zones: [1.55, 10.85, 15.5, 20.15, 29.45],
     valueLabel: `Warmth = ${result.lab_temperature_b}`,
-    categoryText: result.undertone_descriptive + (warmthBothOf(result) ? ' · suits warm & cool' : ''),
+    categoryText: warmthDisplay(result) + (warmthBothOf(result) ? ' · suits warm & cool' : ''),
     gradientFrom: '#c98bb4', gradientMid: '#e6a0a0', gradientTo: '#e8946f', poleLeft: 'Cool', poleRight: 'Warm'
   });
 
@@ -10747,7 +10823,9 @@ function renderConfidence(result){
     label = 'Close call';
     const runnerUpPctForExplain = quantDistToConfidencePercent(result.quant_runner_up_dist);
     const runnerUpPctTextForExplain = runnerUpPctForExplain != null ? ` (${runnerUpPctForExplain}%)` : '';
-    explain = `Your coloring fits <strong>${result.season}</strong> best${pctText ? ` (a ${pctText} match)` : ''}, with the runner-up a close second — a solid pick, just not a clear-cut one.`;
+    explain = result.quant_warmth_tiebreak
+      ? `<strong>${result.season}</strong>${pctText ? ` (${pctText})` : ''} and <strong>${result.runner_up}</strong>${runnerUpPctTextForExplain} are almost tied on your measurements — so your <strong>${(result.undertone_descriptive || '').toLowerCase()}</strong> warmth decides it: <strong>${result.season}</strong>.`
+      : `Your coloring fits <strong>${result.season}</strong> best${pctText ? ` (a ${pctText} match)` : ''}, with the runner-up a close second — a solid pick, just not a clear-cut one.`;
   } else if(result.isLowConfidence){
     tier = 'lower';
     label = 'Lower confidence';
@@ -11622,7 +11700,7 @@ function buildColorProfileData(){
 
   const cielabRows = [
     { name: 'Warmth', value: result.lab_temperature_b, max: 35, zones: [1.55, 10.85, 15.5, 20.15, 29.45],
-      valueLabel: `Warmth = ${result.lab_temperature_b}`, categoryText: result.undertone_descriptive,
+      valueLabel: `Warmth = ${result.lab_temperature_b}`, categoryText: warmthDisplay(result),
       gradientFrom: '#c98bb4', gradientMid: '#e6a0a0', gradientTo: '#e8946f', poleLeft: 'Cool', poleRight: 'Warm' },
     { name: 'Depth', value: result.depth_score, max: 100, zones: [40.8, 53.3],
       valueLabel: `Depth = ${result.depth_score}`, categoryText: result.depth_level,
@@ -11915,6 +11993,7 @@ function fmbsReachedEnd(){
 // browsers increasingly ignore it altogether, but it's the closest thing
 // a web page has to "you really haven't downloaded these yet."
 window.addEventListener('beforeunload', (e) => {
+  if(window.fmbsFreshStart) return; // she already confirmed "Start over" on the home pop-up
   if(hasDownloadedBoth) return;
   if(!resultCard || !resultCard.classList.contains('show')) return;
   if(document.body.classList.contains('scan-failed')) return;
@@ -12320,7 +12399,7 @@ function renderShadeMatches(macMatches, drugMatches){
     // (Warm-neutral, Medium-to-Light, ...) dropped, just the axis name
     // and its raw number.
     const filterChips = [
-      { label: 'Warmth', value: r.undertone_descriptive, num: r.lab_temperature_b },
+      { label: 'Warmth', value: warmthDisplay(r), num: r.lab_temperature_b },
       { label: 'Depth', value: r.depth_level, num: r.depth_score },
       { label: 'Contrast', value: r.contrast_level, num: r.contrast_score },
       { label: 'Chroma', value: r.chroma_level, num: r.avg_chroma },
@@ -13235,13 +13314,16 @@ function herTiers(result){
   // (2026-10-15, per Nghi) "suits both": a neutral reading on the OTHER side from her season (a Cool-neutral Spring or
   // Autumn, a Warm-neutral Summer or Winter) sits right between warm and cool -- she suits both, so warmth has no
   // "avoid" side anywhere (rules, opposites, practice, Check My Shade)
-  const warmthBoth = (/^cool-neutral$/i.test(ud) && warm) || (/^warm-neutral$/i.test(ud) && !warm);
-  return { warmth: w, warmthBoth, depth: d.main, chroma: c.main, warmthLabel: wl, depthLabel: asRead(result && result.depth_level, d.label), chromaLabel: asRead(result && result.chroma_level, c.label), warmthSet: warmthBoth ? ['Warm', 'Cool'] : [w], depthSet: d.set, chromaSet: c.set };
+  const neutralZone = inWarmthNeutralZone(result && result.lab_temperature_b);
+  const warmthBoth = neutralZone || (/^cool-neutral$/i.test(ud) && warm) || (/^warm-neutral$/i.test(ud) && !warm);
+  return { warmth: w, warmthBoth, neutralZone, depth: d.main, chroma: c.main, warmthLabel: neutralZone ? 'Neutral' : wl, depthLabel: asRead(result && result.depth_level, d.label), chromaLabel: asRead(result && result.chroma_level, c.label), warmthSet: warmthBoth ? ['Warm', 'Cool'] : [w], depthSet: d.set, chromaSet: c.set };
 }
 // a tier label as its words: "Medium-to-Deep" -> [Medium, Deep], "Cool-neutral" -> [Cool, Neutral]
 function tierWords(lbl){ return String(lbl || '').split(/-to-|-/).map(t => t.trim()).filter(Boolean).map(t => t[0].toUpperCase() + t.slice(1).toLowerCase())
   .filter(t => ['Light', 'Medium', 'Deep', 'Muted', 'Balanced', 'Vivid', 'Warm', 'Cool', 'Neutral'].includes(t)); }
-function sameTier(a, b){ const x = tierWords(a).sort().join('|'), y = tierWords(b).sort().join('|'); return !!x && x === y; }
+function sameTier(a, b){
+  if(String(a) === 'Neutral' || String(b) === 'Neutral'){ const o = String(a) === 'Neutral' ? b : a; return String(o) === 'Neutral' || /^(warm|cool)-neutral$/i.test(String(o)); } // neutral zone: either neutral half is right
+  const x = tierWords(a).sort().join('|'), y = tierWords(b).sort().join('|'); return !!x && x === y; }
 function tierLabel(her, ax){ return (her && her[ax + 'Label']) || (her && her[ax]) || ''; }
 // what a rule chip says for warmth: "Warm & cool" when she suits both
 function warmthShow(her){ return her && her.warmthBoth ? 'Warm & cool' : tierLabel(her, 'warmth'); }
@@ -13846,8 +13928,10 @@ function renderLoveOrNot(mode, hex, matches, pct){
   const SW28 = ["#f9f8f6","#f0e2b7","#efdacd","#dfdbd2","#e4c877","#e8b3aa","#cbb89f","#ddabb2","#94ccc7","#dcb093","#a1c98d","#b4bc80","#a1abd3","#d58b97","#da8376","#60b4ad","#b0936d","#76b059","#96a055","#ab7fbd","#c77580","#d2726f","#7483bd","#c35a6c","#c95450","#926e53","#8a53a2","#6b503d"];
   const FEATURES = [
     { k:'season_lipstick', key:'seasonShade', t:'Find My Season & Best Lipsticks', s:'Your season, personalized colors & 3 best lipstick shades', hot:true },
-    { k:'check_pair',      key:'check',       t:'Check Shades', s:'Is this color yours? Or find shades just like it',
-      pair:[ { k:'my_shade', key:'check', label:'Check My Shade / Not My Shade' }, { k:'similar', key:'similar', label:'Find Similar Shades' } ] },
+    // (2026-10-18, per Nghi) two full-size wallpapers again, one at a time -- joined by a heart split between them:
+    // the left half sits at the middle right of Check My Shade, the right half at the middle left of Find Similar Shades
+    { k:'my_shade',        key:'check',       t:'Check My Shade / Not My Shade', s:'Is this color yours? Snap it and see', heart:'r' },
+    { k:'similar',         key:'similar',     t:'Find Similar Shades', s:'Love a shade? Find its closest twins', heart:'l' },
     { k:'season',          key:'season',      t:'Find My Season',     s:'Your season, personalized colors & more' },
   ];
   const RR = (cx,cy,rx,ry,rot,d) => `<ellipse class="cv-rng" cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" ${rot?`transform="rotate(${rot} ${cx} ${cy})"`:''} style="--d:${d}s"/>`;
@@ -13899,18 +13983,22 @@ function renderLoveOrNot(mode, hex, matches, pct){
       <path d="M100 9 L48 44 M100 9 L152 44" fill="none" stroke="#96333c" stroke-width="1.6" stroke-linecap="round" vector-effect="non-scaling-stroke" opacity=".75"/>
     </svg><span class="cv-pin" aria-hidden="true"><svg viewBox="0 0 64 64"><path d="M32 52 C 19 42, 7 32, 7 20 C 7 11, 14 5, 22 5 C 27 5, 30 8, 32 13 C 34 8, 37 5, 42 5 C 50 5, 57 11, 57 20 C 57 32, 45 42, 32 52 Z" fill="#96333c"/></svg></span>
     <span class="cv-hook l" aria-hidden="true"></span><span class="cv-hook r" aria-hidden="true"></span>`;
+  const HALF_HEART = side => `<span class="cv-halfheart ${side}" aria-hidden="true"><svg viewBox="${side === 'r' ? '0' : '32'} 0 32 64"><path d="M32 54 C 18 43, 6 33, 6 20 C 6 11, 13 5, 21 5 C 26 5, 30 8, 32 13 C 34 8, 38 5, 43 5 C 51 5, 58 11, 58 20 C 58 33, 46 43, 32 54 Z" fill="#96333c" stroke="#fdf5f3" stroke-width="3"/></svg></span>`;
   const LINK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1"/><path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1"/></svg>';
   track.innerHTML = FEATURES.map((f,i) => f.pair
     ? `<div class="cv-slide cv-pair" data-i="${i}" data-k="${f.k}" role="group" aria-label="${f.t}" tabindex="0">
         <div class="cv-pair-row">${f.pair.map((h, j) => `<div class="cv-half" data-key="${h.key}" role="button" aria-label="${h.label}"><div class="cv-frame"><div class="cv-mat">${MOVE[h.k]()}</div></div><div class="cv-half-cap">${h.label}</div></div>`).join('')}${HANGER}</div>
         <div class="cv-cue">${HAND}<span>swipe</span></div></div>`
-    : `<button type="button" class="cv-slide" data-i="${i}" data-k="${f.k}" aria-label="${f.t}">${f.hot ? '<span class="cv-hot">Most loved</span>' : ''}<div class="cv-frame"><div class="cv-mat">${MOVE[f.k]()}</div></div><div class="cv-cue">${HAND}<span>swipe</span></div></button>`).join('');
+    : `<button type="button" class="cv-slide" data-i="${i}" data-k="${f.k}" aria-label="${f.t}">${f.hot ? '<span class="cv-hot">Most loved</span>' : ''}<div class="cv-frame"><div class="cv-mat">${MOVE[f.k]()}</div>${f.heart ? HALF_HEART(f.heart) : ''}</div><div class="cv-cue">${HAND}<span>swipe</span></div></button>`).join('');
   dotsEl.innerHTML = FEATURES.map((f,i) => `<button type="button" data-i="${i}" aria-label="${f.t}"></button>`).join('');
   const slides = [...track.children]; let cur = -1; // slides[] stays in feature order; the track's DOM order rotates (endless loop)
   function setCur(i){
     if(i === cur) return;
     const was = cur; cur = i;
     slides.forEach((x,k) => x.classList.toggle('cv-on', k === i));
+    // the two shade pages are one folded sheet: while either is showing, both stand up together
+    const spread = !!FEATURES[i].heart;
+    slides.forEach((x,k) => x.classList.toggle('cv-spread-on', spread && !!FEATURES[k].heart));
     [...dotsEl.children].forEach((x,k) => x.classList.toggle('cv-on', k === i));
     capEl.innerHTML = `<b>${FEATURES[i].t}</b><span>${FEATURES[i].s}</span>`;
   }
@@ -14004,7 +14092,32 @@ function renderLoveOrNot(mode, hex, matches, pct){
     if(!timer) timer = setInterval(beatTick, 4000);
     requestAnimationFrame(() => { setCur(Math.max(cur, 0)); ensureNeighbors(); goTo(Math.max(cur, 0), 300); });
   }
-  const homeBtn = $('fmbsHomeBtn'); if(homeBtn) homeBtn.addEventListener('click', openCover);
+  /* (2026-10-18, per Nghi) home = fresh start: results are cleared and not saved; when there are results on the page,
+     a pop-up warns first and offers the download */
+  function freshStart(){
+    try{ if(window.fmbsClearSavedResults) window.fmbsClearSavedResults(); sessionStorage.setItem('fmbs_restart', '1'); }catch(e){}
+    window.fmbsFreshStart = true;
+    location.reload();
+  }
+  const resetOv = $('homeResetOverlay');
+  if(resetOv && resetOv.parentElement !== document.body) document.body.appendChild(resetOv);
+  const closeReset = () => { if(resetOv) resetOv.classList.remove('show'); };
+  const homeBtn = $('fmbsHomeBtn');
+  if(homeBtn) homeBtn.addEventListener('click', () => {
+    const st = window.fmbsPageState ? window.fmbsPageState() : {};
+    if(st.season || st.check){
+      const dl = $('homeResetDownload'), dlSrc = $('downloadBothBtn');
+      if(dl) dl.style.display = (st.season && dlSrc) ? '' : 'none'; // only the season reading has a download
+      if(resetOv) resetOv.classList.add('show');
+    } else if(st.photo) freshStart(); // a photo but no results yet: nothing to lose
+    else openCover();
+  });
+  if($('homeResetGo')) $('homeResetGo').addEventListener('click', () => { closeReset(); freshStart(); });
+  ['homeResetStay', 'homeResetClose'].forEach(id => { if($(id)) $(id).addEventListener('click', closeReset); });
+  if(resetOv) resetOv.addEventListener('click', e => { if(e.target === resetOv) closeReset(); });
+  if($('homeResetDownload')) $('homeResetDownload').addEventListener('click', () => { closeReset(); const b = $('downloadBothBtn'); if(b){ b.scrollIntoView({ behavior:'smooth', block:'center' }); b.click(); } });
+  // right after a fresh start: straight to the wallpapers (the welcome + belief pop-ups were already seen)
+  try{ if(sessionStorage.getItem('fmbs_restart')){ sessionStorage.removeItem('fmbs_restart'); requestAnimationFrame(openCover); } }catch(e){}
 
   /* a tap on the centered wallpaper opens that feature in the existing flow; a drag/swipe is not a tap */
   function openFeature(key){
