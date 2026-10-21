@@ -3331,6 +3331,7 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
 
 <footer class="site-footer">
   <nav class="site-footer-links" aria-label="Legal and contact">
+    <a href="/blog/">Guides</a>
     <a href="about.html">About Us</a>
     <a href="faq.html">FAQ</a>
     <a data-legal="privacy">Privacy Policy</a>
@@ -14288,6 +14289,16 @@ function renderLoveOrNot(mode, hex, matches, pct){
     const half = e.target.closest('.cv-half');
     closeCover(half ? half.dataset.key : FEATURES[cur].key);
   });
+  /* DEEP LINK (2026-10-21, per Nghi): blog buttons open a reading directly -- /?go=season | seasonShade | check | similar.
+     Skips the cover and welcome pop-ups, then cleans the address bar. */
+  try{
+    const u = new URL(location.href), go = u.searchParams.get('go');
+    if(go && ['season','seasonShade','check','similar'].includes(go)){
+      u.searchParams.delete('go'); history.replaceState(null, '', u.pathname + u.search + u.hash);
+      $('cvPop1').classList.remove('cv-show'); $('cvPop2').classList.remove('cv-show');
+      closeCover(go);
+    }
+  }catch(e){}
 })();
 </script>
 </body>
