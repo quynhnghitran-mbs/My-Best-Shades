@@ -1928,7 +1928,61 @@
   @keyframes gbFly{0%{opacity:0;transform:translate(-50%,-50%) scale(.4)}15%{opacity:1}100%{opacity:0;transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) scale(1.1) rotate(var(--r))}}
   @media (prefers-reduced-motion:reduce){.gb-box,.gb-glow,.gb-hand{animation:none;}}
   #resultCard.sr-locked .season-reveal{display:block;}
-  #resultCard.sr-locked > :not(.season-reveal){display:none !important;}
+  /* (2026-11-02) smoother dragging on phones */
+  .drain-cmp input[type=range], .lon-cmp-in{pointer-events:none;}
+  .drain-cmp, .lon-card{touch-action:pan-y;-webkit-tap-highlight-color:transparent;}
+  .drain-cmp-worst, .drain-cmp-line, .drain-cmp-knob, .lon-cmp-r, .lon-cmp-line, .lon-cmp-knob{will-change:left;}
+  .lon-card{touch-action:pan-y;will-change:transform;-webkit-user-select:none;user-select:none;}
+  .toc .tryon, .lon-card{-webkit-tap-highlight-color:transparent;}
+  /* (2026-11-02) four reads + opposite palette */
+  .palette-swatch-row{position:relative;}
+  .tap-guide{position:absolute;left:0;top:0;width:44px;height:36px;color:var(--rose-deep);pointer-events:none;z-index:3;opacity:0;filter:drop-shadow(0 1px 2px rgba(255,255,255,.95)) drop-shadow(0 2px 4px rgba(58,31,34,.25));}
+  .tap-guide svg{width:100%;height:100%;fill:#fff;}
+  body.chip-tried #palPanels .tap-guide, body.drain-tried #drainPalette .tap-guide{display:none;}
+  @media (prefers-reduced-motion:reduce){.tap-guide{display:none;}}
+  .read-dots{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;margin:6px 0 18px;}
+  .read-dot{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:62px;}
+  .read-dot i{width:52px;height:52px;border-radius:50%;box-shadow:inset 0 -3px 6px rgba(0,0,0,.15),0 2px 6px rgba(58,31,34,.15);border:2px solid #fff;}
+  .read-dot b{font-size:12.5px;font-weight:600;}
+  .read-dot small{font-size:11px;color:var(--muted);letter-spacing:.3px;}
+  #drainPalette .palette-dot{position:relative;}
+  .drain-guide{justify-content:center;font-size:12px;color:var(--muted);}
+  /* (2026-11-02) pay-to-see */
+  .pay-eye{display:inline-flex;align-items:center;justify-content:center;vertical-align:-0.2em;width:1.5em;height:1.25em;margin:0 .1em;border-radius:999px;background:rgba(150,51,60,.1);color:#96333c;cursor:pointer;}
+  .pay-eye svg{width:1em;height:1em;}
+  .pay-eye:hover{background:rgba(150,51,60,.18);}
+  .pay-hid{display:inline-flex;align-items:center;gap:.25em;vertical-align:-0.15em;cursor:pointer;max-width:100%;}
+  .pay-fake{filter:blur(.3em);opacity:.85;user-select:none;-webkit-user-select:none;white-space:nowrap;pointer-events:none;overflow:hidden;max-width:70%;}
+  .tryon-bar .pay-hid{display:flex;flex-wrap:nowrap;justify-content:center;align-items:center;margin:0 auto .15em;}
+  .tryon-bar span.pay-hid{display:flex;}
+  .tryon-bar span.pay-fake{display:block;}
+  .tryon-bar span.pay-eye{display:inline-flex;margin:0 0 0 .2em;flex:none;}
+  .pay-hid .pay-eye{flex:none;}
+  #myShadeResultPct .pay-hid{gap:.15em;}
+  #myShadeResultPct .pay-fake{filter:blur(.22em);}
+  .tryon-bar .pay-eye{display:flex;font-size:1.5em;color:inherit;background:rgba(255,255,255,.2);width:1.8em;height:1.3em;margin:0 auto .15em;}
+  body.res-locked #seasonsMap{display:none !important;} /* her dot on the 16-season map would give the season away */
+  .season-reveal.sr-wiggle .gb-box{animation:srWiggle .6s ease;}
+  @keyframes srWiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-7deg)}40%{transform:rotate(6deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(2deg)}}
+  .pay-blur{position:relative;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none;}
+  .pay-blur-t{filter:blur(7px);opacity:.85;}
+  .pay-blur-k{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#96333c;}
+  .pay-blur-k svg{width:18px;height:18px;filter:drop-shadow(0 1px 2px rgba(255,255,255,.9));}
+  #myShadeResultPct .pay-blur-k svg{width:26px;height:26px;}
+  #myShadeResultPct .pay-eye{font-size:40px;}
+  .gn-q{min-width:44px;justify-content:center;font-family:'Playfair Display',serif;font-size:18px;font-weight:600;color:var(--rose-deep);cursor:pointer;}
+  body:not(.res-locked) #resultCard.sr-locked > :not(.season-reveal){display:none !important;}
+  /* (2026-11-02) locked reading: only the season itself waits in the gift; the rest of the reading shows */
+  /* (2026-11-02, per Nghi) story card before payment: family line, then the gift as the heading, then her color story
+     with the season masked, the confidence and her guess. Only the season name itself stays in the gift. */
+  body.res-locked #resultCard.sr-locked{display:flex;flex-direction:column;}
+  body.res-locked #resultCard.sr-locked > #seasonName, body.res-locked #resultCard.sr-locked > .fb-thumbs{display:none !important;}
+  body.res-locked #resultCard.sr-locked > *{order:5;}
+  body.res-locked #resultCard.sr-locked > #seasonFamily{order:0;}
+  body.res-locked #resultCard.sr-locked > #seasonReveal{order:1;margin:2px auto 4px;}
+  body.res-locked #resultCard.sr-locked > #seasonDesc{order:2;}
+  body.res-locked #resultCard.sr-locked > #confidenceNote{order:3;}
+  body.res-locked #resultCard.sr-locked > #guessNote{order:4;}
   #resultCard.sr-flip #seasonName{animation:srFlip .7s ease both;}
   #resultCard.sr-flip #seasonFamily, #resultCard.sr-flip #seasonDesc{animation:srFade .7s ease .25s both;}
   @keyframes srFlip{from{transform:perspective(600px) rotateX(80deg);opacity:0}to{transform:none;opacity:1}}
@@ -2728,6 +2782,9 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
         <div class="analysis-eyebrow" id="detailedAnalysisEyebrow">Your Detailed</div>
         <h3 class="analysis-title">Seasonal Color Analysis</h3>
 
+        <!-- (2026-11-02, per Nghi) her four reads restated before the color reading -->
+        <div class="analysis-subhead">Your Four Reads</div>
+        <div class="read-dots" id="readDots"></div>
         <div class="analysis-subhead">Your Color Reading</div>
         <div id="cielabMetrics"></div>
         <div id="readingEnd" aria-hidden="true"></div>
@@ -2736,6 +2793,18 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
 
     <div id="styleGuideSection" style="display:none;">
       <div class="analysis-card">
+        <!-- (2026-11-02, per Nghi) Why Your Warmth, Depth & Chroma is step 2, before the personalized colors (step 3) -->
+        <div id="runnerSection" style="display:none;">
+          <div class="step-tag" data-step="why"></div>
+          <div class="analysis-subhead second" id="runnerHeading">Why Your Warmth, Depth &amp; Chroma</div>
+          <div class="pal-tabs tier-tabs" id="tierTabs" role="tablist">
+            <button type="button" class="pal-tab active" data-axis="warmth" role="tab" aria-selected="true">Warmth</button>
+            <button type="button" class="pal-tab" data-axis="depth" role="tab" aria-selected="false">Depth</button>
+            <button type="button" class="pal-tab" data-axis="chroma" role="tab" aria-selected="false">Chroma</button>
+          </div>
+          <div class="cmp-block" id="runnerCompare"></div>
+          <div class="palette-guidance" id="runnerCaption"></div>
+        </div>
         <div class="step-tag" data-step="colors"></div>
         <h3 class="analysis-title" id="colorPaletteTitle">Your Color Palette</h3>
         <div class="palette-why" id="paletteWhy"></div>
@@ -2871,23 +2940,23 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
         </div>
 
 
-        <div id="runnerSection" style="display:none;">
-          <div class="step-tag" data-step="why"></div>
-          <div class="analysis-subhead second" id="runnerHeading">Why Your Warmth, Depth &amp; Chroma</div>
-          <div class="pal-tabs tier-tabs" id="tierTabs" role="tablist">
-            <button type="button" class="pal-tab active" data-axis="warmth" role="tab" aria-selected="true">Warmth</button>
-            <button type="button" class="pal-tab" data-axis="depth" role="tab" aria-selected="false">Depth</button>
-            <button type="button" class="pal-tab" data-axis="chroma" role="tab" aria-selected="false">Chroma</button>
-          </div>
-          <div class="cmp-block" id="runnerCompare"></div>
-          <div class="palette-guidance" id="runnerCaption"></div>
-        </div>
-
         <div id="drainSection" style="display:none;">
           <div class="step-tag" data-step="skip"></div>
           <div class="analysis-subhead second">Colors That Drain You</div>
           <div class="drain-cmp" id="drainCompare"></div>
           <div class="palette-guidance" id="drainCaption"></div>
+          <!-- (2026-11-02, per Nghi) the whole opposite palette, styled like the personalized colors, tap to try on -->
+          <div id="drainPalette" style="display:none;">
+            <div class="analysis-subhead second">Your Opposite Palette</div>
+            <div class="dials-subtitle" id="drainPaletteSub"></div>
+            <div class="tab-tryon" id="drainTryOn"></div>
+            <div class="pc-guide drain-guide"><span>Tap a color to see how it drains you</span></div>
+            <div class="analysis-subhead">Clothing</div>
+            <div id="drainClothingRow" class="palette-swatch-row"></div>
+            <div class="analysis-subhead second">Lips &amp; Cheeks</div>
+            <div id="drainLipsRow" class="palette-swatch-row"></div>
+            <div class="palette-guidance" id="drainPaletteCaption"></div>
+          </div>
         </div>
 
         <div id="practiceZone"><div class="step-tag" data-step="practice"></div>
@@ -3321,7 +3390,7 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
 <div class="exit-nudge-overlay" id="guessOverlay" role="dialog" aria-modal="true" aria-labelledby="guessPopTitle">
   <div class="exit-nudge-card gp-card">
     <button type="button" class="exit-nudge-close" id="guessPopClose" aria-label="Close">&times;</button>
-    <div class="gp-eyebrow" id="guessPopEyebrow">Let's play while we find your season!</div>
+    <div class="gp-eyebrow" id="guessPopEyebrow">Let's play while we read your colors!</div>
     <div class="gp-title" id="guessPopTitle">Take a guess</div>
     <div class="gp-body" id="guessPopBody"></div>
   </div>
@@ -7495,7 +7564,7 @@ function updateMyShadeActionButtons(){
   const active = isColorCheckActive();
   const checkAnotherBtn = document.getElementById('myShadeCheckAnotherBtn');
   const checksRemainingEl = document.getElementById('myShadeChecksRemaining');
-  if(checkAnotherBtn) checkAnotherBtn.style.display = active ? '' : 'none';
+  if(checkAnotherBtn) checkAnotherBtn.style.display = ''; // (2026-11-02) free tries: always offered
   if(checksRemainingEl){
     const expiresAt = getColorCheckExpiresAt();
     if(active && expiresAt){
@@ -7633,8 +7702,9 @@ function renderColorCheckPayPalButton(paypalSdk){
       // The auto-continue case below already scrolls to its own result
       // card (myShadeRunCheck's callers), so this only fires when that's
       // NOT about to happen, to avoid two scrolls fighting each other.
-      applyColorCheckUnlockState({ scrollToSection: !willAutoContinue });
+      applyColorCheckUnlockState({ scrollToSection: !willAutoContinue && !myShadeLastRun });
       if(willAutoContinue) btn.click();
+      else if(myShadeLastRun && myShadePickedRgb) myShadeRunCheck(myShadeLastRun.action, myShadeLastRun.runFn); // (2026-11-02) unblur the result she already ran
     }),
     onError: (err) => {
       console.error('[PayPal] Checkout error', err);
@@ -8520,7 +8590,7 @@ function renderMyShadeTryOn(mode, hex, matches){
     const parts = [`<div>${tryOnTileHtml(src, hex, 'Your color')}<div class="tryon-compare-label"><b>Your photo's color</b>${hex.toUpperCase()}</div></div>`];
     (matches || []).slice(0, 3).forEach(m => {
       const brand = (splitBrandLine(m.brand_line) || {}).brand || '';
-      parts.push(`<div>${tryOnTileHtml(src, m.hex, (m.confidencePct != null ? m.confidencePct + '%' : m.hex))}<div class="tryon-compare-label"><b>${escapeHtml(m.name)}</b>${escapeHtml(brandDisplayNameSafe(brand))}</div></div>`);
+      parts.push(`<div>${tryOnTileHtml(src, m.hex, (m.confidencePct != null ? m.confidencePct + '%' : m.hex))}<div class="tryon-compare-label"><b>${payLocked() ? payBlurHtml(m.name, 'Unlock your pass to see the shade names.') : escapeHtml(m.name)}</b>${escapeHtml(brandDisplayNameSafe(brand))}</div></div>`);
     });
     cmpEl.innerHTML = parts.join('');
   }
@@ -8568,13 +8638,9 @@ async function myShadeHandleSelfieFile(file){
     };
     renderMyShadeProfileGate();
     const summary = document.getElementById('myShadeProfileSummaryCard');
-    if(!isColorCheckActive() && paywallCardEl){
-      // 2026-10-09, per Nghi: selfie -> exposure check passed -> payment.
-      const pwDesc = document.getElementById('paywallDesc');
-      if(pwDesc) pwDesc.innerHTML = "Unlock your pass below to start checking colors.";
-      paywallCardEl.classList.add('show');
-      paywallCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else if(summary) summary.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // CHANGED 2026-11-02, per Nghi: no paywall here any more. She checks for free; the % (Check My Shade)
+    // and the shade names (Find Similar Shades) stay blurred until she unlocks the pass.
+    if(summary) summary.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } finally {
     if(myShadeSelfieLoading) myShadeSelfieLoading.classList.remove('show');
     [myShadeSelfieInputCamera, myShadeSelfieInputUpload].forEach(i => { if(i){ i.disabled = false; i.value = ''; } });
@@ -9434,6 +9500,7 @@ function renderMyShadeResult(rgb, pct, scored){
   document.getElementById('myShadeResultSwatch').style.background = hex;
   const pctEl = document.getElementById('myShadeResultPct');
   pctEl.textContent = pct + '%';
+  if(payLocked()) pctEl.innerHTML = payBlurHtml('88%', 'Unlock your pass to see how well this color suits you.'); // (2026-11-02)
   // Both carry a hardcoded style="display:none;" in the markup, left
   // over from the 2026-09-16 retirement (see the comment above
   // #myShadeResultCategory in the HTML) -- className/textContent alone
@@ -9633,7 +9700,7 @@ function renderSimilarShadeTab(){
             ${medalBadgeSvg(rankLabels[i] || (i+1), rankCfg.medalColor, rankCfg.medalWidth, rankCfg.medalStroke)}
           </div>
           <div class="shade-result-info">
-            <div class="shade-result-name">${s.name}</div>
+            <div class="shade-result-name">${payLocked() ? payBlurHtml(s.name, 'Unlock your pass to see the shade names.') : s.name}</div>
             <div class="shade-result-conf-row">
               ${renderLoveIcons(s.confidencePct)}
               <div class="shade-result-conf-num">${s.confidencePct}% similar to your color</div>
@@ -9669,14 +9736,37 @@ function renderSimilarShadeTab(){
 // myShadeLastAction so a mid-flow PayPal payment re-clicks the same
 // button afterward. `runFn(rgb)` does the actual scoring/rendering for
 // whichever mode this is, and is expected to throw on failure.
+// (2026-11-02, per Nghi) pay-to-see: unpaid checks show the result with the % / shade names blurred.
+// The real value is never put on the page while locked, only a placeholder. Tapping it opens the paywall.
+let myShadeLastRun = null;
+function payLocked(){ return !isColorCheckActive(); }
+function payBlurHtml(placeholder, msg){
+  // (2026-11-02, per Nghi) blurred stand-in + eye icon, like the locked reading; tapping it opens the pass paywall
+  return `<span class="pay-hid pay-blur" role="button" tabindex="0" data-pay-msg="${escapeHtml(msg)}" aria-label="${escapeHtml(msg)}" title="Unlock to see"><span class="pay-fake" aria-hidden="true">${escapeHtml(payFakeFor(placeholder))}</span><span class="pay-eye">${EYE_OFF_SVG}</span></span>`;
+}
+function openCheckPaywall(msg){
+  if(!paywallCardEl) return;
+  paywallCardEl.dataset.plan = 'check';
+  const d = document.getElementById('paywallDesc'); if(d){ d.style.display = ''; d.innerHTML = msg || 'Unlock your pass to see your results.'; }
+  paywallCardEl.classList.add('show');
+  paywallCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+document.addEventListener('click', (e) => {
+  const b = e.target.closest && e.target.closest('.pay-blur'); if(!b) return;
+  e.preventDefault(); e.stopPropagation(); // capture phase: beats the row's own buy-link click
+  openCheckPaywall(b.dataset.payMsg);
+}, true);
+document.addEventListener('keydown', (e) => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const b = e.target.closest && e.target.closest('.pay-blur'); if(!b) return;
+  e.preventDefault(); openCheckPaywall(b.dataset.payMsg);
+});
+
 function myShadeRunCheck(action, runFn){
   if(!myShadePickedRgb) return;
-  if(!isColorCheckActive()){
-    paywallCardEl.classList.add('show');
-    paywallCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    return;
-  }
+  // (2026-11-02, per Nghi) no gate: unpaid checks run, with the result locked (see payLocked())
   myShadeLastAction = action;
+  myShadeLastRun = { action, runFn };
   { const ru = document.getElementById('myShadeReupload'); if(ru) ru.style.display = 'none'; } // she pressed Check / Find: photo committed
   hideError(myShadeErrorBox);
   myShadeCheckLoading.classList.add('show');
@@ -9744,12 +9834,7 @@ document.getElementById('myShadeCheckAnotherBtn').addEventListener('click', () =
   // cheap to keep -- a customer sitting on this page across their
   // pass's exact expiry moment shouldn't get a new upload-and-pick
   // cycle before being told they need to renew).
-  if(!isColorCheckActive()){
-    paywallCardEl.classList.add('show');
-    paywallCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    return;
-  }
-  myShadeResultCard.classList.remove('show');
+  myShadeResultCard.classList.remove('show'); // (2026-11-02) free to try another color; results stay locked until she pays
   if(myShadeSwatchCanvas) myShadeSwatchCanvas.style.display = 'none';
   myShadeSwatchPlaceholder.style.display = 'block';
   myShadePickHint.style.display = 'none';
@@ -10226,15 +10311,28 @@ analyzeBtn.addEventListener('click', async () => {
     showMirrorReads(measurements);
     setPhotoLock(true);
     if(!getPurchase()){
-      const paywallDescEl = document.getElementById('paywallDesc');
-      if(paywallDescEl){
-        paywallDescEl.innerHTML = (paywallCardEl && paywallCardEl.dataset.plan === 'season' ? "Unlock to see your season and personal colors." : "Unlock to see your season and best lipsticks.");
-        showPaywallTeaser();
-      }
-      if(paywallCardEl){
-        paywallCardEl.classList.add('show');
-        paywallCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+      // CHANGED 2026-11-02, per Nghi: the free part runs first (scan, exposure check, her four reads, the
+      // guessing game), but NO season matching. Her reading waits in a locked present at the end; tapping
+      // it opens the paywall, and paying runs the season (+ lipstick) matching and opens the present.
+      if(loading1Text) loading1Text.textContent = 'Undertone, depth & contrast computing...';
+      openGuessPop();
+      await new Promise(r => setTimeout(r, 1400));
+      if(loading1Text) loading1Text.textContent = 'Your reading is ready...';
+      await new Promise(r => setTimeout(r, 700));
+      // (2026-11-02, per Nghi) the full reading shows for free -- palette, why, colors to avoid, practice, the
+      // lipstick looks -- built from her measurements only (no AI call). The final results (her season, lipstick
+      // names, % matches) are masked with an eye icon and the season waits inside the gift; paying unlocks them.
+      try{
+        const freeResult = mergeMeasuredResult({ undertone: measurements.undertone_descriptive || measurements.undertone || '', explanation: '' }, measurements);
+        freeResult.explanation = freeColorStory(freeResult); // written on her device; the AI's own story replaces it after payment
+        freeResult.image_mime_type = uploadedImage.mediaType;
+        startResultLock(freeResult);
+        currentSeasonResult = freeResult;
+        const wantsLips = document.documentElement.getAttribute('data-fmbs-mode') === 'seasonShade' || (paywallCardEl && paywallCardEl.dataset.plan === 'seasonShade');
+        renderSeasonResult(freeResult, { skipDebugHistory: true, forceShadeAccess: wantsLips });
+        maskLockedResults();
+      }catch(e){ console.error('[Locked reading] render failed', e); }
+      showPrepayPresent();
       return; // the finally block below hides the loading state and re-enables the button
     }
 
@@ -10322,92 +10420,17 @@ analyzeBtn.addEventListener('click', async () => {
       { type: "text", text: "Analyze this person's color season using the seasonal color analysis framework in your instructions and respond with only the JSON object." + measurementText }
     ];
     const result = await callClaude(SEASON_SYSTEM_PROMPT, userContent);
-    if(measurements){
-      // Overwrite with the real measured values regardless of what
-      // Claude echoed back, so downstream display is always accurate.
-      result.estimated_skin_rgb = [measurements.skin_rgb.r, measurements.skin_rgb.g, measurements.skin_rgb.b];
-      result.estimated_iris_rgb = [measurements.iris_rgb.r, measurements.iris_rgb.g, measurements.iris_rgb.b];
-      result.estimated_sclera_rgb = [measurements.sclera_rgb.r, measurements.sclera_rgb.g, measurements.sclera_rgb.b];
-      result.estimated_eyebrow_rgb = [measurements.eyebrow_rgb.r, measurements.eyebrow_rgb.g, measurements.eyebrow_rgb.b];
-      result.skin_luminance = measurements.skin_luminance;
-      result.eyebrow_luminance = measurements.eyebrow_luminance;
-      result.iris_luminance = measurements.iris_luminance;
-      result.sclera_luminance = measurements.sclera_luminance;
-      result.skin_lab_L = measurements.skin_lab_L;
-      result.iris_lab_L = measurements.iris_lab_L;
-      result.sclera_lab_L = measurements.sclera_lab_L;
-      result.eyebrow_lab_L = measurements.eyebrow_lab_L;
-      result.depth_score = measurements.depth_score;
-      result.depth_level = measurements.depth_level;
-      result.g_minus_b = measurements.g_minus_b;
-      result.lightness = measurements.lightness;
-      result.darkness = measurements.darkness;
-      result.contrast_score = measurements.contrast_score;
-      result.contrast_level = measurements.contrast_level;
-      result.image_width = measurements.image_width;
-      result.image_height = measurements.image_height;
-      result.skin_rgb_cheek = measurements.skin_rgb_cheek;
-      result.skin_rgb_forehead = measurements.skin_rgb_forehead;
-      result.bangs_detected = measurements.bangs_detected;
-      result.forehead_hair_pct = measurements.forehead_hair_pct;
-      result.skin_chroma = measurements.skin_chroma;
-      result.iris_chroma = measurements.iris_chroma;
-      result.sclera_chroma = measurements.sclera_chroma;
-      result.face_box = measurements.face_box;
-      result.lower_face_box = measurements.lower_face_box;
-      result.avg_chroma = measurements.avg_chroma;
-      result.chroma_level = measurements.chroma_level;
-      result.eyelid_rgb = measurements.eyelid_rgb;
-      result.eyelid_luminance = measurements.eyelid_luminance;
-      result.undertone_descriptive = measurements.undertone_descriptive;
-      result.quant_best = measurements.quant_best;
-      result.quant_best_dist = measurements.quant_best_dist;
-      result.quant_runner_up = measurements.quant_runner_up;
-      result.quant_runner_up_dist = measurements.quant_runner_up_dist;
-      result.quant_warmth_tiebreak = !!measurements.quant_warmth_tiebreak;
-      result.quant_too_close = measurements.quant_too_close;
-      result.quant_poor_fit = measurements.quant_poor_fit;
-      result.lab_temperature_b = measurements.lab_temperature_b;
-      // Safety net: force the actual displayed season/family to match
-      // the quantitative result exactly, regardless of what Claude
-      // returned — same pattern already used for every other measured
-      // field, so a prompt-following slip can never surface a season
-      // that doesn't match the given quantitative match.
-      const seasonFamilyMap = {
-        "Light Spring":"Spring", "True Spring":"Spring", "Bright Spring":"Spring", "Soft Spring":"Spring",
-        "Light Summer":"Summer", "True Summer":"Summer", "Soft Summer":"Summer", "Deep Soft Summer":"Summer",
-        "Soft Autumn":"Autumn", "True Autumn":"Autumn", "Deep Autumn":"Autumn", "Deep Soft Autumn":"Autumn",
-        "Deep Winter":"Winter", "True Winter":"Winter", "Bright Winter":"Winter", "Soft Winter":"Winter"
-      };
-      // Resolves immediately, no retry step -- a tie means two seasons
-      // are genuinely equally plausible, so show both; a poor fit
-      // means one season is the best available answer, just not a
-      // confident one.
-      if(measurements.quant_too_close){
-        result.season = `${measurements.quant_best}/${measurements.quant_runner_up}`;
-        result.shadeMatchSeason = measurements.quant_best; // for shade/chart lookups, which need a single real season key -- the combined name is display-only
-        result.family = seasonFamilyMap[measurements.quant_best] || result.family;
-        result.isCombinedSeason = true;
-      } else if(measurements.quant_borderline){
-        result.season = measurements.quant_best;
-        result.shadeMatchSeason = measurements.quant_best;
-        result.family = seasonFamilyMap[measurements.quant_best] || result.family;
-        result.isBorderline = true;
-      } else if(measurements.quant_poor_fit){
-        result.season = measurements.quant_best;
-        result.shadeMatchSeason = measurements.quant_best;
-        result.family = seasonFamilyMap[measurements.quant_best] || result.family;
-        result.isLowConfidence = true;
-      } else {
-        result.season = measurements.quant_best;
-        result.shadeMatchSeason = measurements.quant_best;
-        result.family = seasonFamilyMap[measurements.quant_best] || result.family;
-      }
-      result.runner_up = measurements.quant_runner_up;
-    }
+    if(measurements) mergeMeasuredResult(result, measurements);
     result.image_mime_type = uploadedImage.mediaType;
     currentSeasonResult = result;
+    { const rcp = document.getElementById('resultCard'); if(rcp) rcp.classList.remove('sr-prepay'); } // paid: the present now holds her real reading
+    stopResultLock(); // (2026-11-02) the real render below replaces every masked spot
     renderSeasonResult(result);
+    if(prepayUnboxPending){ // she tapped the present before paying: open it for her now (2026-11-02)
+      prepayUnboxPending = false;
+      const rbx = document.getElementById('seasonReveal');
+      if(rbx) setTimeout(() => { rbx.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => rbx.click(), 500); }, 300);
+    }
     saveLastResultSnapshot(); // see restoreLastResultSnapshot() -- survives a reload/back-navigation
     consumePurchase(); // they got their reading -- this purchase is now used up
     clearSeasonFailCount(); // successful read -- the losing streak (if any) is over
@@ -10448,6 +10471,107 @@ analyzeBtn.addEventListener('click', async () => {
 const CUSTOMER_LOCATION_FETCH_TIMEOUT_MS = 3000;
 const CUSTOMER_LOCATION_WAIT_MS = 3200;
 let customerLocationPromise = null;
+// (2026-11-02) shared by the free (locked) reading and the paid one: copy every measured value onto the result
+// and force the season to the quantitative match, exactly as the paid flow always did.
+// (2026-11-02, per Nghi) the color story before payment, built from her own measurements only (no AI call, so the
+// privacy policy's "after you pay" still holds). Her season name in it is masked by the locked reading.
+function freeColorStory(r){
+  const low = x => String(x || '').replace(/-to-/g, ' to ').toLowerCase();
+  const und = r.undertone_descriptive || r.undertone || '';
+  const warm = /spring|autumn/i.test(r.season || '');
+  const feel = { Light: 'light and airy', Medium: 'balanced', Deep: 'rich and deep' };
+  const dWord = low(r.depth_level), cWord = low(r.chroma_level), kWord = low(r.contrast_level);
+  const soft = /muted/i.test(r.chroma_level || ''), vivid = /vivid/i.test(r.chroma_level || '');
+  return `Your coloring has a <strong>${escapeHtml(und || (warm ? 'warm' : 'cool'))}</strong> undertone, with <strong>${escapeHtml(dWord || 'medium')} depth</strong> and <strong>${escapeHtml(cWord || 'balanced')} chroma</strong>. ` +
+    `Your skin, eyes and brows sit at <strong>${escapeHtml(kWord || 'medium')} contrast</strong>, so the overall impression is ${soft ? '<strong>soft and blended</strong>' : vivid ? '<strong>clear and vivid</strong>' : '<strong>gentle and balanced</strong>'}. ` +
+    `That combination is the hallmark of ${escapeHtml(r.season || '')}: you'll shine in ${warm ? 'warm' : 'cool'}, ${soft ? 'muted' : vivid ? 'clear, bright' : 'balanced'} colors that echo your natural coloring.`;
+}
+
+function mergeMeasuredResult(result, measurements){
+    // Overwrite with the real measured values regardless of what
+    // Claude echoed back, so downstream display is always accurate.
+    result.estimated_skin_rgb = [measurements.skin_rgb.r, measurements.skin_rgb.g, measurements.skin_rgb.b];
+    result.estimated_iris_rgb = [measurements.iris_rgb.r, measurements.iris_rgb.g, measurements.iris_rgb.b];
+    result.estimated_sclera_rgb = [measurements.sclera_rgb.r, measurements.sclera_rgb.g, measurements.sclera_rgb.b];
+    result.estimated_eyebrow_rgb = [measurements.eyebrow_rgb.r, measurements.eyebrow_rgb.g, measurements.eyebrow_rgb.b];
+    result.skin_luminance = measurements.skin_luminance;
+    result.eyebrow_luminance = measurements.eyebrow_luminance;
+    result.iris_luminance = measurements.iris_luminance;
+    result.sclera_luminance = measurements.sclera_luminance;
+    result.skin_lab_L = measurements.skin_lab_L;
+    result.iris_lab_L = measurements.iris_lab_L;
+    result.sclera_lab_L = measurements.sclera_lab_L;
+    result.eyebrow_lab_L = measurements.eyebrow_lab_L;
+    result.depth_score = measurements.depth_score;
+    result.depth_level = measurements.depth_level;
+    result.g_minus_b = measurements.g_minus_b;
+    result.lightness = measurements.lightness;
+    result.darkness = measurements.darkness;
+    result.contrast_score = measurements.contrast_score;
+    result.contrast_level = measurements.contrast_level;
+    result.image_width = measurements.image_width;
+    result.image_height = measurements.image_height;
+    result.skin_rgb_cheek = measurements.skin_rgb_cheek;
+    result.skin_rgb_forehead = measurements.skin_rgb_forehead;
+    result.bangs_detected = measurements.bangs_detected;
+    result.forehead_hair_pct = measurements.forehead_hair_pct;
+    result.skin_chroma = measurements.skin_chroma;
+    result.iris_chroma = measurements.iris_chroma;
+    result.sclera_chroma = measurements.sclera_chroma;
+    result.face_box = measurements.face_box;
+    result.lower_face_box = measurements.lower_face_box;
+    result.avg_chroma = measurements.avg_chroma;
+    result.chroma_level = measurements.chroma_level;
+    result.eyelid_rgb = measurements.eyelid_rgb;
+    result.eyelid_luminance = measurements.eyelid_luminance;
+    result.undertone_descriptive = measurements.undertone_descriptive;
+    result.quant_best = measurements.quant_best;
+    result.quant_best_dist = measurements.quant_best_dist;
+    result.quant_runner_up = measurements.quant_runner_up;
+    result.quant_runner_up_dist = measurements.quant_runner_up_dist;
+    result.quant_warmth_tiebreak = !!measurements.quant_warmth_tiebreak;
+    result.quant_too_close = measurements.quant_too_close;
+    result.quant_poor_fit = measurements.quant_poor_fit;
+    result.lab_temperature_b = measurements.lab_temperature_b;
+    // Safety net: force the actual displayed season/family to match
+    // the quantitative result exactly, regardless of what Claude
+    // returned — same pattern already used for every other measured
+    // field, so a prompt-following slip can never surface a season
+    // that doesn't match the given quantitative match.
+    const seasonFamilyMap = {
+      "Light Spring":"Spring", "True Spring":"Spring", "Bright Spring":"Spring", "Soft Spring":"Spring",
+      "Light Summer":"Summer", "True Summer":"Summer", "Soft Summer":"Summer", "Deep Soft Summer":"Summer",
+      "Soft Autumn":"Autumn", "True Autumn":"Autumn", "Deep Autumn":"Autumn", "Deep Soft Autumn":"Autumn",
+      "Deep Winter":"Winter", "True Winter":"Winter", "Bright Winter":"Winter", "Soft Winter":"Winter"
+    };
+    // Resolves immediately, no retry step -- a tie means two seasons
+    // are genuinely equally plausible, so show both; a poor fit
+    // means one season is the best available answer, just not a
+    // confident one.
+    if(measurements.quant_too_close){
+      result.season = `${measurements.quant_best}/${measurements.quant_runner_up}`;
+      result.shadeMatchSeason = measurements.quant_best; // for shade/chart lookups, which need a single real season key -- the combined name is display-only
+      result.family = seasonFamilyMap[measurements.quant_best] || result.family;
+      result.isCombinedSeason = true;
+    } else if(measurements.quant_borderline){
+      result.season = measurements.quant_best;
+      result.shadeMatchSeason = measurements.quant_best;
+      result.family = seasonFamilyMap[measurements.quant_best] || result.family;
+      result.isBorderline = true;
+    } else if(measurements.quant_poor_fit){
+      result.season = measurements.quant_best;
+      result.shadeMatchSeason = measurements.quant_best;
+      result.family = seasonFamilyMap[measurements.quant_best] || result.family;
+      result.isLowConfidence = true;
+    } else {
+      result.season = measurements.quant_best;
+      result.shadeMatchSeason = measurements.quant_best;
+      result.family = seasonFamilyMap[measurements.quant_best] || result.family;
+    }
+    result.runner_up = measurements.quant_runner_up;
+  return result;
+}
+
 function fetchCustomerLocation(){
   customerLocationPromise = (async () => {
     // No AbortController/signal here on purpose: some preview/sandbox
@@ -12526,6 +12650,7 @@ function mountTryOnCarousel(host, src, items, opts){
   host.appendChild(box);
   let favBtn = null, nopeBtnC = null;
   const lipKind = opts.fav === 'lipstick';
+  if(lipKind && resultLock) items.forEach(it => { if(it.label) resultLock.names.add(it.label); }); // so favorites etc. mask them too
   if(opts.fav){
     const rail = document.createElement('div'); rail.className = 'tryon-rail'; box.querySelector('.tryon').appendChild(rail);
     const hh = document.createElement('div'); hh.className = 'heart-hand'; hh.setAttribute('aria-hidden', 'true'); hh.innerHTML = TOC_HAND; rail.appendChild(hh);
@@ -12551,7 +12676,8 @@ function mountTryOnCarousel(host, src, items, opts){
     const it = items[i];
     bar.style.backgroundColor = it.hex;
     bar.style.color = tryOnTextColor(it.hex);
-    const setText = () => { lab.innerHTML = it.label ? escapeHtml(it.label) + (it.sub ? `<small>${escapeHtml(it.sub)}</small>` : '') : ''; lab.classList.remove('out'); };
+    // (2026-11-02) locked reading: a lipstick's name on the try-on band is an eye-off icon until she pays
+    const setText = () => { lab.innerHTML = it.label ? ((lipKind && resultLock) ? eyeHtml(it.label) : escapeHtml(it.label)) + (it.sub ? `<small>${escapeHtml(it.sub)}</small>` : '') : ''; lab.classList.remove('out'); };
     clearTimeout(fadeT);
     if(instant || !lab.innerHTML){ setText(); }
     else { lab.classList.add('out'); fadeT = setTimeout(setText, 380); }
@@ -12572,7 +12698,9 @@ function mountTryOnCarousel(host, src, items, opts){
   function user(step){ box.classList.add('swiped'); if(opts.stopOnUser) stopAuto(); show(i + step); restart(); }
   let x0 = null, y0 = 0, moved = false;
   tile.addEventListener('pointerdown', e => { if(e.target.closest('.tryon-rail')){ x0 = null; return; } x0 = e.clientX; y0 = e.clientY; moved = false; });
-  tile.addEventListener('pointermove', e => { if(x0 !== null && Math.abs(e.clientX - x0) > 8) moved = true; });
+  tile.addEventListener('pointermove', e => { if(x0 === null) return; const dx = e.clientX - x0, dy = e.clientY - y0;
+    if(Math.abs(dx) > 8) moved = true;
+    if(Math.abs(dx) > 36 && Math.abs(dx) > Math.abs(dy) * 1.2){ x0 = null; user(dx < 0 ? 1 : -1); } }); // (2026-11-02) react mid-swipe on phones
   tile.addEventListener('pointerup', e => {
     if(x0 === null) return;
     const dx = e.clientX - x0, dy = e.clientY - y0; x0 = null;
@@ -12933,12 +13061,138 @@ function drainPairs(result){
   return pairs;
 }
 function pickDrainColors(result){ return drainPairs(result).map(q => ({ hex: q.r })); }
+// (2026-11-02, per Nghi) her four reads, restated as circles before Your Color Reading
+function renderReadDots(result){
+  const el = document.getElementById('readDots'); if(!el) return;
+  const f = [['Skin', result && result.estimated_skin_rgb], ['Sclera', result && result.estimated_sclera_rgb], ['Iris', result && result.estimated_iris_rgb], ['Eyebrow', result && result.estimated_eyebrow_rgb]]
+    .filter(x => Array.isArray(x[1]) && x[1].length === 3);
+  if(f.length < 4){ el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.innerHTML = f.map(([n, c]) => { const hx = rgbToHex(c[0], c[1], c[2]); return `<div class="read-dot"><i style="background:${hx}"></i><b>${n}</b><small>${hx.toUpperCase()}</small></div>`; }).join('');
+}
+// (2026-11-02, per Nghi) the full opposite palette: every color of her own palette pushed to the far end of all
+// three axes (same rules as the Drains-you slider): depth flipped, chroma flipped, warmth to the other side.
+function drainShift(hex, her, opp){
+  const lab = rgbToLab(hexToRgb(hex)), C0 = Math.hypot(lab.a, lab.b);
+  const dL = TIER_DEPTH_L[opp.depth] - lblAvg(tierLabel(her, 'depth'), TIER_DEPTH_L);
+  const kC = TIER_CHROMA_K[opp.chroma] / (lblAvg(tierLabel(her, 'chroma'), TIER_CHROMA_K) || 0.75);
+  const L = Math.max(14, Math.min(93, lab.L + dL));
+  // chroma: scale a*/b* (neutrals stay near-neutral)
+  let k = C0 < 6 ? 1 : Math.max(5, Math.min(80, C0 * kC)) / C0;
+  let a = lab.a * k, b = lab.b * k;
+  // warmth = the b* axis (same axis as her Warmth reading): push every color to the other side
+  if(!her.warmthBoth){
+    const sign = her.warmth === 'Warm' ? -1 : 1; // she is warm -> cooler (bluer), she is cool -> warmer (yellower)
+    b += sign * (C0 < 6 ? 12 : 24);
+    if(sign > 0) a += C0 < 6 ? 3 : 0; else a -= C0 < 6 ? 1 : 0;
+  }
+  const C = Math.hypot(a, b), h = (Math.atan2(b, a) * 180 / Math.PI + 360) % 360;
+  return lchToHex(L, C, h);
+}
+
+function renderDrainPalette(result){
+  const wrap = document.getElementById('drainPalette'); if(!wrap) return;
+  const data = lastStyleGuideData;
+  if(!data || !Array.isArray(data.clothing) || !data.clothing.length){ wrap.style.display = 'none'; return; }
+  const { her, opp } = oppositeTiers(result);
+  const uniq = list => { const seen = new Set(); return list.filter(hx => { const k = hx.toLowerCase(); if(seen.has(k)) return false; seen.add(k); return true; }); };
+  // built like her personalized colors: the palette of the season sitting at the far end of all three of her axes
+  // (deep <-> light, muted <-> vivid, warm <-> cool). That season's name is never shown.
+  const mineName = (result && (result.shadeMatchSeason || result.season)) || '';
+  const herW = (SEASON_PALETTE_TARGET[mineName] || {}).warmth;
+  const want = {
+    warmth: opp.warmth === 'Warm' ? 0.6 : opp.warmth === 'Cool' ? -0.5 : (herW != null ? (herW >= 0 ? -0.5 : 0.6) : 0),
+    value: { Light: 0.75, Medium: 0.5, Deep: 0.3 }[opp.depth] != null ? { Light: 0.75, Medium: 0.5, Deep: 0.3 }[opp.depth] : 0.5,
+    chroma: { Vivid: 0.92, Balanced: 0.55, Muted: 0.22 }[opp.chroma] != null ? { Vivid: 0.92, Balanced: 0.55, Muted: 0.22 }[opp.chroma] : 0.55,
+  };
+  let oppSeason = null, best = Infinity;
+  Object.entries(SEASON_PALETTE_TARGET).forEach(([n, t]) => { if(n === mineName) return;
+    const d = Math.hypot((t.warmth - want.warmth) * 1.2, (t.value - want.value) * 2, t.chroma - want.chroma); if(d < best){ best = d; oppSeason = n; } });
+  let clothing = [], lips = [];
+  try{
+    // then pushed further to the extreme, the same way her own reading nudges her palette
+    const deltas = { deltaB: want.warmth > 0 ? 6 : want.warmth < 0 ? -6 : 0, deltaL: opp.depth === 'Deep' ? -8 : opp.depth === 'Light' ? 8 : 0, deltaC: opp.chroma === 'Vivid' ? 15 : opp.chroma === 'Muted' ? -15 : 0 };
+    clothing = uniq((generateClothingPalette(oppSeason, deltas) || []).map(c => c.hex));
+    const cl = generateCheekLipPalettes(oppSeason, deltas) || {};
+    lips = uniq([].concat(cl.lipstick || [], cl.blush || []).map(c => c.hex));
+  }catch(e){ clothing = []; }
+  if(!clothing.length){ // fallback: shift her own palette
+    clothing = uniq(data.clothing.map(c => drainShift(c.hex, her, opp)));
+    lips = uniq([].concat(data.lipstick || [], data.blush || []).map(c => drainShift(c.hex, her, opp)));
+  }
+  const chips = list => list.map(hx => `<div class="palette-chip" data-hex="${hx}" role="button" tabindex="0" aria-label="Try this color on"><div class="palette-dot" style="background:${hx};"></div></div>`).join('');
+  document.getElementById('drainClothingRow').innerHTML = chips(clothing);
+  document.getElementById('drainLipsRow').innerHTML = chips(lips);
+  const sub = document.getElementById('drainPaletteSub');
+  if(sub) sub.innerHTML = `Your own palette turned to <strong>${[opp.depth, opp.warmth, opp.chroma].filter(Boolean).join(', ').toLowerCase()}</strong>: the far end of your warmth, depth and chroma.`;
+  const cap = document.getElementById('drainPaletteCaption');
+  if(cap) cap.innerHTML = `${magnifierIcon()} Seeing these near your face is a quick way to learn what <strong>not</strong> to pick: they cast shadows, gray your skin or wash you out.`;
+  wrap.style.display = 'block';
+  const host = document.getElementById('drainTryOn'), src = tryOnSource('season');
+  host.innerHTML = '';
+  const items = clothing.concat(lips).map(hx => ({ hex: hx, label: '', name: '', sub: 'Drains you' }));
+  const onShow = (it) => { const hx = String(it.hex).toLowerCase();
+    wrap.querySelectorAll('.palette-chip').forEach(c => c.classList.toggle('on', String(c.dataset.hex).toLowerCase() === hx)); };
+  if(!src || !mountTryOnCarousel(host, src, items, { count: false, auto: true, interval: 2500, stopOnUser: true, cue: false, onShow })) host.style.display = 'none';
+  else host.style.display = '';
+}
+document.addEventListener('click', (e) => {
+  const chip = e.target.closest('#drainPalette .palette-chip[data-hex]'); if(!chip) return;
+  document.body.classList.add('drain-tried');
+  const host = document.getElementById('drainTryOn'); if(!host || !host._tocShow || !host._tocShow(chip.dataset.hex)) return;
+  const r = host.getBoundingClientRect();
+  if(r.top < 70 || r.top > window.innerHeight * 0.45) window.scrollTo({ top: r.top + window.scrollY - 80, behavior: 'smooth' });
+});
+
+// (2026-11-02, per Nghi) a hand that moves around the color circles and taps them, so she knows the circles try on.
+// One per swatch area (each personalized-colors tab's first row, and the opposite palette). It starts when the row
+// is on screen and stops for good once she taps a circle there.
+let tapGuideIO = null;
+function tapGuidePath(row){
+  const chips = [...row.querySelectorAll('.palette-chip')]; if(chips.length < 2) return null;
+  const rr = row.getBoundingClientRect(); if(!rr.width) return null;
+  const pick = [0, 1, 2, chips.length > 5 ? 5 : chips.length - 1, chips.length > 4 ? 4 : 1].filter((v, i, a) => v < chips.length && a.indexOf(v) === i);
+  return pick.map(i => { const d = (chips[i].querySelector('.palette-dot') || chips[i]).getBoundingClientRect();
+    return { x: d.left - rr.left + d.width / 2, y: d.top - rr.top + d.height / 2 }; });
+}
+function startTapGuide(row){
+  const g = row.querySelector(':scope > .tap-guide'); if(!g) return;
+  const pts = tapGuidePath(row); if(!pts) return;
+  if(g._anim) g._anim.cancel();
+  const at = (p, s) => `translate(${(p.x + 7).toFixed(1)}px, ${(p.y + 25).toFixed(1)}px) translate(-50%, -50%) rotate(-90deg) scale(${s})`;
+  const frames = []; const n = pts.length;
+  pts.forEach((p, i) => { const o = i / n;
+    frames.push({ offset: o, transform: at(p, 1), opacity: i === 0 ? 0 : 1 });
+    frames.push({ offset: o + 0.35 / n, transform: at(p, 1), opacity: 1 });
+    frames.push({ offset: o + 0.5 / n, transform: at(p, 0.82), opacity: 1 });
+    frames.push({ offset: o + 0.65 / n, transform: at(p, 1), opacity: 1 }); });
+  frames.push({ offset: 1, transform: at(pts[0], 1), opacity: 0 });
+  try{ g._anim = g.animate(frames, { duration: n * 1100, iterations: Infinity, easing: 'ease-in-out' }); }catch(e){}
+}
+function attachTapGuides(){
+  const rows = [...document.querySelectorAll('#palPanels .pal-panel')].map(p => p.querySelector('.palette-swatch-row')).filter(Boolean);
+  const dr = document.getElementById('drainClothingRow'); if(dr) rows.push(dr);
+  if(!tapGuideIO && 'IntersectionObserver' in window){
+    tapGuideIO = new IntersectionObserver(es => es.forEach(e => { if(e.isIntersecting) startTapGuide(e.target); }), { threshold: 0.3 });
+  }
+  rows.forEach(row => {
+    if(!row.querySelector('.palette-chip')) return;
+    if(!row.querySelector(':scope > .tap-guide')){ const g = document.createElement('span'); g.className = 'tap-guide'; g.setAttribute('aria-hidden', 'true'); g.innerHTML = TOC_HAND; row.appendChild(g); }
+    if(tapGuideIO){ tapGuideIO.unobserve(row); tapGuideIO.observe(row); } else startTapGuide(row);
+  });
+}
+window.addEventListener('resize', () => document.querySelectorAll('.palette-swatch-row > .tap-guide').forEach(g => startTapGuide(g.parentElement)));
+document.addEventListener('click', (e) => {
+  const t = e.target.closest && e.target.closest('.pal-tab'); if(!t) return;
+  setTimeout(() => document.querySelectorAll('#palPanels .pal-panel.active .palette-swatch-row > .tap-guide').forEach(g => startTapGuide(g.parentElement)), 60);
+});
+
 function renderDrainSection(result){
   const sec = document.getElementById('drainSection'); if(!sec) return;
   const src = tryOnSource('season');
   const cmp = document.getElementById('drainCompare'), cap = document.getElementById('drainCaption');
   const pairs = drainPairs(result);
-  if(!src || pairs.length < 2 || !mountCompareSlider(cmp, src, pairs, 'Yours', 'Drains you')){ sec.style.display = 'none'; return; }
+  if(!src || pairs.length < 2 || !mountCompareSlider(cmp, src, pairs, 'Yours', 'Drains you')){ sec.style.display = 'none'; return; } // (the opposite palette below lives in this section too)
   const { her, opp } = oppositeTiers(result);
   cap.innerHTML = `${magnifierIcon()} Same hue · <strong>${[tierLabel(her, 'depth'), her.warmthBoth ? null : tierLabel(her, 'warmth'), tierLabel(her, 'chroma')].filter(Boolean).join(', ')}</strong> → <strong>${[opp.depth, opp.warmth, opp.chroma].filter(Boolean).join(', ')}</strong>${her.warmthBoth ? '<br>Warm or cool: <strong>both suit you</strong>' : ''}`;
   sec.style.display = 'block';
@@ -13187,6 +13441,160 @@ function openShareSheet(){
   b.addEventListener('click', openShareSheet);
 })();
 
+// 27b: the locked present before payment (2026-11-02, per Nghi). Shown at the end of the free scan;
+// tapping it opens the paywall. After payment the matching runs and the present opens by itself.
+let prepayUnboxPending = false;
+function showPrepayPresent(){
+  const rc = document.getElementById('resultCard'); if(!rc) return;
+  rc.classList.add('show', 'sr-locked', 'sr-prepay');
+  if(!resultLock) document.body.classList.add('sr-hold'); // with a locked reading on the page, its sections stay visible
+  const rb = document.getElementById('seasonReveal'); if(rb) rb.setAttribute('aria-label', 'Your reading is ready. Tap to unbox.');
+  setTimeout(() => { if(!gpOpen) rc.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 200);
+}
+function openPrepayPaywall(){
+  prepayUnboxPending = true;
+  const rb = document.getElementById('seasonReveal');
+  if(rb){ rb.classList.remove('sr-wiggle'); void rb.offsetWidth; rb.classList.add('sr-wiggle'); }
+  const d = document.getElementById('paywallDesc');
+  if(d) d.innerHTML = (paywallCardEl && paywallCardEl.dataset.plan === 'season') ? 'Unlock to open your season and personal colors.' : 'Unlock to open your season and best lipsticks.';
+  showPaywallTeaser();
+  if(paywallCardEl){ paywallCardEl.classList.add('show'); setTimeout(() => paywallCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 350); }
+}
+
+// (2026-11-02, per Nghi) SMOOTH DRAGGING on phones for every compare slider (Why, Colors That Drain You, the
+// Love-it-or-not cards). A native range input on iOS/Android only moves when the tiny invisible thumb is grabbed,
+// and jumps in whole steps. Here a horizontal drag anywhere on the picture moves the divider, once per frame;
+// a vertical drag still scrolls the page; a tap jumps the divider to that spot.
+(function smoothCompareDrag(){
+  // The range inputs stay for keyboard use, but take no touches (CSS pointer-events:none): the browser's own
+  // slider jumps to wherever a finger lands, even when she only meant to scroll. Touches go to the picture instead.
+  const zoneOf = (t) => {
+    const dc = t.closest && t.closest('.drain-cmp'); if(dc){ const inp = dc.querySelector('input[type=range]'); return inp ? { inp, card: null } : null; }
+    const lc = t.closest && t.closest('.lon-card'); if(lc){ const inp = lc.querySelector('.lon-cmp-in'); return inp ? { inp, card: lc } : null; }
+    return null;
+  };
+  const inside = (inp, x, y) => { const r = inp.getBoundingClientRect(); return x >= r.left && x <= r.right && y >= r.top && y <= r.bottom; };
+  let act = null, raf = 0, pend = null;
+  const setFrom = (inp, x) => {
+    const r = inp.getBoundingClientRect(); if(!r.width) return;
+    pend = { inp, v: Math.max(0, Math.min(100, (x - r.left) / r.width * 100)) };
+    if(!raf) raf = requestAnimationFrame(() => { raf = 0; if(!pend) return; pend.inp.value = pend.v.toFixed(2); pend.inp.dispatchEvent(new Event('input', { bubbles: true })); pend = null; });
+  };
+  document.addEventListener('pointerdown', e => {
+    if(e.target.closest && e.target.closest('button, a, .tryon-rail, .cmp-nav')) return;
+    const z = zoneOf(e.target); if(!z) return;
+    if(z.card && !inside(z.inp, e.clientX, e.clientY)) return; // the rest of a Love-it card still swipes the card
+    e.stopPropagation(); // the compare zone never swipes the card underneath
+    act = { inp: z.inp, el: e.target, id: e.pointerId, x0: e.clientX, y0: e.clientY, live: e.pointerType === 'mouse' };
+    if(act.live){ e.preventDefault(); setFrom(act.inp, e.clientX); }
+  }, true);
+  document.addEventListener('pointermove', e => {
+    if(!act || e.pointerId !== act.id) return;
+    if(!act.live){
+      const dx = Math.abs(e.clientX - act.x0), dy = Math.abs(e.clientY - act.y0);
+      if(dx > 4 && dx > dy) act.live = true;
+      else if(dy > 10){ act = null; return; } // she is scrolling
+    }
+    if(act.live){ e.preventDefault(); e.stopPropagation(); setFrom(act.inp, e.clientX); }
+  }, { capture: true, passive: false });
+  const end = e => { if(!act || e.pointerId !== act.id) return;
+    if(!act.live && e.type === 'pointerup' && Math.abs(e.clientX - act.x0) < 6 && Math.abs(e.clientY - act.y0) < 6) setFrom(act.inp, e.clientX); // tap = jump there
+    if(e.type === 'pointerup') e.stopPropagation();
+    act = null; };
+  document.addEventListener('pointerup', end, true); document.addEventListener('pointercancel', end, true);
+})();
+
+// 27c: LOCKED READING (2026-11-02, per Nghi). Before payment the whole reading is on the page, but every final
+// result -- her season (and family), her runner-up, lipstick shade names, % matches -- is swapped for an eye-off
+// icon. Tapping one opens the paywall. A MutationObserver keeps masking anything that renders later (try-on
+// labels, favorites, the Why section...). Downloads and sharing open the paywall too.
+let resultLock = null, resultLockObs = null, resultLockQueued = false;
+const SEASON_TEXT_RE = /\b(?:(?:Light|True|Bright|Soft|Deep Soft|Deep)\s+)?(?:Spring|Summer|Autumn|Winter)s?\b/g;
+const PCT_TEXT_RE = /\b\d{1,3}(?:\.\d+)?\s?%(?:\s+(?:match(?:ing)?|fit|similar))?/g;
+const LOCK_SKIP = '#paywallCard, #myShadeSection, #guessOverlay, script, style, .pay-eye, .pay-hid, .legal-doc, footer, .site-footer, #fmbsHome, .cover-view, noscript';
+const LOCK_PCT_ZONES = '#brandSection, #runnerSection, #colorAnalysisSection, #resultCard';
+const EYE_OFF_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>';
+function startResultLock(result){
+  resultLock = { names: new Set() }; // lipstick names are learned from the podium after it renders
+  document.body.classList.add('res-locked');
+  if(!resultLockObs){
+    resultLockObs = new MutationObserver(() => { if(!resultLock || resultLockQueued) return; resultLockQueued = true; requestAnimationFrame(() => { resultLockQueued = false; maskLockedResults(); }); });
+  }
+  resultLockObs.observe(document.body, { childList: true, subtree: true, characterData: true });
+}
+function stopResultLock(){
+  resultLock = null;
+  if(resultLockObs) resultLockObs.disconnect();
+  document.body.classList.remove('res-locked');
+}
+// (2026-11-02, per Nghi) a blurred stand-in sits before every eye icon. It is placeholder text of about the same
+// length (never the real name or number), so nothing can be read out of the page.
+const PAY_LOREM = 'Lorem ipsum dolor sit amet consectetur';
+function payFakeFor(t){ t = String(t || ''); if(/%/.test(t)) return t.replace(/\d/g, '8'); const n = Math.max(5, Math.min(16, t.trim().length || 9)); return PAY_LOREM.slice(0, n).trim(); }
+function eyeHtml(real){ return `<span class="pay-hid" role="button" tabindex="0" aria-label="Hidden. Unlock to see it." title="Unlock to see"><span class="pay-fake" aria-hidden="true">${escapeHtml(payFakeFor(real))}</span><span class="pay-eye">${EYE_OFF_SVG}</span></span>`; }
+function maskLockedResults(){
+  if(!resultLock) return;
+  if(resultLockObs) resultLockObs.disconnect();
+  try{
+    // lipstick names on the podium and in try-on labels: learn them, then mask everywhere
+    document.querySelectorAll('#brandSection .shade-result-name').forEach(el => { const t = el.textContent.trim(); if(t && !el.querySelector('.pay-eye')){ resultLock.names.add(t); resultLock.names.add(tocTitleCase(t)); } });
+    document.querySelectorAll('#brandSection .shade-result-name, #brandSection .shade-result-conf-num').forEach(el => { if(!el.querySelector('.pay-hid')) el.innerHTML = eyeHtml(el.textContent.trim()); });
+    const names = [...resultLock.names].filter(n => n && n.length > 2).sort((a, b) => b.length - a.length).map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    const nameRe = names.length ? new RegExp(names.join('|'), 'g') : null;
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode: n => {
+      const pe = n.parentElement; if(!pe || pe.closest(LOCK_SKIP)) return NodeFilter.FILTER_REJECT;
+      return /\S/.test(n.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT; } });
+    const hits = [];
+    let n; while((n = walker.nextNode())){
+      const v = n.nodeValue, inPct = !!n.parentElement.closest(LOCK_PCT_ZONES);
+      SEASON_TEXT_RE.lastIndex = 0; PCT_TEXT_RE.lastIndex = 0;
+      const pctRe = inPct ? PCT_TEXT_RE : /\b\d{1,3}(?:\.\d+)?\s?%\s+(?:match(?:ing)?|fit)/g;
+      if(SEASON_TEXT_RE.test(v) || (nameRe && (nameRe.lastIndex = 0, nameRe.test(v))) || (pctRe.lastIndex = 0, pctRe.test(v))) hits.push([n, pctRe]);
+    }
+    hits.forEach(([node, pctRe]) => {
+      let v = node.nodeValue;
+      const mark = '\u0000';
+      const found = [];
+      const take = re => { if(!re) return; re.lastIndex = 0; v = v.replace(re, m => { found.push(m); return mark; }); };
+      if(nameRe) take(nameRe); take(SEASON_TEXT_RE); take(pctRe);
+      const pe = node.parentElement;
+      if(pe && pe.closest('svg')){ node.nodeValue = v.split(mark).join('•••'); return; }
+      // order the found pieces as they appear: rebuild by walking the original string
+      const orig = node.nodeValue, pieces = [];
+      { let pos = 0; const all = [];
+        found.forEach(m => { let at = -1, from = 0; while((at = orig.indexOf(m, from)) >= 0 && all.some(a => at < a[0] + a[1].length && at + m.length > a[0])) from = at + 1; if(at >= 0) all.push([at, m]); });
+        all.sort((a, b) => a[0] - b[0]);
+        all.forEach(([at, m]) => { if(at > pos) pieces.push(orig.slice(pos, at)); pieces.push({ m }); pos = at + m.length; });
+        if(pos < orig.length) pieces.push(orig.slice(pos)); }
+      const frag = document.createDocumentFragment();
+      pieces.forEach(pc => { if(typeof pc === 'string'){ frag.appendChild(document.createTextNode(pc)); return; } const t = document.createElement('span'); t.innerHTML = eyeHtml(pc.m); frag.appendChild(t.firstChild); });
+      node.parentNode.replaceChild(frag, node);
+    });
+    // attributes that could read the season aloud
+    document.querySelectorAll('[aria-label], [title], img[alt]').forEach(el => {
+      if(el.closest(LOCK_SKIP)) return;
+      ['aria-label', 'title', 'alt'].forEach(a => { const v = el.getAttribute(a); if(!v) return; SEASON_TEXT_RE.lastIndex = 0; if(SEASON_TEXT_RE.test(v) || (nameRe && (nameRe.lastIndex = 0, nameRe.test(v)))) el.setAttribute(a, 'Hidden until unlocked'); });
+    });
+  }catch(e){ console.error('[Locked reading] mask failed', e); }
+  if(resultLockObs && resultLock) resultLockObs.observe(document.body, { childList: true, subtree: true, characterData: true });
+}
+function openLockedPaywall(){
+  if(resultLock) openPrepayPaywall();
+}
+document.addEventListener('click', (e) => {
+  if(!resultLock) return;
+  const eye = e.target.closest && e.target.closest('.pay-hid:not(.pay-blur), .pay-eye:not(.pay-blur)'); // .pay-blur = Check My Shade / Find Similar (their own paywall)
+  const dl = e.target.closest && e.target.closest('#downloadBothBtn, #sharePaletteBtn, #voiceShareBtn, #exitNudgeDownloadBtn, #homeResetDownload, .palette-download-btn, .palette-share-btn');
+  if(!eye && !dl) return;
+  e.preventDefault(); e.stopPropagation();
+  openLockedPaywall();
+}, true);
+document.addEventListener('keydown', (e) => {
+  if(!resultLock || (e.key !== 'Enter' && e.key !== ' ')) return;
+  const eye = e.target.closest && e.target.closest('.pay-hid:not(.pay-blur), .pay-eye:not(.pay-blur)'); if(!eye) return;
+  e.preventDefault(); openLockedPaywall();
+});
+
 // 27: tap-to-reveal season card
 (function wireSeasonReveal(){
   const btn = document.getElementById('seasonReveal'); if(!btn) return;
@@ -13200,6 +13608,12 @@ function openShareSheet(){
   }
   btn.addEventListener('click', () => {
     if(btn.classList.contains('open')) return;
+    const rcp = document.getElementById('resultCard');
+    if(rcp && rcp.classList.contains('sr-prepay')){ // not paid yet (or paid and still matching): no opening
+      if(!getPurchase()) openPrepayPaywall();
+      else { btn.classList.remove('sr-wiggle'); void btn.offsetWidth; btn.classList.add('sr-wiggle'); }
+      return;
+    }
     btn.classList.add('open');
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     setTimeout(revealSeason, reduce ? 150 : 1250);
@@ -13228,6 +13642,9 @@ function fmbsAfterSeasonResult(result, fresh){
   try{ localStorage.setItem('fmbs_tiers', JSON.stringify(Object.assign({ season: (result.shadeMatchSeason || result.season || '') }, herTiers(result)))); }catch(e){}
   placeEndZone();
   renderDrainSection(result);
+  renderDrainPalette(result);
+  renderReadDots(result);
+  setTimeout(attachTapGuides, 0);
   renderRunnerUpCompare(result);
   startOddGame(result);
   renderGuessNote(result);
@@ -13260,11 +13677,11 @@ function tryOnPaletteChip(chip){
 }
 function heartPaletteChip(chip){ tryOnPaletteChip(chip); }
 document.addEventListener('click', (e) => {
-  const chip = e.target.closest('#styleGuideSection .palette-chip[data-hex]'); if(chip) tryOnPaletteChip(chip);
+  const chip = e.target.closest('#palPanels .palette-chip[data-hex]'); if(chip) tryOnPaletteChip(chip);
 });
 document.addEventListener('keydown', (e) => {
   if(e.key !== 'Enter' && e.key !== ' ') return;
-  const chip = e.target.closest && e.target.closest('#styleGuideSection .palette-chip[data-hex]'); if(chip){ e.preventDefault(); tryOnPaletteChip(chip); }
+  const chip = e.target.closest && e.target.closest('#palPanels .palette-chip[data-hex]'); if(chip){ e.preventDefault(); tryOnPaletteChip(chip); }
 });
 
 // ---- lipstick matches: broken heart (not for me) ----
@@ -13297,7 +13714,7 @@ function mountCompareSlider(host, src, pairs, leftLabel, rightLabel){
       <span class="drain-cmp-tag cmp-tl" style="left:10px;">${escapeHtml(leftLabel)}</span>
       <span class="drain-cmp-tag cmp-tr" style="right:10px;">${escapeHtml(rightLabel)}</span>
       <div class="cmp-hand" aria-hidden="true">${TOC_HAND}</div>
-      <input type="range" min="0" max="100" value="50" aria-label="Drag to compare">
+      <input type="range" min="0" max="100" step="any" value="50" aria-label="Drag to compare">
     </div>
     ${pairs.length > 1 ? `<div class="cmp-nav"><button type="button" class="cmp-prev" aria-label="Previous pair">‹</button><div class="cmp-dots">${pairs.map((_, k) => `<b class="${k ? '' : 'on'}"></b>`).join('')}</div><button type="button" class="cmp-next" aria-label="Next pair">›</button></div>` : ''}`;
   const root = host.querySelector('.drain-cmp');
@@ -13824,7 +14241,7 @@ const STEP_ICON = {
 function hasLipstickTier(){ try{ const pu = getPurchase(); if(pu && pu.tier === 'seasonShade') return true; }catch(e){}
   const bs = document.getElementById('brandSection'); return !!(bs && bs.style.display === 'block'); }
 function classSteps(){
-  const st = [['season', 'Season', 'resultCard'], ['colors', 'Colors', 'styleGuideSection'], ['why', 'Why', 'runnerSection'], ['skip', 'Colors to avoid', 'drainSection']];
+  const st = [['season', 'Season', 'resultCard'], ['why', 'Why', 'runnerSection'], ['colors', 'Colors', 'colorPaletteTitle'], ['skip', 'Colors to avoid', 'drainSection']]; // (2026-11-02) Why before Colors
   // (2026-10-13, per Nghi) Practice comes before Lipsticks; Save is always last
   st.push(['practice', 'Practice', 'oddGame']);
   if(hasLipstickTier()) st.push(['lips', 'Lipsticks', 'brandSection']);
@@ -13847,7 +14264,7 @@ function renderGuessPop(){
   if(!body) return;
   if(gpStep < GP_STEPS.length){
     const st = GP_STEPS[gpStep];
-    eyebrow.textContent = "Let's play while we find your season!";
+    eyebrow.textContent = "Let's play while we read your colors!";
     title.textContent = st.q;
     body.innerHTML = `<div class="gp-row gp-3">${st.opts.map(c => `<button type="button" class="gp-opt" data-v="${c.v}" aria-label="${c.label}">${gpFace(c)}</button>`).join('')}<div class="gp-hand" aria-hidden="true">${TOC_HAND}</div></div>
       <div class="gp-dots">${GP_STEPS.map((_, j) => `<b class="${j <= gpStep ? 'on' : ''}"></b>`).join('')}</div>`;
@@ -13911,9 +14328,13 @@ document.addEventListener('click', (e) => {
   const card = document.getElementById('myShadeResultCard'), box = document.getElementById('msGuess');
   card.classList.remove('ms-guessing');
   const chip = m => `<span class="gn-chip">${m ? ICON_MINE : ICON_NOTMINE}${m ? 'Mine' : 'Not mine'}</span>`;
+  if(payLocked()){ // (2026-11-02, per Nghi) unpaid: her guess, then a "?" -- the answer opens with the pass
+    box.innerHTML = `<div class="gn-head">Your guess</div><div class="gn-row" style="justify-content:center;">${chip(saidMine)}<span class="gn-arrow">→</span><span class="gn-chip gn-q pay-blur" role="button" tabindex="0" data-pay-msg="Unlock your pass to see if this color is yours." aria-label="Unlock your pass to see if this color is yours.">?</span></div>`;
+  } else {
   box.innerHTML = `<div class="gn-head">Your guess</div><div class="gn-row ${right ? 'ok' : 'no'}" style="justify-content:center;">${right ? `${chip(saidMine)}<span class="gn-mk">✓</span>` : `${chip(saidMine)}<span class="gn-arrow">→</span>${chip(st.mine)}`}</div>`;
   if(right) floatHearts(box);
-  renderLoveOrNot('check', st.hex, null, st.pct);
+  }
+  renderLoveOrNot('check', st.hex, null, payLocked() ? null : st.pct);
   sendToLiveSheet({ type: 'colorcheck_guess', timestamp: new Date().toISOString(), hex: st.hex, match_pct: st.pct, guess_mine: saidMine, correct: right });
   msGuessState = null;
 });
@@ -14058,10 +14479,10 @@ function renderLoveOrNot(mode, hex, matches, pct){
   const prof = myShadeUploadedProfile;
   const cards = mode === 'check'
     ? [{ hex, label: 'Your color · ' + hex.toUpperCase(), sub: '', pct }]
-    : (matches || []).slice(0, 6).map(m => {
+    : (matches || []).slice(0, 6).map((m, mi) => {
         let p = null;
         try{ if(prof){ const sc = scoreColorForProfile(hexToRgb(m.hex), prof, 'lipstick'); p = sc ? sc.pct : null; } }catch(e){ p = null; }
-        return { hex: m.hex, label: tocTitleCase(m.name), sub: brandDisplayNameSafe((splitBrandLine(m.brand_line) || {}).brand || ''), pct: p, sim: m.confidencePct };
+        return { hex: m.hex, label: (mode === 'similar' && payLocked()) ? `Shade ${mi + 1}` : tocTitleCase(m.name), sub: brandDisplayNameSafe((splitBrandLine(m.brand_line) || {}).brand || ''), pct: payLocked() ? null : p, sim: m.confidencePct }; // (2026-11-02) her % match is a paid result
       });
   if(!cards.length){ box.style.display = 'none'; return; }
   if(mode === 'check' && src){ const one = document.getElementById('myShadeTryOn'); if(one) one.innerHTML = ''; } // the swipe card is her try-on now
@@ -14092,7 +14513,7 @@ function renderLoveOrNot(mode, hex, matches, pct){
           <div class="lon-cmp-r" style="top:${top}%;left:50%;background:${c.hex};"></div>
           <div class="lon-cmp-line" style="left:50%;top:${top}%;"></div><div class="lon-cmp-knob" style="left:50%;top:${(cr.barTop * 100 + (100 - cr.barTop * 100) * 0.52).toFixed(1)}%;">↔</div><div class="lon-cmp-hand" aria-hidden="true" style="top:calc(${(cr.barTop * 100 + (100 - cr.barTop * 100) * 0.52).toFixed(1)}% + 10px);">${TOC_HAND}</div>
           <span class="lon-cmp-tag l" style="top:calc(${top}% + 12px);color:${tryOnTextColor(hex)}">Your color</span><span class="lon-cmp-tag r" style="top:calc(${top}% + 12px);color:${tryOnTextColor(c.hex)}">${right}</span>
-          <input class="lon-cmp-in" type="range" min="0" max="100" value="50" aria-label="Drag to compare" style="top:${top}%;height:${(100 - cr.barTop * 100).toFixed(1)}%;"></div>`;
+          <input class="lon-cmp-in" type="range" min="0" max="100" step="any" value="50" aria-label="Drag to compare" style="top:${top}%;height:${(100 - cr.barTop * 100).toFixed(1)}%;"></div>`;
       }
     }
     return `<div class="lon-sw lon-split">${halves}</div>`;
@@ -14157,7 +14578,8 @@ function renderLoveOrNot(mode, hex, matches, pct){
     let x0 = null, dx = 0;
     const yes = card.querySelector('.lon-stamp.yes'), no = card.querySelector('.lon-stamp.no');
     card.addEventListener('pointerdown', e => { x0 = e.clientX; dx = 0; card.style.transition = 'none'; card.setPointerCapture && card.setPointerCapture(e.pointerId); });
-    card.addEventListener('pointermove', e => { if(x0 === null) return; dx = e.clientX - x0; card.style.transform = `translateX(${dx}px) rotate(${dx / 18}deg)`; yes.style.opacity = Math.max(0, Math.min(1, dx / 80)); no.style.opacity = Math.max(0, Math.min(1, -dx / 80)); });
+    let rafC = 0;
+    card.addEventListener('pointermove', e => { if(x0 === null) return; dx = e.clientX - x0; if(rafC) return; rafC = requestAnimationFrame(() => { rafC = 0; if(x0 === null) return; card.style.transform = `translate3d(${dx}px,0,0) rotate(${dx / 18}deg)`; yes.style.opacity = Math.max(0, Math.min(1, dx / 80)); no.style.opacity = Math.max(0, Math.min(1, -dx / 80)); }); });
     const end = () => { if(x0 === null) return; x0 = null; card.style.transition = ''; if(Math.abs(dx) > 70) decide(dx > 0); else { card.style.transform = ''; yes.style.opacity = 0; no.style.opacity = 0; } };
     card.addEventListener('pointerup', end); card.addEventListener('pointercancel', end);
   }
@@ -14165,7 +14587,10 @@ function renderLoveOrNot(mode, hex, matches, pct){
   box.querySelector('.lon-btn.no').addEventListener('click', () => decide(false));
   function finish(){
     let msg;
-    if(mode === 'check'){
+    if(mode === 'check' && (pct == null || payLocked())){ // (2026-11-02) unpaid: her % stays hidden
+      const eye = payBlurHtml('88% match', 'Unlock your pass to see how well this color suits you.');
+      msg = loved.length ? `You love it. How well it suits your coloring: ${eye}` : `Not for you? See how well it really suits your coloring: ${eye}`;
+    } else if(mode === 'check'){
       const love = loved.length > 0, p = pct;
       msg = love && p >= 70 ? `You love it, and it loves you back: a <strong>${p}% match</strong> for your coloring ✓`
         : love ? `You love it, but it's a <strong>${p}% match</strong> for your coloring. Try <strong>Find Similar Shades</strong> for a closer version of this look.`
@@ -14173,7 +14598,8 @@ function renderLoveOrNot(mode, hex, matches, pct){
         : `Good instinct: it's only a <strong>${p}% match</strong> for your coloring ✓`;
     } else {
       const scored = loved.filter(c => c.pct != null).sort((a, b) => b.pct - a.pct);
-      msg = !loved.length ? `None of these felt like you. Try another color, or check one with <strong>Check My Shade / Not My Shade</strong>.`
+      msg = (loved.length && payLocked()) ? `You loved <strong>${loved.length}</strong>: ${loved.map(c => `<strong>${escapeHtml(c.label)}</strong>`).join(', ')}. Their names and the best one for you: ${payBlurHtml('Lorem Ipsum (000)', 'Unlock your pass to see the shade names.')}` // (2026-11-02) unpaid
+        : !loved.length ? `None of these felt like you. Try another color, or check one with <strong>Check My Shade / Not My Shade</strong>.`
         : scored.length ? `You loved <strong>${loved.length}</strong>. The best one for your coloring: <strong>${escapeHtml(scored[0].label)}</strong>, a <strong>${scored[0].pct}% match</strong>.`
         : `You loved <strong>${loved.length}</strong>: ${loved.map(c => `<strong>${escapeHtml(c.label)}</strong>`).join(', ')}. Add a selfie above to see which suits you best.`;
     }
