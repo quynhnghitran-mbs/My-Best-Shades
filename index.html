@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Find Your Color Season &amp; Best Lipstick Shades | Find My Best Shades</title>
-<meta name="description" content="Upload a selfie to find your color season and the lipsticks that suit you, from 600+ shades across: MAC, Revlon, L'Oréal Paris, Maybelline, wet n wild and KIKO Milano. Check any shade before you buy, and find similar shades.">
+<meta name="description" content="Upload a selfie to find your color season and the lipsticks that suit you, from 600+ lipstick shades. Check any shade before you buy, and find similar shades.">
 <meta name="theme-color" content="#f2d9d6">
 <link rel="canonical" href="https://www.findmybestshades.com/">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Find My Best Shades">
 <meta property="og:title" content="Find Your Color Season &amp; Best Lipstick Shades | Find My Best Shades">
-<meta property="og:description" content="Upload a selfie and get your personal color season plus ranked lipstick picks from 600+ shades across 6 brands: MAC, Revlon, L'Oréal Paris, Maybelline, wet n wild and KIKO Milano.">
+<meta property="og:description" content="Upload a selfie and get your personal color season plus ranked lipstick picks from 600+ shades.">
 <meta property="og:url" content="https://www.findmybestshades.com/">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Find Your Color Season &amp; Best Lipstick Shades | Find My Best Shades">
@@ -194,6 +194,8 @@
   /* Interfaces (2026-10-09): My Shade / Find Similar show My Shade only; the season ones hide it. */
   html[data-fmbs-mode="check"] #mirrorStage, html[data-fmbs-mode="similar"] #mirrorStage{display:none !important;}
   html:not([data-fmbs-mode="check"]):not([data-fmbs-mode="similar"]) #myShadeSection{display:none !important;}
+  /* (2026-11-02, per Nghi) no repeat: once the Check My Shade / Find Similar Shades section is open, hide the upsell box with the same two buttons */
+  html[data-fmbs-mode="check"] #myShadeCtaBlock, html[data-fmbs-mode="similar"] #myShadeCtaBlock{display:none !important;}
   /* (2026-10-15, per Nghi, report #7) practice belongs to the season reading -- never shown in Check My Shade / Find Similar */
   #paywallCard[data-plan="check"] .pw-t-read, #paywallCard:not([data-plan="check"]) .pw-t-pass{display:none;}
   html[data-fmbs-mode="check"] #practiceZone, html[data-fmbs-mode="similar"] #practiceZone, #msRecall{display:none !important;}
@@ -1219,6 +1221,8 @@
   }
   .metric-poles{display:flex;justify-content:space-between;margin-bottom:7px;}
   .metric-poles span{font-size:12px;color:var(--muted);letter-spacing:0.02em;}
+  .metric-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin:6px 0 4px;}
+  .metric-chips .metric-pill{padding:4px 9px;font-size:11.5px;white-space:nowrap;box-shadow:0 2px 6px rgba(58,31,34,.18);}
   .metric-pill{
     display:inline-block;padding:3px 11px;border-radius:20px;
     background:rgba(150,51,60,0.10);color:var(--rose-deep);
@@ -1958,7 +1962,12 @@
   .tryon-bar span.pay-fake{display:block;}
   .tryon-bar span.pay-eye{display:inline-flex;margin:0 0 0 .2em;flex:none;}
   .pay-hid .pay-eye{flex:none;}
+  .pay-hid.pay-story{display:inline;}
+  .pay-story .pay-fake{display:inline;white-space:normal;max-width:none;overflow:visible;filter:blur(.32em);}
+  .pay-story .pay-eye{display:inline-flex;margin-left:.3em;}
   #myShadeResultPct .pay-hid{gap:.15em;}
+  #myShadeResultPct{display:flex;align-items:center;justify-content:center;gap:.05em;}
+  #myShadeResultPct .pct-unit{white-space:nowrap;}
   #myShadeResultPct .pay-fake{filter:blur(.22em);}
   .tryon-bar .pay-eye{display:flex;font-size:1.5em;color:inherit;background:rgba(255,255,255,.2);width:1.8em;height:1.3em;margin:0 auto .15em;}
   body.res-locked #seasonsMap{display:none !important;} /* her dot on the 16-season map would give the season away */
@@ -3278,7 +3287,7 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
         <div class="exit-nudge-card">
           <button type="button" class="exit-nudge-close" id="myShadeSeasonCtaClose" aria-label="Close">&times;</button>
           <div class="exit-nudge-title" id="myShadeSeasonCtaTitle">Go further: find your season + best lipsticks</div>
-          <div class="exit-nudge-body">Get your <strong>color season</strong>, a full <strong>personal palette</strong>, and the lipsticks that match you best from <strong>600+ shades across 6 brands</strong>.</div>
+          <div class="exit-nudge-body">Get your <strong>color season</strong>, a full <strong>personal palette</strong>, and the lipsticks that match you best from <strong>600+ lipstick shades</strong>.</div>
           <button type="button" class="btn exit-nudge-download-btn" id="myShadeSeasonCtaBtn">Find My Season &amp; Best Lipsticks</button>
           <button type="button" class="link-btn exit-nudge-skip" id="myShadeSeasonCtaLater">Maybe later</button>
         </div>
@@ -9500,7 +9509,7 @@ function renderMyShadeResult(rgb, pct, scored){
   document.getElementById('myShadeResultSwatch').style.background = hex;
   const pctEl = document.getElementById('myShadeResultPct');
   pctEl.textContent = pct + '%';
-  if(payLocked()) pctEl.innerHTML = payBlurHtml('88%', 'Unlock your pass to see how well this color suits you.'); // (2026-11-02)
+  if(payLocked()) pctEl.innerHTML = payBlurHtml('88', 'Unlock your pass to see how well this color suits you.') + '<span class="pct-unit">% match</span>'; // (2026-11-02) only the number is hidden
   // Both carry a hardcoded style="display:none;" in the markup, left
   // over from the 2026-09-16 retirement (see the comment above
   // #myShadeResultCategory in the HTML) -- className/textContent alone
@@ -10331,6 +10340,9 @@ analyzeBtn.addEventListener('click', async () => {
         const wantsLips = document.documentElement.getAttribute('data-fmbs-mode') === 'seasonShade' || (paywallCardEl && paywallCardEl.dataset.plan === 'seasonShade');
         renderSeasonResult(freeResult, { skipDebugHistory: true, forceShadeAccess: wantsLips });
         maskLockedResults();
+        // (2026-11-02, per Nghi) after the free story: a longer blurred paragraph + eye icon -- her full story opens with payment
+        const sd = document.getElementById('seasonDesc');
+        if(sd && !sd.querySelector('.pay-story')) sd.insertAdjacentHTML('beforeend', ` <span class="pay-hid pay-story" role="button" tabindex="0" aria-label="Your full color story. Unlock to read it." title="Unlock to read"><span class="pay-fake" aria-hidden="true">${PAY_LOREM_LONG}</span><span class="pay-eye">${EYE_OFF_SVG}</span></span>`);
       }catch(e){ console.error('[Locked reading] render failed', e); }
       showPrepayPresent();
       return; // the finally block below hides the loading state and re-enables the button
@@ -11035,6 +11047,13 @@ function metricRowHTML(opts){
   const pct = (v) => Math.max(0, Math.min(100, (v / max) * 100));
   const ticks = (opts.zones || []).map(z => `<div class="metric-tick" style="left:${pct(z)}%;"></div>`).join('');
   const markerPct = pct(opts.value);
+  // (2026-11-02, per Nghi) the result chip sits under the bar, below her marker, in the bar's own color at that spot
+  const stops = [opts.gradientFrom, opts.gradientMid, opts.gradientTo].filter(Boolean).map(hexToRgb);
+  const seg = (stops.length - 1) * markerPct / 100, k = Math.min(stops.length - 2, Math.floor(seg)), f = seg - k;
+  const mix = ['r', 'g', 'b'].map(c => Math.round(stops[k][c] + (stops[k + 1][c] - stops[k][c]) * f));
+  const pillBg = rgbToHex(mix[0], mix[1], mix[2]);
+  const pillInk = (0.299 * mix[0] + 0.587 * mix[1] + 0.114 * mix[2]) > 160 ? '#3a1f22' : '#ffffff';
+  if(opts.chips) opts.chips.push(`<span class="metric-pill" style="background:${pillBg};color:${pillInk};">${opts.chipText || opts.categoryText || 'N/A'}</span>`);
   return `<div class="metric-row">
     <div class="metric-icon">${opts.icon}</div>
     <div class="metric-body">
@@ -11047,7 +11066,7 @@ function metricRowHTML(opts){
         <div class="metric-marker" style="left:${markerPct}%;"></div>
       </div>
       <div class="metric-poles"><span>${opts.poleLeft}</span><span>${opts.poleRight}</span></div>
-      <span class="metric-pill">${opts.categoryText || 'N/A'}</span>
+
     </div>
   </div>`;
 }
@@ -11068,13 +11087,14 @@ function renderColorAnalysis(result){
   // real classification pill that drives season + shade matching.
   const metricsHolder = document.getElementById('cielabMetrics');
   let html = '';
+  const chips = []; // (2026-11-02, per Nghi) her four results, together under all the bars, each in its bar's color
 
   html += metricRowHTML({
     icon: iconThermometer(ANALYSIS_ROSE), name: 'Warmth',
     value: result.lab_temperature_b, max: 35,
     zones: [1.55, 10.85, 15.5, 20.15, 29.45],
     valueLabel: `Warmth = ${result.lab_temperature_b}`,
-    categoryText: warmthDisplay(result) + (warmthBothOf(result) ? ' · suits warm & cool' : ''),
+    categoryText: warmthDisplay(result) + (warmthBothOf(result) ? ' · suits warm & cool' : ''), chips,
     gradientFrom: '#c98bb4', gradientMid: '#e6a0a0', gradientTo: '#e8946f', poleLeft: 'Cool', poleRight: 'Warm'
   });
 
@@ -11083,7 +11103,7 @@ function renderColorAnalysis(result){
     value: result.depth_score, max: 100,
     zones: [40.8, 53.3],
     valueLabel: `Depth = ${result.depth_score}`,
-    categoryText: result.depth_level,
+    categoryText: result.depth_level, chips,
     gradientFrom: '#3c2420', gradientMid: '#b8826a', gradientTo: '#f6e1d6', poleLeft: 'Deep', poleRight: 'Light'
   });
 
@@ -11106,7 +11126,7 @@ function renderColorAnalysis(result){
     value: result.contrast_score, max: 80,
     zones: [39.88, 53.73],
     valueLabel: `${result.lightness} − ${result.darkness} = ${result.contrast_score}`,
-    categoryText: result.contrast_level,
+    categoryText: result.contrast_level, chips, chipText: `${result.contrast_level} contrast`,
     gradientFrom: '#F0D8DC', gradientTo: '#5C2430', poleLeft: 'Low', poleRight: 'High Contrast'
   });
 
@@ -11115,9 +11135,10 @@ function renderColorAnalysis(result){
     value: result.avg_chroma, max: 40,
     zones: [CHROMA_CUT_LOW, CHROMA_CUT_HIGH],
     valueLabel: `Chroma = ${result.avg_chroma}`,
-    categoryText: result.chroma_level,
+    categoryText: result.chroma_level, chips, chipText: `${result.chroma_level} chroma`,
     gradientFrom: '#a99091', gradientMid: '#c46b78', gradientTo: '#e0234f', poleLeft: 'Muted', poleRight: 'Vivid'
   });
+  html += `<div class="metric-chips">${chips.join('')}</div>`;
 
   metricsHolder.innerHTML = html;
 }
@@ -13530,7 +13551,8 @@ function stopResultLock(){
 // (2026-11-02, per Nghi) a blurred stand-in sits before every eye icon. It is placeholder text of about the same
 // length (never the real name or number), so nothing can be read out of the page.
 const PAY_LOREM = 'Lorem ipsum dolor sit amet consectetur';
-function payFakeFor(t){ t = String(t || ''); if(/%/.test(t)) return t.replace(/\d/g, '8'); const n = Math.max(5, Math.min(16, t.trim().length || 9)); return PAY_LOREM.slice(0, n).trim(); }
+const PAY_LOREM_LONG = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco.';
+function payFakeFor(t){ t = String(t || ''); if(/%/.test(t) || /^\s*\d+\s*$/.test(t)) return t.replace(/\d/g, '8'); const n = Math.max(5, Math.min(16, t.trim().length || 9)); return PAY_LOREM.slice(0, n).trim(); }
 function eyeHtml(real){ return `<span class="pay-hid" role="button" tabindex="0" aria-label="Hidden. Unlock to see it." title="Unlock to see"><span class="pay-fake" aria-hidden="true">${escapeHtml(payFakeFor(real))}</span><span class="pay-eye">${EYE_OFF_SVG}</span></span>`; }
 function maskLockedResults(){
   if(!resultLock) return;
@@ -13538,7 +13560,8 @@ function maskLockedResults(){
   try{
     // lipstick names on the podium and in try-on labels: learn them, then mask everywhere
     document.querySelectorAll('#brandSection .shade-result-name').forEach(el => { const t = el.textContent.trim(); if(t && !el.querySelector('.pay-eye')){ resultLock.names.add(t); resultLock.names.add(tocTitleCase(t)); } });
-    document.querySelectorAll('#brandSection .shade-result-name, #brandSection .shade-result-conf-num').forEach(el => { if(!el.querySelector('.pay-hid')) el.innerHTML = eyeHtml(el.textContent.trim()); });
+    document.querySelectorAll('#brandSection .shade-result-name').forEach(el => { if(!el.querySelector('.pay-hid')) el.innerHTML = eyeHtml(el.textContent.trim()); });
+    document.querySelectorAll('#brandSection .shade-result-conf-num').forEach(el => { if(el.querySelector('.pay-hid')) return; const t = el.textContent.trim(); el.innerHTML = eyeHtml('88') + escapeHtml(t.replace(/^[\d.\s]+/, '')); }); // only the number hidden
     const names = [...resultLock.names].filter(n => n && n.length > 2).sort((a, b) => b.length - a.length).map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
     const nameRe = names.length ? new RegExp(names.join('|'), 'g') : null;
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode: n => {
@@ -13567,7 +13590,7 @@ function maskLockedResults(){
         all.forEach(([at, m]) => { if(at > pos) pieces.push(orig.slice(pos, at)); pieces.push({ m }); pos = at + m.length; });
         if(pos < orig.length) pieces.push(orig.slice(pos)); }
       const frag = document.createDocumentFragment();
-      pieces.forEach(pc => { if(typeof pc === 'string'){ frag.appendChild(document.createTextNode(pc)); return; } const t = document.createElement('span'); t.innerHTML = eyeHtml(pc.m); frag.appendChild(t.firstChild); });
+      pieces.forEach(pc => { if(typeof pc === 'string'){ frag.appendChild(document.createTextNode(pc)); return; } const isPct = /^\s*\d/.test(pc.m) && /%/.test(pc.m); const t = document.createElement('span'); t.innerHTML = eyeHtml(isPct ? '88' : pc.m); frag.appendChild(t.firstChild); if(isPct) frag.appendChild(document.createTextNode(pc.m.replace(/^[\d.\s]+/, ''))); }); // a % keeps its unit: ▒▒ 👁 % match
       node.parentNode.replaceChild(frag, node);
     });
     // attributes that could read the season aloud
@@ -14588,7 +14611,7 @@ function renderLoveOrNot(mode, hex, matches, pct){
   function finish(){
     let msg;
     if(mode === 'check' && (pct == null || payLocked())){ // (2026-11-02) unpaid: her % stays hidden
-      const eye = payBlurHtml('88% match', 'Unlock your pass to see how well this color suits you.');
+      const eye = payBlurHtml('88', 'Unlock your pass to see how well this color suits you.') + '<strong>% match</strong>';
       msg = loved.length ? `You love it. How well it suits your coloring: ${eye}` : `Not for you? See how well it really suits your coloring: ${eye}`;
     } else if(mode === 'check'){
       const love = loved.length > 0, p = pct;
