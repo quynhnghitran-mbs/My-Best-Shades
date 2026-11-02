@@ -1,0 +1,2 @@
+# Send the old Netlify address to the real domain (2026-11-02)
+https://findmybestshades.netlify.app/*  https://www.findmybestshades.com/:splat  301!
