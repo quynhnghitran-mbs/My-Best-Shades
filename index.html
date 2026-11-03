@@ -8227,9 +8227,13 @@ function scoreColorForProfile(rgb, profile, itemType){
   // (2026-10-16, per Nghi "A only") an axis counts as off when the dot sits outside the pink range the bars show
   // by more than MYSHADE_BAND_MARGIN -- so the bars, the text and the score always agree
   const misses = myShadeBandMisses(axes.lab, target, profile, itemType);
-  if(misses != null){
-    if(misses >= 2) pct = Math.min(pct, 69);
-    else if(misses === 1) pct = Math.min(pct, 79);
+  if(misses != null && misses > 0){
+    // (2026-11-03, per Nghi) the cap now steps down with HOW FAR outside her range the color is, so a color
+    // 10 points too vivid no longer ties with one 4 points too light (e.g. 4 over -> ~77%, 10 over -> ~72%)
+    const over = (myShadeBandMisses.last || []).reduce((t, r) => t + Math.max(0, (r.over || 0) - MYSHADE_BAND_MARGIN), 0);
+    const step = Math.round(over * 0.875);
+    if(misses >= 2) pct = Math.min(pct, Math.max(40, 69 - step));
+    else pct = Math.min(pct, Math.max(70, 79 - step));
   }
   return { pct, dist, axes, exposureAdjustedValue: adjustedValue, target, itemChromaLabel, paletteMisses: misses, paletteReasons: misses ? (myShadeBandMisses.last || []) : [] };
 }
@@ -8258,13 +8262,13 @@ function myShadeBandMisses(lab, target, profile, itemType){
   // the same three ranges renderMyShadeAxisBars() draws
   if(target.warmth != null && !(her && her.warmthBoth)){
     const t = target.warmth * 50, m = MYSHADE_AXIS_MIN_DELTA * 50;
-    if(lab.b < t - m - M) reasons.push({ read: 'cool', towards: 'warmer' });
-    else if(lab.b > t + m + M) reasons.push({ read: 'warm', towards: 'cooler' });
+    if(lab.b < t - m - M) reasons.push({ read: 'cool', towards: 'warmer', over: (t - m) - lab.b });
+    else if(lab.b > t + m + M) reasons.push({ read: 'warm', towards: 'cooler', over: lab.b - (t + m) });
   }
   if(target.hasDepth && target.value != null){
     const dr = myShadeDepthRange(target);
-    if(lab.L < dr.from - M) reasons.push({ read: 'deep', towards: 'lighter' });
-    else if(lab.L > dr.to + M) reasons.push({ read: 'light', towards: 'deeper' });
+    if(lab.L < dr.from - M) reasons.push({ read: 'deep', towards: 'lighter', over: dr.from - lab.L });
+    else if(lab.L > dr.to + M) reasons.push({ read: 'light', towards: 'deeper', over: lab.L - dr.to });
   }
   if(target.chromaMode === 'band'){
     let lo = null, hi = null;
@@ -8272,8 +8276,8 @@ function myShadeBandMisses(lab, target, profile, itemType){
     if(cr){ lo = cr.from; hi = cr.to; }
     else if(target.chroma != null){ lo = target.chroma * 80 - 4; hi = target.chroma * 80 + 4; }
     if(lo != null){
-      if(lab.C < lo - M) reasons.push({ read: 'muted', towards: 'richer, more saturated' });
-      else if(lab.C > hi + M) reasons.push({ read: 'vivid', towards: 'more muted' });
+      if(lab.C < lo - M) reasons.push({ read: 'muted', towards: 'richer, more saturated', over: lo - lab.C });
+      else if(lab.C > hi + M) reasons.push({ read: 'vivid', towards: 'more muted', over: lab.C - hi });
     }
   }
   myShadeBandMisses.last = reasons;
