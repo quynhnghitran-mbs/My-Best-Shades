@@ -1221,6 +1221,7 @@
   }
   .metric-poles{display:flex;justify-content:space-between;margin-bottom:7px;}
   .metric-poles span{font-size:12px;color:var(--muted);letter-spacing:0.02em;}
+  .olive-note{font-size:12.5px;line-height:1.55;color:var(--muted);text-align:center;margin:8px 6px 2px;}
   .metric-chips{display:flex;flex-wrap:wrap;justify-content:center;gap:5px;margin:6px 0 4px;}
   .metric-chips .metric-pill{padding:4px 9px;font-size:11.5px;white-space:nowrap;box-shadow:0 2px 6px rgba(58,31,34,.18);}
   .metric-pill{
@@ -1970,7 +1971,8 @@
   #myShadeResultPct .pct-unit{white-space:nowrap;}
   #myShadeResultPct .pay-fake{filter:blur(.22em);}
   .tryon-bar .pay-eye{display:flex;font-size:1.5em;color:inherit;background:rgba(255,255,255,.2);width:1.8em;height:1.3em;margin:0 auto .15em;}
-  body.res-locked #seasonsMap{display:none !important;} /* her dot on the 16-season map would give the season away */
+  body.res-locked #seasonsMap{display:none !important;}
+  body.res-locked .olive-note{display:none !important;} /* her dot on the 16-season map would give the season away */
   .season-reveal.sr-wiggle .gb-box{animation:srWiggle .6s ease;}
   @keyframes srWiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-7deg)}40%{transform:rotate(6deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(2deg)}}
   .pay-blur{position:relative;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;-webkit-user-select:none;}
@@ -5393,6 +5395,35 @@ function shadeWhyExplanation(target, s){
 const WARMTH_NEUTRAL_LINE = 15.5, WARMTH_NEUTRAL_ZONE = 1.0;
 function inWarmthNeutralZone(b){ return b != null && isFinite(b) && Math.abs(b - WARMTH_NEUTRAL_LINE) <= WARMTH_NEUTRAL_ZONE; }
 function warmthDisplay(r){ return r && inWarmthNeutralZone(r.lab_temperature_b) ? 'Neutral' : ((r && r.undertone_descriptive) || ''); }
+// (2026-11-04, per Nghi) OLIVE: a display label only -- it never changes her season, tiers or shades. Olive skin has
+// less red (CIELAB a*) than usual for its depth. "Usual" = the neutral/warm red at each depth, read from a foundation
+// undertone chart (Fair / Light / Medium / Tan / Deep); real olive faces measured 80-100% of it. Only neutral readings
+// (Cool-neutral / Warm-neutral, b* 10.85-20.15) can be olive. Fair skin (L* >= 80) that shows the sign gets "(Olive)" -- might be.
+const OLIVE_RED_AT_DEPTH = [[38.1, 18.6], [55.2, 18.2], [71.8, 14.3], [82.8, 9.5], [89.2, 5.4]];
+function oliveExpectedRed(L){
+  const t = OLIVE_RED_AT_DEPTH; if(L <= t[0][0]) return t[0][1]; if(L >= t[t.length - 1][0]) return t[t.length - 1][1];
+  for(let i = 1; i < t.length; i++) if(L <= t[i][0]){ const f = (L - t[i - 1][0]) / (t[i][0] - t[i - 1][0]); return t[i - 1][1] + f * (t[i][1] - t[i - 1][1]); }
+  return t[t.length - 1][1];
+}
+const OLIVE_RED_RATIO = 1.0;
+function classifyOlive(L, a, b){
+  if(![L, a, b].every(v => v != null && isFinite(v))) return null;
+  if(b < 10.85 || b >= 20.15) return null;           // only neutral readings
+  if(a > OLIVE_RED_RATIO * oliveExpectedRed(L)) return null;   // usual red for her depth: not olive
+  return L >= 80 ? 'maybe' : 'olive';                            // fair skin hides the cast, so only "(Olive)" -- might be
+}
+// the warmth label as she reads it: "Olive warm-neutral" / "(Olive) cool-neutral" when it applies
+function warmthDisplayLabel(r){
+  const base = warmthDisplay(r); if(!base || !r || !r.skin_olive) return base;
+  const low = base.toLowerCase();
+  return r.skin_olive === 'olive' ? `Olive ${low}` : `(Olive) ${low}`;
+}
+function oliveNoteHtml(r){
+  if(!r || !r.skin_olive) return '';
+  return r.skin_olive === 'olive'
+    ? `<strong>Olive</strong>: your skin has a little less red than usual for its depth, the soft green-gray cast of olive skin. It sits between warm and cool, so it doesn't change your season or your shades.`
+    : `<strong>(Olive)</strong>: fair skin hides an olive cast in photos, so <strong>you might have olive skin too</strong>. If gold and silver both look fine on you and pastels make you look a little gray, you probably do. It doesn't change your season or your shades.`;
+}
 function classifyUndertoneDescriptive(labB){
   if(labB <= 1.55) return "Blue-cool";
   if(labB < 10.85) return "Cool";
@@ -6713,6 +6744,7 @@ async function measureFaceFromPhoto(imgEl){
         return { x0: Math.min(mL.x, mR.x) - mw * 0.9, x1: Math.max(mL.x, mR.x) + mw * 0.9, y0: nose.y - span * 0.15, y1: chin.y + span * 0.15 };
       })(),
       g_minus_b: Math.round(gMinusB), undertone, undertone_descriptive: undertoneDescriptive,
+      skin_lab_a: Math.round(customerLab.a*10)/10, skin_olive: classifyOlive(customerLab.L, customerLab.a, customerLab.b),
       lab_temperature_b: Math.round(customerLab.b*10)/10,
       skin_luminance: Math.round(skinLuminance), eyebrow_luminance: Math.round(eyebrowLuminance),
       iris_luminance: Math.round(irisLuminance), sclera_luminance: Math.round(scleraLuminance),
@@ -8644,7 +8676,7 @@ async function myShadeHandleSelfieFile(file){
     myShadeSelfieBoxes = { face: m.face_box, lower: m.lower_face_box };
     myShadeUploadedProfile = {
       source: 'selfie',
-      lab_temperature_b: m.lab_temperature_b, undertone_descriptive: m.undertone_descriptive,
+      lab_temperature_b: m.lab_temperature_b, undertone_descriptive: m.undertone_descriptive, skin_olive: m.skin_olive || null,
       depth_score: m.depth_score, depth_level: m.depth_level,
       contrast_score: m.contrast_score, contrast_level: m.contrast_level,
       avg_chroma: m.avg_chroma, chroma_level: m.chroma_level,
@@ -8731,7 +8763,7 @@ function renderMyShadeProfileGate(){
   // a profile PNG downloaded before these numbers were embedded (see
   // buildMyShadeProfilePayload above).
   const numberChips = [
-    { label: 'Warmth', value: warmthDisplay(profile), num: profile.lab_temperature_b },
+    { label: 'Warmth', value: warmthDisplayLabel(profile), num: profile.lab_temperature_b },
     { label: 'Depth', value: profile.depth_level, num: profile.depth_score },
     { label: 'Contrast', value: profile.contrast_level, num: profile.contrast_score },
     { label: 'Chroma', value: profile.chroma_level, num: profile.avg_chroma },
@@ -8743,11 +8775,11 @@ function renderMyShadeProfileGate(){
   const chipRowEl = document.getElementById('myShadeProfileChipRow');
   if(numberChips.length){
     chipRowEl.innerHTML = numberChips.map(c =>
-      `<span class="pick-filter-chip"><span class="pick-filter-chip-label">${escapeHtml(c.label)} = </span><span class="pick-filter-chip-num">${escapeHtml(c.num)}</span><span class="pick-filter-chip-label"> \u00b7 ${escapeHtml(c.value)}</span></span>`
+      `<span class="pick-filter-chip"><span class="pick-filter-chip-label">${escapeHtml(c.label)} = </span><span class="pick-filter-chip-num">${escapeHtml(c.num)}</span><span class="pick-filter-chip-label"> \u00b7 ${(c.label === 'Warmth' && payLocked()) ? payBlurHtml(c.value, 'Unlock your pass to see your skin tone.') : escapeHtml(c.value)}</span></span>` // (2026-11-04) skin tone hidden until paid
     ).join('');
   } else {
-    const chips = [warmthDisplay(profile), profile.depth_level, profile.contrast_level, profile.chroma_level].filter(Boolean);
-    chipRowEl.innerHTML = chips.map(c => `<span class="pick-filter-chip">${escapeHtml(c)}</span>`).join('');
+    const chips = [warmthDisplayLabel(profile), profile.depth_level, profile.contrast_level, profile.chroma_level].filter(Boolean);
+    chipRowEl.innerHTML = chips.map((c, i) => `<span class="pick-filter-chip">${(i === 0 && payLocked()) ? payBlurHtml(c, 'Unlock your pass to see your skin tone.') : escapeHtml(c)}</span>`).join('');
   }
 }
 const myShadeSwitchProfileBtn = document.getElementById('myShadeSwitchProfileBtn');
@@ -10426,7 +10458,8 @@ analyzeBtn.addEventListener('click', async () => {
         `Contrast Score: ${measurements.contrast_score} -> Contrast: ${measurements.contrast_level}\n` +
         `Skin chroma (saturation): ${measurements.skin_chroma}%  Iris chroma (saturation): ${measurements.iris_chroma}%  Sclera chroma (saturation): ${measurements.sclera_chroma}%\n` +
         `QUANTITATIVE SEASON MATCH: ${measurements.quant_best} (distance=${measurements.quant_best_dist}). This was computed by finding the nearest of the 16 season archetypes to the measurements above, by weighted Euclidean distance directly in CIELAB units (b*/L*/C*/contrast). This IS the final season — use it exactly as given, do not perform your own comparison between candidate seasons or second-guess it based on your own visual impression. Your only job now is to write a warm, natural 2-3 sentence explanation for why this season fits, based on what you observe in the photo (skip any mention of the distance calculation or numeric methodology in that explanation).\n` +
-        `Use the Depth, Undertone, and Contrast results directly rather than recalculating from your own visual estimate.`;
+        `Use the Depth, Undertone, and Contrast results directly rather than recalculating from your own visual estimate.` +
+        (measurements.skin_olive === 'olive' ? `\nOlive: her skin has less red than usual for its depth (an olive, soft green-gray cast). Mention her olive skin tone warmly in the explanation; it does not change the season.` : measurements.skin_olive === 'maybe' ? `\nPossible olive: her fair skin shows a slight olive sign. Mention gently that she might have olive skin too; it does not change the season.` : '');
     }
 
     if(loading1Text) loading1Text.textContent = 'Season matching...';
@@ -10493,12 +10526,13 @@ let customerLocationPromise = null;
 // privacy policy's "after you pay" still holds). Her season name in it is masked by the locked reading.
 function freeColorStory(r){
   const low = x => String(x || '').replace(/-to-/g, ' to ').toLowerCase();
-  const und = r.undertone_descriptive || r.undertone || '';
+  const und = warmthDisplayLabel(r) || r.undertone_descriptive || r.undertone || ''; // (2026-11-04) includes Olive when it applies
   const warm = /spring|autumn/i.test(r.season || '');
   const feel = { Light: 'light and airy', Medium: 'balanced', Deep: 'rich and deep' };
   const dWord = low(r.depth_level), cWord = low(r.chroma_level), kWord = low(r.contrast_level);
   const soft = /muted/i.test(r.chroma_level || ''), vivid = /vivid/i.test(r.chroma_level || '');
-  return `Your coloring has a <strong>${escapeHtml(und || (warm ? 'warm' : 'cool'))}</strong> undertone, with <strong>${escapeHtml(dWord || 'medium')} depth</strong> and <strong>${escapeHtml(cWord || 'balanced')} chroma</strong>. ` +
+  const undW = String(und || (warm ? 'warm' : 'cool')).replace(/^\(olive\)/i, '(olive)').replace(/^[A-Z]/, c => c.toLowerCase());
+  return `Your coloring has ${/^[aeiou(]/i.test(undW) && !/^\(/.test(undW) ? 'an' : 'a'} <strong>${escapeHtml(undW)}</strong> undertone, with <strong>${escapeHtml(dWord || 'medium')} depth</strong> and <strong>${escapeHtml(cWord || 'balanced')} chroma</strong>. ` +
     `Your skin, eyes and brows sit at <strong>${escapeHtml(kWord || 'medium')} contrast</strong>, so the overall impression is ${soft ? '<strong>soft and blended</strong>' : vivid ? '<strong>clear and vivid</strong>' : '<strong>gentle and balanced</strong>'}. ` +
     `That combination is the hallmark of ${escapeHtml(r.season || '')}: you'll shine in ${warm ? 'warm' : 'cool'}, ${soft ? 'muted' : vivid ? 'clear, bright' : 'balanced'} colors that echo your natural coloring.`;
 }
@@ -10541,6 +10575,7 @@ function mergeMeasuredResult(result, measurements){
     result.eyelid_rgb = measurements.eyelid_rgb;
     result.eyelid_luminance = measurements.eyelid_luminance;
     result.undertone_descriptive = measurements.undertone_descriptive;
+    result.skin_lab_a = measurements.skin_lab_a; result.skin_olive = measurements.skin_olive || null;
     result.quant_best = measurements.quant_best;
     result.quant_best_dist = measurements.quant_best_dist;
     result.quant_runner_up = measurements.quant_runner_up;
@@ -11098,7 +11133,7 @@ function renderColorAnalysis(result){
     value: result.lab_temperature_b, max: 35,
     zones: [1.55, 10.85, 15.5, 20.15, 29.45],
     valueLabel: `Warmth = ${result.lab_temperature_b}`,
-    categoryText: warmthDisplay(result) + (warmthBothOf(result) ? ' · suits warm & cool' : ''), chips,
+    categoryText: warmthDisplayLabel(result) + (warmthBothOf(result) ? ' · suits warm & cool' : ''), chips,
     gradientFrom: '#c98bb4', gradientMid: '#e6a0a0', gradientTo: '#e8946f', poleLeft: 'Cool', poleRight: 'Warm'
   });
 
@@ -11143,6 +11178,7 @@ function renderColorAnalysis(result){
     gradientFrom: '#a99091', gradientMid: '#c46b78', gradientTo: '#e0234f', poleLeft: 'Muted', poleRight: 'Vivid'
   });
   html += `<div class="metric-chips">${chips.join('')}</div>`;
+  { const on = oliveNoteHtml(result); if(on) html += `<div class="olive-note">${on}</div>`; }
 
   metricsHolder.innerHTML = html;
 }
@@ -11325,7 +11361,7 @@ function renderSeasonResult(result, opts){
   if(!opts || !opts.skipDebugHistory) saveDebugHistory(result);
   const myShadeCtaBlockEl = document.getElementById('myShadeCtaBlock');
   if(myShadeCtaBlockEl) myShadeCtaBlockEl.style.display = '';
-  document.getElementById('seasonFamily').textContent = result.family + " · " + (result.undertone || "");
+  document.getElementById('seasonFamily').textContent = result.family + " · " + (result.skin_olive === 'olive' ? 'olive ' : result.skin_olive === 'maybe' ? '(olive) ' : '') + (result.undertone || ""); // (2026-11-04) olive on the season tag too
   document.getElementById('seasonName').textContent = result.season;
   // result.explanation and result.runner_up both come from the AI's own
   // response -- see the PROMPT literal above and its "wrap ... in
@@ -12766,7 +12802,7 @@ function renderShadeMatches(looks){
     // (Warm-neutral, Medium-to-Light, ...) dropped, just the axis name
     // and its raw number.
     const filterChips = [
-      { label: 'Warmth', value: warmthDisplay(r), num: r.lab_temperature_b },
+      { label: 'Warmth', value: warmthDisplayLabel(r), num: r.lab_temperature_b },
       { label: 'Depth', value: r.depth_level, num: r.depth_score },
       { label: 'Contrast', value: r.contrast_level, num: r.contrast_score },
       { label: 'Chroma', value: r.chroma_level, num: r.avg_chroma },
@@ -13566,6 +13602,11 @@ function maskLockedResults(){
     document.querySelectorAll('#brandSection .shade-result-name').forEach(el => { const t = el.textContent.trim(); if(t && !el.querySelector('.pay-eye')){ resultLock.names.add(t); resultLock.names.add(tocTitleCase(t)); } });
     document.querySelectorAll('#brandSection .shade-result-name').forEach(el => { if(!el.querySelector('.pay-hid')) el.innerHTML = eyeHtml(el.textContent.trim()); });
     document.querySelectorAll('#brandSection .shade-result-conf-num').forEach(el => { if(el.querySelector('.pay-hid')) return; const t = el.textContent.trim(); el.innerHTML = eyeHtml('88') + escapeHtml(t.replace(/^[\d.\s]+/, '')); }); // only the number hidden
+    // (2026-11-04, per Nghi) her skin-tone tag is a result too: the season tag line, the undertone in the free story,
+    // and the warmth chip under Your Color Reading (the olive note is hidden by CSS)
+    { const sf = document.getElementById('seasonFamily'); if(sf && sf.textContent.trim() && !sf.querySelector('.pay-hid')) sf.innerHTML = eyeHtml(sf.textContent.trim()); }
+    { const sd = document.getElementById('seasonDesc'); const st = sd && /^\s*Your coloring has/.test(sd.textContent) ? sd.querySelector('strong') : null; if(st && !st.querySelector('.pay-hid')) st.innerHTML = eyeHtml(st.textContent); }
+    { const wc = document.querySelector('#cielabMetrics .metric-chips .metric-pill'); if(wc && !wc.querySelector('.pay-hid')){ wc.innerHTML = eyeHtml(wc.textContent); wc.style.color = ''; } }
     const names = [...resultLock.names].filter(n => n && n.length > 2).sort((a, b) => b.length - a.length).map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
     const nameRe = names.length ? new RegExp(names.join('|'), 'g') : null;
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode: n => {
@@ -14489,7 +14530,7 @@ async function lonAddSelfie(file, msgEl){
     myShadeSelfieBoxes = { face: m.face_box, lower: m.lower_face_box };
     myShadeUploadedProfile = {
       source: 'selfie',
-      lab_temperature_b: m.lab_temperature_b, undertone_descriptive: m.undertone_descriptive,
+      lab_temperature_b: m.lab_temperature_b, undertone_descriptive: m.undertone_descriptive, skin_olive: m.skin_olive || null,
       depth_score: m.depth_score, depth_level: m.depth_level,
       contrast_score: m.contrast_score, contrast_level: m.contrast_level,
       avg_chroma: m.avg_chroma, chroma_level: m.chroma_level,
