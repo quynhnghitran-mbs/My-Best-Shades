@@ -1971,7 +1971,6 @@
   #myShadeResultPct .pct-unit{white-space:nowrap;}
   #myShadeResultPct .pay-fake{filter:blur(.22em);}
   .tryon-bar .pay-eye{display:flex;font-size:1.5em;color:inherit;background:rgba(255,255,255,.2);width:1.8em;height:1.3em;margin:0 auto .15em;}
-  body.res-locked #seasonsMap{display:none !important;}
   body.res-locked .olive-note{display:none !important;} /* her dot on the 16-season map would give the season away */
   .season-reveal.sr-wiggle .gb-box{animation:srWiggle .6s ease;}
   @keyframes srWiggle{0%,100%{transform:rotate(0)}20%{transform:rotate(-7deg)}40%{transform:rotate(6deg)}60%{transform:rotate(-4deg)}80%{transform:rotate(2deg)}}
@@ -13572,8 +13571,8 @@ function openPrepayPaywall(){
 let resultLock = null, resultLockObs = null, resultLockQueued = false;
 const SEASON_TEXT_RE = /\b(?:(?:Light|True|Bright|Soft|Deep Soft|Deep)\s+)?(?:Spring|Summer|Autumn|Winter)s?\b/g;
 const PCT_TEXT_RE = /\b\d{1,3}(?:\.\d+)?\s?%(?:\s+(?:match(?:ing)?|fit|similar))?/g;
-const LOCK_SKIP = '#paywallCard, #myShadeSection, #guessOverlay, script, style, .pay-eye, .pay-hid, .legal-doc, footer, .site-footer, #fmbsHome, .cover-view, noscript';
-const LOCK_PCT_ZONES = '#brandSection, #runnerSection, #colorAnalysisSection, #resultCard';
+const LOCK_SKIP = '#paywallCard, #myShadeSection, #guessOverlay, #seasonsMap, script, style, .pay-eye, .pay-hid, .legal-doc, footer, .site-footer, #fmbsHome, .cover-view, noscript';
+const LOCK_PCT_ZONES = '#runnerSection, #colorAnalysisSection, #resultCard';
 const EYE_OFF_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>';
 function startResultLock(result){
   resultLock = { names: new Set() }; // lipstick names are learned from the podium after it renders
@@ -13601,7 +13600,7 @@ function maskLockedResults(){
     // lipstick names on the podium and in try-on labels: learn them, then mask everywhere
     document.querySelectorAll('#brandSection .shade-result-name').forEach(el => { const t = el.textContent.trim(); if(t && !el.querySelector('.pay-eye')){ resultLock.names.add(t); resultLock.names.add(tocTitleCase(t)); } });
     document.querySelectorAll('#brandSection .shade-result-name').forEach(el => { if(!el.querySelector('.pay-hid')) el.innerHTML = eyeHtml(el.textContent.trim()); });
-    document.querySelectorAll('#brandSection .shade-result-conf-num').forEach(el => { if(el.querySelector('.pay-hid')) return; const t = el.textContent.trim(); el.innerHTML = eyeHtml('88') + escapeHtml(t.replace(/^[\d.\s]+/, '')); }); // only the number hidden
+    // (2026-11-05, per Nghi) the lipstick cards' % matching now shows before payment; only the shade names stay hidden
     // (2026-11-04, per Nghi) her skin-tone tag is a result too: the season tag line, the undertone in the free story,
     // and the warmth chip under Your Color Reading (the olive note is hidden by CSS)
     { const sf = document.getElementById('seasonFamily'); if(sf && sf.textContent.trim() && !sf.querySelector('.pay-hid')) sf.innerHTML = eyeHtml(sf.textContent.trim()); }
@@ -13616,8 +13615,8 @@ function maskLockedResults(){
     let n; while((n = walker.nextNode())){
       const v = n.nodeValue, inPct = !!n.parentElement.closest(LOCK_PCT_ZONES);
       SEASON_TEXT_RE.lastIndex = 0; PCT_TEXT_RE.lastIndex = 0;
-      const pctRe = inPct ? PCT_TEXT_RE : /\b\d{1,3}(?:\.\d+)?\s?%\s+(?:match(?:ing)?|fit)/g;
-      if(SEASON_TEXT_RE.test(v) || (nameRe && (nameRe.lastIndex = 0, nameRe.test(v))) || (pctRe.lastIndex = 0, pctRe.test(v))) hits.push([n, pctRe]);
+      const pctRe = n.parentElement.closest('#brandSection') ? null : (inPct ? PCT_TEXT_RE : /\b\d{1,3}(?:\.\d+)?\s?%\s+(?:match(?:ing)?|fit)/g); // lipstick % shows (2026-11-05)
+      if(SEASON_TEXT_RE.test(v) || (nameRe && (nameRe.lastIndex = 0, nameRe.test(v))) || (pctRe && (pctRe.lastIndex = 0, pctRe.test(v)))) hits.push([n, pctRe]);
     }
     hits.forEach(([node, pctRe]) => {
       let v = node.nodeValue;
@@ -13911,7 +13910,8 @@ const FAMILY_ICON = {
 };
 function renderSeasonsMap(result){
   const el = document.getElementById('seasonsMap'); if(!el) return;
-  const mine = (result && (result.shadeMatchSeason || result.season)) || '';
+  // (2026-11-05, per Nghi) before payment the full 16-season map shows, but without her "You" marker
+  const mine = resultLock ? '' : ((result && (result.shadeMatchSeason || result.season)) || '');
   // each season as a color wheel of all 28 of its colors, ordered around the ring by hue (neutrals last)
   const wheel = name => { try{
       const pal = (generateClothingPalette(name) || []).map(c => { const l = rgbToLab(hexToRgb(c.hex)); return { hex: c.hex, C: Math.hypot(l.a, l.b), L: l.L, h: (Math.atan2(l.b, l.a) * 180 / Math.PI + 360) % 360 }; });
