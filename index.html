@@ -1939,6 +1939,16 @@
   .drain-cmp-worst, .drain-cmp-line, .drain-cmp-knob, .lon-cmp-r, .lon-cmp-line, .lon-cmp-knob{will-change:left;}
   .lon-card{touch-action:pan-y;will-change:transform;-webkit-user-select:none;user-select:none;}
   .toc .tryon, .lon-card{-webkit-tap-highlight-color:transparent;}
+  /* (2026-11-05) Find Similar Shades: tap a tile for a large try-on */
+  #myShadeTryOnCompare .tc-zoom{cursor:pointer;}
+  .tc-zoom-ov{position:fixed;inset:0;z-index:9000;background:rgba(40,22,26,.55);display:none;align-items:center;justify-content:center;padding:16px;}
+  .tc-zoom-ov.show{display:flex;animation:srFade .25s ease both;}
+  .tc-zoom-card{position:relative;width:100%;max-width:360px;background:#fdf5f3;border-radius:20px;padding:12px 12px 14px;box-shadow:0 18px 40px rgba(40,22,26,.35);}
+  .tc-zoom-card .tryon{width:100%;}
+  .tc-zoom-cap{text-align:center;margin-top:10px;font-size:14px;}
+  .tc-zoom-cap b{display:block;font-family:'Playfair Display',serif;font-size:18px;color:var(--rose-deep);}
+  .tc-zoom-cap span{color:var(--muted);font-size:12.5px;}
+  .tc-zoom-x{position:absolute;top:-12px;right:-6px;width:34px;height:34px;border-radius:50%;border:0;background:#fff;color:var(--rose-deep);font-size:22px;line-height:1;box-shadow:0 4px 12px rgba(40,22,26,.25);cursor:pointer;z-index:2;}
   /* (2026-11-02) four reads + opposite palette */
   .palette-swatch-row{position:relative;}
   .tap-guide{position:absolute;left:0;top:0;width:44px;height:36px;color:var(--rose-deep);pointer-events:none;z-index:3;opacity:0;filter:drop-shadow(0 1px 2px rgba(255,255,255,.95)) drop-shadow(0 2px 4px rgba(58,31,34,.25));}
@@ -8631,14 +8641,40 @@ function renderMyShadeTryOn(mode, hex, matches){
     const html = tryOnTileHtml(src, hex, 'Your color \u00b7 ' + hex.toUpperCase(), true);
     if(html && oneEl){ oneEl.innerHTML = html; if(swatchEl) swatchEl.style.display = 'none'; }
   } else if(cmpEl){
-    const parts = [`<div>${tryOnTileHtml(src, hex, 'Your color')}<div class="tryon-compare-label"><b>Your photo's color</b>${hex.toUpperCase()}</div></div>`];
+    const parts = [`<div class="tc-zoom" role="button" tabindex="0" data-hex="${hex}" data-band="Your color" data-cap="Your photo's color · ${hex.toUpperCase()}">${tryOnTileHtml(src, hex, 'Your color')}<div class="tryon-compare-label"><b>Your photo's color</b>${hex.toUpperCase()}</div></div>`];
     (matches || []).slice(0, 3).forEach(m => {
       const brand = (splitBrandLine(m.brand_line) || {}).brand || '';
-      parts.push(`<div>${tryOnTileHtml(src, m.hex, (m.confidencePct != null ? m.confidencePct + '%' : m.hex))}<div class="tryon-compare-label"><b>${payLocked() ? payBlurHtml(m.name, 'Unlock your pass to see the shade names.') : escapeHtml(m.name)}</b>${escapeHtml(brandDisplayNameSafe(brand))}</div></div>`);
+      parts.push(`<div class="tc-zoom" role="button" tabindex="0" data-hex="${m.hex}" data-band="${m.confidencePct != null ? m.confidencePct + '% similar' : m.hex}" data-name="${payLocked() ? '' : escapeHtml(m.name)}" data-brand="${escapeHtml(brandDisplayNameSafe(brand))}">${tryOnTileHtml(src, m.hex, (m.confidencePct != null ? m.confidencePct + '%' : m.hex))}<div class="tryon-compare-label"><b>${payLocked() ? payBlurHtml(m.name, 'Unlock your pass to see the shade names.') : escapeHtml(m.name)}</b>${escapeHtml(brandDisplayNameSafe(brand))}</div></div>`);
     });
     cmpEl.innerHTML = parts.join('');
   }
 }
+// (2026-11-05, per Nghi) tap a Find Similar Shades tile: scroll up to the Love-it-or-not card, showing that shade
+function showOnLoveOrNot(hx){
+  const box = document.getElementById('loveOrNot'); if(!box || box.style.display === 'none') return;
+  if(box._lonShow) box._lonShow(hx);
+  const r = box.getBoundingClientRect();
+  window.scrollTo({ top: r.top + window.scrollY - 80, behavior: 'smooth' });
+}
+function openTryOnZoom(tile){ // (no longer used: replaced by showOnLoveOrNot, kept for reference)
+  const src = tryOnSource('myshade'); if(!src) return;
+  let ov = document.getElementById('tcZoomOverlay');
+  if(!ov){ ov = document.createElement('div'); ov.id = 'tcZoomOverlay'; ov.className = 'tc-zoom-ov'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-modal', 'true'); document.body.appendChild(ov);
+    ov.addEventListener('click', e => { if(e.target === ov || e.target.closest('.tc-zoom-x')) ov.classList.remove('show'); }); }
+  const d = tile.dataset;
+  const name = d.name ? `<b>${d.name}</b>` : (d.cap ? `<b>${escapeHtml(d.cap)}</b>` : `<b>${payBlurHtml('Lorem Ipsum', 'Unlock your pass to see the shade names.')}</b>`);
+  ov.innerHTML = `<div class="tc-zoom-card"><button type="button" class="tc-zoom-x" aria-label="Close">×</button>${tryOnTileHtml(src, d.hex, d.band || '', true) || ''}<div class="tc-zoom-cap">${name}${d.brand ? `<span>${d.brand}</span>` : ''}</div></div>`;
+  ov.classList.add('show');
+}
+document.addEventListener('click', e => {
+  const t = e.target.closest && e.target.closest('#myShadeTryOnCompare .tc-zoom'); if(!t || e.target.closest('.pay-blur')) return;
+  showOnLoveOrNot(t.dataset.hex);
+});
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape'){ const ov = document.getElementById('tcZoomOverlay'); if(ov) ov.classList.remove('show'); return; }
+  if(e.key !== 'Enter') return; const t = e.target.closest && e.target.closest('#myShadeTryOnCompare .tc-zoom'); if(t){ e.preventDefault(); showOnLoveOrNot(t.dataset.hex); }
+});
+
 function brandDisplayNameSafe(b){
   try{ return (typeof brandDisplayName === 'function') ? brandDisplayName(b) : b; } catch(e){ return b; }
 }
@@ -9790,6 +9826,7 @@ function payBlurHtml(placeholder, msg){
 }
 function openCheckPaywall(msg){
   if(!paywallCardEl) return;
+  { const zo = document.getElementById('tcZoomOverlay'); if(zo) zo.classList.remove('show'); }
   paywallCardEl.dataset.plan = 'check';
   const d = document.getElementById('paywallDesc'); if(d){ d.style.display = ''; d.innerHTML = msg || 'Unlock your pass to see your results.'; }
   paywallCardEl.classList.add('show');
@@ -14673,6 +14710,12 @@ function renderLoveOrNot(mode, hex, matches, pct){
     }
     verdict.innerHTML = msg; verdict.style.display = '';
   }
+  // (2026-11-05, per Nghi) a tapped Find Similar Shades tile brings that shade up on this card
+  box._lonShow = (hx) => {
+    const k = cards.findIndex(c => String(c.hex).toLowerCase() === String(hx || '').toLowerCase());
+    if(k >= 0){ i = k; btns.style.display = ''; verdict.style.display = 'none'; const gd = box.querySelector('.lon-guide'); if(gd) gd.style.display = ''; draw(); }
+    return k >= 0;
+  };
   box.style.display = '';
   draw();
 }
