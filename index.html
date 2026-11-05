@@ -8642,7 +8642,7 @@ function renderMyShadeTryOn(mode, hex, matches){
     if(html && oneEl){ oneEl.innerHTML = html; if(swatchEl) swatchEl.style.display = 'none'; }
   } else if(cmpEl){
     const parts = [`<div class="tc-zoom" role="button" tabindex="0" data-hex="${hex}" data-band="Your color" data-cap="Your photo's color · ${hex.toUpperCase()}">${tryOnTileHtml(src, hex, 'Your color')}<div class="tryon-compare-label"><b>Your photo's color</b>${hex.toUpperCase()}</div></div>`];
-    (matches || []).slice(0, 3).forEach(m => {
+    (matches || []).slice(0, 10).forEach(m => {
       const brand = (splitBrandLine(m.brand_line) || {}).brand || '';
       parts.push(`<div class="tc-zoom" role="button" tabindex="0" data-hex="${m.hex}" data-band="${m.confidencePct != null ? m.confidencePct + '% similar' : m.hex}" data-name="${payLocked() ? '' : escapeHtml(m.name)}" data-brand="${escapeHtml(brandDisplayNameSafe(brand))}">${tryOnTileHtml(src, m.hex, (m.confidencePct != null ? m.confidencePct + '%' : m.hex))}<div class="tryon-compare-label"><b>${payLocked() ? payBlurHtml(m.name, 'Unlock your pass to see the shade names.') : escapeHtml(m.name)}</b>${escapeHtml(brandDisplayNameSafe(brand))}</div></div>`);
     });
@@ -9898,8 +9898,8 @@ myShadeCheckBtn.addEventListener('click', () => {
 // sell look like this one), regardless of whether a profile exists.
 if(myShadeFindSimilarBtn) myShadeFindSimilarBtn.addEventListener('click', () => {
   myShadeRunCheck('similar', (rgb) => {
-    const matches = findSimilarShades(rgb); // whole catalog -- still what the live sheet logs
-    renderSimilarShadeResults(rgb, matches.slice(0, 3), []); // 2026-10-31, per Nghi: MAC + drugstore merged, one top 3
+    const matches = findSimilarShades(rgb, 10); // whole catalog; (2026-11-05, per Nghi) top 10
+    renderSimilarShadeResults(rgb, matches.slice(0, 10), []); // 2026-10-31 merged list; 2026-11-05, per Nghi: top 10
     sendToLiveSheet({
       type: 'colorcheck_result', mode: 'similar',
       item_rgb_r: rgb.r, item_rgb_g: rgb.g, item_rgb_b: rgb.b,
@@ -14584,7 +14584,7 @@ function renderLoveOrNot(mode, hex, matches, pct){
   const prof = myShadeUploadedProfile;
   const cards = mode === 'check'
     ? [{ hex, label: 'Your color · ' + hex.toUpperCase(), sub: '', pct }]
-    : (matches || []).slice(0, 6).map((m, mi) => {
+    : (matches || []).slice(0, 10).map((m, mi) => {
         let p = null;
         try{ if(prof){ const sc = scoreColorForProfile(hexToRgb(m.hex), prof, 'lipstick'); p = sc ? sc.pct : null; } }catch(e){ p = null; }
         return { hex: m.hex, label: (mode === 'similar' && payLocked()) ? `Shade ${mi + 1}` : tocTitleCase(m.name), sub: brandDisplayNameSafe((splitBrandLine(m.brand_line) || {}).brand || ''), pct: payLocked() ? null : p, sim: m.confidencePct }; // (2026-11-02) her % match is a paid result
