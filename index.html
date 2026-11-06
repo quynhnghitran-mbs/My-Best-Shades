@@ -4114,7 +4114,7 @@ function classifyHairChroma(chromaC){
   return 'Vivid';
 }
 
-const MIN_PICK_PCT = 80;
+const MIN_PICK_PCT = 70; // was 80; lowered 2026-11-06 per Nghi so each look can fill 10
 function bestShadeMatches(customerLab, chromaLevel, contrastLevel, seasonFamily, pool = CATALOG_SHADES){
   pool = pool.filter(s => !/Glass Shine Balm/i.test(String(s.brand_line || '')));
   const depthL = customerLab.depthAvg != null ? customerLab.depthAvg : customerLab.L;
@@ -4169,13 +4169,13 @@ function bestShadeMatchesCore(customerLab, chromaLevel, contrastLevel, seasonFam
     .filter(s => !darkerOnly || s.depthDelta >= 0)
     .filter(strongEnough)
     .sort(byFitThenDelta)
-    .slice(0, 3);
+    .slice(0, LOOK_COUNT);
 
-  if(candidates.length < 3){
+  if(candidates.length < LOOK_COUNT){
     const pickedNames = new Set(candidates.map(s => s.name));
     let widenedWarmth = [ownWarmthTier];
     for(const nextTier of warmthFallbackTiers){
-      if(candidates.length >= 3) break;
+      if(candidates.length >= LOOK_COUNT) break;
       if(!widenedWarmth.includes(nextTier)) widenedWarmth = [...widenedWarmth, nextTier];
       let widened = pool
         .filter(s => !pickedNames.has(s.name) && passesFilters(s, widenedWarmth))
@@ -4183,7 +4183,7 @@ function bestShadeMatchesCore(customerLab, chromaLevel, contrastLevel, seasonFam
         .filter(s => !darkerOnly || s.depthDelta >= 0)
         .filter(strongEnough)
         .sort(byFitThenDelta);
-      const fill = widened.slice(0, 3 - candidates.length);
+      const fill = widened.slice(0, LOOK_COUNT - candidates.length);
       fill.forEach(s => pickedNames.add(s.name));
       candidates = candidates.concat(fill);
     }
@@ -4209,6 +4209,7 @@ const LOOK_BANDS = {
   natural: { chroma: [20, 33], depth: [-8, 10] },
 };
 const LOOK_STEP = 5; // chroma points between looks
+const LOOK_COUNT = 10;
 function lookCandidates(customerLab, seasonFamily, look, warmExtra, pool){
   const depthAvg = customerLab.depthAvg != null ? customerLab.depthAvg : customerLab.L;
   const chromaAvg = customerLab.chromaAvg != null ? customerLab.chromaAvg : customerLab.C;
@@ -4240,12 +4241,12 @@ function bestShadeLooks(customerLab, chromaLevel, contrastLevel, seasonFamily, p
   const dTop = dramatic.length ? dramatic[0].chroma_C : Infinity;
   const soft = lookCandidates(customerLab, seasonFamily, 'soft', warmExtra, pool)
     .filter(s => !/Lustreglass/i.test(s.brand_line) && s.chroma_C <= dTop - 2 * LOOK_STEP && !used.has(s.brand_line + '|' + s.name))
-    .slice(0, 3);
+    .slice(0, LOOK_COUNT);
   soft.forEach(s => used.add(s.brand_line + '|' + s.name));
   const sTop = soft.length ? soft[0].chroma_C : chromaC;
   const natural = lookCandidates(customerLab, seasonFamily, 'natural', warmExtra, pool)
     .filter(s => s.chroma_C >= sTop + LOOK_STEP && s.chroma_C <= dTop - LOOK_STEP && !used.has(s.brand_line + '|' + s.name))
-    .slice(0, 3);
+    .slice(0, LOOK_COUNT);
   return { soft, natural, dramatic };
 }
 
