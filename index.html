@@ -441,6 +441,50 @@
     content:'✓'; position:absolute; left:0; color:var(--rose-deep); font-weight:700;
   }
   .paypal-btn-slot{ min-height:45px; }
+
+  body.fmbs-live{overflow:hidden;}
+  body.fmbs-live #guessOverlay{display:none !important;}
+  body.fmbs-live .cv-cover, body.fmbs-live .cv-veil{display:none !important;}
+  #liveOverlay{position:fixed;inset:0;z-index:2147483000;overflow-y:auto;background:radial-gradient(120% 80% at 50% 0%,#5a1e33 0%,#2a0f1a 70%);color:#fff;font-family:'Work Sans',system-ui,sans-serif;padding:14px 16px 28px;box-sizing:border-box;display:flex;flex-direction:column;align-items:center;}
+  #liveOverlay *{box-sizing:border-box;}
+  .lv-top{width:100%;max-width:560px;display:flex;align-items:center;gap:10px;}
+  .lv-brand{font-weight:700;letter-spacing:1.5px;font-size:14px;display:flex;align-items:center;gap:8px;white-space:nowrap;min-width:0;}
+  .lv-brand i{font-family:'Playfair Display',serif;letter-spacing:0;font-weight:500;font-size:16px;overflow:hidden;text-overflow:ellipsis;}
+  .lv-dot{width:11px;height:11px;border-radius:50%;background:#ff3b5c;box-shadow:0 0 0 0 rgba(255,59,92,.7);animation:lvPulse 1.4s infinite;}
+  @keyframes lvPulse{70%{box-shadow:0 0 0 10px rgba(255,59,92,0)}100%{box-shadow:0 0 0 0 rgba(255,59,92,0)}}
+  .lv-count{margin-left:auto;font-size:12px;opacity:.75;white-space:nowrap;}
+  .lv-x{background:rgba(255,255,255,.12);border:0;color:#fff;width:34px;height:34px;border-radius:50%;font-size:15px;cursor:pointer;}
+  .lv-modes{display:flex;gap:8px;margin:14px 0 6px;}
+  .lv-modes button{border:1.5px solid rgba(255,255,255,.35);background:transparent;color:#fff;border-radius:999px;padding:8px 16px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;}
+  .lv-modes button.on{background:#f3b6c4;color:#4a1626;border-color:#f3b6c4;}
+  .lv-stage{width:100%;max-width:560px;display:flex;flex-direction:column;align-items:center;gap:16px;margin-top:10px;}
+  .lv-ask{font-family:'Playfair Display',serif;font-size:clamp(30px,8vw,46px);text-align:center;line-height:1.15;margin-top:18px;}
+  .lv-ask small{display:block;font-family:'Work Sans',sans-serif;font-size:15px;opacity:.75;margin-top:10px;letter-spacing:.5px;}
+  .lv-name{width:100%;font:inherit;font-size:18px;padding:14px 16px;border-radius:14px;border:0;background:rgba(255,255,255,.12);color:#fff;text-align:center;}
+  .lv-name::placeholder{color:rgba(255,255,255,.55);}
+  .lv-drop{width:100%;min-height:42vh;border:2.5px dashed rgba(243,182,196,.7);border-radius:26px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;padding:20px;cursor:pointer;background:rgba(255,255,255,.04);}
+  .lv-drop.over{background:rgba(243,182,196,.15);}
+  .lv-drop b{font-size:17px;font-weight:600;opacity:.9;max-width:320px;}
+  .lv-plus{width:74px;height:74px;border-radius:50%;background:#f3b6c4;color:#4a1626;font-size:46px;line-height:74px;font-weight:300;}
+  .lv-err{background:rgba(255,80,110,.18);border:1px solid rgba(255,120,140,.5);border-radius:14px;padding:12px 16px;font-size:15px;text-align:center;}
+  .lv-scan{position:relative;width:min(70vw,320px);aspect-ratio:1;margin-top:30px;}
+  .lv-scan img{position:absolute;inset:14px;width:calc(100% - 28px);height:calc(100% - 28px);object-fit:cover;border-radius:50%;}
+  .lv-ring{position:absolute;inset:0;border-radius:50%;background:conic-gradient(#f3b6c4,#e07a8f,#b14b6a,#7a8fd0,#7ac2b0,#f2c46a,#f3b6c4);animation:lvSpin 1.6s linear infinite;}
+  @keyframes lvSpin{to{transform:rotate(360deg)}}
+  .lv-msg{font-family:'Playfair Display',serif;font-size:28px;text-align:center;}
+  .lv-dots::after{content:'';animation:lvDots 1.2s steps(4) infinite;}
+  @keyframes lvDots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
+  .lv-sub{font-size:15px;opacity:.75;}
+  .lv-reveal{text-align:center;animation:lvPop .7s cubic-bezier(.2,1.4,.4,1);}
+  .lv-reveal small{display:block;font-size:17px;opacity:.85;}
+  .lv-reveal b{display:block;font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(40px,11vw,62px);color:#f8c9d4;line-height:1.1;}
+  @keyframes lvPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+  .lv-report{width:100%;border-radius:14px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.45);animation:lvUp .8s .2s both;}
+  .lv-report img{display:block;width:100%;height:auto;}
+  @keyframes lvUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
+  .lv-actions{display:flex;gap:10px;width:100%;position:sticky;bottom:0;padding-top:6px;}
+  .lv-btn{flex:1;text-align:center;text-decoration:none;border:0;border-radius:999px;padding:15px;font:inherit;font-size:17px;font-weight:700;background:#f3b6c4;color:#4a1626;cursor:pointer;}
+  .lv-btn.ghost{background:#4a1a2c;color:#fff;border:1.5px solid rgba(255,255,255,.3);}
   .iap-buy-btn{ width:100%; min-height:45px; border:0; border-radius:999px; background:var(--rose-deep); color:#fff; font:inherit; font-size:15px; font-weight:700; cursor:pointer; }
   .iap-buy-btn:disabled{ opacity:.55; }
   .iap-restore{ display:block; margin:10px auto 0; }
@@ -2756,10 +2800,10 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
   </div>
 </div>
 
-<div class="exit-nudge-overlay" id="exitNudgeOverlay" role="dialog" aria-modal="true" aria-label="Download Your Color Report">
+<div class="exit-nudge-overlay" id="exitNudgeOverlay" role="dialog" aria-modal="true" aria-label="Download your palette">
   <div class="exit-nudge-card">
     <button type="button" class="exit-nudge-close" id="exitNudgeCloseBtn" aria-label="Close">&times;</button>
-    <button type="button" class="btn exit-nudge-download-btn" id="exitNudgeDownloadBtn">Download Your Color Report</button>
+    <button type="button" class="btn exit-nudge-download-btn" id="exitNudgeDownloadBtn">Download your color palette</button>
   </div>
 </div>
 
@@ -2852,7 +2896,7 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
         <p>This Privacy Policy explains what Find My Best Shades ("we", "us") collects when you use this website, why, and the choices you have. We run this site from Vietnam and serve customers mainly in the United States. Questions or requests: <a href="mailto:findmybestshades@gmail.com">findmybestshades@gmail.com</a>.</p>
         <h3>What we collect</h3>
         <ul>
-          <li><strong>Your photo.</strong> The selfie you upload for a color reading. Face detection and color sampling run in your browser, and this photo check happens before you pay. After you pay, a copy is also sent, securely, to an AI service to help interpret the reading (see "Who we share with").</li>
+          <li><strong>Your photo.</strong> The selfie you upload for a color reading. Face detection and color sampling run in your browser, and this photo check happens before you pay. Your photo never leaves your device.</li>
           <li><strong>Color measurements from your photo.</strong> Numeric color values for your skin, iris, eye whites and eyebrows, plus the resulting season and scores. We do not store your photo on our servers, nor a face template, or any data used to identify who you are.</li>
           <li><strong>Your name (optional).</strong> The first name you type in, used only to greet you. It stays in your browser.</li>
           <li class="app-only"><strong>Your order details.</strong> In the app, purchases are processed by Apple (App Store) or Google (Google Play). We receive a purchase confirmation, never your card details or Apple/Google account password.</li>
@@ -2867,7 +2911,6 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
         <ul>
           <li class="web-only"><strong>PayPal</strong> processes payments under its own privacy policy.</li>
           <li class="app-only"><strong>Apple and Google</strong> process in-app purchases under their own privacy policies.</li>
-          <li><strong>Anthropic</strong> (Claude AI) receives your photo, sent through our server, to help interpret your reading. It is used to return your result.</li>
           <li><strong>Google</strong> hosts the spreadsheet where we log measurements, feedback and order events, serves our fonts, and hosts the face-detection model your browser downloads.</li>
           <li><strong>jsDelivr</strong> serves the face-detection code your browser loads.</li>
           <li><strong>ipwho.is</strong> looks up an approximate location from your IP address.</li>
@@ -7381,8 +7424,10 @@ function setPhotoLock(locked){
   if(note) note.style.display = locked ? 'block' : 'none';
 }
 
+let readingOk = false;
 analyzeBtn.addEventListener('click', async () => {
   if(!uploadedImage) return;
+  readingOk = false;
   document.body.classList.add('photo-committed'); // she's happy with this photo: the re-upload icons go away
   const cachedScan = !!(preflightCache && preflightCache.img === uploadedImage);
   hideError(errorBox1);
@@ -7473,18 +7518,14 @@ analyzeBtn.addEventListener('click', async () => {
       + `Undertone: ${low(warmthDisplayLabel(result) || result.undertone)}\n`
       + `Depth: ${low(result.depth_level)}\nChroma: ${low(result.chroma_level)}\nContrast: ${low(result.contrast_level)}`
       + (result.skin_olive === 'olive' ? '\nOlive note: her skin has a soft olive (green-gray) cast.' : result.skin_olive === 'maybe' ? '\nOlive note: her fair skin may have a slight olive cast.' : '');
-    try{
-      const story = String(await callClaudeText(STORY_SYSTEM_PROMPT, storyFacts)).trim();
-      result.explanation = story || freeColorStory(result);
-    } catch(e){
-      console.warn('[story] AI story failed, using the on-device story', e);
-      result.explanation = freeColorStory(result); // she paid: never fail the reading over the story text
-    }
+    void storyFacts;
+    result.explanation = paidColorStory(result);
     result.image_mime_type = uploadedImage.mediaType;
     currentSeasonResult = result;
     { const rcp = document.getElementById('resultCard'); if(rcp) rcp.classList.remove('sr-prepay'); } // paid: the present now holds her real reading
     stopResultLock(); // (2026-11-02) the real render below replaces every masked spot
     renderSeasonResult(result);
+    readingOk = true;
     if(prepayUnboxPending){ // she tapped the present before paying: open it for her now (2026-11-02)
       prepayUnboxPending = false;
       const rbx = document.getElementById('seasonReveal');
@@ -7500,6 +7541,7 @@ analyzeBtn.addEventListener('click', async () => {
   } finally {
     loading1.classList.remove('show');
     analyzeBtn.disabled = false;
+    try{ document.dispatchEvent(new CustomEvent('fmbs:reading-end', { detail: { ok: readingOk } })); }catch(e){}
   }
 });
 
@@ -7517,6 +7559,23 @@ function freeColorStory(r){
   return `Your coloring has ${/^[aeiou(]/i.test(undW) && !/^\(/.test(undW) ? 'an' : 'a'} <strong>${escapeHtml(undW)}</strong> undertone, with <strong>${escapeHtml(dWord || 'medium')} depth</strong> and <strong>${escapeHtml(cWord || 'balanced')} chroma</strong>. ` +
     `Your skin, eyes and brows sit at <strong>${escapeHtml(kWord || 'medium')} contrast</strong>, so the overall impression is ${soft ? '<strong>soft and blended</strong>' : vivid ? '<strong>clear and vivid</strong>' : '<strong>gentle and balanced</strong>'}. ` +
     `That combination is the hallmark of ${escapeHtml(r.season || '')}: you'll shine in ${warm ? 'warm' : 'cool'}, ${soft ? 'muted' : vivid ? 'clear, bright' : 'balanced'} colors that echo your natural coloring.`;
+}
+
+function paidColorStory(r){
+  const base = freeColorStory(r);
+  const warm = /spring|autumn/i.test(r.season || '');
+  const soft = /muted/i.test(r.chroma_level || ''), vivid = /vivid/i.test(r.chroma_level || '');
+  const dl = String(r.depth_level || ''), light = /light/i.test(dl) && !/deep/i.test(dl), deep = /deep/i.test(dl) && !/light/i.test(dl);
+  const metals = ((((SEASON_STYLE_GUIDE[r.season] || {}).jewelry) || {}).metals || []).map(m => m.name.toLowerCase()).slice(0, 2);
+  const lips = warm ? (soft ? 'warm, muted shades like soft coral, terracotta and cinnamon rose' : vivid ? 'warm, clear shades like coral, poppy and warm pink' : 'warm shades like peachy rose, coral and brick')
+                    : (soft ? 'cool, muted shades like dusty rose, mauve and soft berry' : vivid ? 'cool, clear shades like raspberry, fuchsia and blue-red' : 'cool shades like rosy pink, berry and plum rose');
+  const depth = light ? 'Keep them light to medium so they never overpower your coloring.' : deep ? 'Go medium to deep so they hold their own against your rich coloring.' : 'Medium depths look the most natural on you.';
+  const avoid = warm ? (soft ? 'icy pastels, stark black and neon brights' : 'icy pastels, gray-blues and blue-based fuchsia')
+                     : (soft ? 'orange, mustard and neon brights' : 'orange, mustard and golden browns');
+  const effect = warm ? 'gray or washed out' : 'sallow or tired';
+  return base + ` ` + (metals.length ? `Reach for <strong>${escapeHtml(metals.join(' and '))}</strong> jewelry; it echoes your undertone. ` : '')
+    + `For lipstick, choose <strong>${lips}</strong>. ${depth} `
+    + `Keep <strong>${avoid}</strong> away from your face, as they can make your skin look ${effect}.`;
 }
 
 function mergeMeasuredResult(result, measurements){
@@ -8968,9 +9027,11 @@ function drawReportPages(){
   rpSparkle(ctx, 190, 112, 13); rpSparkle(ctx, RP_W - 180, 82, 11);
   rpPill(ctx, RP_W / 2, 160, rpTraits(result), `italic 500 17px ${RP_SERIF}`, 22, 34, 'rgba(240,186,198,0.6)', RP_ROSE);
   const sf = `italic 500 15.5px ${RP_SERIF}`;
-  const story = sgWrapText(ctx, rpPlain(result.explanation), CW - 80, sf).slice(0, 3);
-  story.forEach((l, i) => sgText(ctx, l, RP_W / 2, 206 + i * 22, { font: sf, color: RP_INK, align: 'center' }));
-  let y = 206 + story.length * 22 + 26;
+  const sy = rpViewerName ? 226 : 206; // live mode: "For @name" under the traits
+  if(rpViewerName) sgText(ctx, 'For ' + rpViewerName, RP_W / 2, 200, { font: `500 14px ${SG_WORKSANS}`, color: RP_SOFT, align: 'center', letterSpacing: 1 });
+  const story = sgWrapText(ctx, rpPlain(freeColorStory(result)), CW - 80, sf).slice(0, 3); // report keeps the short 3-sentence story
+  story.forEach((l, i) => sgText(ctx, l, RP_W / 2, sy + i * 22, { font: sf, color: RP_INK, align: 'center' }));
+  let y = sy + story.length * 22 + 26;
   const ph = 212;
   sgFillRoundRect(ctx, X - 14, y, CW + 28, ph, 18, 'rgba(255,255,255,0.45)');
   ctx.strokeStyle = 'rgba(214,140,160,0.55)'; ctx.lineWidth = 1.1; sgRoundRectPath(ctx, X - 14, y, CW + 28, ph, 18); ctx.stroke();
@@ -9062,6 +9123,108 @@ async function rpMakePdf(canvases){
   push(x + `trailer\n<< /Size ${total} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF\n`);
   return new Blob(parts, { type: 'application/pdf' });
 }
+
+let rpViewerName = ''; // shown on the report in live mode ("For @name")
+function liveModeOn(){ try{ return isOwner() && sessionStorage.getItem('fmbs_live') === '1'; }catch(e){ return false; } }
+(function liveFromUrl(){
+  try{
+    const u = new URL(location.href), v = u.searchParams.get('live');
+    if(v === null) return;
+    if(v === '0') sessionStorage.removeItem('fmbs_live'); else if(isOwner()) sessionStorage.setItem('fmbs_live', '1');
+    u.searchParams.delete('live'); history.replaceState(null, '', u.pathname + u.search + u.hash);
+  }catch(e){}
+})();
+function liveCount(add){
+  const k = 'fmbs_live_count_' + new Date().toISOString().slice(0, 10);
+  try{ const n = (parseInt(localStorage.getItem(k), 10) || 0) + (add || 0); if(add) localStorage.setItem(k, String(n)); return n; }catch(e){ return 0; }
+}
+function initLiveMode(){
+  if(!liveModeOn()) return;
+  document.body.classList.add('fmbs-live');
+  const ov = document.createElement('div');
+  ov.id = 'liveOverlay';
+  ov.innerHTML = `
+    <div class="lv-top">
+      <div class="lv-brand"><span class="lv-dot"></span>LIVE<i>Find My Best Shades</i></div>
+      <div class="lv-count" id="lvCount"></div>
+      <button type="button" class="lv-x" id="lvExit" aria-label="Exit live mode">✕</button>
+    </div>
+    <div class="lv-modes"><button type="button" data-m="season">Season</button><button type="button" data-m="seasonShade">Season + Lipsticks</button></div>
+    <div class="lv-stage" id="lvStage"></div>`;
+  document.body.appendChild(ov);
+  let mode = 'seasonShade', state = 'idle', fileIn = null, runId = 0;
+  const stage = ov.querySelector('#lvStage');
+  const setMode = m => { mode = m; ov.querySelectorAll('.lv-modes button').forEach(b => b.classList.toggle('on', b.dataset.m === m)); };
+  ov.querySelectorAll('.lv-modes button').forEach(b => b.addEventListener('click', () => { if(state !== 'running') setMode(b.dataset.m); }));
+  setMode(mode);
+  ov.querySelector('#lvExit').addEventListener('click', () => { try{ sessionStorage.removeItem('fmbs_live'); }catch(e){} ov.remove(); document.body.classList.remove('fmbs-live'); });
+  const showCount = () => { { const n = liveCount(0); ov.querySelector('#lvCount').textContent = `${n} reading${n === 1 ? '' : 's'} today`; } };
+  showCount();
+  function idle(msg){
+    state = 'idle';
+    stage.innerHTML = `
+      <div class="lv-ask">Send me your selfie 💌<small>front-facing · daylight · no filter</small></div>
+      <input class="lv-name" id="lvName" placeholder="Viewer name (e.g. @linh)" value="${escapeHtml(rpViewerName)}" autocomplete="off">
+      <label class="lv-drop" id="lvDrop"><span class="lv-plus">+</span><b>Drop, paste (Ctrl+V) or tap to choose her photo</b><input type="file" accept="image/*" id="lvFile" hidden></label>
+      ${msg ? `<div class="lv-err">${msg}</div>` : ''}`;
+    fileIn = stage.querySelector('#lvFile');
+    fileIn.addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if(f) run(f); });
+    const drop = stage.querySelector('#lvDrop');
+    drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+    drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+    drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f) run(f); });
+  }
+  document.addEventListener('paste', e => {
+    if(!document.getElementById('liveOverlay') || state === 'running') return;
+    const it = [...(e.clipboardData ? e.clipboardData.items : [])].find(i => i.type && i.type.startsWith('image/'));
+    if(it){ e.preventDefault(); run(it.getAsFile()); }
+  });
+  async function run(file){
+    const nameEl = stage.querySelector('#lvName');
+    if(nameEl) rpViewerName = nameEl.value.trim();
+    state = 'running'; const my = ++runId;
+    const url = URL.createObjectURL(file);
+    stage.innerHTML = `<div class="lv-scan"><div class="lv-ring"></div><img src="${url}" alt=""></div>
+      <div class="lv-msg">Reading ${escapeHtml(rpViewerName || 'her')}'s colors<span class="lv-dots"></span></div>
+      <div class="lv-sub" id="lvSub">Finding her face…</div>`;
+    try{
+      window.fmbsSetMode && window.fmbsSetMode(mode);
+      const pw = document.getElementById('paywallCard'); if(pw) pw.dataset.plan = mode;
+      photoLocked = false; document.body.classList.remove('photo-committed');
+      uploadedImage = null; handleImageFile(file);
+      const t0 = Date.now();
+      while((!uploadedImage || analyzeBtn.disabled) && Date.now() - t0 < 20000){
+        await new Promise(r => setTimeout(r, 150));
+        const rd = document.getElementById('mmReady'); if(uploadedImage && rd && /can.t find your face/i.test(rd.textContent)) break;
+      }
+      if(my !== runId) return;
+      if(!uploadedImage || analyzeBtn.disabled) return idle("Couldn't find a face in that photo. Ask for a clear, front-facing selfie.");
+      const sub = stage.querySelector('#lvSub'); if(sub) sub.textContent = 'Measuring skin, eyes & brows…';
+      const done = new Promise(res => document.addEventListener('fmbs:reading-end', e => res(e.detail), { once: true }));
+      analyzeBtn.click();
+      const r = await done;
+      if(my !== runId) return;
+      if(!r || !r.ok) return idle("That photo didn't give a clear reading (lighting or angle). Ask for another selfie in daylight.");
+      if(sub) sub.textContent = 'Painting the color report…';
+      await new Promise(res => setTimeout(res, 700)); // let the palettes and lipstick looks finish rendering
+      try{ await Promise.race([Promise.all(['500 20px "Playfair Display"', 'italic 500 20px "Playfair Display"', '400 12px "Work Sans"'].map(f => document.fonts.load(f))), new Promise(res => setTimeout(res, 1200))]); }catch(e){}
+      const page = drawReportPages()[0];
+      if(!page) return idle('Something went wrong drawing the report. Try again.');
+      const png = await new Promise(res => page.toBlob(res, 'image/png'));
+      const purl = URL.createObjectURL(png);
+      liveCount(1); showCount();
+      state = 'result';
+      const season = (currentSeasonResult && currentSeasonResult.season) || '';
+      stage.innerHTML = `<div class="lv-reveal"><small>${escapeHtml(rpViewerName || 'You')} ${rpViewerName ? 'is' : 'are'} a</small><b>${escapeHtml(season)}</b></div>
+        <div class="lv-report"><img src="${purl}" alt="Color report"></div>
+        <div class="lv-actions"><a class="lv-btn ghost" href="${purl}" download="color-report-${escapeHtml((rpViewerName || 'viewer').replace(/[^a-z0-9]+/gi, '-'))}.png">Save PNG</a><button type="button" class="lv-btn" id="lvNext">Next viewer ✨</button></div>`;
+      stage.querySelector('#lvNext').addEventListener('click', () => { rpViewerName = ''; idle(); });
+    }catch(e){ console.error('[live]', e); idle('Something went wrong. Try the photo again.'); }
+    finally { URL.revokeObjectURL(url); }
+  }
+  idle();
+}
+if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initLiveMode); else setTimeout(initLiveMode, 0);
 
 function isMobileDevice(){
   if(navigator.userAgentData && typeof navigator.userAgentData.mobile === 'boolean'){
@@ -10830,6 +10993,7 @@ function renderGuessPop(){
   }
 }
 function openGuessPop(){
+  if(document.body.classList.contains('fmbs-live')) return;
   const ov = document.getElementById('guessOverlay'); if(!ov || !preview || !preview.src) return;
   if(ov.parentElement !== document.body) document.body.appendChild(ov);
   const g = seasonGuess || {};
