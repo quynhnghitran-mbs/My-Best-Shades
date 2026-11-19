@@ -2756,10 +2756,10 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
   </div>
 </div>
 
-<div class="exit-nudge-overlay" id="exitNudgeOverlay" role="dialog" aria-modal="true" aria-label="Download your color report">
+<div class="exit-nudge-overlay" id="exitNudgeOverlay" role="dialog" aria-modal="true" aria-label="Download Your Color Report">
   <div class="exit-nudge-card">
     <button type="button" class="exit-nudge-close" id="exitNudgeCloseBtn" aria-label="Close">&times;</button>
-    <button type="button" class="btn exit-nudge-download-btn" id="exitNudgeDownloadBtn">Download your color report</button>
+    <button type="button" class="btn exit-nudge-download-btn" id="exitNudgeDownloadBtn">Download Your Color Report</button>
   </div>
 </div>
 
@@ -8991,7 +8991,7 @@ function drawReportPages(){
     rpMeter(ctx, X + (i % 2) * (colW + 50), y + 100 + Math.floor(i / 2) * 62, colW, r);
   });
   y += ph + 40;
-  const wR = 142, wIn = 74, c1 = RP_W / 4 + 10, c2 = RP_W * 3 / 4 - 10, cy = y + 24 + wR;
+  const wR = lips ? 142 : 188, wIn = lips ? 74 : 98, c1 = RP_W / 4 + 10, c2 = RP_W * 3 / 4 - 10, cy = y + 24 + wR;
   rpPill(ctx, c1, y, 'YOUR PERSONALIZED COLORS', `500 13px ${RP_SERIF}`, 20, 30);
   const drain = (lastDrainColors || []).slice(0, 28);
   if(drain.length) rpPill(ctx, c2, y, 'COLORS THAT DRAIN YOU', `500 13px ${RP_SERIF}`, 20, 30);
@@ -9001,6 +9001,20 @@ function drawReportPages(){
   if(drain.length) rpMetalRow(ctx, c2, cy + wR + 34, lastDrainMetals || [], true);
   rpSparkle(ctx, RP_W / 2, cy - 10, 9, 0.4);
   y = cy + wR + 92;
+  if(!lips){
+    const uniq = list => { const seen = new Set(); return (list || []).map(c => c && c.hex).filter(h => h && !seen.has(h.toLowerCase()) && seen.add(h.toLowerCase())); };
+    const rowsM = [['LIPS & CHEEKS', uniq([].concat(data.lipstick || [], data.blush || []))], ['EYES', uniq(data.eyeshadow)], ['HAIR', uniq(data.hair)]]
+      .filter(([, l]) => l.length);
+    if(rowsM.length){
+      rpPill(ctx, RP_W / 2, y, 'YOUR MAKEUP & HAIR COLORS', `500 13px ${RP_SERIF}`, 20, 30);
+      const colW = CW / rowsM.length, r = 132, rin = 70, wy = y + 58 + r;
+      rowsM.forEach(([t, l], i) => {
+        const cx = X + colW * i + colW / 2;
+        rpArcText(ctx, t, cx, wy, r + 14, `500 14px ${RP_SERIF}`, RP_ROSE);
+        rpWheel(ctx, cx, wy, r, rin, l.slice(0, 16), face, false);
+      });
+    }
+  }
   if(lips){
     rpPill(ctx, RP_W / 2, y, 'YOUR BEST LIPSTICKS', `500 13px ${RP_SERIF}`, 20, 30);
     const colW = CW / 3, r = 80, rin = 44, wy = y + 50 + r;
