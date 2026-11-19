@@ -4990,6 +4990,7 @@ const paywallCardEl = document.getElementById('paywallCard');
 
 const CUSTOMER_NAME_STORAGE_KEY = 'ffbs_customer_name';
 function getCustomerName(){
+  if(isOwner()) return null; // (2026-11-19, per Nghi) never greet the owner by name -- clean for filming/demos
   try{
     const raw = (localStorage.getItem(CUSTOMER_NAME_STORAGE_KEY) || '').trim();
     return raw || null;
@@ -5002,6 +5003,7 @@ function setCustomerName(name){
 }
 const CUSTOMER_FULL_NAME_STORAGE_KEY = 'ffbs_customer_full_name';
 function getCustomerFullName(){
+  if(isOwner()) return null; // (2026-11-19, per Nghi) never greet the owner by name -- clean for filming/demos
   try{
     const raw = (localStorage.getItem(CUSTOMER_FULL_NAME_STORAGE_KEY) || '').trim();
     return raw || null;
@@ -5014,6 +5016,7 @@ function setCustomerFullName(name){
 }
 const CUSTOMER_SURNAME_STORAGE_KEY = 'ffbs_customer_surname';
 function getCustomerSurname(){
+  if(isOwner()) return null; // (2026-11-19, per Nghi) never greet the owner by name -- clean for filming/demos
   try{
     const raw = (localStorage.getItem(CUSTOMER_SURNAME_STORAGE_KEY) || '').trim();
     return raw || null;
