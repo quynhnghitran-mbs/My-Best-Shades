@@ -8953,7 +8953,7 @@ function rpArcText(ctx, text, cx, cy, r, font, color){
   ctx.restore();
 }
 function rpFooter(ctx){
-  const y = RP_H - 40, t = 'Personalized by findmybestshades.com', font = `italic 500 15px ${RP_SERIF}`;
+  const y = RP_H - 34, t = 'Personalized by findmybestshades.com', font = `italic 500 15px ${RP_SERIF}`;
   sgText(ctx, t, RP_W / 2, y, { font, color: RP_ROSE, align: 'center' });
   ctx.font = font; const w = ctx.measureText(t).width;
   rpSparkle(ctx, RP_W / 2 - w / 2 - 20, y - 5, 8); rpSparkle(ctx, RP_W / 2 + w / 2 + 20, y - 5, 8);
@@ -9027,8 +9027,13 @@ function drawReportPages(){
   rpSparkle(ctx, 190, 112, 13); rpSparkle(ctx, RP_W - 180, 82, 11);
   rpPill(ctx, RP_W / 2, 160, rpTraits(result), `italic 500 17px ${RP_SERIF}`, 22, 34, 'rgba(240,186,198,0.6)', RP_ROSE);
   const sf = `italic 500 15.5px ${RP_SERIF}`;
-  const sy = rpViewerName ? 226 : 206; // live mode: "For @name" under the traits
-  if(rpViewerName) sgText(ctx, 'For ' + rpViewerName, RP_W / 2, 200, { font: `500 14px ${SG_WORKSANS}`, color: RP_SOFT, align: 'center', letterSpacing: 1 });
+  const sy = rpViewerName ? 238 : 206; // live mode: "For @name" under the traits
+  if(rpViewerName){ // (2026-11-19, per Nghi) more noticeable: large italic rose script with sparkles
+    const ft = `italic 600 25px ${RP_SERIF}`, t = 'For ' + rpViewerName;
+    sgText(ctx, t, RP_W / 2, 206, { font: ft, color: RP_ROSE, align: 'center' });
+    ctx.font = ft; const tw = ctx.measureText(t).width;
+    rpSparkle(ctx, RP_W / 2 - tw / 2 - 20, 198, 9, 0.7); rpSparkle(ctx, RP_W / 2 + tw / 2 + 20, 198, 9, 0.7);
+  }
   const story = sgWrapText(ctx, rpPlain(freeColorStory(result)), CW - 80, sf).slice(0, 3); // report keeps the short 3-sentence story
   story.forEach((l, i) => sgText(ctx, l, RP_W / 2, sy + i * 22, { font: sf, color: RP_INK, align: 'center' }));
   let y = sy + story.length * 22 + 26;
@@ -9082,6 +9087,8 @@ function drawReportPages(){
   if(lips){
     rpPill(ctx, RP_W / 2, y, 'YOUR BEST LIPSTICKS', `500 13px ${RP_SERIF}`, 20, 30);
     const colW = CW / 3, r = 80, rin = 44, wy = y + 50 + r;
+    const listTop = wy + r + 26, maxRows = Math.max(1, ...lips.map(l => l.list.length));
+    const rowH = Math.max(22, Math.min(29, (RP_H - 86 - listTop) / Math.max(1, maxRows - 1)));
     lips.forEach((l, i) => {
       const cx = X + colW * i + colW / 2;
       rpArcText(ctx, l.title, cx, wy, r + 12, `500 13px ${RP_SERIF}`, RP_ROSE);
@@ -9089,7 +9096,7 @@ function drawReportPages(){
       else sgText(ctx, 'No shade reaches 70% here', cx, wy, { font: `italic 500 13px ${RP_SERIF}`, color: RP_SOFT, align: 'center' });
       const lx = X + colW * i + 4, tw = colW - 36;
       l.list.forEach((s, k) => {
-        const ly = wy + r + 26 + k * 29;
+        const ly = wy + r + 26 + k * rowH;
         sgFillCircle(ctx, lx + 9, ly - 4, 9, s.hex);
         sgText(ctx, String(k + 1), lx + 9, ly, { font: `500 10px ${RP_SERIF}`, color: tryOnTextColor(s.hex), align: 'center' });
         let line = ''; try{ line = brandLineDisplayPlain(splitBrandLine(s.brand_line)).replace(/ · /g, ' '); }catch(e){}
