@@ -479,8 +479,10 @@
   .lv-reveal small{display:block;font-size:17px;opacity:.85;}
   .lv-reveal b{display:block;font-family:'Playfair Display',serif;font-weight:500;font-size:clamp(40px,11vw,62px);color:#f8c9d4;line-height:1.1;}
   @keyframes lvPop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
-  .lv-report{width:100%;border-radius:14px;overflow:hidden;box-shadow:0 18px 50px rgba(0,0,0,.45);animation:lvUp .8s .2s both;}
-  .lv-report img{display:block;width:100%;height:auto;}
+  .lv-report{width:100%;border-radius:14px;overflow:visible;box-shadow:0 18px 50px rgba(0,0,0,.45);animation:lvUp .8s .2s both;}
+  .lv-report{position:relative;cursor:zoom-in;}
+  .lv-report img{display:block;width:100%;height:auto;border-radius:14px;}
+  .lv-loupe{display:none;position:absolute;width:min(46vw,240px);height:min(46vw,240px);border-radius:50%;border:4px solid #fff;box-shadow:0 10px 30px rgba(0,0,0,.45);background-repeat:no-repeat;background-color:#fff;pointer-events:none;z-index:2;}
   @keyframes lvUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
   .lv-actions{display:flex;gap:10px;width:100%;position:sticky;bottom:0;padding-top:6px;}
   .lv-btn{flex:1;text-align:center;text-decoration:none;border:0;border-radius:999px;padding:15px;font:inherit;font-size:17px;font-weight:700;background:#f3b6c4;color:#4a1626;cursor:pointer;}
@@ -9012,7 +9014,8 @@ function rpMetalRow(ctx, cx, y, metals, faded){
 function rpTraits(result){
   const w = String(warmthDisplayLabel(result) || result.undertone_descriptive || '').replace(/-to-/g, ' to ');
   const cap = s => String(s || '').replace(/-to-/g, ' to ');
-  return [w, cap(result.depth_level), cap(result.chroma_level)].filter(Boolean).join('  ·  ');
+  const k = cap(result.contrast_level); // (2026-11-20, per Nghi) contrast belongs in the traits too
+  return [w, cap(result.depth_level), cap(result.chroma_level), k ? k + ' contrast' : ''].filter(Boolean).join('  ·  ');
 }
 function drawReportPages(){
   const result = currentSeasonResult, data = lastStyleGuideData;
@@ -9145,6 +9148,26 @@ function liveCount(add){
   const k = 'fmbs_live_count_' + new Date().toISOString().slice(0, 10);
   try{ const n = (parseInt(localStorage.getItem(k), 10) || 0) + (add || 0); if(add) localStorage.setItem(k, String(n)); return n; }catch(e){ return 0; }
 }
+function liveLoupe(box, src){
+  if(!box) return;
+  const img = box.querySelector('img'), Z = 2.6;
+  const lp = document.createElement('div'); lp.className = 'lv-loupe'; box.appendChild(lp);
+  lp.style.backgroundImage = `url(${src})`;
+  const move = (cx, cy) => {
+    const r = img.getBoundingClientRect(), x = cx - r.left, y = cy - r.top;
+    if(x < 0 || y < 0 || x > r.width || y > r.height){ lp.style.display = 'none'; return; }
+    const d = lp.offsetWidth || 220;
+    lp.style.display = 'block';
+    lp.style.left = (x - d / 2) + 'px'; lp.style.top = (y - d / 2) + 'px';
+    lp.style.backgroundSize = `${r.width * Z}px ${r.height * Z}px`;
+    lp.style.backgroundPosition = `${-(x * Z - d / 2)}px ${-(y * Z - d / 2)}px`;
+  };
+  box.addEventListener('mousemove', e => move(e.clientX, e.clientY));
+  box.addEventListener('mouseleave', () => { lp.style.display = 'none'; });
+  box.addEventListener('touchstart', e => { const t = e.touches[0]; move(t.clientX, t.clientY); }, { passive: true });
+  box.addEventListener('touchmove', e => { e.preventDefault(); const t = e.touches[0]; move(t.clientX, t.clientY); }, { passive: false });
+  box.addEventListener('touchend', () => { lp.style.display = 'none'; });
+}
 function initLiveMode(){
   if(!liveModeOn()) return;
   document.body.classList.add('fmbs-live');
@@ -9226,6 +9249,7 @@ function initLiveMode(){
         <div class="lv-report"><img src="${purl}" alt="Color report"></div>
         <div class="lv-actions"><a class="lv-btn ghost" href="${purl}" download="color-report-${escapeHtml((rpViewerName || 'viewer').replace(/[^a-z0-9]+/gi, '-'))}.png">Save PNG</a><button type="button" class="lv-btn" id="lvNext">Next viewer ✨</button></div>`;
       stage.querySelector('#lvNext').addEventListener('click', () => { rpViewerName = ''; idle(); });
+      liveLoupe(stage.querySelector('.lv-report'), purl);
     }catch(e){ console.error('[live]', e); idle('Something went wrong. Try the photo again.'); }
     finally { URL.revokeObjectURL(url); }
   }
