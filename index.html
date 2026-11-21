@@ -549,6 +549,18 @@
   .lc-n{cursor:pointer;border-radius:12px;padding:4px;}
   .lc-n.on{background:rgba(243,182,196,.16);outline:2px solid #f3b6c4;}
   .lc-strip-c i{cursor:pointer;}
+  .lc-cmp2{position:relative;touch-action:none;user-select:none;aspect-ratio:1;}
+  .lc-cmp2 canvas{position:absolute;inset:0;}
+  .lc-split2{position:absolute;top:0;bottom:0;width:3px;transform:translateX(-50%);pointer-events:none;}
+  .lc-split2 i{position:absolute;left:0;width:3px;background:#fff;box-shadow:0 0 6px rgba(0,0,0,.45);border-radius:2px;}
+
+  .lc-all{background:transparent;border:0;font:inherit;font-size:20px;font-weight:700;cursor:pointer;padding:6px;border-radius:12px;}
+  .lc-all.ok{color:#9ff0c0;}.lc-all.no{color:#ff9db0;}.lc-all.on{background:rgba(255,255,255,.1);}
+  .lc-lrow .lc-names{max-height:min(46vw,250px);overflow-y:auto;padding-right:4px;scrollbar-width:thin;scrollbar-color:transparent transparent;}
+  .lc-lrow .lc-names:hover{scrollbar-color:rgba(243,182,196,.7) transparent;}
+  .lc-lrow .lc-names::-webkit-scrollbar{width:5px;}.lc-lrow .lc-names::-webkit-scrollbar-thumb{background:transparent;border-radius:9px;}
+  .lc-lrow .lc-names:hover::-webkit-scrollbar-thumb{background:rgba(243,182,196,.7);}
+  .lc-n{margin-right:2px;}
   .lc-nav{display:flex;align-items:center;gap:14px;margin-top:6px;}
   .lc-nav>button{width:46px;height:46px;border-radius:50%;border:0;background:rgba(255,255,255,.15);color:#fff;font-size:22px;cursor:pointer;}
   .lc-dots{display:flex;gap:8px;}.lc-dots button{width:11px;height:11px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.35);cursor:pointer;}.lc-dots button.on{background:#f3b6c4;}
@@ -9241,6 +9253,17 @@ function lvWheelCanvas(colors, face, numbered, size){
   const cv = document.createElement('canvas'); const S = size || 560; cv.width = cv.height = S;
   const ctx = cv.getContext('2d'); rpWheel(ctx, S / 2, S / 2, S / 2 - 14, S * 0.27, colors, face, numbered); return cv;
 }
+function lvSolidCanvas(col, face, size){
+  const cv = document.createElement('canvas'); const S = size || 420; cv.width = cv.height = S;
+  const cx = cv.getContext('2d'), R = S / 2 - 14, r = S * 0.27;
+  cx.save(); cx.shadowColor = 'rgba(0,0,0,.25)'; cx.shadowBlur = 18; cx.shadowOffsetY = 6;
+  cx.beginPath(); cx.arc(S / 2, S / 2, R, 0, Math.PI * 2); cx.arc(S / 2, S / 2, r, Math.PI * 2, 0, true); cx.closePath(); cx.fillStyle = col; cx.fill(); cx.restore();
+  cx.beginPath(); cx.arc(S / 2, S / 2, r, 0, Math.PI * 2); cx.fillStyle = '#fff'; cx.fill();
+  cx.beginPath(); cx.arc(S / 2, S / 2, R, 0, Math.PI * 2); cx.lineWidth = 4; cx.strokeStyle = '#fff'; cx.stroke(); // white outer edge, like the 10-shade wheel
+  const fr = r - 6; cx.save(); cx.beginPath(); cx.arc(S / 2, S / 2, fr, 0, Math.PI * 2); cx.clip();
+  if(face){ try{ cx.drawImage(face.img, face.sx, face.sy, face.side, face.side, S / 2 - fr, S / 2 - fr, fr * 2, fr * 2); }catch(e){} }
+  cx.restore(); return cv;
+}
 function liveCardsHtml(){
   const result = currentSeasonResult, data = lastStyleGuideData || {};
   const prof = buildColorProfileData() || { pixelFeatures: [], cielabRows: [] };
@@ -9260,8 +9283,8 @@ function liveCardsHtml(){
 </div>`; }).join('')}</div>
     </section>`;
   const card2 = `<section class="lc lc2">
-      <div class="lc-cmp2"><canvas width="560" height="560"></canvas></div>
-      <div class="lc-two"><b class="ok">Yours ✓</b><b class="no">Not yours ✕</b></div>
+      <div class="lc-cmp2"><canvas class="ca" width="560" height="560"></canvas><canvas class="cb" width="560" height="560"></canvas><div class="lc-split2"><i class="t"></i><i class="b"></i></div></div>
+      <div class="lc-two"><button type="button" class="lc-all ok">Yours ✓</button><button type="button" class="lc-all no">Not yours ✕</button></div>
       <div class="lc-metal" id="lcMetal"></div>
       <div class="lc-strip" id="lcStrip"><div class="lc-strip-c"></div><span class="lc-knob"></span></div>
     </section>`;
@@ -9280,26 +9303,55 @@ function liveCardsWire(stage, lips){
   try{ const { her, opp } = oppositeTiers(result); pairs = herCols.map(h => ({ a: h, b: drainShift(h, her, opp) })); }catch(e){}
   const mm = (data.jewelry && data.jewelry.metals) || [], dm = lastDrainMetals || [];
   for(let k = 0; k < Math.max(mm.length, dm.length); k++){ const a = mm[k] || mm[0], b = dm[k] || dm[0]; if(a && b) pairs.push({ a: a.hex, b: b.hex, an: a.name, bn: b.name, metal: true }); }
-  const cv = stage.querySelector('.lc-cmp2 canvas'), cx = cv && cv.getContext('2d');
+  const box2 = stage.querySelector('.lc-cmp2'), ca = box2.querySelector('.ca').getContext('2d'), cb = box2.querySelector('.cb').getContext('2d');
   const strip = stage.querySelector('#lcStrip');
   strip.querySelector('.lc-strip-c').innerHTML = pairs.map(p => `<i style="background:${p.a}"${p.metal ? ' class="m"' : ''}></i>`).join('');
-  const drawPair = i => {
-    const p = pairs[i]; if(!p || !cx) return;
+  const ring = (cx, col, metal) => {
     const S = 560, R = S / 2 - 10, r = S * 0.30;
     cx.clearRect(0, 0, S, S);
-    const half = (col, a0, a1) => { let fill = col;
-      if(p.metal){ const g = cx.createRadialGradient(S / 2 - R * 0.3, S / 2 - R * 0.4, 10, S / 2, S / 2, R); g.addColorStop(0, lightenHex(col, 35)); g.addColorStop(0.55, col); g.addColorStop(1, darkenHex(col, 25)); fill = g; }
-      cx.beginPath(); cx.arc(S / 2, S / 2, R, a0, a1); cx.arc(S / 2, S / 2, r, a1, a0, true); cx.closePath(); cx.fillStyle = fill; cx.fill(); };
-    half(p.a, Math.PI / 2, Math.PI * 1.5); half(p.b, -Math.PI / 2, Math.PI / 2);
+    let fill = col;
+    if(metal){ const g = cx.createRadialGradient(S / 2 - R * 0.3, S / 2 - R * 0.4, 10, S / 2, S / 2, R); g.addColorStop(0, lightenHex(col, 35)); g.addColorStop(0.55, col); g.addColorStop(1, darkenHex(col, 25)); fill = g; }
+    cx.beginPath(); cx.arc(S / 2, S / 2, R, 0, Math.PI * 2); cx.arc(S / 2, S / 2, r, Math.PI * 2, 0, true); cx.closePath(); cx.fillStyle = fill; cx.fill();
+    cx.beginPath(); cx.arc(S / 2, S / 2, r, 0, Math.PI * 2); cx.fillStyle = '#fff'; cx.fill(); // white inner edge
     cx.save(); cx.beginPath(); cx.arc(S / 2, S / 2, r - 6, 0, Math.PI * 2); cx.clip();
     if(face){ try{ cx.drawImage(face.img, face.sx, face.sy, face.side, face.side, S / 2 - r + 6, S / 2 - r + 6, (r - 6) * 2, (r - 6) * 2); }catch(e){} }
     cx.restore();
-    cx.strokeStyle = '#fff'; cx.lineWidth = 4; cx.beginPath(); cx.moveTo(S / 2, 6); cx.lineTo(S / 2, S / 2 - r); cx.moveTo(S / 2, S / 2 + r); cx.lineTo(S / 2, S - 6); cx.stroke();
-    stage.querySelector('#lcMetal').innerHTML = p.metal ? `<span>${escapeHtml(p.an)}</span><span>${escapeHtml(p.bn)}</span>` : '';
-    const n = pairs.length, knob = strip.querySelector('.lc-knob'); knob.style.left = ((i + 0.5) / n * 100) + '%';
+    cx.beginPath(); cx.arc(S / 2, S / 2, R, 0, Math.PI * 2); cx.lineWidth = 4; cx.strokeStyle = '#fff'; cx.stroke(); // white outer edge
   };
+  const colorPairs = pairs.filter(p => !p.metal);
+  const drawAll = () => {
+    [[ca, colorPairs.map(p => p.a)], [cb, colorPairs.map(p => p.b)]].forEach(([cx, cols]) => {
+      cx.clearRect(0, 0, 560, 560); rpWheel(cx, 280, 280, 270, 168, cols, face, false);
+      cx.beginPath(); cx.arc(280, 280, 270, 0, Math.PI * 2); cx.lineWidth = 4; cx.strokeStyle = '#fff'; cx.stroke(); });
+    stage.querySelector('#lcMetal').innerHTML = '';
+    strip.querySelector('.lc-knob').style.display = 'none';
+    stage.querySelectorAll('.lc-all').forEach(b => b.classList.add('on'));
+  };
+  stage.querySelectorAll('.lc-all').forEach(b => b.addEventListener('click', () => {
+    if(b.classList.contains('on')){ stage.querySelectorAll('.lc-all').forEach(o => o.classList.remove('on')); drawPair(cur2); } else drawAll(); }));
+  const drawPair = i => {
+    const p = pairs[i]; if(!p) return;
+    stage.querySelectorAll('.lc-all').forEach(b => b.classList.remove('on'));
+    strip.querySelector('.lc-knob').style.display = '';
+    ring(ca, p.a, p.metal); ring(cb, p.b, p.metal);
+    stage.querySelector('#lcMetal').innerHTML = p.metal ? `<span>${escapeHtml(p.an)}</span><span>${escapeHtml(p.bn)}</span>` : '';
+    strip.querySelector('.lc-knob').style.left = ((i + 0.5) / pairs.length * 100) + '%';
+  };
+  let split = 50, sdrag = false;
+  const setSplit = v => { split = Math.max(0, Math.min(100, v)); box2.querySelector('.cb').style.clipPath = `inset(0 0 0 ${split}%)`; box2.querySelector('.lc-split2').style.left = split + '%';
+    const Ro = (280 - 10) / 560 * 100, Rf = (560 * 0.30 - 6) / 560 * 100, dx = split - 50;
+    const outer = Math.abs(dx) < Ro ? Math.sqrt(Ro * Ro - dx * dx) : 0, inner = Math.abs(dx) < Rf ? Math.sqrt(Rf * Rf - dx * dx) : 0;
+    const t = box2.querySelector('.lc-split2 .t'), b = box2.querySelector('.lc-split2 .b');
+    t.style.top = (50 - outer) + '%'; t.style.height = Math.max(0, outer - inner) + '%';
+    b.style.top = (50 + inner) + '%'; b.style.height = Math.max(0, outer - inner) + '%'; };
+  const sAt = e => { const rr = box2.getBoundingClientRect(); setSplit((e.clientX - rr.left) / rr.width * 100); };
+  const nearLine = e => { const rr = box2.getBoundingClientRect(); return Math.abs((e.clientX - rr.left) - split / 100 * rr.width) < 26; };
+  box2.addEventListener('pointerdown', e => { if(!nearLine(e)) return; sdrag = true; box2.setPointerCapture(e.pointerId); sAt(e); });
+  box2.addEventListener('pointermove', e => { if(sdrag) sAt(e); else box2.style.cursor = nearLine(e) ? 'ew-resize' : 'default'; });
+  box2.addEventListener('pointerup', () => { sdrag = false; });
+  setSplit(50);
   let cur2 = 0, dragging = false;
-  const at = e => { const rr = strip.getBoundingClientRect(); const i = Math.max(0, Math.min(pairs.length - 1, Math.floor((e.clientX - rr.left) / rr.width * pairs.length))); if(i !== cur2){ cur2 = i; drawPair(i); } };
+  const at = e => { const rr = strip.getBoundingClientRect(); const i = Math.max(0, Math.min(pairs.length - 1, Math.floor((e.clientX - rr.left) / rr.width * pairs.length))); if(i !== cur2 || stage.querySelector('.lc-all.on')){ cur2 = i; drawPair(i); } };
   strip.addEventListener('pointerdown', e => { dragging = true; strip.setPointerCapture(e.pointerId); at(e); });
   strip.addEventListener('pointermove', e => { if(dragging) at(e); });
   strip.addEventListener('pointerup', () => { dragging = false; });
@@ -9311,15 +9363,16 @@ function liveCardsWire(stage, lips){
       stage.querySelector('#lcLookName').textContent = l.title.replace(/\b(\w)(\w*)/g, (m, a, b) => a + b.toLowerCase());
       const paint = cols => { wrap.innerHTML = ''; if(cols.length) wrap.appendChild(lvWheelCanvas(cols, face, false, 420)); };
       paint(l.list.map(s => s.hex));
-      const top = l.list.slice(0, 3), more = l.list.length - top.length;
+      const top = l.list.slice(0, 10); // (2026-11-21, per Nghi) all 10 in a scrolling list
       stage.querySelector('#lcNames').innerHTML = !top.length ? '<div class="lc-none">No shade reaches 70% for this look</div>'
         : top.map((s, k) => { let line = ''; try{ line = brandLineDisplayPlain(splitBrandLine(s.brand_line)).replace(/ · /g, ' '); }catch(e){}
             return `<div class="lc-n" data-k="${k}" role="button" tabindex="0"><i style="background:${s.hex}">${k + 1}</i><div><b>${escapeHtml(s.name)}</b><small>${escapeHtml(line)}</small></div></div>`; }).join('')
-          + (more > 0 ? `<div class="lc-more">+${more} more in the report</div>` : '');
+          ;
+      stage.querySelector('#lcNames').scrollTop = 0;
       stage.querySelectorAll('#lcNames .lc-n').forEach(n => n.addEventListener('click', () => {
         const on = !n.classList.contains('on');
         stage.querySelectorAll('#lcNames .lc-n').forEach(o => o.classList.remove('on'));
-        if(on){ n.classList.add('on'); paint(Array(12).fill(top[+n.dataset.k].hex)); } else paint(l.list.map(s => s.hex));
+        if(on){ n.classList.add('on'); wrap.innerHTML = ''; wrap.appendChild(lvSolidCanvas(top[+n.dataset.k].hex, face, 420)); } else paint(l.list.map(s => s.hex));
       }));
     };
     stage.querySelector('.lc-lp').addEventListener('click', () => { li = (li + lips.length - 1) % lips.length; showLook(); });
