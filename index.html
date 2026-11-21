@@ -9253,10 +9253,9 @@ function initLiveMode(){
       const season = (currentSeasonResult && currentSeasonResult.season) || '';
       stage.innerHTML = `<div class="lv-reveal"><small>${escapeHtml(rpViewerName || 'You')} ${rpViewerName ? 'is' : 'are'} a</small><b>${escapeHtml(season)}</b></div>
         <div class="lv-report"><img src="${purl}" alt="Color report"></div>
-        <div class="lv-actions"><button type="button" class="lv-btn" id="lvLink">Copy link</button><button type="button" class="lv-btn ghost" id="lvSave">Save</button>${(navigator.canShare && navigator.canShare({ files: [new File([png], 'r.png', { type: 'image/png' })] })) ? '<button type="button" class="lv-btn ghost" id="lvShare">Share</button>' : ''}<button type="button" class="lv-btn ghost" id="lvNext">Next ✨</button></div>`;
+        <div class="lv-actions"><button type="button" class="lv-btn" id="lvLink">Copy link</button><button type="button" class="lv-btn ghost" id="lvNext">Next ✨</button></div>`;
       stage.querySelector('#lvNext').addEventListener('click', () => { rpViewerName = ''; idle(); });
       const fname = `color-report-${(rpViewerName || 'viewer').replace(/[^a-z0-9]+/gi, '-')}.png`;
-      stage.querySelector('#lvSave').addEventListener('click', () => { const a = document.createElement('a'); a.href = purl; a.download = fname; document.body.appendChild(a); a.click(); a.remove(); });
       const lk = (() => { try{ return localStorage.getItem('fmbs_live_key') || ''; }catch(e){ return ''; } })();
       const linkP = !lk ? Promise.reject(new Error('no key')) : new Promise(res => page.toBlob(res, 'image/jpeg', 0.86))
         .then(jpg => fetch(`/.netlify/functions/report?name=${encodeURIComponent(rpViewerName)}&season=${encodeURIComponent(season)}`, { method: 'POST', headers: { 'x-live-key': lk, 'content-type': 'image/jpeg' }, body: jpg }))
@@ -9283,8 +9282,6 @@ function initLiveMode(){
         }
         setTimeout(() => { b.textContent = 'Copy link'; }, 4000);
       });
-      const sh = stage.querySelector('#lvShare');
-      if(sh) sh.addEventListener('click', async () => { try{ await navigator.share({ files: [new File([png], fname, { type: 'image/png' })] }); }catch(e){} });
       liveLoupe(stage.querySelector('.lv-report'), purl);
     }catch(e){ console.error('[live]', e); idle('Something went wrong. Try the photo again.'); }
     finally { URL.revokeObjectURL(url); }
