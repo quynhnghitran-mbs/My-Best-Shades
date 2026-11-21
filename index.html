@@ -10256,12 +10256,12 @@ function drainShift(hex, her, opp){
   const L = Math.max(14, Math.min(93, lab.L + dL));
   let k = C0 < 6 ? 1 : Math.max(5, Math.min(80, C0 * kC)) / C0;
   let a = lab.a * k, b = lab.b * k;
+  let C = Math.hypot(a, b), h = (Math.atan2(b, a) * 180 / Math.PI + 360) % 360;
   if(!her.warmthBoth){
-    const sign = her.warmth === 'Warm' ? -1 : 1; // she is warm -> cooler (bluer), she is cool -> warmer (yellower)
-    b += sign * (C0 < 6 ? 12 : 24);
-    if(sign > 0) a += C0 < 6 ? 3 : 0; else a -= C0 < 6 ? 1 : 0;
+    const toCool = her.warmth === 'Warm';
+    if(C < 6){ b += toCool ? -6 : 6; C = Math.hypot(a, b); h = (Math.atan2(b, a) * 180 / Math.PI + 360) % 360; }
+    else { const target = toCool ? 290 : 70; let d = ((target - h + 540) % 360) - 180; h = (h + Math.sign(d) * Math.min(Math.abs(d), 22) + 360) % 360; }
   }
-  const C = Math.hypot(a, b), h = (Math.atan2(b, a) * 180 / Math.PI + 360) % 360;
   return lchToHex(L, C, h);
 }
 
