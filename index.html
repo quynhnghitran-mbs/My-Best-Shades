@@ -485,7 +485,8 @@
   .lv-loupe{display:none;position:absolute;width:240px;height:240px;border-radius:50%;border:4px solid #fff;box-shadow:0 10px 30px rgba(0,0,0,.45);background-repeat:no-repeat;background-color:#fff;pointer-events:none;z-index:2;}
   @keyframes lvUp{from{transform:translateY(30px);opacity:0}to{transform:none;opacity:1}}
   .lv-actions{display:flex;gap:10px;width:100%;position:sticky;bottom:0;padding-top:6px;}
-  .lv-btn{flex:1;text-align:center;text-decoration:none;border:0;border-radius:999px;padding:15px;font:inherit;font-size:17px;font-weight:700;background:#f3b6c4;color:#4a1626;cursor:pointer;}
+  .lv-btn{flex:1;text-align:center;text-decoration:none;border:0;border-radius:999px;padding:14px 10px;white-space:nowrap;font:inherit;font-size:15px;font-weight:700;background:#f3b6c4;color:#4a1626;cursor:pointer;}
+  #lvLink{flex:1.7;}
   .lv-btn.ghost{background:#4a1a2c;color:#fff;border:1.5px solid rgba(255,255,255,.3);}
   .iap-buy-btn{ width:100%; min-height:45px; border:0; border-radius:999px; background:var(--rose-deep); color:#fff; font:inherit; font-size:15px; font-weight:700; cursor:pointer; }
   .iap-buy-btn:disabled{ opacity:.55; }
@@ -9138,6 +9139,10 @@ let rpViewerName = ''; // shown on the report in live mode ("For @name")
 function liveModeOn(){ try{ return isOwner() && sessionStorage.getItem('fmbs_live') === '1'; }catch(e){ return false; } }
 (function liveFromUrl(){
   try{
+    const u0 = new URL(location.href), key = u0.searchParams.get('livekey');
+    if(key !== null){ if(isOwner()) localStorage.setItem('fmbs_live_key', key); u0.searchParams.delete('livekey'); history.replaceState(null, '', u0.pathname + u0.search + u0.hash); }
+  }catch(e){}
+  try{
     const u = new URL(location.href), v = u.searchParams.get('live');
     if(v === null) return;
     if(v === '0') sessionStorage.removeItem('fmbs_live'); else if(isOwner()) sessionStorage.setItem('fmbs_live', '1');
@@ -9247,8 +9252,28 @@ function initLiveMode(){
       const season = (currentSeasonResult && currentSeasonResult.season) || '';
       stage.innerHTML = `<div class="lv-reveal"><small>${escapeHtml(rpViewerName || 'You')} ${rpViewerName ? 'is' : 'are'} a</small><b>${escapeHtml(season)}</b></div>
         <div class="lv-report"><img src="${purl}" alt="Color report"></div>
-        <div class="lv-actions"><a class="lv-btn ghost" href="${purl}" download="color-report-${escapeHtml((rpViewerName || 'viewer').replace(/[^a-z0-9]+/gi, '-'))}.png">Save PNG</a><button type="button" class="lv-btn" id="lvNext">Next viewer ✨</button></div>`;
+        <div class="lv-actions"><button type="button" class="lv-btn" id="lvLink">Copy link</button><button type="button" class="lv-btn ghost" id="lvSave">Save</button>${(navigator.canShare && navigator.canShare({ files: [new File([png], 'r.png', { type: 'image/png' })] })) ? '<button type="button" class="lv-btn ghost" id="lvShare">Share</button>' : ''}<button type="button" class="lv-btn ghost" id="lvNext">Next ✨</button></div>`;
       stage.querySelector('#lvNext').addEventListener('click', () => { rpViewerName = ''; idle(); });
+      const fname = `color-report-${(rpViewerName || 'viewer').replace(/[^a-z0-9]+/gi, '-')}.png`;
+      stage.querySelector('#lvSave').addEventListener('click', () => { const a = document.createElement('a'); a.href = purl; a.download = fname; document.body.appendChild(a); a.click(); a.remove(); });
+      const lk = (() => { try{ return localStorage.getItem('fmbs_live_key') || ''; }catch(e){ return ''; } })();
+      const linkP = !lk ? Promise.reject(new Error('no key')) : new Promise(res => page.toBlob(res, 'image/jpeg', 0.86))
+        .then(jpg => fetch(`/.netlify/functions/report?name=${encodeURIComponent(rpViewerName)}&season=${encodeURIComponent(season)}`, { method: 'POST', headers: { 'x-live-key': lk, 'content-type': 'image/jpeg' }, body: jpg }))
+        .then(r => { if(!r.ok) throw new Error('upload ' + r.status); return r.json(); }).then(j => j.url);
+      linkP.catch(() => {});
+      stage.querySelector('#lvLink').addEventListener('click', async e => {
+        const b = e.currentTarget;
+        if(!lk){ b.textContent = 'Set up links first'; setTimeout(() => { b.textContent = 'Copy link'; }, 2500); return; }
+        b.textContent = 'Uploading…';
+        try{
+          const link = await linkP;
+          await navigator.clipboard.writeText(`Hi ${rpViewerName || 'love'}! Here's your color report 💄 ${link}`);
+          b.textContent = 'Link copied! Paste in her DM';
+        }catch(err){ console.warn('[live link]', err); b.textContent = "Couldn't make a link, use Save"; }
+        setTimeout(() => { b.textContent = 'Copy link'; }, 3000);
+      });
+      const sh = stage.querySelector('#lvShare');
+      if(sh) sh.addEventListener('click', async () => { try{ await navigator.share({ files: [new File([png], fname, { type: 'image/png' })] }); }catch(e){} });
       liveLoupe(stage.querySelector('.lv-report'), purl);
     }catch(e){ console.error('[live]', e); idle('Something went wrong. Try the photo again.'); }
     finally { URL.revokeObjectURL(url); }
