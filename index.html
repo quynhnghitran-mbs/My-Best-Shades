@@ -541,7 +541,11 @@
   .lc-side{position:absolute;top:50%;transform:translateY(-50%);z-index:3;width:38px;height:38px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;font-size:22px;line-height:38px;cursor:pointer;opacity:.25;transition:opacity .2s;}
   .lc-side.l{left:-6px;}.lc-side.r{right:-6px;}
   .lc-side.big{top:42%;}
-  @media (hover:hover){.lc-side{opacity:0;}.lc-wrap:hover>.lc-side.big,.lc-lwrap:hover>.lc-side{opacity:.9;}}
+  @media (hover:hover){.lc-side{opacity:0;}.lc-side.big:hover,.lc-lwrap:hover>.lc-side{opacity:.9;}}
+
+  .lc-dots{opacity:0;transition:opacity .2s;}
+  .lc-wrap:has(>.lc-side.big:hover) .lc-dots,.lc-wrap:has(>.lc-side.big:hover)>.lc-side.big{opacity:.9;}
+  .lc-side.big{width:44px;height:64px;border-radius:22px;}
   .lc-lwrap{position:relative;text-align:center;}
   .lc-lwrap b{display:block;font-family:'Playfair Display',serif;font-size:24px;font-weight:500;margin-top:4px;}
   .lc-lwrap .lc-side{top:auto;bottom:0;transform:none;width:32px;height:32px;line-height:32px;font-size:18px;}
@@ -9327,8 +9331,7 @@ function liveCardsWire(stage, lips){
     strip.querySelector('.lc-knob').style.display = 'none';
     stage.querySelectorAll('.lc-all').forEach(b => b.classList.add('on'));
   };
-  stage.querySelectorAll('.lc-all').forEach(b => b.addEventListener('click', () => {
-    if(b.classList.contains('on')){ stage.querySelectorAll('.lc-all').forEach(o => o.classList.remove('on')); drawPair(cur2); } else drawAll(); }));
+  stage.querySelectorAll('.lc-all').forEach(b => b.addEventListener('click', drawAll));
   const drawPair = i => {
     const p = pairs[i]; if(!p) return;
     stage.querySelectorAll('.lc-all').forEach(b => b.classList.remove('on'));
