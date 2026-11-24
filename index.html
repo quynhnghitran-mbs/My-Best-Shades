@@ -546,6 +546,38 @@
   .lc-dots{opacity:0;transition:opacity .2s;}
   .lc-wrap:has(>.lc-side.big:hover) .lc-dots,.lc-wrap:has(>.lc-side.big:hover)>.lc-side.big{opacity:.9;}
   .lc-side.big{width:44px;height:64px;border-radius:22px;}
+
+  .cc{text-align:center;margin:4px auto 12px;}
+  .cc-wheel{width:min(78vw,330px);margin:0 auto;position:relative;cursor:pointer;}
+  .cc-wheel canvas{width:100%;height:auto;display:block;}
+  .cc-metals{display:flex;justify-content:center;gap:16px;margin-top:8px;flex-wrap:wrap;}
+  .cc-metals span{display:flex;align-items:center;gap:7px;font-family:'Playfair Display',serif;font-size:18px;color:var(--rose-deep);}
+  .cc-metals i{width:24px;height:24px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 1px 4px rgba(0,0,0,.2);}
+  .cc-cap{font-size:12.5px;color:var(--muted);margin-top:6px;min-height:17px;}
+  .cc-cmp{position:relative;width:min(78vw,330px);margin:0 auto;aspect-ratio:1;touch-action:none;user-select:none;}
+  .cc-cmp canvas{position:absolute;inset:0;width:100%;height:100%;}
+  .cc-split{position:absolute;top:0;bottom:0;width:3px;transform:translateX(-50%);pointer-events:none;}
+  .cc-grip{position:absolute;left:50%;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;background:#fff;color:var(--rose-deep);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(58,31,34,.25);font-size:14px;font-weight:700;}
+
+  .cc-split i{position:absolute;left:0;width:3px;background:#fff;box-shadow:0 0 6px rgba(0,0,0,.35);border-radius:2px;}
+  .cc-btns{display:flex;justify-content:center;gap:8px;margin:8px 0 2px;flex-wrap:wrap;}
+  .cc-btns button{border:1px solid rgba(150,51,60,.25);background:#fff;border-radius:999px;padding:6px 14px;font:inherit;font-size:13.5px;font-weight:700;color:var(--rose-deep);cursor:pointer;}
+  .cc-btns button.ok{color:#2f7a52;}.cc-btns button.no{color:#b23a55;}
+  .cc-btns button.on{background:var(--rose-deep);color:#fff;border-color:var(--rose-deep);}
+  .cc-mlab{display:grid;grid-template-columns:1fr 1fr;min-height:22px;font-family:'Playfair Display',serif;font-size:18px;color:var(--rose-deep);margin-top:4px;}
+  .cc-strip{position:relative;margin:8px auto 0;width:min(86vw,380px);height:36px;touch-action:none;cursor:ew-resize;}
+  .cc-strip-c{display:flex;height:22px;margin-top:7px;border-radius:999px;overflow:hidden;box-shadow:0 0 0 2px #fff,0 1px 5px rgba(0,0,0,.15);}
+  .cc-strip-c i{flex:1;}.cc-strip-c i.m{flex:1.6;background-image:linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,0) 60%)!important;}
+  .cc-knob{position:absolute;top:0;width:26px;height:36px;border-radius:10px;border:3px solid #fff;transform:translateX(-50%);box-shadow:0 2px 8px rgba(0,0,0,.35);pointer-events:none;}
+  .cc-lip{position:relative;}
+  .cc-lip .cc-arrow{position:absolute;top:42%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:0;background:rgba(255,255,255,.85);color:var(--rose-deep);font-size:22px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.15);z-index:2;}
+  .cc-lip .cc-arrow.l{left:0;}.cc-lip .cc-arrow.r{right:0;}
+  .cc-lname{font-family:'Playfair Display',serif;font-size:21px;color:var(--ink,#3a2a2d);margin-top:8px;}
+  .cc-lbrand{font-size:13px;color:var(--muted);margin-top:2px;}
+  .cc-ldots{display:flex;justify-content:center;gap:6px;margin-top:10px;flex-wrap:wrap;}
+  .cc-ldots button{width:22px;height:22px;border-radius:50%;border:0;padding:0;cursor:pointer;box-shadow:0 0 0 2px #fff,0 1px 4px rgba(0,0,0,.2);}
+  .cc-ldots button.on{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--rose-deep);}
+  #seasonGuess{display:none !important;}
   .lc-lwrap{position:relative;text-align:center;}
   .lc-lwrap b{display:block;font-family:'Playfair Display',serif;font-size:24px;font-weight:500;margin-top:4px;}
   .lc-lwrap .lc-side{top:auto;bottom:0;transform:none;width:32px;height:32px;line-height:32px;font-size:18px;}
@@ -841,6 +873,13 @@
   .shade-tab small{display:block;font-weight:500;font-size:12px;opacity:0.85;margin-top:2px;}
   .shade-tab.active{background:var(--card);color:var(--rose-deep);box-shadow:0 2px 8px rgba(58,31,34,0.12);}
   .shade-tab-empty{font-size:13px;color:var(--muted);text-align:center;padding:18px 8px;}
+  body.sr-hold #lipUpsell{display:none !important;}
+  .lip-upsell{margin:22px 0 8px;padding:20px 18px;border:1px solid rgba(150,51,60,.2);border-radius:18px;background:rgba(255,255,255,.7);text-align:center;}
+  .lip-upsell-tag{font-family:'Playfair Display',serif;font-size:20px;color:var(--rose-deep);margin-bottom:12px;}
+  .lip-upsell-swatches{display:flex;justify-content:center;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
+  .lip-upsell-swatches i{width:26px;height:26px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 1px 4px rgba(0,0,0,.15);}
+  .lip-upsell-text{font-size:14px;color:var(--ink,#3a2a2d);margin-bottom:14px;line-height:1.5;}
+  .lip-upsell-price{font-size:12.5px;color:var(--muted);margin-top:8px;}
   .brand-pick-box{margin:12px 0 6px;padding:12px 12px 10px;border:1px solid rgba(150,51,60,.18);border-radius:14px;background:rgba(255,255,255,.6);}
   .brand-pick-head{font-size:13px;font-weight:700;color:var(--rose-deep);margin-bottom:8px;}
   .brand-pick-head small{font-weight:500;color:var(--muted);margin-left:4px;}
@@ -1045,7 +1084,8 @@
   .metric-row:last-child{margin-bottom:2px;}
   .metric-icon{flex:0 0 22px;width:22px;height:22px;margin-top:1px;}
   .metric-body{flex:1;min-width:0;}
-  .metric-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:10px;flex-wrap:wrap;}
+  .metric-val{position:absolute;bottom:15px;transform:translateX(-50%);font-size:11.5px;font-weight:700;color:var(--rose-deep);white-space:nowrap;z-index:3;}
+  .metric-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;gap:10px;flex-wrap:wrap;}
   .metric-name{font-weight:600;font-size:12.5px;color:var(--text-light);}
 
   .metric-ring{flex:0 0 auto;}
@@ -2358,40 +2398,29 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
     <div class="paywall-tiers">
       <div class="paywall-tier featured">
         <div class="paywall-tier-badge">Most Popular</div>
-        <div class="paywall-tier-name">Find My Season &amp; Best Lipsticks</div>
-
-        <div class="paywall-tier-price"><s class="pw-was">$15.99</s> $12.99</div>
-        <div class="paywall-tier-subprice pw-launch">Launch price · same as season only</div>
+        <div class="paywall-tier-name">Your Best Lipsticks</div>
+        <div class="paywall-tier-price">$4.99</div>
+        <div class="paywall-tier-subprice">One time · names of all 30 lipsticks</div>
         <ul class="paywall-tier-features">
-          <li><strong>Hair, makeup, dress, even shoes, all in your colors.</strong> They see ease; you know your palette</li>
-          <li><strong>Glowing from day to night.</strong> Colors that light you up, never wash you out</li>
-          <li><strong>No more confusion.</strong> You’ll know your color &amp; lipstick before you reach for it</li>
-          <li><strong>A wardrobe that’s all you.</strong> Every piece in your shades. Nothing wasted, nothing off</li>
-          <li><strong>Perfectly imperfect, beautifully you.</strong> Meet your best version at ease</li>
+          <li><strong>Real lipsticks you can buy today.</strong> Brand, line and shade name for every match</li>
+          <li><strong>10 for each look.</strong> Soft, Natural and Dramatic, matched to your own coloring</li>
+          <li><strong>Shop one brand or line.</strong> Pick a brand and see your best shades in it</li>
+          <li><strong>Less than one wrong lipstick.</strong> Stop buying "almost" shades</li>
         </ul>
         <div id="paypalBtn-seasonShade" class="paypal-btn-slot"></div>
       </div>
-      <div class="paywall-tier">
-        <div class="paywall-tier-name">Find My Season</div>
-        <div class="paywall-tier-price">$12.99</div>
-        <ul class="paywall-tier-features">
-          <li><strong>Stop guessing, start glowing.</strong> Your season, 1 of 16, read from your own skin, eyes and brows</li>
-          <li><strong>Your personal palette.</strong> Hair, makeup, outfits and jewelry that light you up</li>
-          <li><strong>Shop with clarity.</strong> Know what to reach for, and what to walk past</li>
-          <li><strong>Your natural beauty, finally understood.</strong> Confident in every color you wear</li>
-        </ul>
+      <div class="paywall-tier" style="display:none;">
         <div id="paypalBtn-season" class="paypal-btn-slot"></div>
       </div>
 
       <div class="paywall-tier">
-        <div class="paywall-tier-name">Check My Shade / Not My Shade</div>
-        <div class="paywall-tier-price">$9.99</div>
-        <div class="paywall-tier-subprice">+ Find Similar Shades · 1 year, unlimited</div>
+        <div class="paywall-tier-name">Find Similar Shades</div>
+        <div class="paywall-tier-price">$6.99</div>
+        <div class="paywall-tier-subprice">1 year, unlimited</div>
         <ul class="paywall-tier-features">
-          <li><strong>Buy with confidence, every time.</strong> Snap any color and know in seconds if it's yours</li>
-          <li><strong>Stop wasting money on "almost" shades.</strong> See why it's off and what to pick instead</li>
           <li><strong>Love a color? Get it for less.</strong> Find its closest dupes across brands</li>
-          <li><strong>A whole year of right choices</strong> for makeup, clothes, jewelry and hair</li>
+          <li><strong>Shop one brand or line.</strong> See the closest shades in the brand you like</li>
+          <li><strong>A whole year of finds</strong> with no limit on how many colors you check</li>
         </ul>
         <div id="paypalBtn-colorCheck" class="paypal-btn-slot" style="display:none;"></div>
         <div class="paywall-tier-locked-note" id="colorCheckLockedNote">One payment, no subscription. Check as many colors as you like for a year.</div>
@@ -2507,7 +2536,8 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
           <div class="step-tag" data-step="why"></div>
           <div class="analysis-subhead second" id="runnerHeading">Why Your Warmth, Depth &amp; Chroma</div>
           <div class="pal-tabs tier-tabs" id="tierTabs" role="tablist">
-            <button type="button" class="pal-tab active" data-axis="warmth" role="tab" aria-selected="true">Warmth</button>
+            <button type="button" class="pal-tab active" data-axis="overall" role="tab" aria-selected="true">Overall</button>
+            <button type="button" class="pal-tab" data-axis="warmth" role="tab" aria-selected="false">Warmth</button>
             <button type="button" class="pal-tab" data-axis="depth" role="tab" aria-selected="false">Depth</button>
             <button type="button" class="pal-tab" data-axis="chroma" role="tab" aria-selected="false">Chroma</button>
           </div>
@@ -2683,13 +2713,21 @@ try{if(sessionStorage.getItem('fmbs_cover_done')){var c=document.getElementById(
     </div>
 
     <div class="myshade-cta" id="myShadeCtaBlock">
-      <div class="myshade-cta-text">Unsure about a lipstick, blush, outfit or any other color? Or looking for a shade like one you love?<br><span class="myshade-cta-price">Just $9.99 unlocks both for a full year, with unlimited checks.</span></div>
+      <div class="myshade-cta-text">Unsure about a lipstick, blush, outfit or any other color? Or looking for a shade like one you love?<br><span class="myshade-cta-price">Check My Shade is free. Find Similar Shades names: $6.99 for a full year, unlimited.</span></div>
       <div class="myshade-cta-row">
         <button class="btn ghost" id="myShadeCtaBtn">Check My Shade / Not My Shade</button>
         <button class="btn ghost" id="myShadeCtaSimilarBtn">Find Similar Shades</button>
       </div>
     </div>
 
+  </div>
+
+  <div class="lip-upsell" id="lipUpsell" style="display:none;">
+    <div class="lip-upsell-tag">Your best lipsticks are ready</div>
+    <div class="lip-upsell-swatches" id="lipUpsellSwatches"></div>
+    <div class="lip-upsell-text">30 real lipsticks matched to your coloring, 10 each for your Soft, Natural and Dramatic looks.</div>
+    <button class="btn" id="lipUpsellBtn" type="button">See my best lipsticks</button>
+    <div class="lip-upsell-price">Colors free · names unlock for $4.99</div>
   </div>
 
   <div id="brandSection" style="display:none;">
@@ -3953,10 +3991,11 @@ function shadeSimilarityPct(deltaE){
 
 const SIMILAR_SHADE_CATALOG = CATALOG_SHADES.map(s => ({ ...s, lab: rgbToLab({ r: s.r, g: s.g, b: s.b }) }));
 
-function findSimilarShades(rgb, topN = 3, group){
+function findSimilarShades(rgb, topN = 3, group, keep){
   const pickedLab = rgbToLab(rgb);
   return SIMILAR_SHADE_CATALOG
     .filter(s => !group || (group === 'mac') === s.brand_line.startsWith('mac::'))
+    .filter(s => !keep || keep(s))
     .map(s => {
       const deltaE = deltaE2000(pickedLab, s.lab); // CIEDE2000 since 2026-10-08 -- see SIMILAR_SHADE_DECAY_TAU
       return { ...s, deltaE, confidencePct: shadeSimilarityPct(deltaE) };
@@ -4316,7 +4355,59 @@ function lipCtxFromLab(lab, chromaLevel, contrastLevel, family){
   const rule = CONTRAST_LIPSTICK_RULES[contrastLipstickGroup(contrastLevel, chromaLevel, depthL, chromaC, lab.b)] || null;
   return { lab, rule, depthL, chromaC, cool: /Summer|Winter/.test(family || '') };
 }
+let LOOK_RESULT = null;
 function bestShadeLooks(customerLab, chromaLevel, contrastLevel, seasonFamily, pool = CATALOG_SHADES){
+  const r = LOOK_RESULT || currentSeasonResult;
+  let her = null; try{ her = herTiers(r); }catch(e){}
+  if(!her) return bestShadeLooksBand(customerLab, chromaLevel, contrastLevel, seasonFamily, pool);
+  const ctx = lipCtxFromLab(customerLab, chromaLevel, contrastLevel, seasonFamily);
+  const nat = lipBands(ctx).looks.find(bd => bd.look === 'natural') || lipBands(ctx).looks[0];
+  const tB = nat.b, tL = (nat.dLo + nat.dHi) / 2, tC = (nat.lo + nat.hi) / 2;
+  const W4 = ['Cool', 'Cool-neutral', 'Warm-neutral', 'Warm'], ORD = { depth: ['Deep', 'Medium', 'Light'], chroma: ['Muted', 'Balanced', 'Vivid'] };
+  let wl = her.warmthLabel === 'Neutral' ? classifyShadeTemp4(r && r.lab_temperature_b != null ? r.lab_temperature_b : 23) : her.warmthLabel;
+  if(!W4.includes(wl)) wl = her.warmth;
+  const famWarm = /spring|autumn/i.test(String(seasonFamily || (r && (r.shadeMatchSeason || r.season)) || '')) ? 'Warm' : 'Cool';
+  const parts = (lbl, ax) => { const w = tierWords(lbl).filter(t => ORD[ax].includes(t)); return w.length ? w : [ax === 'depth' ? classifyDepthZone(tL) : 'Balanced']; };
+  const dSet = parts(her.depthLabel, 'depth'), cSet = parts(her.chromaLabel, 'chroma');
+  const grow = (set, ax) => { const o = ORD[ax], ix = set.map(t => o.indexOf(t)); return [...new Set([...set, o[Math.max(0, Math.min(...ix) - 1)], o[Math.min(o.length - 1, Math.max(...ix) + 1)]])]; };
+  const other = { 'Warm-neutral': 'Cool-neutral', 'Cool-neutral': 'Warm-neutral', 'Warm': 'Warm-neutral', 'Cool': 'Cool-neutral' }[wl];
+  const steps = [];
+  let w = [wl]; steps.push({ w: [...w], d: dSet, c: cSet });
+  w.push(other); steps.push({ w: [...w], d: dSet, c: cSet });
+  if(!w.includes(famWarm)) w.push(famWarm); steps.push({ w: [...w], d: dSet, c: cSet });
+  steps.push({ w: [...w], d: dSet, c: grow(cSet, 'chroma') });
+  steps.push({ w: [...w], d: grow(dSet, 'depth'), c: grow(cSet, 'chroma') });
+  const high = /high/i.test(String(contrastLevel || '')) && !/low|medium/i.test(String(contrastLevel || ''));
+  const extDeep = dSet.includes('Deep') || (!dSet.includes('Light') && tL < 50);
+  const depthGap = L => high ? (extDeep ? Math.max(0, L - tL) : Math.max(0, tL - L)) : Math.abs(L - tL);
+  const extra = L => high ? (extDeep ? Math.max(0, tL - L) : Math.max(0, L - tL)) : 0; // how far into her extreme
+  const usable = pool.filter(s => !/Glass Shine Balm/i.test(String(s.brand_line || '')) && [s.lightness_L, s.temperature_b, s.chroma_C].every(v => v != null && isFinite(v)));
+  const need = 3 * LOOK_COUNT;
+  let picked = [];
+  for(const st of steps){
+    picked = usable.filter(s => st.w.includes(classifyShadeTemp4(s.temperature_b)) && st.d.includes(classifyDepthZone(s.lightness_L)) && st.c.includes(classifyShadeChroma(s.chroma_C)));
+    if(picked.length >= need) break;
+  }
+  picked = picked.map(s => ({ s, dist: Math.hypot(WARMTH_RANK_WEIGHT * (s.temperature_b - tB), DEPTH_RANK_WEIGHT * depthGap(s.lightness_L), CHROMA_RANK_WEIGHT * (s.chroma_C - tC)) }))
+    .sort((x, y) => x.dist - y.dist).slice(0, need);
+  const sd = a => { const m = a.reduce((t, v) => t + v, 0) / (a.length || 1); return Math.sqrt(a.reduce((t, v) => t + (v - m) * (v - m), 0) / (a.length || 1)); };
+  const byDepth = sd(picked.map(x => x.s.lightness_L)) > sd(picked.map(x => x.s.chroma_C));
+  picked.sort((x, y) => byDepth ? (y.s.lightness_L - x.s.lightness_L) : ((x.s.chroma_C + extra(x.s.lightness_L)) - (y.s.chroma_C + extra(y.s.lightness_L))));
+  const n = picked.length, k = Math.floor(n / 3), rem = n - 3 * k; // uneven counts: Natural gets the extra
+  const cut = { soft: [0, k], natural: [k, 2 * k + rem], dramatic: [2 * k + rem, n] };
+  const looks = { soft: [], natural: [], dramatic: [] };
+  const bands = lipBands(ctx).looks;
+  Object.keys(cut).forEach(look => {
+    const bd = bands.find(b => b.look === look) || nat;
+    looks[look] = picked.slice(cut[look][0], cut[look][1]).map(({ s, dist }) => {
+      const sc = lipUnionScore(ctx, s.lightness_L, s.temperature_b, s.chroma_C);
+      const target = { L: Math.min(bd.dHi, Math.max(bd.dLo, s.lightness_L)), b: bd.b, rangeLow: bd.lo, rangeHigh: bd.hi, chromaAvg: ctx.chromaC };
+      return { ...s, look, confidencePct: Math.max(sc.pct, Math.min(98, shadeConfidencePct(dist))), dist, depthDelta: ctx.depthL - s.lightness_L, whyExplanation: shadeWhyExplanation(target, s) };
+    }).sort((x, y) => y.confidencePct - x.confidencePct || x.dist - y.dist);
+  });
+  return looks;
+}
+function bestShadeLooksBand(customerLab, chromaLevel, contrastLevel, seasonFamily, pool = CATALOG_SHADES){
   const ctx = lipCtxFromLab(customerLab, chromaLevel, contrastLevel, seasonFamily);
   const bands = lipBands(ctx);
   const looks = { soft: [], natural: [], dramatic: [] };
@@ -5024,13 +5115,13 @@ const PAYPAL_CLIENT_ID_SANDBOX = 'AaV956UJu2dbvnye8nA7Nwh_SNV6KaC2c8kGliDwa9Xw6Z
 const PAYPAL_CLIENT_ID_LIVE = 'BAAJjuhrzVCy9wBy2mlT0x4_ADZEiEXY4fpSSxwLmHMbZ_QsgoKaJIaYSSEaq_7_ofZjyH0yykMYTsHR9o'; // Live/"API Credentials" Client ID from developer.paypal.com (dashboard toggle set to Live), tied to your real Business account
 const PAYPAL_CLIENT_ID = PAYPAL_ENV === 'live' ? PAYPAL_CLIENT_ID_LIVE : PAYPAL_CLIENT_ID_SANDBOX;
 const PRICING = {
-  season:      { amount: '12.99', label: 'Find My Season' },
-  seasonShade: { amount: '12.99', label: 'Find My Season & Best Lipsticks' }, // launch price (was 15.99), 2026-10-18 per Nghi
+  season:      { amount: '12.99', label: 'Find My Season' }, // (2026-11-24) the season is free now; this plan is no longer offered
+  seasonShade: { amount: '4.99', label: 'Your Best Lipsticks (shade names)' }, // (2026-11-24, per Nghi) $4.99 -- only the lipstick names are paid
 };
 const PURCHASE_STORAGE_KEY = 'ffbs_purchase';
 
 const COLORCHECK_PASS_DAYS = 365;
-const COLORCHECK_PRICING = { amount: '9.99', label: 'Check My Shade / Not My Shade + Find Similar Shades — 1 Year Unlimited', days: COLORCHECK_PASS_DAYS };
+const COLORCHECK_PRICING = { amount: '6.99', label: 'Find Similar Shades — 1 Year Unlimited', days: COLORCHECK_PASS_DAYS }; // (2026-11-24, per Nghi) $6.99; Check My Shade is free
 const COLORCHECK_PURCHASE_STORAGE_KEY = 'ffbs_colorcheck_purchase'; // now holds { email, expiresAt, updatedAt } instead of a remaining-count balance
 
 const PURCHASE_SIGNING_KEY = 'ffbs-glow-2026-do-not-share';
@@ -5869,7 +5960,7 @@ function lipstickCtx(){
   let lab, looks;
   try{
     lab = computeCustomerLabFromResult(r);
-    looks = (r === currentSeasonResult && currentShadeLooks) ? currentShadeLooks : bestShadeLooks(lab, r.chroma_level, r.contrast_level, r.family);
+    if(r === currentSeasonResult && currentShadeLooks) looks = currentShadeLooks; else { LOOK_RESULT = r; try{ looks = bestShadeLooks(lab, r.chroma_level, r.contrast_level, r.family); } finally { LOOK_RESULT = null; } }
   }catch(e){ return null; }
   const shown = [];
   ['soft', 'natural', 'dramatic'].forEach(k => (looks[k] || []).forEach(s => shown.push({ s, look: k, pct: s.confidencePct })));
@@ -5937,6 +6028,43 @@ function lipLookReasons(lab, bd){
 }
 const LOOK_NAMES = { soft: 'Soft Look', natural: 'Natural', dramatic: 'Dramatic' };
 
+function clothingPaletteFit(lab, profile){
+  try{
+    const season = profile.shadeMatchSeason || profile.season, cen = SEASON_LAB_CENTROIDS[season];
+    const deltas = (cen && profile.lab_temperature_b != null && profile.depth_score != null && profile.avg_chroma != null)
+      ? { deltaB: profile.lab_temperature_b - cen.b, deltaL: profile.depth_score - cen.depthL, deltaC: profile.avg_chroma - cen.chromaC } : {};
+    const shaping = computeClothingShaping(season, deltas); if(!shaping) return null;
+    const hues = shaping.wheel === 'warm' ? CLOTHING_WARM_HUES : CLOTHING_COOL_HUES;
+    const hueOf = l => (Math.atan2(l.b, l.a) * 180 / Math.PI + 360) % 360;
+    const out = (x, a, z) => x < a ? a - x : (x > z ? x - z : 0);
+    const h0 = hueOf(lab); let best = null;
+    hues.forEach(hh => {
+      const pr = buildSwatchPair(hh, shaping), A = rgbToLab(hexToRgb(pr.lightHex)), B = rgbToLab(hexToRgb(pr.darkHex));
+      const fam = { name: pr.lightLabel + ' / ' + pr.darkLabel, dLo: Math.min(A.L, B.L) - 4, dHi: Math.max(A.L, B.L) + 4,
+        lo: Math.max(0, Math.min(A.C, B.C) * 0.75 - 3), hi: Math.max(A.C, B.C) * 1.25 + 3,
+        bLo: Math.min(A.b, B.b) - 6, bHi: Math.max(A.b, B.b) + 6, hue: hueOf({ a: A.a + B.a, b: A.b + B.b }), C: (A.C + B.C) / 2 };
+      let dh = ((h0 - fam.hue + 540) % 360) - 180;
+      const dH = 2 * Math.sqrt(Math.max(0, lab.C * fam.C)) * Math.sin(Math.abs(dh) * Math.PI / 360);
+      const gH = Math.max(0, dH - 6), gL = out(lab.L, fam.dLo, fam.dHi), gC = out(lab.C, fam.lo, fam.hi);
+      const dist = Math.hypot(gH, gL, gC);
+      if(!best || dist < best.dist) best = { fam, dist, gH, gL, gC, dh };
+    });
+    if(!best) return null;
+    const M = MYSHADE_BAND_MARGIN, f = best.fam, reasons = [];
+    if(best.gH > M){ // which way the hue turned: toward the warm side (yellow-orange) or the cool side (blue-violet)
+      const towardWarm = Math.abs(((70 - (f.hue + best.dh) + 540) % 360) - 180) < Math.abs(((70 - f.hue + 540) % 360) - 180);
+      reasons.push(towardWarm ? { read: 'warm', towards: 'cooler', over: best.gH } : { read: 'cool', towards: 'warmer', over: best.gH });
+    }
+    if(lab.L < f.dLo - M) reasons.push({ read: 'deep', towards: 'lighter', over: best.gL });
+    else if(lab.L > f.dHi + M) reasons.push({ read: 'light', towards: 'deeper', over: best.gL });
+    if(lab.C < f.lo - M) reasons.push({ read: 'muted', towards: 'richer, more saturated', over: best.gC });
+    else if(lab.C > f.hi + M) reasons.push({ read: 'vivid', towards: 'more muted', over: best.gC });
+    let pct = Math.min(98, shadeConfidencePct(best.dist));
+    const over = reasons.reduce((t, r) => t + Math.max(0, r.over - M), 0), step = Math.round(over * 0.875);
+    if(reasons.length >= 2) pct = Math.min(pct, Math.max(40, 69 - step)); else if(reasons.length === 1) pct = Math.min(pct, Math.max(70, 79 - step));
+    return { pct, reasons, band: f };
+  }catch(e){ return null; }
+}
 function scoreColorForProfile(rgb, profile, itemType){
   let target = myShadeProfileTarget(profile, itemType);
   if(!target) return null;
@@ -5983,6 +6111,10 @@ function scoreColorForProfile(rgb, profile, itemType){
       const why = lipLookReasons(lab0, ls.band);
       return { pct: ls.pct, dist, axes, exposureAdjustedValue: adjustedValue, target: { ...target, lookBand: ls.band }, itemChromaLabel, paletteMisses: why.length, paletteReasons: why, look: ls.look };
     }
+  }
+  if(itemType === 'clothing'){
+    const pf = clothingPaletteFit(axes.lab, profile);
+    if(pf) return { pct: pf.pct, dist, axes, exposureAdjustedValue: adjustedValue, target: { ...target, paletteBand: pf.band }, itemChromaLabel, paletteMisses: pf.reasons.length, paletteReasons: pf.reasons };
   }
   return { pct, dist, axes, exposureAdjustedValue: adjustedValue, target, itemChromaLabel, paletteMisses: misses, paletteReasons: misses ? (myShadeBandMisses.last || []) : [] };
 }
@@ -6397,11 +6529,11 @@ function renderMyShadeProfileGate(){
   const chipRowEl = document.getElementById('myShadeProfileChipRow');
   if(numberChips.length){
     chipRowEl.innerHTML = numberChips.map(c =>
-      `<span class="pick-filter-chip"><span class="pick-filter-chip-label">${escapeHtml(c.label)} = </span><span class="pick-filter-chip-num">${escapeHtml(c.num)}</span><span class="pick-filter-chip-label"> \u00b7 ${(c.label === 'Warmth' && payLocked()) ? payBlurHtml(c.value, 'Unlock your pass to see your skin tone.') : escapeHtml(c.value)}</span></span>` // (2026-11-04) skin tone hidden until paid
+      `<span class="pick-filter-chip"><span class="pick-filter-chip-label">${escapeHtml(c.label)} = </span><span class="pick-filter-chip-num">${escapeHtml(c.num)}</span><span class="pick-filter-chip-label"> \u00b7 ${(c.label === 'Warmth' && payLockedInfo()) ? payBlurHtml(c.value, 'Unlock your pass to see your skin tone.') : escapeHtml(c.value)}</span></span>` // (2026-11-04) skin tone hidden until paid
     ).join('');
   } else {
     const chips = [warmthDisplayLabel(profile), profile.depth_level, profile.contrast_level, profile.chroma_level].filter(Boolean);
-    chipRowEl.innerHTML = chips.map((c, i) => `<span class="pick-filter-chip">${(i === 0 && payLocked()) ? payBlurHtml(c, 'Unlock your pass to see your skin tone.') : escapeHtml(c)}</span>`).join('');
+    chipRowEl.innerHTML = chips.map((c, i) => `<span class="pick-filter-chip">${(i === 0 && payLockedInfo()) ? payBlurHtml(c, 'Unlock your pass to see your skin tone.') : escapeHtml(c)}</span>`).join('');
   }
 }
 const myShadeSwitchProfileBtn = document.getElementById('myShadeSwitchProfileBtn');
@@ -6933,7 +7065,12 @@ function renderMyShadeAxisBars(lab, target, itemType, hex){
   const rows = axes.map(a => {
     const zones = axisZonesFromClassifier(a.fn, a.lo, a.hi);
     let band = null, note = '', onLabels = null;
-    if(target && target.lookBand){ // (2026-11-05) Check My Shade lipstick: the band of her best-fitting look
+    if(target && target.paletteBand){ // (2026-11-22) clothing: her own palette's version of this color family
+      const f = target.paletteBand;
+      if(a.key === 'warmth') band = { from: f.bLo, to: f.bHi, txt: `your ${f.name}` };
+      else if(a.key === 'depth') band = { from: f.dLo, to: f.dHi, txt: `your range ${f.dLo.toFixed(0)}–${f.dHi.toFixed(0)}` };
+      else if(a.key === 'chroma') band = { from: f.lo, to: f.hi, txt: `your range ${f.lo.toFixed(0)}–${f.hi.toFixed(0)}` };
+    } else if(target && target.lookBand){ // (2026-11-05) Check My Shade lipstick: the band of her best-fitting look
       const bd = target.lookBand, nm = LOOK_NAMES[bd.look] || 'look';
       if(bd.look === 'all'){ // (2026-11-07) her whole lipstick range, Soft Look to Dramatic
         if(a.key === 'warmth') band = { from: bd.bLo, to: bd.bHi, txt: bd.cool ? `your side: cool to neutral (up to ${bd.bHi.toFixed(0)})` : `your side: neutral to warm (from ${bd.bLo.toFixed(0)})` };
@@ -6979,11 +7116,12 @@ function renderMyShadeAxisBars(lab, target, itemType, hex){
 }
 
 function renderMyShadeResult(rgb, pct, scored){
+  { const sp = document.querySelector('.brand-pick-box.sim-pick'); if(sp) sp.remove(); } // Find Similar's brand picker is not part of a fit check
   const hex = '#' + [rgb.r, rgb.g, rgb.b].map(v => v.toString(16).padStart(2,'0')).join('');
   document.getElementById('myShadeResultSwatch').style.background = hex;
   const pctEl = document.getElementById('myShadeResultPct');
   pctEl.textContent = pct + '%';
-  if(payLocked()) pctEl.innerHTML = payBlurHtml('88', 'Unlock your pass to see how well this color suits you.') + '<span class="pct-unit">% match</span>'; // (2026-11-02) only the number is hidden
+  if(payLockedInfo()) pctEl.innerHTML = payBlurHtml('88', 'Unlock your pass to see how well this color suits you.') + '<span class="pct-unit">% match</span>'; // (2026-11-02) only the number is hidden
   pctEl.style.display = '';
   const gridElReset = document.getElementById('myShadeSimilarGrid');
   if(gridElReset) gridElReset.innerHTML = '';
@@ -7076,6 +7214,24 @@ function renderSimilarShadeResults(rgb, macMatches, drugMatches){
   myShadeResultCard.classList.add('show');
   myShadeResultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
+let simBrandPick = '', simLinePick = '';
+function simBrandBoxEl(){
+  const brands = new Map();
+  SIMILAR_SHADE_CATALOG.forEach(s => { const p = splitBrandLine(s.brand_line); if(!brands.has(p.brandId)) brands.set(p.brandId, { name: p.brandId === 'mac' ? 'M·A·C' : p.brand, lines: new Set() }); brands.get(p.brandId).lines.add(p.line); });
+  const opt = (v, t, sel) => `<option value="${escapeHtml(v)}"${sel ? ' selected' : ''}>${escapeHtml(t)}</option>`;
+  const bOpts = opt('', 'All brands', !simBrandPick) + [...brands.entries()].sort((a, b) => a[1].name.localeCompare(b[1].name)).map(([id, b]) => opt(id, b.name, id === simBrandPick)).join('');
+  const cur = brands.get(simBrandPick);
+  const lOpts = opt('', 'All lines', !simLinePick) + (cur ? [...cur.lines].sort().map(l => opt(l, l, l === simLinePick)).join('') : '');
+  const box = document.createElement('div');
+  box.className = 'brand-pick-box sim-pick';
+  box.innerHTML = `<div class="brand-pick-head">Shopping one brand? <small>Optional</small></div>
+    <div class="brand-pick-row"><select class="brand-pick-brand" aria-label="Brand">${bOpts}</select><span class="brand-pick-arrow">→</span><select class="brand-pick-line" aria-label="Product line"${cur ? '' : ' disabled'}>${lOpts}</select></div>
+    <div class="brand-pick-note">${!simBrandPick ? 'Showing the closest shades from every brand.' : simLinePick ? 'The closest shades in this line.' : 'The closest shades from this brand.'}</div>`;
+  const rerender = () => { renderSimilarShadeTab(); const b = document.querySelector('.brand-pick-box.sim-pick'); if(b) b.scrollIntoView({ block: 'nearest' }); };
+  box.querySelector('.brand-pick-brand').addEventListener('change', e => { simBrandPick = e.target.value; simLinePick = ''; rerender(); });
+  box.querySelector('.brand-pick-line').addEventListener('change', e => { simLinePick = e.target.value; rerender(); });
+  return box;
+}
 function renderSimilarShadeTab(){
   if(!myShadeSimilarLast) return;
   const { rgb, macMatches, drugMatches } = myShadeSimilarLast;
@@ -7095,7 +7251,8 @@ function renderSimilarShadeTab(){
       renderSimilarShadeTab();
     }));
   }
-  const matches = macMatches; // merged top 3 (see renderSimilarShadeResults call)
+  const matches = simBrandPick ? findSimilarShades(rgb, 10, null, s => { const p = splitBrandLine(s.brand_line); return p.brandId === simBrandPick && (!simLinePick || p.line === simLinePick); }) : macMatches;
+  { const g = document.getElementById('myShadeTryOnCompare'); if(g && g.parentNode){ const old = g.parentNode.querySelector('.brand-pick-box.sim-pick'); if(old) old.remove(); g.parentNode.insertBefore(simBrandBoxEl(), g); } }
   renderMyShadeTryOn('similar', hex, matches);
   renderLoveOrNot('similar', hex, matches);
   if(!matches.length){
@@ -7152,7 +7309,8 @@ function renderSimilarShadeTab(){
 }
 
 let myShadeLastRun = null;
-function payLocked(){ return !isColorCheckActive(); }
+function payLocked(){ return !isColorCheckActive(); } // shade NAMES (Find Similar, lists) -- the only paid part
+function payLockedInfo(){ return false; } // (2026-11-24, per Nghi) % match, skin tone, every reading: free for everyone
 function payBlurHtml(placeholder, msg){
   return `<span class="pay-hid pay-blur" role="button" tabindex="0" data-pay-msg="${escapeHtml(msg)}" aria-label="${escapeHtml(msg)}" title="Unlock to see"><span class="pay-fake" aria-hidden="true">${escapeHtml(payFakeFor(placeholder))}</span><span class="pay-eye">${EYE_OFF_SVG}</span></span>`;
 }
@@ -7563,17 +7721,18 @@ analyzeBtn.addEventListener('click', async () => {
       await new Promise(r => setTimeout(r, 700));
       try{
         const freeResult = mergeMeasuredResult({ undertone: measurements.undertone_descriptive || measurements.undertone || '', explanation: '' }, measurements);
-        freeResult.explanation = freeColorStory(freeResult); // written on her device; the AI's own story replaces it after payment
+        freeResult.explanation = paidColorStory(freeResult);
         freeResult.image_mime_type = uploadedImage.mediaType;
-        startResultLock(freeResult);
-        currentSeasonResult = freeResult;
         const wantsLips = document.documentElement.getAttribute('data-fmbs-mode') === 'seasonShade' || (paywallCardEl && paywallCardEl.dataset.plan === 'seasonShade');
+        startResultLock(freeResult, true);
+        currentSeasonResult = freeResult;
+        { const rcp = document.getElementById('resultCard'); if(rcp) rcp.classList.remove('sr-prepay'); }
         renderSeasonResult(freeResult, { skipDebugHistory: true, forceShadeAccess: wantsLips });
         maskLockedResults();
-        const sd = document.getElementById('seasonDesc');
-        if(sd && !sd.querySelector('.pay-story')) sd.insertAdjacentHTML('beforeend', ` <span class="pay-hid pay-story" role="button" tabindex="0" aria-label="Your full color story. Unlock to read it." title="Unlock to read"><span class="pay-fake" aria-hidden="true">${PAY_LOREM_LONG}</span><span class="pay-eye">${EYE_OFF_SVG}</span></span>`);
-      }catch(e){ console.error('[Locked reading] render failed', e); }
-      showPrepayPresent();
+        readingOk = true;
+        { const rc = document.getElementById('resultCard'); if(rc){ rc.classList.add('show', 'sr-locked'); document.body.classList.add('sr-hold'); const rb = document.getElementById('seasonReveal'); if(rb) rb.setAttribute('aria-label', 'Your reading is ready. Tap to unbox.'); setTimeout(() => { if(!gpOpen) rc.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 200); } } // (2026-11-24, per Nghi) keep the gift box: it opens free
+        if(!wantsLips){ stopResultLock(); setPhotoLock(false); preflightCache = null; } // season-only: nothing to unlock
+      }catch(e){ console.error('[Free reading] render failed', e); }
       return; // the finally block below hides the loading state and re-enables the button
     }
 
@@ -8100,24 +8259,25 @@ function metricRingSVG(value, max, size){
 function metricRowHTML(opts){
   const max = opts.max;
   const pct = (v) => Math.max(0, Math.min(100, (v / max) * 100));
-  const ticks = (opts.zones || []).map(z => `<div class="metric-tick" style="left:${pct(z)}%;"></div>`).join('');
+  const ticks = ''; // (2026-11-24, per Nghi) threshold dashes hidden
   const markerPct = pct(opts.value);
   const stops = [opts.gradientFrom, opts.gradientMid, opts.gradientTo].filter(Boolean).map(hexToRgb);
   const seg = (stops.length - 1) * markerPct / 100, k = Math.min(stops.length - 2, Math.floor(seg)), f = seg - k;
   const mix = ['r', 'g', 'b'].map(c => Math.round(stops[k][c] + (stops[k + 1][c] - stops[k][c]) * f));
   const pillBg = rgbToHex(mix[0], mix[1], mix[2]);
   const pillInk = (0.299 * mix[0] + 0.587 * mix[1] + 0.114 * mix[2]) > 160 ? '#3a1f22' : '#ffffff';
-  if(opts.chips) opts.chips.push(`<span class="metric-pill" style="background:${pillBg};color:${pillInk};">${opts.chipText || opts.categoryText || 'N/A'}</span>`);
+  const pill = `<span class="metric-pill" style="background:${pillBg};color:${pillInk};">${opts.chipText || opts.categoryText || 'N/A'}</span>`; // (2026-11-24) sits where the ring was
   return `<div class="metric-row">
     <div class="metric-icon">${opts.icon}</div>
     <div class="metric-body">
       <div class="metric-top">
         <span class="metric-name">${opts.name}</span>
-        ${metricRingSVG(opts.value, max)}
+        ${pill}
       </div>
       <div class="metric-track" style="background:linear-gradient(to right, ${opts.gradientFrom}, ${opts.gradientMid ? opts.gradientMid + ', ' : ''}${opts.gradientTo});">
         ${ticks}
         <div class="metric-marker" style="left:${markerPct}%;"></div>
+        <div class="metric-val" style="left:${markerPct}%;">${opts.value}</div>
       </div>
       <div class="metric-poles"><span>${opts.poleLeft}</span><span>${opts.poleRight}</span></div>
 
@@ -8156,20 +8316,6 @@ function renderColorAnalysis(result){
     gradientFrom: '#3c2420', gradientMid: '#b8826a', gradientTo: '#f6e1d6', poleLeft: 'Deep', poleRight: 'Light'
   });
 
-  const lightnessPct = Math.max(0, Math.min(100, (result.lightness / 100) * 100));
-  const darknessPct = Math.max(0, Math.min(100, (result.darkness / 100) * 100));
-  html += `<div class="metric-subrow">
-    <div class="sub">
-      <div class="sub-label">Lightness<br>(skin &amp; sclera)</div>
-      <div class="sub-track"><div class="sub-fill" style="width:${lightnessPct}%;"></div></div>
-      <div class="sub-value">${result.lightness}</div>
-    </div>
-    <div class="sub">
-      <div class="sub-label">Darkness<br>(iris &amp; brow)</div>
-      <div class="sub-track"><div class="sub-fill" style="width:${darknessPct}%;"></div></div>
-      <div class="sub-value">${result.darkness}</div>
-    </div>
-  </div>`;
   html += metricRowHTML({
     icon: iconContrastCircle(ANALYSIS_ROSE), name: 'Contrast',
     value: result.contrast_score, max: 80,
@@ -8187,7 +8333,6 @@ function renderColorAnalysis(result){
     categoryText: result.chroma_level, chips, chipText: `${result.chroma_level} chroma`,
     gradientFrom: '#a99091', gradientMid: '#c46b78', gradientTo: '#e0234f', poleLeft: 'Muted', poleRight: 'Vivid'
   });
-  html += `<div class="metric-chips">${chips.join('')}</div>`;
   { const on = oliveNoteHtml(result); if(on) html += `<div class="olive-note">${on}</div>`; }
 
   metricsHolder.innerHTML = html;
@@ -8336,6 +8481,7 @@ function renderSeasonResult(result, opts){
     brandSection.style.display = 'none';
     if(shadeFeedbackBlockEl) shadeFeedbackBlockEl.style.display = 'none';
   }
+  renderLipUpsell(result, !hasShadeAccess);
   if(!(opts && opts.skipDebugHistory)) resetThumbs(['season','shade']); // a fresh reading gets fresh thumbs
   fmbsAfterSeasonResult(result, !(opts && opts.skipDebugHistory));
 }
@@ -8501,7 +8647,7 @@ function renderColorsOnYou(result, swatchSets){
     const panel = host.closest('.pal-panel');
     const onShow = (it) => { if(!panel) return; const hx = String(it.hex).toLowerCase();
       panel.querySelectorAll('.palette-chip').forEach(c => c.classList.toggle('on', String(c.dataset.hex).toLowerCase() === hx)); };
-    const ok = mountTryOnCarousel(host, src, items, { count: false, fav: true, auto: true, interval: 2500, stopOnUser: true, cue: false, onShow });
+    const ok = mountColorCircle(host, (swatchSets.clothing || []).slice(0, 28).map(c => c.hex), metals, panel); void onShow; // (2026-11-24) circle, like Live mode
     if(!ok){ host.style.display = 'none'; return; }
   });
 }
@@ -9184,7 +9330,8 @@ function drawReportPages(){
         sgFillCircle(ctx, lx + 9, ly - 4, 9, s.hex);
         sgText(ctx, String(k + 1), lx + 9, ly, { font: `500 10px ${RP_SERIF}`, color: tryOnTextColor(s.hex), align: 'center' });
         let line = ''; try{ line = brandLineDisplayPlain(splitBrandLine(s.brand_line)).replace(/ · /g, ' '); }catch(e){}
-        sgText(ctx, rpFit(ctx, s.name, `500 13px ${RP_SERIF}`, tw), lx + 24, ly - 1, { font: `500 13px ${RP_SERIF}`, color: RP_INK, align: 'left' });
+        if(resultLock) sgText(ctx, 'Unlock to see the name', lx + 24, ly - 1, { font: `italic 500 12px ${RP_SERIF}`, color: RP_SOFT, align: 'left' }); // (2026-11-24) names are the paid part
+        else sgText(ctx, rpFit(ctx, s.name, `500 13px ${RP_SERIF}`, tw), lx + 24, ly - 1, { font: `500 13px ${RP_SERIF}`, color: RP_INK, align: 'left' });
         sgText(ctx, rpFit(ctx, line, `400 10px ${SG_WORKSANS}`, tw), lx + 24, ly + 10, { font: `400 10px ${SG_WORKSANS}`, color: RP_SOFT, align: 'left' });
       });
     });
@@ -9718,6 +9865,22 @@ function computeCustomerLabFromResult(result){
   return lab;
 }
 
+function renderLipUpsell(result, show){
+  const box = document.getElementById('lipUpsell'); if(!box) return;
+  box.style.display = show ? '' : 'none';
+  if(!show) return;
+  let cols = [];
+  try{ const lab = computeCustomerLabFromResult(result); LOOK_RESULT = result; const L = bestShadeLooks(lab, result.chroma_level, result.contrast_level, result.family); ['soft', 'natural', 'dramatic'].forEach(k => (L[k] || []).slice(0, 3).forEach(sh => cols.push(sh.hex))); }catch(e){} finally { LOOK_RESULT = null; }
+  const sw = document.getElementById('lipUpsellSwatches'); if(sw) sw.innerHTML = cols.map(h => `<i style="background:${h}"></i>`).join('');
+}
+document.addEventListener('click', e => {
+  if(!(e.target.closest && e.target.closest('#lipUpsellBtn')) || !currentSeasonResult) return;
+  try{ window.fmbsSetMode && window.fmbsSetMode('seasonShade'); }catch(err){}
+  if(!getPurchase() || getPurchase().tier !== 'seasonShade'){ if(!resultLock) startResultLock(currentSeasonResult, true); }
+  renderSeasonResult(currentSeasonResult, { skipDebugHistory: true, forceShadeAccess: true });
+  if(resultLock) maskLockedResults();
+  setTimeout(() => { const b = document.getElementById('brandSection'); if(b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 150);
+});
 function showBestShadeMatches(result){
   if(!result || !result.estimated_skin_rgb) return;
   hideError(errorBox2);
@@ -9856,6 +10019,111 @@ function tocTitleCase(n){
   n = String(n || '');
   if(n !== n.toUpperCase()) return n;
   return n.toLowerCase().replace(/(^|[\s(\-])([a-z\u00e0-\u00ff])/g, (m, p, c) => p + c.toUpperCase()).replace(/m\u00b7a\u00b7c/gi, 'M\u00b7A\u00b7C');
+}
+
+function ccFace(){ try{ return rpFaceSource(); }catch(e){ return null; } }
+function ccSolid(cx, S, col, face, metal){
+  const R = S / 2 - 10, r = S * 0.30;
+  cx.clearRect(0, 0, S, S);
+  let fill = col;
+  if(metal){ const g = cx.createRadialGradient(S / 2 - R * 0.3, S / 2 - R * 0.4, 10, S / 2, S / 2, R); g.addColorStop(0, lightenHex(col, 35)); g.addColorStop(0.55, col); g.addColorStop(1, darkenHex(col, 25)); fill = g; }
+  cx.beginPath(); cx.arc(S / 2, S / 2, R, 0, Math.PI * 2); cx.arc(S / 2, S / 2, r, Math.PI * 2, 0, true); cx.closePath(); cx.fillStyle = fill; cx.fill();
+  cx.beginPath(); cx.arc(S / 2, S / 2, r, 0, Math.PI * 2); cx.fillStyle = '#fff'; cx.fill();
+  cx.save(); cx.beginPath(); cx.arc(S / 2, S / 2, r - 6, 0, Math.PI * 2); cx.clip();
+  if(face){ try{ cx.drawImage(face.img, face.sx, face.sy, face.side, face.side, S / 2 - r + 6, S / 2 - r + 6, (r - 6) * 2, (r - 6) * 2); }catch(e){} }
+  cx.restore();
+  cx.beginPath(); cx.arc(S / 2, S / 2, R, 0, Math.PI * 2); cx.lineWidth = 4; cx.strokeStyle = '#fff'; cx.stroke();
+}
+function ccWheel(cx, S, cols, face){
+  cx.clearRect(0, 0, S, S); rpWheel(cx, S / 2, S / 2, S / 2 - 10, S * 0.30, cols, face, false);
+  cx.beginPath(); cx.arc(S / 2, S / 2, S / 2 - 10, 0, Math.PI * 2); cx.lineWidth = 4; cx.strokeStyle = '#fff'; cx.stroke();
+}
+function mountColorCircle(host, wheel, metals, scope){
+  if(!host || !wheel || !wheel.length) return false;
+  const face = ccFace(); if(!face) return false;
+  metals = metals || [];
+  host.innerHTML = `<div class="cc"><div class="cc-wheel"><canvas width="560" height="560"></canvas></div>${metals.length ? `<div class="cc-metals">${metals.map(m => `<span><i style="background:radial-gradient(circle at 35% 30%, ${lightenHex(m.hex, 35)}, ${m.hex} 55%, ${darkenHex(m.hex, 25)})"></i>${escapeHtml(m.name)}</span>`).join('')}</div>` : ''}<div class="cc-cap">Tap a color below to see it all around you</div></div>`;
+  const cv = host.querySelector('canvas'), cx = cv.getContext('2d');
+  let cur = null;
+  const paint = () => {
+    const m = cur && metals.find(x => String(x.hex).toLowerCase() === cur);
+    if(cur) ccSolid(cx, 560, cur, face, !!m); else ccWheel(cx, 560, wheel, face);
+    const cap = host.querySelector('.cc-cap'); if(cap) cap.textContent = cur ? (m ? m.name : 'Tap again to see all your colors') : 'Tap a color below to see it all around you';
+    if(scope) scope.querySelectorAll('.palette-chip').forEach(c => c.classList.toggle('on', !!cur && String(c.dataset.hex).toLowerCase() === cur));
+  };
+  host._tocShow = hex => { const k = String(hex || '').toLowerCase(); cur = (cur === k) ? null : k; paint(); return true; };
+  host.querySelector('.cc-wheel').addEventListener('click', () => { if(cur){ cur = null; paint(); } });
+  paint();
+  return true;
+}
+function mountCircleCompare(host, sets, pairs, metals){
+  const face = ccFace(); if(!host || !face || !sets.length) return false;
+  host.innerHTML = `<div class="cc">
+      <div class="cc-cmp"><canvas class="ca" width="560" height="560"></canvas><canvas class="cb" width="560" height="560"></canvas><div class="cc-split"><i class="t"></i><i class="b"></i><span class="cc-grip" aria-hidden="true">↔</span></div></div>
+      <div class="cc-mlab"><span></span><span></span></div>
+      <div class="cc-btns">${sets.map((st, i) => `<button type="button" class="${i ? 'no' : 'ok'}" data-i="${i}">${escapeHtml(st.label)}</button>`).join('')}</div>
+      <div class="cc-strip"><div class="cc-strip-c">${pairs.map(p => `<i style="background:${p.a}"${p.metal ? ' class="m"' : ''}></i>`).join('')}</div><span class="cc-knob"></span></div>
+    </div>`;
+  const box = host.querySelector('.cc-cmp'), ca = box.querySelector('.ca').getContext('2d'), cb = box.querySelector('.cb').getContext('2d');
+  const knob = host.querySelector('.cc-knob'), mlab = host.querySelectorAll('.cc-mlab span');
+  let other = 1;
+  const drawAll = i => {
+    if(i) other = i;
+    ccWheel(ca, 560, sets[0].cols, face); ccWheel(cb, 560, sets[other].cols, face);
+    host.querySelectorAll('.cc-btns button').forEach(b => b.classList.toggle('on', +b.dataset.i === 0 || +b.dataset.i === other));
+    knob.style.display = 'none';
+    mlab[0].textContent = metals ? metals.a : ''; mlab[1].textContent = metals ? metals.b : '';
+  };
+  const drawPair = i => {
+    const p = pairs[i]; if(!p) return;
+    host.querySelectorAll('.cc-btns button').forEach(b => b.classList.remove('on'));
+    knob.style.display = ''; knob.style.left = ((i + 0.5) / pairs.length * 100) + '%';
+    ccSolid(ca, 560, p.a, face, p.metal); ccSolid(cb, 560, p.b, face, p.metal);
+    mlab[0].textContent = p.an || p.la || ''; mlab[1].textContent = p.bn || p.lb || '';
+  };
+  host.querySelectorAll('.cc-btns button').forEach(b => b.addEventListener('click', () => drawAll(+b.dataset.i)));
+  let split = 50, sdrag = false;
+  const setSplit = v => { split = Math.max(0, Math.min(100, v)); box.querySelector('.cb').style.clipPath = `inset(0 0 0 ${split}%)`; box.querySelector('.cc-split').style.left = split + '%';
+    const Ro = (280 - 10) / 560 * 100, Rf = (560 * 0.30 - 6) / 560 * 100, dx = split - 50;
+    const outer = Math.abs(dx) < Ro ? Math.sqrt(Ro * Ro - dx * dx) : 0, inner = Math.abs(dx) < Rf ? Math.sqrt(Rf * Rf - dx * dx) : 0;
+    const t = box.querySelector('.cc-split .t'), bb = box.querySelector('.cc-split .b');
+    t.style.top = (50 - outer) + '%'; t.style.height = Math.max(0, outer - inner) + '%';
+    { const g = box.querySelector('.cc-grip'); if(g) g.style.top = (50 + (outer + inner) / 2) + '%'; } // (2026-11-24) the hand sits on the lower half of the line, on the ring
+    bb.style.top = (50 + inner) + '%'; bb.style.height = Math.max(0, outer - inner) + '%'; };
+  const sAt = e => { const rr = box.getBoundingClientRect(); setSplit((e.clientX - rr.left) / rr.width * 100); };
+  const nearLine = e => { const rr = box.getBoundingClientRect(); return Math.abs((e.clientX - rr.left) - split / 100 * rr.width) < 28; };
+  box.addEventListener('pointerdown', e => { if(!nearLine(e)) return; box.classList.add('dragged'); sdrag = true; box.setPointerCapture(e.pointerId); sAt(e); e.preventDefault(); });
+  box.addEventListener('pointermove', e => { if(sdrag) sAt(e); else box.style.cursor = nearLine(e) ? 'ew-resize' : 'default'; });
+  box.addEventListener('pointerup', () => { sdrag = false; });
+  setSplit(50);
+  const strip = host.querySelector('.cc-strip'); let dragging = false, cur = -1;
+  const at = e => { const rr = strip.getBoundingClientRect(); const i = Math.max(0, Math.min(pairs.length - 1, Math.floor((e.clientX - rr.left) / rr.width * pairs.length))); if(i !== cur || knob.style.display === 'none'){ cur = i; drawPair(i); } };
+  strip.addEventListener('pointerdown', e => { dragging = true; strip.setPointerCapture(e.pointerId); at(e); });
+  strip.addEventListener('pointermove', e => { if(dragging) at(e); });
+  strip.addEventListener('pointerup', () => { dragging = false; });
+  drawAll(1);
+  return true;
+}
+function mountLipCircle(host, list){
+  const face = ccFace(); if(!host || !face || !list.length) return false;
+  host.innerHTML = `<div class="cc cc-lip"><button type="button" class="cc-arrow l" aria-label="Previous shade">‹</button><div class="cc-wheel"><canvas width="560" height="560"></canvas></div><button type="button" class="cc-arrow r" aria-label="Next shade">›</button>
+    <div class="cc-lname"></div><div class="cc-lbrand"></div><div class="cc-ldots">${list.map((s, i) => `<button type="button" data-i="${i}" style="background:${s.hex}" aria-label="Shade ${i + 1}"></button>`).join('')}</div></div>`;
+  const cx = host.querySelector('canvas').getContext('2d');
+  let i = 0;
+  const show = k => { i = (k + list.length) % list.length; const s = list[i];
+    ccSolid(cx, 560, s.hex, face, false);
+    host.querySelector('.cc-lname').textContent = `${i + 1}. ${tocTitleCase(s.name)}`;
+    host.querySelector('.cc-lbrand').textContent = brandLineDisplayPlain(splitBrandLine(s.brand_line));
+    host.querySelectorAll('.cc-ldots button').forEach((b, n) => b.classList.toggle('on', n === i)); };
+  host._lipShow = k => show(k);
+  host.querySelector('.cc-arrow.l').addEventListener('click', () => show(i - 1));
+  host.querySelector('.cc-arrow.r').addEventListener('click', () => show(i + 1));
+  host.querySelectorAll('.cc-ldots button').forEach(b => b.addEventListener('click', () => show(+b.dataset.i)));
+  let x0 = null; const wh = host.querySelector('.cc-wheel');
+  wh.addEventListener('pointerdown', e => { x0 = e.clientX; });
+  wh.addEventListener('pointerup', e => { if(x0 != null && Math.abs(e.clientX - x0) > 40) show(i + (e.clientX < x0 ? 1 : -1)); x0 = null; });
+  show(0);
+  return true;
 }
 function mountTryOnCarousel(host, src, items, opts){
   opts = opts || {};
@@ -10018,7 +10286,6 @@ function renderShadeMatches(looks){
     tabBar.appendChild(b);
   });
   shadePodium.appendChild(tabBar);
-  if(!document.body.classList.contains('hearted')) shadePodium.insertAdjacentHTML('beforeend', LIP_HINT_HTML);
   const tryOnSrc = tryOnSource('season');
   const matches = (tabs.find(t => t.key === currentShadeTab) || tabs[0]).list;
   if(matches.length === 0){
@@ -10034,7 +10301,7 @@ function renderShadeMatches(looks){
   if(tryOnSrc && sorted.length){
     tocHost = document.createElement('div');
     shadePodium.appendChild(tocHost);
-    if(!mountTryOnCarousel(tocHost, tryOnSrc, sorted.map(s => ({ hex: s.hex, label: tocTitleCase(s.name), sub: brandLineDisplayPlain(splitBrandLine(s.brand_line)) })), { count: false, fav: 'lipstick' })){
+    if(!mountLipCircle(tocHost, sorted)){ // (2026-11-24, per Nghi) one shade at a time on a circle; no love-it / not-for-me
       tocHost.remove(); tocHost = null;
     }
   }
@@ -10066,10 +10333,12 @@ function renderShadeMatches(looks){
         ${buyUrl ? `<div class="shade-result-shop">Buy now →</div>` : ''}
       </div>
     `;
-    if(buyUrl){
-      row.addEventListener('click', () => window.open(buyUrl, '_blank', 'noopener'));
-    }
-    if(!tocHost){
+    row.addEventListener('click', e => {
+      if(e.target.closest('.pay-hid')) return;
+      if(buyUrl && e.target.closest('.shade-result-shop')){ window.open(buyUrl, '_blank', 'noopener'); return; }
+      if(tocHost && tocHost._lipShow){ tocHost._lipShow(i); const r = tocHost.getBoundingClientRect(); if(r.top < 60 || r.bottom > window.innerHeight) tocHost.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+    });
+    if(false){
       row.appendChild(favHeartButton({ hex: s.hex, name: tocTitleCase(s.name), sub: brandLineDisplayPlain(parts), kind: 'lipstick' }));
       row.appendChild(nopeButton(row, { hex: s.hex, name: tocTitleCase(s.name), sub: brandLineDisplayPlain(parts) }));
     }
@@ -10315,7 +10584,8 @@ function renderDrainPalette(result){
   const items = clothing.concat(lips).map(hx => ({ hex: hx, label: '', name: '', sub: 'Drains you' }));
   const onShow = (it) => { const hx = String(it.hex).toLowerCase();
     wrap.querySelectorAll('.palette-chip').forEach(c => c.classList.toggle('on', String(c.dataset.hex).toLowerCase() === hx)); };
-  if(!src || !mountTryOnCarousel(host, src, items, { count: false, auto: true, interval: 2500, stopOnUser: true, cue: false, onShow })) host.style.display = 'none';
+  void onShow; void items;
+  if(!src || !mountColorCircle(host, clothing.slice(0, 28), lastDrainMetals || [], wrap)) host.style.display = 'none';
   else host.style.display = '';
 }
 document.addEventListener('click', (e) => {
@@ -10618,7 +10888,8 @@ function openPrepayPaywall(){
   const rb = document.getElementById('seasonReveal');
   if(rb){ rb.classList.remove('sr-wiggle'); void rb.offsetWidth; rb.classList.add('sr-wiggle'); }
   const d = document.getElementById('paywallDesc');
-  if(d) d.innerHTML = (paywallCardEl && paywallCardEl.dataset.plan === 'season') ? 'Unlock to open your season and personal colors.' : 'Unlock to open your season and best lipsticks.';
+  if(resultLock && resultLock.namesOnly && paywallCardEl) paywallCardEl.dataset.plan = 'seasonShade'; // (2026-11-24) the names are the only paid part
+  if(d) d.innerHTML = (resultLock && resultLock.namesOnly) ? 'Unlock to see the names of your best lipsticks.' : (paywallCardEl && paywallCardEl.dataset.plan === 'season') ? 'Unlock to open your season and personal colors.' : 'Unlock to open your season and best lipsticks.';
   showPaywallTeaser();
   if(paywallCardEl){ paywallCardEl.classList.add('show'); setTimeout(() => paywallCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' }), 350); }
 }
@@ -10668,9 +10939,9 @@ const LOCK_PCT_ZONES = '#runnerSection, #colorAnalysisSection, #resultCard';
 const LOCK_WARM_ZONES = '#runnerSection, #drainSection, .rule-card';
 const WARM_TEXT_RE = /\b(?:\(?olive\)?\s+)?(?:cool|warm|neutral)(?:-neutral)?(?:\s+(?:rosy|golden|peachy|pink|olive))?\b|\bolive\b/gi;
 const EYE_OFF_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6.5 9.5-6.5S21.5 12 21.5 12s-3.5 6.5-9.5 6.5S2.5 12 2.5 12Z"/><circle cx="12" cy="12" r="3"/><path d="M4 4l16 16"/></svg>';
-function startResultLock(result){
-  resultLock = { names: new Set() }; // lipstick names are learned from the podium after it renders
-  document.body.classList.add('res-locked');
+function startResultLock(result, namesOnly){
+  resultLock = { names: new Set(), namesOnly: !!namesOnly }; // lipstick names are learned from the podium after it renders
+  if(!namesOnly) document.body.classList.add('res-locked');
   if(!resultLockObs){
     resultLockObs = new MutationObserver(() => { if(!resultLock || resultLockQueued) return; resultLockQueued = true; requestAnimationFrame(() => { resultLockQueued = false; maskLockedResults(); }); });
   }
@@ -10691,9 +10962,9 @@ function maskLockedResults(){
   try{
     document.querySelectorAll('#brandSection .shade-result-name').forEach(el => { const t = el.textContent.trim(); if(t && !el.querySelector('.pay-eye')){ resultLock.names.add(t); resultLock.names.add(tocTitleCase(t)); } });
     document.querySelectorAll('#brandSection .shade-result-name').forEach(el => { if(!el.querySelector('.pay-hid')) el.innerHTML = eyeHtml(el.textContent.trim()); });
-    { const sf = document.getElementById('seasonFamily'); if(sf && sf.textContent.trim() && !sf.querySelector('.pay-hid')) sf.innerHTML = eyeHtml(sf.textContent.trim()); }
-    { const sd = document.getElementById('seasonDesc'); const st = sd && /^\s*Your coloring has/.test(sd.textContent) ? sd.querySelector('strong') : null; if(st && !st.querySelector('.pay-hid')) st.innerHTML = eyeHtml(st.textContent); }
-    { const wc = document.querySelector('#cielabMetrics .metric-chips .metric-pill'); if(wc && !wc.querySelector('.pay-hid')){ wc.innerHTML = eyeHtml(wc.textContent); wc.style.color = ''; } }
+    if(!resultLock.namesOnly){ const sf = document.getElementById('seasonFamily'); if(sf && sf.textContent.trim() && !sf.querySelector('.pay-hid')) sf.innerHTML = eyeHtml(sf.textContent.trim()); }
+    if(!resultLock.namesOnly){ const sd = document.getElementById('seasonDesc'); const st = sd && /^\s*Your coloring has/.test(sd.textContent) ? sd.querySelector('strong') : null; if(st && !st.querySelector('.pay-hid')) st.innerHTML = eyeHtml(st.textContent); }
+    if(!resultLock.namesOnly){ const wc = document.querySelector('#cielabMetrics .metric-chips .metric-pill'); if(wc && !wc.querySelector('.pay-hid')){ wc.innerHTML = eyeHtml(wc.textContent); wc.style.color = ''; } }
     const names = [...resultLock.names].filter(n => n && n.length > 2).sort((a, b) => b.length - a.length).map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
     const nameRe = names.length ? new RegExp(names.join('|'), 'g') : null;
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, { acceptNode: n => {
@@ -10702,6 +10973,7 @@ function maskLockedResults(){
     const hits = [];
     let n; while((n = walker.nextNode())){
       const v = n.nodeValue, inPct = !!n.parentElement.closest(LOCK_PCT_ZONES);
+      if(resultLock.namesOnly){ if(nameRe && (nameRe.lastIndex = 0, nameRe.test(v))) hits.push([n, null, null]); continue; }
       SEASON_TEXT_RE.lastIndex = 0; PCT_TEXT_RE.lastIndex = 0;
       const pctRe = n.parentElement.closest('#brandSection') ? null : (inPct ? PCT_TEXT_RE : /\b\d{1,3}(?:\.\d+)?\s?%\s+(?:match(?:ing)?|fit)/g); // lipstick % shows (2026-11-05)
       const warmRe = n.parentElement.closest(LOCK_WARM_ZONES) ? WARM_TEXT_RE : null;
@@ -10712,7 +10984,7 @@ function maskLockedResults(){
       const mark = '\u0000';
       const found = [];
       const take = re => { if(!re) return; re.lastIndex = 0; v = v.replace(re, m => { found.push(m); return mark; }); };
-      if(nameRe) take(nameRe); take(SEASON_TEXT_RE); take(pctRe); take(warmRe);
+      if(nameRe) take(nameRe); if(!resultLock.namesOnly) take(SEASON_TEXT_RE); take(pctRe); take(warmRe);
       const pe = node.parentElement;
       if(pe && pe.closest('svg')){ node.nodeValue = v.split(mark).join('•••'); return; }
       const orig = node.nodeValue, pieces = [];
@@ -10727,7 +10999,7 @@ function maskLockedResults(){
     });
     document.querySelectorAll('[aria-label], [title], img[alt]').forEach(el => {
       if(el.closest(LOCK_SKIP)) return;
-      ['aria-label', 'title', 'alt'].forEach(a => { const v = el.getAttribute(a); if(!v) return; SEASON_TEXT_RE.lastIndex = 0; if(SEASON_TEXT_RE.test(v) || (nameRe && (nameRe.lastIndex = 0, nameRe.test(v)))) el.setAttribute(a, 'Hidden until unlocked'); });
+      ['aria-label', 'title', 'alt'].forEach(a => { const v = el.getAttribute(a); if(!v) return; SEASON_TEXT_RE.lastIndex = 0; if((!resultLock.namesOnly && SEASON_TEXT_RE.test(v)) || (nameRe && (nameRe.lastIndex = 0, nameRe.test(v)))) el.setAttribute(a, 'Hidden until unlocked'); });
     });
   }catch(e){ console.error('[Locked reading] mask failed', e); }
   if(resultLockObs && resultLock) resultLockObs.observe(document.body, { childList: true, subtree: true, characterData: true });
@@ -10738,7 +11010,7 @@ function openLockedPaywall(){
 document.addEventListener('click', (e) => {
   if(!resultLock) return;
   const eye = e.target.closest && e.target.closest('.pay-hid:not(.pay-blur), .pay-eye:not(.pay-blur)'); // .pay-blur = Check My Shade / Find Similar (their own paywall)
-  const dl = e.target.closest && e.target.closest('#downloadBothBtn, #sharePaletteBtn, #voiceShareBtn, #exitNudgeDownloadBtn, #homeResetDownload, .palette-download-btn, .palette-share-btn');
+  const dl = !resultLock.namesOnly && e.target.closest && e.target.closest('#downloadBothBtn, #sharePaletteBtn, #voiceShareBtn, #exitNudgeDownloadBtn, #homeResetDownload, .palette-download-btn, .palette-share-btn');
   if(!eye && !dl) return;
   e.preventDefault(); e.stopPropagation();
   openLockedPaywall();
@@ -10977,7 +11249,7 @@ const FAMILY_ICON = {
 };
 function renderSeasonsMap(result){
   const el = document.getElementById('seasonsMap'); if(!el) return;
-  const mine = resultLock ? '' : ((result && (result.shadeMatchSeason || result.season)) || '');
+  const mine = (resultLock && !resultLock.namesOnly) ? '' : ((result && (result.shadeMatchSeason || result.season)) || '');
   const wheel = name => { try{
       const pal = (generateClothingPalette(name) || []).map(c => { const l = rgbToLab(hexToRgb(c.hex)); return { hex: c.hex, C: Math.hypot(l.a, l.b), L: l.L, h: (Math.atan2(l.b, l.a) * 180 / Math.PI + 360) % 360 }; });
       const chrom = pal.filter(c => c.C >= 10).sort((x, y) => ((x.h + 330) % 360) - ((y.h + 330) % 360));
@@ -11022,7 +11294,7 @@ function seasonExplainHtml(result, part){
   </div>`;
 }
 
-let tierAxis = 'warmth', tierResult = null;
+let tierAxis = 'overall', tierResult = null;
 const TIER_ORDER = { depth: ['Light', 'Medium', 'Deep'], chroma: ['Muted', 'Balanced', 'Vivid'], warmth: ['Cool', 'Warm'] };
 function tierFromReading(label, score, cuts, order){
   const parts = String(label || '').split(/-to-|-/).map(t => t.trim()).filter(t => order.includes(t));
@@ -11087,7 +11359,7 @@ function renderTierCompare(){
   const data = lastStyleGuideData, src = tryOnSource('season');
   if(!result || !src || !data || !data.clothing || !data.clothing.length){ sec.style.display = 'none'; return; }
   const her = herTiers(result);
-  const tiers = { warmth: ['Warm', 'Cool'], depth: ['Light', 'Medium', 'Deep'], chroma: ['Muted', 'Balanced', 'Vivid'] }[tierAxis];
+  const tiers = { warmth: ['Warm', 'Cool'], depth: ['Light', 'Medium', 'Deep'], chroma: ['Muted', 'Balanced', 'Vivid'] }[tierAxis] || [];
   const mine = tierLabel(her, tierAxis), others = tiers.filter(t => !isHerTier(her, tierAxis, t));
   const sideSign = her.warmth === 'Warm' ? 1 : -1;
   const pool = data.clothing.map(c => ({ c, lab: rgbToLab(hexToRgb(c.hex)) }))
@@ -11098,7 +11370,25 @@ function renderTierCompare(){
   const both = tierAxis === 'warmth' && her.warmthBoth, otherSide = her.warmth === 'Warm' ? 'Cool' : 'Warm';
   if(both) bases.forEach(hex => pairs.push({ l: hex, r: shiftTier(hex, 'warmth', her.warmth, otherSide), lt: `${her.warmth} ✓`, rt: `${otherSide} ✓` }));
   else others.forEach(t => bases.forEach(hex => pairs.push({ l: hex, r: shiftTier(hex, tierAxis, mine, t), lt: `Your ${mine}`, rt: t })));
-  if(!pairs.length || !mountCompareSlider(document.getElementById('runnerCompare'), src, pairs, both ? `${her.warmth} ✓` : `Your ${mine}`, both ? `${otherSide} ✓` : others[0])){ sec.style.display = 'none'; return; }
+  const herCols = data.clothing.slice(0, 28).map(c => c.hex);
+  let sets, cpairs;
+  if(tierAxis === 'overall'){
+    const { her: h2, opp } = oppositeTiers(result);
+    const dr = herCols.map(hx => drainShift(hx, h2, opp));
+    sets = [{ label: 'Yours ✓', cols: herCols }, { label: 'Not yours ✕', cols: dr }];
+    cpairs = herCols.map((hx, i) => ({ a: hx, b: dr[i] }));
+    const mm = (data.jewelry && data.jewelry.metals) || [], dm = lastDrainMetals || [];
+    for(let k = 0; k < Math.max(mm.length, dm.length); k++){ const x = mm[k] || mm[0], y = dm[k] || dm[0]; if(x && y) cpairs.push({ a: x.hex, b: y.hex, an: x.name, bn: y.name, metal: true }); }
+    const ok = mountCircleCompare(document.getElementById('runnerCompare'), sets, cpairs, { a: mm.map(m => m.name).join(' · '), b: dm.map(m => m.name).join(' · ') });
+    if(!ok){ sec.style.display = 'none'; return; }
+    document.getElementById('runnerCaption').innerHTML = `${magnifierIcon()} Your 28 colors and metals · <strong>vs the ones that drain you</strong>`;
+    sec.style.display = 'block'; return;
+  }
+  const rights = both ? [otherSide] : others;
+  sets = [{ label: both ? `${her.warmth} ✓` : `Your ${mine}`, cols: herCols }].concat(rights.map(t => ({ label: both ? `${t} ✓` : t, cols: herCols.map(hx => shiftTier(hx, tierAxis, both ? her.warmth : mine, t)) })));
+  cpairs = herCols.map((hx, i) => ({ a: hx, b: sets[1].cols[i], la: sets[0].label, lb: sets[1].label }));
+  void pairs;
+  if(!mountCircleCompare(document.getElementById('runnerCompare'), sets, cpairs, null)){ sec.style.display = 'none'; return; }
   const fixed = { warmth: 'depth and chroma', depth: 'warmth and chroma', chroma: 'warmth and depth' }[tierAxis];
   const axisWord = { warmth: 'warmth', depth: 'depth', chroma: 'chroma' }[tierAxis];
   document.getElementById('runnerCaption').innerHTML = both
@@ -11106,7 +11396,8 @@ function renderTierCompare(){
     : `${magnifierIcon()} Same color · only <strong>${axisWord[0].toUpperCase() + axisWord.slice(1)}</strong> changes`;
   sec.style.display = 'block';
 }
-function renderRunnerUpCompare(result){ tierResult = result; tierAxis = 'warmth'; syncTierTabs(); renderTierCompare(); }
+function renderRunnerUpCompare(result){ tierResult = result; tierAxis = 'overall'; // (2026-11-24, per Nghi) Overall first
+  syncTierTabs(); renderTierCompare(); }
 function syncTierTabs(){ document.querySelectorAll('#tierTabs .pal-tab').forEach(b => { const on = b.dataset.axis === tierAxis; b.classList.toggle('active', on); b.setAttribute('aria-selected', on ? 'true' : 'false'); }); }
 document.addEventListener('click', (e) => { const b = e.target.closest('#tierTabs .pal-tab'); if(!b) return; tierAxis = b.dataset.axis; syncTierTabs(); renderTierCompare(); });
 
@@ -11132,6 +11423,7 @@ document.addEventListener('click', (e) => {
 });
 function renderGuessNote(result){
   const el = document.getElementById('guessNote'); if(!el) return;
+  el.style.display = 'none'; return; // (2026-11-24) guessing game removed
   const g = seasonGuess;
   if(!gpDone(g)){ el.style.display = 'none'; return; }
   const name = (result && (result.shadeMatchSeason || result.season)) || '';
@@ -11279,6 +11571,7 @@ function renderGuessPop(){
   }
 }
 function openGuessPop(){
+  return; // (2026-11-24, per Nghi) guessing game removed
   if(document.body.classList.contains('fmbs-live')) return;
   const ov = document.getElementById('guessOverlay'); if(!ov || !preview || !preview.src) return;
   if(ov.parentElement !== document.body) document.body.appendChild(ov);
@@ -11325,13 +11618,13 @@ document.addEventListener('click', (e) => {
   const card = document.getElementById('myShadeResultCard'), box = document.getElementById('msGuess');
   card.classList.remove('ms-guessing');
   const chip = m => `<span class="gn-chip">${m ? ICON_MINE : ICON_NOTMINE}${m ? 'Mine' : 'Not mine'}</span>`;
-  if(payLocked()){ // (2026-11-02, per Nghi) unpaid: her guess, then a "?" -- the answer opens with the pass
+  if(payLockedInfo()){ // (2026-11-02, per Nghi) unpaid: her guess, then a "?" -- the answer opens with the pass
     box.innerHTML = `<div class="gn-head">Your guess</div><div class="gn-row" style="justify-content:center;">${chip(saidMine)}<span class="gn-arrow">→</span><span class="gn-chip gn-q pay-blur" role="button" tabindex="0" data-pay-msg="Unlock your pass to see if this color is yours." aria-label="Unlock your pass to see if this color is yours.">?</span></div>`;
   } else {
   box.innerHTML = `<div class="gn-head">Your guess</div><div class="gn-row ${right ? 'ok' : 'no'}" style="justify-content:center;">${right ? `${chip(saidMine)}<span class="gn-mk">✓</span>` : `${chip(saidMine)}<span class="gn-arrow">→</span>${chip(st.mine)}`}</div>`;
   if(right) floatHearts(box);
   }
-  renderLoveOrNot('check', st.hex, null, payLocked() ? null : st.pct);
+  renderLoveOrNot('check', st.hex, null, payLockedInfo() ? null : st.pct);
   sendToLiveSheet({ type: 'colorcheck_guess', timestamp: new Date().toISOString(), hex: st.hex, match_pct: st.pct, guess_mine: saidMine, correct: right });
   msGuessState = null;
 });
@@ -11377,6 +11670,7 @@ const rqDot = v => blendHex((tierWords(v).length ? tierWords(v) : ['Balanced']).
 let rqState = null;
 function rqKey(r){ return 'fmbs_rq_' + [(r.shadeMatchSeason || r.season || ''), r.lab_temperature_b, r.depth_score, r.avg_chroma].join('|'); }
 function openReadQuiz(){
+  return; // (2026-11-24, per Nghi) Check your reading removed
   const r = currentSeasonResult; const ov = document.getElementById('readQuizOverlay'); if(!r || !ov) return;
   try{ if(sessionStorage.getItem(rqKey(r))) return; sessionStorage.setItem(rqKey(r), '1'); }catch(e){}
   if(ov.parentElement !== document.body) document.body.appendChild(ov);
@@ -11469,7 +11763,7 @@ function renderLoveOrNot(mode, hex, matches, pct){
     : (matches || []).slice(0, 10).map((m, mi) => {
         let p = null;
         try{ const ls = lipstickLookScore(m); if(ls) p = ls.pct; else if(prof){ const sc = scoreColorForProfile(hexToRgb(m.hex), prof, 'lipstick'); p = sc ? sc.pct : null; } }catch(e){ p = null; }
-        return { hex: m.hex, label: (mode === 'similar' && payLocked()) ? `Shade ${mi + 1}` : tocTitleCase(m.name), sub: brandDisplayNameSafe((splitBrandLine(m.brand_line) || {}).brand || ''), pct: payLocked() ? null : p, hasPct: p != null, sim: m.confidencePct }; // (2026-11-02) her % match is a paid result
+        return { hex: m.hex, label: (mode === 'similar' && payLocked()) ? `Shade ${mi + 1}` : tocTitleCase(m.name), sub: brandDisplayNameSafe((splitBrandLine(m.brand_line) || {}).brand || ''), pct: payLockedInfo() ? null : p, hasPct: p != null, sim: m.confidencePct }; // (2026-11-02) her % match is a paid result
       });
   if(!cards.length){ box.style.display = 'none'; return; }
   if(mode === 'check' && src){ const one = document.getElementById('myShadeTryOn'); if(one) one.innerHTML = ''; } // the swipe card is her try-on now
@@ -11572,7 +11866,7 @@ function renderLoveOrNot(mode, hex, matches, pct){
   box.querySelector('.lon-btn.no').addEventListener('click', () => decide(false));
   function finish(){
     let msg;
-    if(mode === 'check' && (pct == null || payLocked())){ // (2026-11-02) unpaid: her % stays hidden
+    if(mode === 'check' && (pct == null || payLockedInfo())){ // (2026-11-02) unpaid: her % stays hidden
       const eye = payBlurHtml('88', 'Unlock your pass to see how well this color suits you.') + '<strong>% match</strong>';
       msg = loved.length ? `You love it. How well it suits your coloring: ${eye}` : `Not for you? See how well it really suits your coloring: ${eye}`;
     } else if(mode === 'check'){
